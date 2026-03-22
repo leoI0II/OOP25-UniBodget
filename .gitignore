@@ -29,6 +29,9 @@ bin/
 # --- Visual Studio Code ---
 .vscode/
 
-# --- File di Sistema Operativo ---
-.DS_Store
+# --- OS Files ---
+*.DS_Store
 Thumbs.db
+
+# --- Temporary project files ---
+deleteme/
