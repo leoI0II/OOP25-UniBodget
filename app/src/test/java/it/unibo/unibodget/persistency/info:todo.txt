@@ -1,0 +1,53 @@
+Test di Persistency 
+
+
+Test di Parser
+- ParserFactoryTest -->
+	getParser("movement") → MovementDataParser
+	getParser("user") → UserDataParser
+	getParser("category") → CategoryDataParser
+	gestione input valido per tipo
+- MovementDataParser --> parsing movimenti
+	parsing campi ...	
+	gestione campi mancanti
+	gestione tipi errati
+	gestione JSON malformato
+- UserDataParserTest --> parsing user 
+	parsing lista movimenti
+	parsing lista categorie
+	gestione JSON vuoto
+	gestione campi opzionali
+	gestione errori
+- CategoryParserTest --> parsing category
+	parsing campi ... name, type, validità
+	validazioni
+	errori
+
+Test di Reader
+- FileReaderFactoryTest --> factory restituisce tipo corretto
+	eccezioni per estensioni non supportate
+- JsonReaderTest --> lettura contenuto file
+	legge correttamente un file JSON
+	gestisce file vuoti e file inesistenti
+	gestisce errori di I/O
+
+Test di Opener
+- FileInitializerImplTest --> inizializzazione file
+	crea file se non esiste
+	inizializza file vuoto
+	non sovrascrive file già esistenti
+	gestisce path invalidi
+	gestisce eccezioni di scrittura
+- SafeFileOpenerTest --> apertura del file
+	se il file non esiste → lo crea
+	se è vuoto → initializer
+	se è corrotto → lo ricrea
+	restituisce sempre un Path valido
+- FileCreatorFactoryTest --> factory creatori
+	.json → JsonFileCreator
+	estensioni non supportate → eccezione
+	comportamento con input null
+- JsonFileCreatorTest --> creazione file JSON
+	crea file JSON valido
+	gestisce file già esistenti
+	gestisce errori di I/O
