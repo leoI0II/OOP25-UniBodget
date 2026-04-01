@@ -22,6 +22,10 @@ Test di Parser
 	parsing campi ... name, type, validità
 	validazioni
 	errori
+- CurrencyParsetTest --> parsing currency
+	parsing campi ...
+	elenco per currency-converter
+	controllare succ con api in model+controller
 
 Test di Reader
 - FileReaderFactoryTest --> factory restituisce tipo corretto
