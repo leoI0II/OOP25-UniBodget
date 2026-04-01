@@ -1,0 +1,21 @@
+Opener
+
+api
+- FileInitializer --> interfaccia inizializza file se non esiste
+- FileOpener --> apre il file a seconda del caso
+
+impl
+- FileInitializerImpl --> (impl)
+	crea file su disco
+	scrive contenuto
+	assicurare che il file sia leggibile dal resto del sistema
+
+	createEmpty(path) → crea file vuoto
+	initializeJson(path) → crea file con {} o []
+- SafeFileOpener --> 
+	aprire un file in modo sicuro
+	se il file non esiste → chiamare FileInitializer
+	se il file è vuoto → inizializzarlo (initializer.initializeJson(path))
+	se il JSON è corrotto → ricrearlo
+	restituire un Path sempre valido
+	loggare eventuali problemi
