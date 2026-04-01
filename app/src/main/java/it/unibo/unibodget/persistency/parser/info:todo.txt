@@ -19,3 +19,4 @@ impl
 - CategoryParser --> (concreto) categorie
 	JSON → Category 
 	x favour
+- CurrencyParser --> (concreto) elenco valute
