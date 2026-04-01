@@ -1,0 +1,17 @@
+Reader
+
+api
+- FileReader --> interfaccia lettura file qualunque
+
+impl
+- BasicReader --> (astratta) lettura file
+	apertura stream
+	gestione eccezioni base
+	validazioni minime
+- FileReaderFactory --> (factory) restituisce l’implementazione corretta in base al tipo di file
+	.json → JsonReader
+	.txt → TextReader (futuro possibile)
+- JsonReader --> (impl) filereader 
+	legge json
+	uso libreria json
+	restituisce stringa / oggetto json
