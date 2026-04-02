@@ -35,18 +35,27 @@ Test di Reader
 	gestisce file vuoti e file inesistenti
 	gestisce errori di I/O
 
-Test di Opener
-- FileInitializerImplTest --> inizializzazione file
-	crea file se non esiste
-	inizializza file vuoto
-	non sovrascrive file già esistenti
-	gestisce path invalidi
-	gestisce eccezioni di scrittura
+Test di FileManager
+opener
 - SafeFileOpenerTest --> apertura del file
 	se il file non esiste → lo crea
 	se è vuoto → initializer
 	se è corrotto → lo ricrea
 	restituisce sempre un Path valido
+
+initializer
+- FileInitializerTest --> inizializzazione file
+	crea file se non esiste
+	inizializza file vuoto
+	non sovrascrive file già esistenti
+	gestisce path invalidi
+	gestisce eccezioni di scrittura
+- MovementFileInitializerTest --> per movement
+- CategoryFileInitializerTest --> per category
+- CurrencyFileInitializerTest --> per currency
+- UserDataFileInitializerTest --> per userdata
+
+creator
 - FileCreatorFactoryTest --> factory creatori
 	.json → JsonFileCreator
 	estensioni non supportate → eccezione
