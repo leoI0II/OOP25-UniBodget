@@ -1,4 +1,4 @@
-Opener
+FileManager
 
 api
 - FileInitializer --> interfaccia inizializza file se non esiste
