@@ -2,6 +2,7 @@ Parser
 
 api
 - DataParser --> interfaccia parser in strutture
+- DataSerializer --> interfaccia serializer in file
 
 impl
 - BasicParser --> (astratta) parser
@@ -20,3 +21,8 @@ impl
 	JSON → Category 
 	x favour
 - CurrencyParser --> (concreto) elenco valute
+
+- BasicDataSerializer --> (astratta) serailizer
+- DataSerializerFactory --> serializer corretto per tipo di file
+
+- JsonDataSerializer --> per json
