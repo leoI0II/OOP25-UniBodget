@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 package it.unibo.unibodget.persistency.filemanager.api;
 
 /**
@@ -22,8 +20,7 @@ public interface FileInitializer {
      * valid implementations may repair or reinitialize it.
      *
      * @throws FileInitializationException if the file cannot be created,
-     *                                     validated, or initialized
+     *                                     validated or initialized
      */
     void initialize() throws FileInitializationException;
 }
->>>>>>> 9c6fcfd (updated fileinitializer interface and comments)
