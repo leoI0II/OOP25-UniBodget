@@ -19,6 +19,7 @@ initializer
 
 	createEmpty(path) → crea file vuoto
 	initializeJson(path) → crea file con {} o []
+- FileInizializerFactory --> factory per tipo initializer
 - CategoryFileInitializer --> per categorie
 - CurrencyFileInitializer --> per currency
 - MovementFileInitializer --> per movimenti
