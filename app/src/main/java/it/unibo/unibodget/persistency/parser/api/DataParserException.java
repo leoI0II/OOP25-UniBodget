@@ -28,6 +28,7 @@ public class DataParserException extends Throwable {
      * Constructs a new {@code DataParserException} with the specified cause
      *
      * @param cause the cause
+     *              {@link Throwable#getCause()} method)
      */
     public DataParserException(Throwable cause) {
         super(cause);
@@ -38,6 +39,7 @@ public class DataParserException extends Throwable {
      *
      * @param message the detail message
      * @param cause   the cause
+     *                {@link Throwable#getCause()} method)
      */
     public DataParserException(String message, Throwable cause) {
         super(message, cause);
