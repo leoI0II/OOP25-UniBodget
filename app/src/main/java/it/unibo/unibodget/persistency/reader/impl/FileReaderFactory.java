@@ -28,11 +28,9 @@ public final class FileReaderFactory {
      * @throws IllegalArgumentException if the file extension is missing or unsupported
      */
     public static FileReader<?> create(final String path) {
-        final String extension = getFileExtension(path);
-        
-        return switch (extension) {
+        return switch (getFileExtension(path)) {
             case "json" -> new JsonReader(path);
-            default -> throw new IllegalArgumentException("Unsupported file type: " + extension);
+            default -> throw new IllegalArgumentException("Unsupported file type: " + getFileExtension(path));
         };
     }
 
