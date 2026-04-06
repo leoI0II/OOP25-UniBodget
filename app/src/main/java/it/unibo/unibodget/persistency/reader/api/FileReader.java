@@ -18,9 +18,8 @@ public interface FileReader<T> {
      * it into an object of type {@code T}.
      * If the file cannot be accessed or parsed, an {@link IOException} is thrown.
      * 
-     * @param path the path to the file to be read
      * @return the parsed object of type {@code T}
      * @throws IOException if the file cannot be read
      */
-    T readFile(String path) throws IOException;
+    T readFile() throws IOException;
 }
