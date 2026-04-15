@@ -1,9 +1,3 @@
----
-config:
-  theme: neo
-  look: neo
-  layout: elk
----
 classDiagram
     class CurrencyUnit {
       <<interface>>
@@ -97,4 +91,37 @@ classDiagram
         +toHexString() String
     }
 
-    
+    class Historical {
+        -transactionsHistory : List~Transaction~
+        +getTransactionHistory() List~Transaction~
+        +addTransaction(Transaction) void
+    }
+    Historical --> Transaction : uses
+
+    class Wallet {
+        <<abstract class>>
+        -name : String
+        -history : Historical
+        -baseCurrency : CurrencyUnit
+        -id : int
+        -count : int static
+        +Wallet(CurrencyUnit)
+        +getName() String
+        +getBaseCurrency() CurrencyUnit
+        +setBaseCurrency() void
+        +addTransaction() void
+        +getHistory() Historical
+        +getBalance() Asset *abstract // conteggio dinamico
+    }
+    Wallet --> Historical : uses
+    Wallet --> CurrencyUnit : uses
+
+    class CashAccount {
+        +getBalance() Asset // foreache lista e torna balance
+    }
+    CashAccount ..> Wallet : implement
+
+    class InvestmentAccount{
+        +getBalance() Asset // foreach lista, convert e return
+    }
+    InvestmentAccount ..> Wallet : implement
