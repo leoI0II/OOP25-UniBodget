@@ -57,6 +57,15 @@ classDiagram
     }
     Transaction --> Asset : uses
 
+    class InvestmentTransaction {
+        -unitPrice : Asset  //prezzo storico x unit
+        -fee : Asset        // bonus fee opzionale
+
+        +getUnitPrice() Asset
+        +getFee() Asset
+    }
+    InvestmentTransaction --|> Transaction : extends
+
     class ARGBColor {
         <<record>>
 
@@ -91,26 +100,27 @@ classDiagram
         +toHexString() String
     }
 
-    class Historical {
-        -transactionsHistory : List~Transaction~
-        +getTransactionHistory() List~Transaction~
-        +addTransaction(Transaction) void
+    class Historical~T extends Transaction~ {
+        -transactionsHistory : List~T~
+        +getTransactionHistory() List~T~
+        +addTransaction(T) void
     }
     Historical --> Transaction : uses
 
-    class Wallet {
+    class Wallet~T extends Transaction~ {
         <<abstract class>>
         -name : String
-        -history : Historical
+        -history : Historical~T~
         -baseCurrency : CurrencyUnit
         -id : int
         -count : int static
         +Wallet(CurrencyUnit)
+        +Wallet(CurrencyUnit, Historical)
         +getName() String
         +getBaseCurrency() CurrencyUnit
         +setBaseCurrency() void
-        +addTransaction() void
-        +getHistory() Historical
+        +addTransaction(T) void
+        +getHistory() Historical~T~
         +getBalance() Asset *abstract // conteggio dinamico
     }
     Wallet --> Historical : uses
@@ -119,9 +129,9 @@ classDiagram
     class CashAccount {
         +getBalance() Asset // foreache lista e torna balance
     }
-    CashAccount ..> Wallet : implement
+    CashAccount ..|> Wallet : implement
 
     class InvestmentAccount{
         +getBalance() Asset // foreach lista, convert e return
     }
-    InvestmentAccount ..> Wallet : implement
+    InvestmentAccount ..|> Wallet : implement
