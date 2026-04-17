@@ -1,6 +1,5 @@
 Test di Persistency 
 
-
 Test di Parser
 - ParserFactoryTest -->
 	getParser("movement") → MovementDataParser
@@ -64,3 +63,7 @@ creator
 	crea file JSON valido
 	gestisce file già esistenti
 	gestisce errori di I/O
+
+Util
+- LoggerImplTest --> test class for LoggerImpl
+- TestCleanup --> util class for delete dir/files, useful for other test classes that create tmp dir/files
