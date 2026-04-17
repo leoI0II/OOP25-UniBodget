@@ -1,0 +1,10 @@
+{
+    "asset": {
+        "currency": "USD",
+        "amount": 1000,
+        "sign": "+"
+    },
+    "date": "2026-10-01",
+    "description": "Sample transaction",
+    "notes": "This is a sample note"
+}
