@@ -1,0 +1,22 @@
+{
+    "username": "",
+    "email": "",
+    "baseCurrency": {
+        "type": "",
+        "symbol": "",
+        "shortName": "",
+        "fullName": "",
+        "code": ""
+    },
+    "theme": {
+        "name": "",
+        "primaryHex": ""
+    },
+    "monthlyLimits": {
+        "categoryName": {
+            /* BudgetLimit da fare */
+        }
+    },
+    "preferenceHistory": [
+    ]
+}
