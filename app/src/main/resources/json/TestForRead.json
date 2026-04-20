@@ -4,7 +4,12 @@
         "amount": 1000,
         "sign": "+"
     },
-    "date": "2026-10-01",
+    "category": {
+            "name": "Salary",
+            "colorHex": "#4CAF50",
+            "type": "INCOME"
+        },
+    "date": "1999-01-01",
     "description": "Sample transaction",
     "notes": "This is a sample note"
 }
