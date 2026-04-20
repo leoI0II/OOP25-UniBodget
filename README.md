@@ -50,15 +50,31 @@ Gestione di lettura e scrittura dei dati:
 
 La persistenza è completamente **data‑driven**:  
 i tipi di valuta, investimenti e impostazioni vengono caricati da file JSON.
+⚠️ da completare ⚠️
 
 ---
 
-### **3. Currency converter: 
+### **3. Menu principale**
+⚠️ da scrivere ⚠️
+
+---
+
+### **4. History**
+⚠️ da scrivere ⚠️
+
+---
+
+### **5. Currency converter**
 
 Il modulo Currency Converter gestisce la conversione tra valute diverse utilizzando:
 - valori caricati da file JSON
 - un sistema di conversione basato su tassi dinamici
+⚠️ da completare ⚠️
 
+---
+
+### **6. Stock Market**
+⚠️ da scrivere ⚠️
 
 ---
 
