@@ -147,3 +147,37 @@ classDiagram
         +getBalance() Asset // foreach lista, convert e return
     }
     InvestmentAccount ..|> Wallet : implement
+
+    class CategoryType {
+        <<enum>>
+        INCOME,
+        EXPENSE,
+        TRANSFER,
+        FRIEND_LOAN,
+        BANK_LOAN;
+    }
+
+    class BasicCategory {
+        <<abstract>>
+        - name : String
+        - color : ARGBColor
+        - type : CategoryType
+
+        + BasicCategory(String, ARGBColor, CategoryType)
+        + getName() String
+        + getColor() ARGBColor
+        + getType() CategoryType
+    }
+    BasicCategory --|> ARGBColor    : uses
+    BasicCategory --|> CategoryType : uses
+
+    class Category {
+        - final Category FOOD$
+        - final Category RENT$
+        - final Category SAVINGS$
+        - final Category TRANSPORT$
+        - final Category TRANSFER$
+        + getDefaultCategories()$ List~Category~
+    }
+
+    
