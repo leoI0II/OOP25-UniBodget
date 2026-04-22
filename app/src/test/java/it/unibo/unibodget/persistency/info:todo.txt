@@ -1,0 +1,69 @@
+Test di Persistency 
+
+Test di Parser
+- ParserFactoryTest -->
+	getParser("movement") → MovementDataParser
+	getParser("user") → UserDataParser
+	getParser("category") → CategoryDataParser
+	gestione input valido per tipo
+- MovementDataParser --> parsing movimenti
+	parsing campi ...	
+	gestione campi mancanti
+	gestione tipi errati
+	gestione JSON malformato
+- UserDataParserTest --> parsing user 
+	parsing lista movimenti
+	parsing lista categorie
+	gestione JSON vuoto
+	gestione campi opzionali
+	gestione errori
+- CategoryParserTest --> parsing category
+	parsing campi ... name, type, validità
+	validazioni
+	errori
+- CurrencyParsetTest --> parsing currency
+	parsing campi ...
+	elenco per currency-converter
+	controllare succ con api in model+controller
+
+Test di Reader
+- FileReaderFactoryTest --> factory restituisce tipo corretto
+	eccezioni per estensioni non supportate
+- JsonReaderTest --> lettura contenuto file
+	legge correttamente un file JSON
+	gestisce file vuoti e file inesistenti
+	gestisce errori di I/O
+
+Test di FileManager
+opener
+- SafeFileOpenerTest --> apertura del file
+	se il file non esiste → lo crea
+	se è vuoto → initializer
+	se è corrotto → lo ricrea
+	restituisce sempre un Path valido
+
+initializer
+- FileInitializerTest --> inizializzazione file
+	crea file se non esiste
+	inizializza file vuoto
+	non sovrascrive file già esistenti
+	gestisce path invalidi
+	gestisce eccezioni di scrittura
+- MovementFileInitializerTest --> per movement
+- CategoryFileInitializerTest --> per category
+- CurrencyFileInitializerTest --> per currency
+- UserDataFileInitializerTest --> per userdata
+
+creator
+- FileCreatorFactoryTest --> factory creatori
+	.json → JsonFileCreator
+	estensioni non supportate → eccezione
+	comportamento con input null
+- JsonFileCreatorTest --> creazione file JSON
+	crea file JSON valido
+	gestisce file già esistenti
+	gestisce errori di I/O
+
+Util
+- LoggerImplTest --> test class for LoggerImpl
+- TestCleanup --> util class for delete dir/files, useful for other test classes that create tmp dir/files

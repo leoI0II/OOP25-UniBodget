@@ -1,0 +1,23 @@
+[
+    {
+        "asset": {
+            "currency": {
+                "type": "",
+                "symbol": "",
+                "shortName": "",
+                "fullName": "",
+                "code": ""
+            },
+            "amount": "",
+            "sign": ""
+        },
+        "category": {
+            "name": "",
+            "colorHex": "",
+            "type": ""
+        },
+        "date": "",
+        "description": "",
+        "notes": ""
+    }
+]
