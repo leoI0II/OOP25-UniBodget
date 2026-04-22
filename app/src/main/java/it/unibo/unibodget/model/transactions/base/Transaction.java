@@ -18,7 +18,7 @@ import it.unibo.unibodget.model.currency.Asset;
  *
  * This class is immutable: all fields are final and set at construction time.
  */
-public class Transaction {
+public sealed abstract class Transaction permits CashTransaction, InvestmentTransaction {
 
     private final Asset asset;
     private final Category category;
@@ -91,6 +91,27 @@ public class Transaction {
      */
     public String getNotes() { 
         return notes; 
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Transaction other = (Transaction) o;
+        return Objects.equals(asset, other.asset)
+            && Objects.equals(category, other.category)
+            && Objects.equals(date, other.date)
+            && Objects.equals(description, other.description)
+            && Objects.equals(notes, other.notes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(asset, category, date, description, notes);
     }
 
     @Override

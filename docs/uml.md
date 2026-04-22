@@ -43,28 +43,38 @@ classDiagram
     }
     Asset --> CurrencyUnit : uses
 
-    class Transaction{
-        -asset : Asset
-        -date : Date
-        -description : String
-        -notes : String
+    class Transaction {
+        <<abstract sealed>>
+        -asset : final Asset
+        -date : final LocalDateTime
+        -category : final Category
+        -description : final String
+        -notes : final String
 
-        +getAsset() Asset
-        +getDate() Date
-        +getDescription() String
-        +getNotes() String
-        +toString() String
+        # Transaction(...)
+        + getAsset() Asset
+        + getDate() LocalDateTime 
+        + getDescription() String
+        + getNotes() String
+        + getCategory() Category
     }
-    Transaction --> Asset : uses
+
+    class CashTransaction {
+        <<final>>
+        + CashTransaction(...) // fa super(...)
+        // niente campi aggiuntivi, eredita tutto
+    }
+    CashTransaction --|> Transaction : use
 
     class InvestmentTransaction {
-        -unitPrice : Asset  //prezzo storico x unit
-        -fee : Asset        // bonus fee opzionale
+        <<final>>
+        -unitPrice : final Asset  //prezzo storico x unit
+        -fee : final Asset        // bonus fee opzionale
 
         +getUnitPrice() Asset
         +getFee() Asset
     }
-    InvestmentTransaction --|> Transaction : extends
+    InvestmentTransaction --|> Transaction : uses
 
     class ARGBColor {
         <<record>>
@@ -127,11 +137,13 @@ classDiagram
     Wallet --> CurrencyUnit : uses
 
     class CashAccount {
+        <<extends Wallet~CashTransaction> >>
         +getBalance() Asset // foreache lista e torna balance
     }
     CashAccount ..|> Wallet : implement
 
     class InvestmentAccount{
+        <<extends Wallet~InvestmentTransaction> >>
         +getBalance() Asset // foreach lista, convert e return
     }
     InvestmentAccount ..|> Wallet : implement
