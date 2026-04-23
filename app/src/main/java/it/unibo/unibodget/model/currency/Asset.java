@@ -55,6 +55,16 @@ public final class Asset {
         return this.currency;
     }
 
+    /**
+     * Returns the sign of the amount.
+     * Positive amounts return +1, negative amounts return -1, zero returns 0.
+     *
+     * @return an integer representing the sign of the amount
+     */
+    public int getSign() {
+        return this.amount.signum();
+    }
+
     @Override
     public String toString() {
         return "Asset{amount=" + this.amount + 
