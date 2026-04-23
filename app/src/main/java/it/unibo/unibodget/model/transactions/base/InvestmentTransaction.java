@@ -1,10 +1,10 @@
-package it.unibo.unibodget.model.transactions.investments;
+package it.unibo.unibodget.model.transactions.base;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
-import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
  * Represents a specialized financial transaction related to an investment.
@@ -22,7 +22,7 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  *
  * It is immutable: all fields are final and set at construction time.
  */
-public class InvestmentTransaction extends Transaction {
+public final class InvestmentTransaction extends Transaction {
 
     private final Asset unitPrice;
     private final Asset fee;
@@ -70,8 +70,31 @@ public class InvestmentTransaction extends Transaction {
      *
      * @return the fee as an {@link Asset}, or null if no fee was applied
      */
-    public Asset getFee() { 
-        return fee; 
+    public Asset getFee() {
+        return fee;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        final InvestmentTransaction other = (InvestmentTransaction) o;
+        return Objects.equals(unitPrice, other.unitPrice)
+            && Objects.equals(fee, other.fee);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), unitPrice, fee);
+    }
+
+    @Override
+    public String toString() {
+        return "InvestmentTransaction{" + super.toString()
+            + ", unitPrice=" + unitPrice
+            + ", fee=" + fee
+            + '}';
     }
 
 }

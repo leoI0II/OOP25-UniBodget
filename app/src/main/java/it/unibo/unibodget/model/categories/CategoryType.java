@@ -12,6 +12,7 @@ package it.unibo.unibodget.model.categories;
 public enum CategoryType {
     INCOME,
     EXPENSE,
+    TRANSFER,
     FRIEND_LOAN,
     BANK_LOAN;
 }

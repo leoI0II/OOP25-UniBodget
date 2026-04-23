@@ -2,6 +2,8 @@ package it.unibo.unibodget.model.categories;
 
 import java.util.Objects;
 
+import org.unibo.unibodget_tracker.utils.ARGBColor;
+
 /**
  * Abstract base class for all category types.
  *
@@ -20,9 +22,8 @@ import java.util.Objects;
 public abstract class BasicCategory {
 
     private String name;
-    private String colorHex;
+    private ARGBColor color;
     private CategoryType type;
-    //private ARGBColor color;
 
     /**
      * Creates a new Category with the given name and HEX color.
@@ -31,14 +32,12 @@ public abstract class BasicCategory {
      * @param colorHex  the color associated with the category
      * @param type      the high-level classification of the category
      */
-    public BasicCategory(String name, 
-                        String colorHex,
-                        CategoryType type
-                        /*ARGBColor color*/) {
+    public BasicCategory(final String name, 
+                        final ARGBColor color,
+                        final CategoryType type) {
         this.name = Objects.requireNonNull(name);
-        this.colorHex = Objects.requireNonNull(colorHex);
+        this.color = Objects.requireNonNull(color);
         this.type = Objects.requireNonNull(type);
-        //this.color = Objects.requireNonNull(color);
     }
 
     /**
@@ -55,8 +54,8 @@ public abstract class BasicCategory {
      *
      * @return the category color in HEX format
      */
-    public String getColorHex() {
-        return this.colorHex;
+    public ARGBColor getColorHex() {
+        return this.color;
     }
 
     /**
@@ -68,16 +67,10 @@ public abstract class BasicCategory {
         return this.type;
     }
 
-    /*
-    public ARGBColor getARGBColor() {
-        return color;
-    }
-    */
-
     @Override
     public String toString() {
         return "Category{name='" + this.name + 
-                "', colorHex='" + this.colorHex + 
+                "', color='" + this.color.toHexString() + 
                 "', type='" + this.type + "'}";
     }
 
@@ -91,13 +84,13 @@ public abstract class BasicCategory {
         }
         BasicCategory c = (BasicCategory) o;
         return this.name.equals(c.name) && 
-                this.colorHex.equals(c.colorHex) && 
+                this.color.equals(c.color) && 
                 this.type.equals(c.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name, this.colorHex, this.type);
+        return Objects.hash(this.name, this.color, this.type);
     }
     
 }
