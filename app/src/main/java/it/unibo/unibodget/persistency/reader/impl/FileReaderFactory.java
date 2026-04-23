@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.reader.impl;
 
 import it.unibo.unibodget.persistency.reader.api.FileReader;
+import it.unibo.unibodget.persistency.util.FilesUtils;
 
 /**
  * A factory class responsible for creating the appropriate {@link FileReader}
@@ -28,24 +29,11 @@ public final class FileReaderFactory {
      * @throws IllegalArgumentException if the file extension is missing or unsupported
      */
     public static FileReader<?> create(final String path) {
-        return switch (getFileExtension(path)) {
+        return switch (FilesUtils.getFileExtension(path)) {
             case "json" -> new JsonReader(path);
-            default -> throw new IllegalArgumentException("Unsupported file type: " + getFileExtension(path));
+            default -> throw new IllegalArgumentException("Unsupported file type: " + FilesUtils.getFileExtension(path));
         };
     }
 
-    /**
-     * Extracts the file extension from a file path.
-     * 
-     * @param path
-     * @return the lowercase file extension (e.g., "json")
-     * @throws IllegalArgumentException if the path has no valid extension
-     */
-    private static String getFileExtension(String path) {
-        final int lastDotIndex = path.lastIndexOf('.');
-        if (lastDotIndex == -1 || lastDotIndex == path.length() - 1) {
-            throw new IllegalArgumentException("File path must have an extension: " + path);
-        }
-        return path.substring(lastDotIndex + 1).toLowerCase();
-    }
+    
 }
