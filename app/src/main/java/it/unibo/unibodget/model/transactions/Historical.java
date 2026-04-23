@@ -34,7 +34,61 @@ public class Historical<T extends Transaction> {
      *
      * @return an unmodifiable list containing all recorded transactions
      */
-    public List<T> getHistory() {
+    public List<T> getTransactions() {
         return Collections.unmodifiableList(history);
     }
+
+    /**
+     * Removes a transaction from the ledger.
+     * Uses {@link Object#equals} to locate the transaction.
+     *
+     * @param transaction the transaction to remove
+     */
+    public boolean removeTransaction(T transaction) {
+        return history.remove(transaction);
+    }
+
+    /**
+     * Replaces an existing transaction with a new one, preserving its position in the ledger.
+     * Uses {@link Object#equals} to locate {@code oldTransaction}.
+     * Does nothing if {@code oldTransaction} is not found.
+     *
+     * @param oldTransaction the transaction to replace; must not be null
+     * @param newTransaction the replacement transaction; must not be null
+     */
+    public boolean replaceTransaction(T oldTransaction, T newTransaction) {
+        Objects.requireNonNull(oldTransaction);
+        Objects.requireNonNull(newTransaction);
+        int index = history.indexOf(oldTransaction);
+        if (index == -1) {
+            return false;
+        }
+        history.set(index, newTransaction);
+        return true;
+    }
+
+    /**
+     * Removes all transactions from the ledger.
+     */
+    public void clear() {
+        history.clear();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Historical<?> other = (Historical<?>) o;
+        return Objects.equals(history, other.history);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(history);
+    }
+
 }
