@@ -49,7 +49,7 @@ public abstract class BasicReader<T> implements FileReader<T> {
      * @throws IllegalArgumentException if the file does 
      *             not match conditions for existence, regularity, or readability
      */
-    private void validatePath() {
+    protected void validatePath() {
         final Path path_to_check = Path.of(path);
         if (!Files.exists(path_to_check)) {
             throw new IllegalArgumentException("File does not exist: " + path);
