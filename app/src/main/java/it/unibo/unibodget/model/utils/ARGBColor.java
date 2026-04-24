@@ -1,4 +1,4 @@
-package org.unibo.unibodget_tracker.utils;
+package it.unibo.unibodget.model.utils;
 
 /**
  * An immutable representation of a color in the ARGB (Alpha, Red, Green, Blue) color space.

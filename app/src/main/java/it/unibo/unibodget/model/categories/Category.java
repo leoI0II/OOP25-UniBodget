@@ -2,7 +2,7 @@ package it.unibo.unibodget.model.categories;
 
 import java.util.List;
 
-import org.unibo.unibodget_tracker.utils.ARGBColor;
+import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
  * Represents a transaction category (e.g., Food, Rent, Transport).
