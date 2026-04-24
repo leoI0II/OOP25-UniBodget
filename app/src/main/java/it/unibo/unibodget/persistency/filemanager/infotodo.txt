@@ -1,0 +1,35 @@
+FileManager
+
+api
+- FileInitializer --> interfaccia inizializza file se non esiste
+- FileOpener --> apre il file a seconda del caso
+- FileCreator --> creatore file per estensione
+
+impl
+creator
+- BasicFileCreator --> (astratta)
+- FileCreatorFactory --> (factory) in base all'estensione
+- JsonFileCreator --> classe specializzazione json
+
+initializer
+- BasicFileInitializer --> (impl)
+	crea file su disco
+	scrive contenuto
+	assicurare che il file sia leggibile dal resto del sistema
+
+	createEmpty(path) → crea file vuoto
+	initializeJson(path) → crea file con {} o []
+- FileInizializerFactory --> factory per tipo initializer
+- CategoryFileInitializer --> per categorie
+- CurrencyFileInitializer --> per currency
+- MovementFileInitializer --> per movimenti
+- UserDataFileInitializer --> per dati utente
+
+opener
+- SafeFileOpener --> (basicimpl)
+	aprire un file in modo sicuro
+	se il file non esiste → chiamare FileInitializer
+	se il file è vuoto → inizializzarlo (initializer.initializeJson(path))
+	se il JSON è corrotto → ricrearlo
+	restituire un Path sempre valido
+	loggare eventuali problemi
