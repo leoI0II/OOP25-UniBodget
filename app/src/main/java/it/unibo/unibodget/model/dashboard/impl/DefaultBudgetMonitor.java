@@ -5,7 +5,6 @@ import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 
 /**
  * Default implementation of {@link BudgetMonitor}.
- * <p>
  * This implementation delegates the evaluation of the budget state
  * to one of three strategies according to the ratio between the
  * current value and the configured limit.

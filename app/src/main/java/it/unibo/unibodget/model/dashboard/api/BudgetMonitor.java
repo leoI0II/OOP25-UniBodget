@@ -2,7 +2,6 @@ package it.unibo.unibodget.model.dashboard.api;
 
 /**
  * Provides budget monitoring facilities for the dashboard subsystem.
- * <p>
  * The monitor coordinates one or more alert strategies in order to
  * determine the current budget status shown in the dashboard.
  */

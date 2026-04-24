@@ -5,7 +5,6 @@ import java.util.Map;
 
 /**
  * Represents an immutable aggregated view of the dashboard state.
- * <p>
  * The snapshot contains the information needed by the presentation
  * layer without exposing the internal details of the domain model.
  */

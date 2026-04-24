@@ -8,7 +8,6 @@ import java.util.Map;
 
 /**
  * Default implementation of {@link CategoryService}.
- * <p>
  * This implementation stores a local category summary map that can
  * later be replaced or populated from the general domain model.
  */

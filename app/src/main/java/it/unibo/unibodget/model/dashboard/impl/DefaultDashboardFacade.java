@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * Default implementation of {@link DashboardFacade}.
- * <p>
  * This class coordinates the retrieval of dashboard data from the
  * underlying services and exposes it as a unified snapshot.
  */

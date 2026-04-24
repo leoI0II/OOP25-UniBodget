@@ -3,7 +3,6 @@ package it.unibo.unibodget.model.dashboard.api;
 
 /**
  * Represents the main access point to dashboard data.
- * <p>
  * The facade hides the internal collaboration among the dashboard
  * services and returns a unified snapshot ready to be consumed by
  * presentation components.

@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * Default implementation of {@link MovementHistoryService}.
- * <p>
  * This implementation stores a local list of transaction descriptions
  * and notifies registered observers whenever the list changes.
  */

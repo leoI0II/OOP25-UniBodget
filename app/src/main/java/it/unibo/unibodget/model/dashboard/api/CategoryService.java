@@ -4,7 +4,6 @@ import java.util.Map;
 
 /**
  * Exposes category-related information required by the dashboard.
- * <p>
  * This service acts as the category-oriented entry point for summary
  * data used by charts, filters, and budget breakdowns.
  */

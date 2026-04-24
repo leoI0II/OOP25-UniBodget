@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Provides access to the movement history shown in the dashboard.
- * <p>
  * This service also acts as an observable source so that dashboard
  * views can be notified whenever the tracked movement collection changes.
  */
