@@ -1,8 +1,8 @@
 package it.unibo.unibodget.model.dashboard.api;
 
-import it.unibo.unibodget.model.dashboard.support.TransactionObservable;
-
 import java.util.List;
+
+import it.unibo.unibodget.model.dashboard.support.TransactionObservable;
 
 /**
  * Provides access to the movement history shown in the dashboard.

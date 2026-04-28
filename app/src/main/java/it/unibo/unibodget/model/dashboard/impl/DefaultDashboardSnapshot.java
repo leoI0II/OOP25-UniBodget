@@ -1,10 +1,11 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
 
 /**
  * Default immutable implementation of {@link DashboardSnapshot}.
@@ -14,7 +15,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     private final double totalBalance;
     private final List<String> recentTransactions;
     private final Map<String, Double> categorySummaries;
-    private final String budgetStatus;
+    private final BudgetStatus budgetStatus;
 
     /**
      * Creates a new dashboard snapshot.
@@ -28,7 +29,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
             final double totalBalance,
             final List<String> recentTransactions,
             final Map<String, Double> categorySummaries,
-            final String budgetStatus) {
+            final BudgetStatus budgetStatus) {
         this.totalBalance = totalBalance;
         this.recentTransactions = List.copyOf(recentTransactions);
         this.categorySummaries = Map.copyOf(categorySummaries);
@@ -63,7 +64,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public String getBudgetStatus() {
+    public BudgetStatus getBudgetStatus() {
         return budgetStatus;
     }
 }

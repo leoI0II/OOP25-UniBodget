@@ -112,7 +112,7 @@ classDiagram
 
     class Historical~T extends Transaction~ {
         -transactionsHistory : List~T~
-        +getTransactionHistory() List~T~
+        +getTransactions() List~T~
         +addTransaction(T) void
     }
     Historical --> Transaction : uses
@@ -121,14 +121,14 @@ classDiagram
         <<abstract class>>
         -name : String
         -history : Historical~T~
-        -baseCurrency : CurrencyUnit
+        -baseCurrency : final CurrencyUnit
         -id : int
         -count : int static
+
         +Wallet(CurrencyUnit)
         +Wallet(CurrencyUnit, Historical)
         +getName() String
         +getBaseCurrency() CurrencyUnit
-        +setBaseCurrency() void
         +addTransaction(T) void
         +getHistory() Historical~T~
         +getBalance() Asset *abstract // conteggio dinamico
@@ -179,5 +179,3 @@ classDiagram
         - final Category TRANSFER$
         + getDefaultCategories()$ List~Category~
     }
-
-    

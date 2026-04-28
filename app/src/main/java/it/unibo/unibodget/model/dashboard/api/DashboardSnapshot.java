@@ -36,5 +36,5 @@ public interface DashboardSnapshot {
      *
      * @return the budget status
      */
-    String getBudgetStatus();
+    BudgetStatus getBudgetStatus();
 }

@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
+import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
@@ -8,6 +9,9 @@ import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 
 /**
  * Default implementation of {@link DashboardFacade}.
@@ -19,7 +23,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     private final MovementHistoryService movementHistoryService;
     private final CategoryService categoryService;
     private final BudgetMonitor budgetMonitor;
-
+    private final BudgetSettings budgetSettings;
     /**
      * Creates a facade using the provided collaborating services.
      *
@@ -30,10 +34,12 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     public DefaultDashboardFacade(
             final MovementHistoryService movementHistoryService,
             final CategoryService categoryService,
-            final BudgetMonitor budgetMonitor) {
-        this.movementHistoryService = movementHistoryService;
-        this.categoryService = categoryService;
-        this.budgetMonitor = budgetMonitor;
+            final BudgetMonitor budgetMonitor,
+            final BudgetSettings budgetSettings) {
+        this.movementHistoryService = Objects.requireNonNull(movementHistoryService);
+        this.categoryService = Objects.requireNonNull(categoryService);
+        this.budgetMonitor = Objects.requireNonNull(budgetMonitor);
+        this.budgetSettings = Objects.requireNonNull(budgetSettings);
     }
 
     /**
@@ -46,7 +52,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         final double totalBalance = summaries.values().stream()
                 .mapToDouble(Double::doubleValue)
                 .sum();
-        final String budgetStatus = budgetMonitor.getBudgetStatus(totalBalance, 1000.0);
+        final BudgetStatus budgetStatus = budgetMonitor.getBudgetStatus(totalBalance, budgetSettings);
 
         return new DefaultDashboardSnapshot(
                 totalBalance,

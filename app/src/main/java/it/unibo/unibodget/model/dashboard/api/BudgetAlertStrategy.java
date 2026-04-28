@@ -14,5 +14,5 @@ public interface BudgetAlertStrategy {
      * @param limitValue the configured budget limit
      * @return a textual representation of the evaluated state
      */
-    String evaluate(double currentValue, double limitValue);
+    BudgetStatus evaluate(double currentValue, double limitValue);
 }

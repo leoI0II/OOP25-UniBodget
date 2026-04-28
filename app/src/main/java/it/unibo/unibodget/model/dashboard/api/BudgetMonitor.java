@@ -1,18 +1,17 @@
 package it.unibo.unibodget.model.dashboard.api;
 
 /**
- * Provides budget monitoring facilities for the dashboard subsystem.
- * The monitor coordinates one or more alert strategies in order to
- * determine the current budget status shown in the dashboard.
+ * Service responsible for evaluating the current budget condition.
+ * This component compares the current aggregated dashboard value with the
+ * budget settings defined by the user and returns a corresponding budget status.
  */
 public interface BudgetMonitor {
 
     /**
-     * Computes the current budget status for the given values.
-     *
-     * @param currentValue the current amount reached by the tracked budget
-     * @param limitValue the configured budget limit
-     * @return the current budget status
+     * Computes the budget status associated with the provided current value.
+     * @param currentValue the current aggregated amount considered by the monitor
+     * @param settings the user-defined budget settings used during the evaluation
+     * @return the resulting budget status
      */
-    String getBudgetStatus(double currentValue, double limitValue);
+    BudgetStatus getBudgetStatus(double currentValue, BudgetSettings settings);
 }

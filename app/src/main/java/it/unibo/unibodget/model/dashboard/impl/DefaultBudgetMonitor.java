@@ -1,7 +1,11 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
+import java.util.Objects;
+
 import it.unibo.unibodget.model.dashboard.api.BudgetAlertStrategy;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
+import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 
 /**
  * Default implementation of {@link BudgetMonitor}.
@@ -11,7 +15,6 @@ import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
  */
 public final class DefaultBudgetMonitor implements BudgetMonitor {
 
-    private static final double WARNING_THRESHOLD = 0.8;
     private static final double CRITICAL_THRESHOLD = 1.0;
 
     private final BudgetAlertStrategy safeStrategy;
@@ -36,16 +39,18 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
             final BudgetAlertStrategy safeStrategy,
             final BudgetAlertStrategy warningStrategy,
             final BudgetAlertStrategy criticalStrategy) {
-        this.safeStrategy = safeStrategy;
-        this.warningStrategy = warningStrategy;
-        this.criticalStrategy = criticalStrategy;
+        this.safeStrategy = Objects.requireNonNull(safeStrategy);
+        this.warningStrategy = Objects.requireNonNull(warningStrategy);
+        this.criticalStrategy = Objects.requireNonNull(criticalStrategy);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getBudgetStatus(final double currentValue, final double limitValue) {
+    public BudgetStatus getBudgetStatus(final double currentValue, final BudgetSettings settings) {
+        Objects.requireNonNull(settings);
+        final double limitValue = settings.getLimitValue();
         if (limitValue <= 0) {
             return safeStrategy.evaluate(currentValue, limitValue);
         }
@@ -53,7 +58,7 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
         if (ratio >= CRITICAL_THRESHOLD) {
             return criticalStrategy.evaluate(currentValue, limitValue);
         }
-        if (ratio >= WARNING_THRESHOLD) {
+        if (ratio >= settings.getWarningThreshold()) {
             return warningStrategy.evaluate(currentValue, limitValue);
         }
         return safeStrategy.evaluate(currentValue, limitValue);

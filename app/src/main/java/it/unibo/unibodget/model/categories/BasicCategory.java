@@ -2,7 +2,7 @@ package it.unibo.unibodget.model.categories;
 
 import java.util.Objects;
 
-import org.unibo.unibodget_tracker.utils.ARGBColor;
+import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
  * Abstract base class for all category types.

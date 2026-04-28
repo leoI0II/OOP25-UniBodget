@@ -1,11 +1,11 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
-import it.unibo.unibodget.model.dashboard.support.TransactionObserver;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
+import it.unibo.unibodget.model.dashboard.support.TransactionObserver;
 
 /**
  * Default implementation of {@link MovementHistoryService}.
