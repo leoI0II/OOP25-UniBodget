@@ -8,6 +8,7 @@ import java.util.Objects;
  */
 public final class Theme {
 
+    public static final Theme DEFAULT = new Theme("Light", "#FFFFFF");
     private String name;
     private String primaryHex;
 
