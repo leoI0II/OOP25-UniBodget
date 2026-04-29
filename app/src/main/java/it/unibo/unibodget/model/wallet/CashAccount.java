@@ -1,7 +1,5 @@
 package it.unibo.unibodget.model.wallet;
 
-import java.math.BigDecimal;
-
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
@@ -42,11 +40,9 @@ public class CashAccount extends Wallet<CashTransaction> {
      */
     @Override
     public Asset getBalance() {
-        BigDecimal total = getHistory().getTransactions().stream()
+        return getHistory().getTransactions().stream()
             .map(CashTransaction::getAsset)
-            .map(Asset::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return Asset.of(getBaseCurrency(), total);
+            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
 }
