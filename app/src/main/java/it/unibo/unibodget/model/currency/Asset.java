@@ -89,18 +89,6 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
     }
 
     /**
-     * Returns a new Asset whose amount is this multiplied by {@code other}'s amount.
-     *
-     * @param other the asset to multiply by; must have the same currency
-     * @return a new Asset with the resulting amount
-     * @throws IllegalArgumentException if currencies differ
-     */
-    public Asset multiply(Asset other) {
-        requireSameCurrency(other);
-        return new Asset(this.currency, this.amount.multiply(other.amount));
-    }
-
-    /**
      * Returns a new Asset whose amount is this multiplied by a scalar {@code factor}.
      *
      * @param factor the scalar multiplier; must not be null
@@ -112,15 +100,17 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
     }
 
     /**
-     * Returns a new Asset whose amount is this divided by {@code other}'s amount.
-     *
-     * @param other the asset to divide by; must have the same currency
-     * @return a new Asset with the resulting amount
-     * @throws IllegalArgumentException if currencies differ
+     * Returns a new Asset whose amount is this divided by a scalar {@code divisor}.
+     * @param divisor the scalar divisor; must not be null and must not be zero
+     * @throws ArithmeticException if {@code divisor} is zero
+     * @return a new Asset with the divided amount
      */
-    public Asset divide(Asset other) {
-        requireSameCurrency(other);
-        return new Asset(this.currency, this.amount.divide(other.amount));
+    public Asset divide(BigDecimal divisor) {
+        Objects.requireNonNull(divisor, "divisor must not be null");
+        if (divisor.signum() == 0) {
+            throw new ArithmeticException("Cannot divide by zero");
+        }
+        return new Asset(this.currency, this.amount.divide(divisor));
     }
 
     /**
