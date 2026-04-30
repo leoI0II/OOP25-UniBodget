@@ -6,6 +6,7 @@ import java.util.Map;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
+import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
  * Default immutable implementation of {@link DashboardSnapshot}.
@@ -13,7 +14,7 @@ import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
 public final class DefaultDashboardSnapshot implements DashboardSnapshot {
 
     private final double totalBalance;
-    private final List<String> recentTransactions;
+    private final List<Transaction> recentTransactions;
     private final Map<String, Double> categorySummaries;
     private final BudgetStatus budgetStatus;
 
@@ -27,7 +28,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      */
     public DefaultDashboardSnapshot(
             final double totalBalance,
-            final List<String> recentTransactions,
+            final List<Transaction> recentTransactions,
             final Map<String, Double> categorySummaries,
             final BudgetStatus budgetStatus) {
         this.totalBalance = totalBalance;
@@ -48,7 +49,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public List<String> getRecentTransactions() {
+    public List<Transaction> getRecentTransactions() {
         return Collections.unmodifiableList(recentTransactions);
     }
 

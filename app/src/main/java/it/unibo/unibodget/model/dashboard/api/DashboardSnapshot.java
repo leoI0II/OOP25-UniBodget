@@ -3,6 +3,8 @@ package it.unibo.unibodget.model.dashboard.api;
 import java.util.List;
 import java.util.Map;
 
+import it.unibo.unibodget.model.transactions.base.Transaction;
+
 /**
  * Represents an immutable aggregated view of the dashboard state.
  * The snapshot contains the information needed by the presentation
@@ -22,7 +24,7 @@ public interface DashboardSnapshot {
      *
      * @return the recent transactions shown by the dashboard
      */
-    List<String> getRecentTransactions();
+    List<Transaction> getRecentTransactions();
 
     /**
      * Returns the aggregated amounts grouped by category.

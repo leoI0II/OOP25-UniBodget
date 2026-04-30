@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
  * Default implementation of {@link DashboardFacade}.
@@ -47,7 +48,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
      */
     @Override
     public DashboardSnapshot loadDashboard() {
-        final List<String> recentTransactions = movementHistoryService.getRecentTransactions();
+        final List<Transaction> recentTransactions = movementHistoryService.getRecentTransactions();
         final Map<String, Double> summaries = categoryService.getCategorySummaries();
         final double totalBalance = summaries.values().stream()
                 .mapToDouble(Double::doubleValue)
