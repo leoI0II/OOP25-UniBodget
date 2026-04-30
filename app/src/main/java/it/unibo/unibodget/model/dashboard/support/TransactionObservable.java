@@ -27,4 +27,4 @@ public interface TransactionObservable {
      * Notifies all registered observers that the observed state has changed.
      */
     void notifyObservers();
-}
+}   
