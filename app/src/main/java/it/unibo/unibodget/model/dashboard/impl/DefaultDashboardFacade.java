@@ -1,17 +1,17 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
-import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
-import it.unibo.unibodget.model.dashboard.api.CategoryService;
-import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
-import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
-
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
+import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.dashboard.api.CategoryService;
+import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
+import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
+import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
 import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
@@ -49,10 +49,9 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     @Override
     public DashboardSnapshot loadDashboard() {
         final List<Transaction> recentTransactions = movementHistoryService.getRecentTransactions();
-        final Map<String, Double> summaries = categoryService.getCategorySummaries();
-        final double totalBalance = summaries.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum();
+        final Map<String, BigDecimal> summaries = categoryService.getCategorySummaries();
+       final BigDecimal totalBalance = summaries.values().stream()
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
         final BudgetStatus budgetStatus = budgetMonitor.getBudgetStatus(totalBalance, budgetSettings);
 
         return new DefaultDashboardSnapshot(

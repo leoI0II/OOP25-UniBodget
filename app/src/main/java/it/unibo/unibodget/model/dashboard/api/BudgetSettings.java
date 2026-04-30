@@ -1,5 +1,7 @@
 package it.unibo.unibodget.model.dashboard.api;
 
+import java.math.BigDecimal;
+
 /**
  * Represents the budget configuration defined by the user.
  * <p>
@@ -17,7 +19,7 @@ public interface BudgetSettings {
      *
      * @return the configured budget limit
      */
-    double getLimitValue();
+    BigDecimal getLimitValue();
 
     /**
      * Returns the warning threshold.
@@ -28,5 +30,5 @@ public interface BudgetSettings {
      *
      * @return the warning threshold ratio
      */
-    double getWarningThreshold();
+    BigDecimal getWarningThreshold();
 }

@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.dashboard.api;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public interface DashboardSnapshot {
      *
      * @return the total balance
      */
-    double getTotalBalance();
+    BigDecimal getTotalBalance();
 
     /**
      * Returns the textual representation of recent transactions.
@@ -31,7 +32,7 @@ public interface DashboardSnapshot {
      *
      * @return a map from category names to aggregated amounts
      */
-    Map<String, Double> getCategorySummaries();
+    Map<String, BigDecimal> getCategorySummaries();
 
     /**
      * Returns the current budget status.

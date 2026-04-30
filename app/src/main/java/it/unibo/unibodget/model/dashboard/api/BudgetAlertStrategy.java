@@ -1,5 +1,7 @@
 package it.unibo.unibodget.model.dashboard.api;
 
+import java.math.BigDecimal;
+
 /**
  * Defines a strategy used to evaluate the current budget state.
  * Different implementations represent different alert policies,
@@ -14,5 +16,5 @@ public interface BudgetAlertStrategy {
      * @param limitValue the configured budget limit
      * @return a textual representation of the evaluated state
      */
-    BudgetStatus evaluate(double currentValue, double limitValue);
+    BudgetStatus evaluate(BigDecimal currentValue, BigDecimal limitValue);
 }
