@@ -11,33 +11,40 @@ import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.dashboard.api.MovementHistoryService;
+import it.unibo.unibodget.model.dashboard.api.WalletService;
 import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
  * Default implementation of {@link DashboardFacade}.
- * This class coordinates the retrieval of dashboard data from the
- * underlying services and exposes it as a unified snapshot.
+ *
+ * <p>This class coordinates the services involved in the dashboard subsystem and
+ * exposes a single method that returns a consistent snapshot of the current state.</p>
  */
 public final class DefaultDashboardFacade implements DashboardFacade {
 
-    private final MovementHistoryService movementHistoryService;
+    private final WalletService walletService;
     private final CategoryService categoryService;
     private final BudgetMonitor budgetMonitor;
     private final BudgetSettings budgetSettings;
+
     /**
-     * Creates a facade using the provided collaborating services.
+     * Creates a new dashboard facade with the required collaborating services.
      *
-     * @param movementHistoryService the service responsible for recent transactions
-     * @param categoryService the service responsible for category summaries
-     * @param budgetMonitor the service responsible for budget evaluation
+     * @param walletService
+     *            the service exposing wallets and the current wallet history
+     * @param categoryService
+     *            the service exposing the aggregated values by category
+     * @param budgetMonitor
+     *            the component evaluating the current budget status
+     * @param budgetSettings
+     *            the user-defined budget configuration
      */
     public DefaultDashboardFacade(
-            final MovementHistoryService movementHistoryService,
+            final WalletService walletService,
             final CategoryService categoryService,
             final BudgetMonitor budgetMonitor,
             final BudgetSettings budgetSettings) {
-        this.movementHistoryService = Objects.requireNonNull(movementHistoryService);
+        this.walletService = Objects.requireNonNull(walletService);
         this.categoryService = Objects.requireNonNull(categoryService);
         this.budgetMonitor = Objects.requireNonNull(budgetMonitor);
         this.budgetSettings = Objects.requireNonNull(budgetSettings);
@@ -48,17 +55,17 @@ public final class DefaultDashboardFacade implements DashboardFacade {
      */
     @Override
     public DashboardSnapshot loadDashboard() {
-        final List<Transaction> recentTransactions = movementHistoryService.getRecentTransactions();
-        final Map<String, BigDecimal> summaries = categoryService.getCategorySummaries();
-       final BigDecimal totalBalance = summaries.values().stream()
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+        final List<Transaction> recentTransactions = List.copyOf(walletService.getCurrentTransactions());
+        final BigDecimal totalBalance = walletService.getCurrentWallet()
+                .map(wallet -> wallet.getBalance().amount())
+                .orElse(BigDecimal.ZERO);
+        final Map<String, BigDecimal> categorySummaries = categoryService.getCategorySummaries();
         final BudgetStatus budgetStatus = budgetMonitor.getBudgetStatus(totalBalance, budgetSettings);
 
         return new DefaultDashboardSnapshot(
                 totalBalance,
                 recentTransactions,
-                summaries,
-                budgetStatus
-        );
+                categorySummaries,
+                budgetStatus);
     }
 }
