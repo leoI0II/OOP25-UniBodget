@@ -5,161 +5,201 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
- * Generic JSON serializer that converts an object of type {@code T}
- * into a JSON string using reflection.
+ * JSON serializer implementation used by UniBodget to convert domain model
+ * objects into JSON strings without relying on external libraries.
  *
- * Supported features:
- * - Records (canonical constructor fields)
- * - Standard classes (declared fields)
- * - Primitive types and wrappers
+ * This serializer supports:
+ * - Primitive types and strings
  * - Enums
- * - BigDecimal
- * - Lists
- * - Nested objects
+ * - {@link LocalDate}
+ * - {@link BigDecimal}
+ * - Java records
+ * - POJOs with inheritance
+ * - Lists and maps
  *
- * No external JSON libraries are used.
+ * To prevent infinite recursion, circular references are detected using an
+ * {@link IdentityHashMap}. When a cycle is found, the value is replaced with
+ * the literal {@code "<circular>"}.
  *
- * @param <T> the type of object to serialize
+ * Static fields are ignored during serialization, ensuring that constant
+ * instances (e.g., predefined categories) do not pollute the JSON output.
+ *
+ * @param <T> the type of the root object to serialize
  */
-public class JsonDataSerializer<T> implements DataSerializer<T> {
-
-    private final Class<T> type;
+public final class JsonDataSerializer<T> implements DataSerializer<T> {
 
     /**
-     * Creates a new serializer for the given type.
+     * Creates a new serializer instance.
      *
-     * @param type the class representing the type to serialize
+     * The {@code rootType} parameter is kept for API compatibility but is
+     * not required by this implementation.
+     *
+     * @param rootType the type of objects this serializer handles
      */
-    public JsonDataSerializer(Class<T> type) {
-        this.type = type;
+    public JsonDataSerializer(Class<T> rootType) {
+        // No initialization needed for this implementation
     }
 
     /**
-     * Serializes the given object into a JSON string.
+     * Serializes the given value into a JSON string.
      *
-     * @param data the object to serialize
-     * @return a JSON string representing the object
+     * @param value the object to serialize
+     * @return the JSON representation of the object
      * @throws DataSerializerException if serialization fails
      */
     @Override
-    public String serialize(T data) throws DataSerializerException {
+    public String serialize(T value) throws DataSerializerException {
         try {
-            return serializeValue(data, 0);
+            return serializeValue(value, new IdentityHashMap<>());
         } catch (Exception e) {
-            throw new DataSerializerException(
-                "Failed to serialize object of type " + type.getSimpleName(), e
-            );
+            throw new DataSerializerException("Serialization failed", e);
         }
     }
 
     /**
-     * Serializes a value into JSON, dispatching based on its type.
+     * Dispatches serialization based on the runtime type of the value.
      *
-     * @param value  the value to serialize
-     * @param indent the indentation level for pretty printing
-     * @return a JSON string representing the value
-     * @throws Exception if reflection fails
+     * @param value the value to serialize
+     * @param visited objects already processed (for circular reference detection)
+     * @return the JSON representation of the value
      */
-    private String serializeValue(Object value, int indent) throws Exception {
-
+    private String serializeValue(Object value, Map<Object, Boolean> visited) throws Exception {
         if (value == null) return "null";
-
         if (value instanceof String s) return "\"" + escape(s) + "\"";
-        if (value instanceof Number || value instanceof Boolean) return value.toString();
-        if (value instanceof BigDecimal bd) return bd.toString();
-
+        if (value instanceof Number n) return n.toString();
+        if (value instanceof Boolean b) return b.toString();
         if (value instanceof Enum<?> e) return "\"" + e.name() + "\"";
+        if (value instanceof LocalDate d) return "\"" + d.toString() + "\"";
+        if (value instanceof BigDecimal bd) return bd.toPlainString();
+        if (value instanceof List<?> list) return serializeList(list, visited);
+        if (value.getClass().isRecord()) return serializeRecord(value, visited);
+        if (value instanceof Map<?, ?> map) return serializeMap(map, visited);
 
-        if (value instanceof List<?> list) {
-            return serializeList(list, indent);
-        }
-
-        return serializeObject(value, indent);
+        return serializeObject(value, visited);
     }
 
     /**
-     * Serializes a Java object (record or class) into a JSON object.
+     * Serializes a {@link List} into a JSON array.
      *
-     * @param obj    the object to serialize
-     * @param indent the indentation level
-     * @return a JSON object string
-     * @throws Exception if reflection fails
+     * @param list the list to serialize
+     * @param visited circular reference tracker
+     * @return JSON array string
      */
-    private String serializeObject(Object obj, int indent) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        String pad = " ".repeat(indent);
+    private String serializeList(List<?> list, Map<Object, Boolean> visited) throws Exception {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
 
-        sb.append("{\n");
-
-        Class<?> clazz = obj.getClass();
-        List<String> entries = new ArrayList<>();
-
-        if (clazz.isRecord()) {
-            for (RecordComponent rc : clazz.getRecordComponents()) {
-                Method accessor = rc.getAccessor();
-                Object value = accessor.invoke(obj);
-                entries.add(fieldEntry(rc.getName(), value, indent + 2));
-            }
-        } else {
-            for (Field field : clazz.getDeclaredFields()) {
-                field.setAccessible(true);
-                Object value = field.get(obj);
-                entries.add(fieldEntry(field.getName(), value, indent + 2));
-            }
-        }
-
-        sb.append(String.join(",\n", entries));
-        sb.append("\n").append(pad).append("}");
-
-        return sb.toString();
-    }
-
-    /**
-     * Formats a single JSON field entry.
-     *
-     * @param name   the field name
-     * @param value  the field value
-     * @param indent the indentation level
-     * @return a JSON field entry string
-     * @throws Exception if serialization fails
-     */
-    private String fieldEntry(String name, Object value, int indent) throws Exception {
-        String pad = " ".repeat(indent);
-        return pad + "\"" + name + "\": " + serializeValue(value, indent);
-    }
-
-    /**
-     * Serializes a Java List into a JSON array.
-     *
-     * @param list   the list to serialize
-     * @param indent the indentation level
-     * @return a JSON array string
-     * @throws Exception if serialization fails
-     */
-    private String serializeList(List<?> list, int indent) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        String pad = " ".repeat(indent);
-
-        sb.append("[\n");
-
-        List<String> entries = new ArrayList<>();
         for (Object elem : list) {
-            entries.add(" ".repeat(indent + 2) + serializeValue(elem, indent + 2));
+            if (!first) sb.append(",");
+            sb.append(serializeValue(elem, visited));
+            first = false;
         }
 
-        sb.append(String.join(",\n", entries));
-        sb.append("\n").append(pad).append("]");
-
+        sb.append("]");
         return sb.toString();
     }
 
     /**
-     * Escapes special characters inside JSON strings.
+     * Serializes a {@link Map} into a JSON object.
      *
-     * @param s the raw string
+     * @param map the map to serialize
+     * @param visited circular reference tracker
+     * @return JSON object string
+     */
+    private String serializeMap(Map<?, ?> map, Map<Object, Boolean> visited) throws Exception {
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+
+        for (var entry : map.entrySet()) {
+            if (!first) sb.append(",");
+            sb.append("\"").append(escape(entry.getKey().toString())).append("\":");
+            sb.append(serializeValue(entry.getValue(), visited));
+            first = false;
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Serializes a Java record by iterating over its components.
+     *
+     * @param record the record instance
+     * @param visited circular reference tracker
+     * @return JSON object string
+     */
+    private String serializeRecord(Object record, Map<Object, Boolean> visited) throws Exception {
+        if (visited.containsKey(record)) return "\"<circular>\"";
+        visited.put(record, true);
+
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+
+        for (RecordComponent comp : record.getClass().getRecordComponents()) {
+            if (!first) sb.append(",");
+            sb.append("\"").append(comp.getName()).append("\":");
+
+            Object fieldValue = comp.getAccessor().invoke(record);
+            sb.append(serializeValue(fieldValue, visited));
+
+            first = false;
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Serializes a POJO by reflecting over its fields, including inherited ones.
+     * Static fields are ignored. Circular references are detected.
+     *
+     * @param obj the object to serialize
+     * @param visited circular reference tracker
+     * @return JSON object string
+     */
+    private String serializeObject(Object obj, Map<Object, Boolean> visited) throws Exception {
+        if (visited.containsKey(obj)) return "\"<circular>\"";
+        visited.put(obj, true);
+
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+
+        Class<?> cls = obj.getClass();
+        while (cls != null && cls != Object.class) {
+
+            for (Field field : cls.getDeclaredFields()) {
+
+                // Skip static fields (e.g., predefined Category constants)
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+
+                field.setAccessible(true);
+
+                if (!first) sb.append(",");
+                sb.append("\"").append(field.getName()).append("\":");
+
+                Object fieldValue = field.get(obj);
+                sb.append(serializeValue(fieldValue, visited));
+
+                first = false;
+            }
+
+            cls = cls.getSuperclass();
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Escapes double quotes inside strings to produce valid JSON.
+     *
+     * @param s the string to escape
      * @return the escaped string
      */
     private String escape(String s) {
