@@ -47,4 +47,38 @@ public interface CurrencyUnit {
      * @return the currency code
      */
     String getCode();
+    
+    /**
+     * Retrieves a {@link CurrencyUnit} instance from its ISO code.
+     * This method searches only in the known enum-based currencies.
+     *
+     * @param code the ISO currency code (e.g., "USD", "EUR")
+     * @return the corresponding {@link CurrencyUnit}, or {@code null} if not found
+     */
+    static CurrencyUnit getByCode(String code) {
+
+        // Fiat currencies
+        for (var c : FiatCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
+                return c;
+            }
+        }
+        
+        // Crypto currencies
+        for (var c : CryptoCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
+                return c;
+            }
+        }
+
+        // Stock market currencies
+        for (var c : StockMarketCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
+                return c;
+            }
+        }
+
+        // No match found
+        return null;
+    }
 }
