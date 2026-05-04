@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.dashboard.api;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -15,5 +16,5 @@ public interface CategoryService {
      * @return a map whose keys are category names and whose values
      *         are the corresponding aggregated amounts
      */
-    Map<String, Double> getCategorySummaries();
+    Map<String, BigDecimal> getCategorySummaries();
 }

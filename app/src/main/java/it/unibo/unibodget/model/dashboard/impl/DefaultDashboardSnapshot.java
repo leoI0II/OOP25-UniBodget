@@ -1,20 +1,23 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
+import it.unibo.unibodget.model.transactions.base.Transaction;
 
 /**
  * Default immutable implementation of {@link DashboardSnapshot}.
  */
 public final class DefaultDashboardSnapshot implements DashboardSnapshot {
 
-    private final double totalBalance;
-    private final List<String> recentTransactions;
-    private final Map<String, Double> categorySummaries;
-    private final String budgetStatus;
+    private final BigDecimal totalBalance;
+    private final List<Transaction> recentTransactions;
+    private final Map<String, BigDecimal> categorySummaries;
+    private final BudgetStatus budgetStatus;
 
     /**
      * Creates a new dashboard snapshot.
@@ -25,10 +28,10 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * @param budgetStatus the current budget status
      */
     public DefaultDashboardSnapshot(
-            final double totalBalance,
-            final List<String> recentTransactions,
-            final Map<String, Double> categorySummaries,
-            final String budgetStatus) {
+            final BigDecimal totalBalance,
+            final List<Transaction> recentTransactions,
+            final Map<String, BigDecimal> categorySummaries,
+            final BudgetStatus budgetStatus) {
         this.totalBalance = totalBalance;
         this.recentTransactions = List.copyOf(recentTransactions);
         this.categorySummaries = Map.copyOf(categorySummaries);
@@ -39,7 +42,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public double getTotalBalance() {
+    public BigDecimal getTotalBalance() {
         return totalBalance;
     }
 
@@ -47,7 +50,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public List<String> getRecentTransactions() {
+    public List<Transaction> getRecentTransactions() {
         return Collections.unmodifiableList(recentTransactions);
     }
 
@@ -55,7 +58,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Double> getCategorySummaries() {
+    public Map<String, BigDecimal> getCategorySummaries() {
         return Collections.unmodifiableMap(categorySummaries);
     }
 
@@ -63,7 +66,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      * {@inheritDoc}
      */
     @Override
-    public String getBudgetStatus() {
+    public BudgetStatus getBudgetStatus() {
         return budgetStatus;
     }
 }

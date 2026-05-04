@@ -1,10 +1,11 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.CategoryService;
-
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import it.unibo.unibodget.model.dashboard.api.CategoryService;
 
 /**
  * Default implementation of {@link CategoryService}.
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public final class DefaultCategoryService implements CategoryService {
 
-    private final Map<String, Double> categorySummaries;
+    private final Map<String, BigDecimal> categorySummaries;
 
     /**
      * Creates an empty category service.
@@ -27,7 +28,7 @@ public final class DefaultCategoryService implements CategoryService {
      *
      * @param categorySummaries the initial category summary values
      */
-    public DefaultCategoryService(final Map<String, Double> categorySummaries) {
+    public DefaultCategoryService(final Map<String, BigDecimal> categorySummaries) {
         this.categorySummaries = new LinkedHashMap<>(categorySummaries);
     }
 
@@ -35,7 +36,7 @@ public final class DefaultCategoryService implements CategoryService {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Double> getCategorySummaries() {
+    public Map<String, BigDecimal> getCategorySummaries() {
         return Collections.unmodifiableMap(categorySummaries);
     }
 
@@ -45,7 +46,7 @@ public final class DefaultCategoryService implements CategoryService {
      * @param categoryName the category name
      * @param amount the aggregated amount associated with the category
      */
-    public void putCategorySummary(final String categoryName, final double amount) {
+    public void putCategorySummary(final String categoryName, final BigDecimal amount) {
         categorySummaries.put(categoryName, amount);
     }
 }

@@ -8,6 +8,8 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
+    id("org.danilopianini.gradle-java-qa") version "1.155.0"
 }
 
 repositories {
@@ -25,6 +27,11 @@ dependencies {
     implementation(libs.guava)
 }
 
+javafx {
+    version = "21"
+    modules("javafx.controls")
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -34,7 +41,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass.set("it.unibo.unibodget.unibodget")
 }
 
 tasks.named<Test>("test") {
