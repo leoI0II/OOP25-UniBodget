@@ -48,11 +48,11 @@ public record Position(
     }
 
     /**
-     * Gets the profit or loss of the position, calculated as current market value − total cost.
+     * Gets the unrealized profit or loss of the position, calculated as current market value − total cost.
      * 
      * @return the profit or loss of the position in the base currency
      */
-    public Asset getProfitLoss() {
+    public Asset getUnrealizedProfitLoss() {
         return currentMarketValue.subtract(getTotalCost());
     }
 
@@ -62,11 +62,11 @@ public record Position(
      *
      * @return the P/L percentage (e.g. 12.5 means +12.5%, -5.0 means -5.0%)
      */
-    public BigDecimal getProfitLossPercentage() {
+    public BigDecimal getUnrealizedProfitLossPercentage() {
         if (getTotalCost().isZero()) {
             return BigDecimal.ZERO; // Avoid division by zero; define as 0% if no cost basis
         }
-        return getProfitLoss()
+        return getUnrealizedProfitLoss()
             .amount()
             .divide(getTotalCost().amount(), 4, RoundingMode.HALF_UP)
             .multiply(BigDecimal.valueOf(100));
