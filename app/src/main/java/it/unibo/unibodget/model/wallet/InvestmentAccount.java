@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,10 +16,12 @@ import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 
 /**
- * A wallet that holds {@link InvestmentTransaction} entries (stocks, crypto, funds).
+ * A wallet specialized for investment assets (stocks, crypto, funds).
  *
- * <p>The balance depends on current market prices and is not implemented yet:
- * it will be computed as Σ(quantity × current market price − fees) for each held asset.
+ * <p>The balance is computed dynamically as the sum of current market values
+ * of all open positions, using a {@link PriceProvider} for live prices.
+ * Profit/loss is tracked separately as realized (from closed sells)
+ * and unrealized (on open positions), following the Average Cost Method.
  */
 public class InvestmentAccount extends Wallet<InvestmentTransaction> {
 
@@ -38,7 +41,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
         Historical<InvestmentTransaction> history,
         PriceProvider priceProvider) {
         super(name, baseCurrency, history, "Investment Account");
-        this.priceProvider = priceProvider;
+        this.priceProvider = Objects.requireNonNull(priceProvider, "Price provider cannot be null");
     }
 
     /**
@@ -142,7 +145,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param transactions the transactions to sort
      * @return a sorted, unmodifiable list
      */
-    public List<InvestmentTransaction> sortedByDate(List<InvestmentTransaction> transactions) {
+    private List<InvestmentTransaction> sortedByDate(List<InvestmentTransaction> transactions) {
         return transactions.stream()
                 .sorted(Comparator.comparing(InvestmentTransaction::getDate))
                 .toList();

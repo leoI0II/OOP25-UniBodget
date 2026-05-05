@@ -79,8 +79,6 @@ public record Position(
      * @return {@code true} if the position is closed or net short, {@code false} otherwise
      */
     public boolean isClosedPosition() {
-        boolean isZero = quantity.compareTo(BigDecimal.ZERO) == 0;
-        boolean isNegative = quantity.compareTo(BigDecimal.ZERO) < 0;
-        return isZero || isNegative; // A position is considered closed if quantity is zero or negative (net short)
+        return quantity.signum() <= 0;
     }
 }

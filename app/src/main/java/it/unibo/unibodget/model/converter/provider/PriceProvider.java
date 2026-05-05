@@ -12,6 +12,6 @@ public interface PriceProvider {
      * @param targetCurrency the currency in which to express the price
      * @return the current price of the asset in the target currency
      */
-    public Asset getCurrentPrice(final CurrencyUnit asset, final CurrencyUnit targetCurrency);
+    Asset getCurrentPrice(final CurrencyUnit asset, final CurrencyUnit targetCurrency);
     
 }
