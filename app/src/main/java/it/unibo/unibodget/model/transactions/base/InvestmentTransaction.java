@@ -39,7 +39,7 @@ public final class InvestmentTransaction extends Transaction {
      * @param notes        optional additional notes or comments
      * @param unitPrice    the historical unit price of the asset at the time
      *                     of the transaction; may be null if not applicable
-     * t@param fee          an optional fee associated with the transaction
+     * @param fee          an optional fee associated with the transaction
      *                     (e.g., broker fee); may be null
      */
     public InvestmentTransaction(
@@ -54,6 +54,18 @@ public final class InvestmentTransaction extends Transaction {
         super(asset, category, date, description, notes);
         this.unitPrice = unitPrice;
         this.fee = fee;
+    }
+
+    public static InvestmentTransaction of(
+            Asset asset,
+            Category category,
+            LocalDate date,
+            String description,
+            String notes,
+            Asset unitPrice,
+            Asset fee
+    ) {
+        return new InvestmentTransaction(asset, category, date, description, notes, unitPrice, fee);
     }
 
     /**
