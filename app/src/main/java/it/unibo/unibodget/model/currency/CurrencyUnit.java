@@ -1,5 +1,9 @@
 package it.unibo.unibodget.model.currency;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Interface to represent a generic currency unit.
  * 
@@ -81,4 +85,21 @@ public interface CurrencyUnit {
         // No match found
         return null;
     }
+
+    /**
+     * Returns a list containing all available currency units in the system.
+     * 
+     * This method aggregates all enum-based currency types implemented in the
+     * application
+     *
+     * @return a list of all {@link CurrencyUnit} instances defined in the system
+     */
+    public static List<CurrencyUnit> allCurrencies() {
+        List<CurrencyUnit> list = new ArrayList<>();
+        Collections.addAll(list, FiatCurrency.values());
+        Collections.addAll(list, CryptoCurrency.values());
+        Collections.addAll(list, StockMarketCurrency.values());
+        return list;
+    }
+
 }
