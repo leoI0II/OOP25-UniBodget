@@ -43,9 +43,7 @@ dependencies {
 }
 
 application {
-    //mainClass.set("it.unibo.unibodget.unibodget")
-    mainClass.set("it.unibo.unibodget.view.currency_converter.CurrencyConverterAppFX")
-
+    mainClass.set("it.unibo.unibodget.unibodget")
 }
 
 tasks.test {
