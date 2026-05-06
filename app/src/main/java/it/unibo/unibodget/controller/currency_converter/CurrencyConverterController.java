@@ -18,18 +18,18 @@ import java.util.Map;
  * the model layer. The controller only orchestrates calls and handles errors
  * before forwarding results to the view.</p>
  */
-public class CurrencyController {
+public class CurrencyConverterController {
 
     private final ExchangeRateAPI api;
     private final CurrencyConverter converter;
 
     /**
-     * Creates a new {@code CurrencyController}.
+     * Creates a new {@code CurrencyConverterController}.
      *
      * @param api       the exchange-rate provider used to retrieve rate tables
      * @param converter the converter used to perform currency conversions
      */
-    public CurrencyController(ExchangeRateAPI api, CurrencyConverter converter) {
+    public CurrencyConverterController(ExchangeRateAPI api, CurrencyConverter converter) {
         this.api = api;
         this.converter = converter;
     }
