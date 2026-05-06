@@ -1,4 +1,4 @@
-package it.unibo.unibodget.controller.currency;
+package it.unibo.unibodget.controller.currency_converter;
 
 import it.unibo.unibodget.model.currency.CurrencyConversionResult;
 import it.unibo.unibodget.model.currency.CurrencyUnit;

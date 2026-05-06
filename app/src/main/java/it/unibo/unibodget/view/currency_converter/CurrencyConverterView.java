@@ -1,6 +1,6 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import it.unibo.unibodget.controller.currency.CurrencyConverterController;
+import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 import java.math.BigDecimal;
@@ -9,11 +9,7 @@ import java.util.Map;
 
 /**
  * Logical view for the currency converter feature. This class represents the
- * UI-facing layer and delegates all operations to the {@link CurrencyConverterController}.
- *
- * <p>This implementation is framework-agnostic: it does not depend on Swing,
- * JavaFX, or any graphical toolkit. Concrete UI components should wrap this
- * class and use its methods to retrieve data and perform conversions.</p>
+ * UI-facing layer and delegates all operations to the {@link CurrencyConverterController}
  */
 public class CurrencyConverterView {
 
