@@ -10,17 +10,15 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 public final class Theme {
 
-    public static final Theme DEFAULT = new Theme("Light", ARGBColor.WHITE);
+    public static final Theme DEFAULT = new Theme("Light", ARGBColor.WHITE, new ARGBColor("#FF4CAF50"));
 
     private String name;
     private ARGBColor primaryColor;
+    private ARGBColor buttonColor;
 
-    /**
-     *  Empty constructor required by the generic JSON parser
-     */
-    public Theme() {
-
-    }
+    private String fontFamily = "Arial";
+    private int fontSize = 14;
+    private boolean boldText = false;
 
     /**
      * Creates a new Theme with the given name and primary color.
@@ -29,17 +27,26 @@ public final class Theme {
      *                   must not be null
      * @param primaryHex the primary HEX color 
      *                   must not be null
+     * @param buttonHex  the button HEX color
+     *                   must not be null
      */
-    public Theme(String name, ARGBColor primaryColor) {
+    public Theme(String name, ARGBColor primaryColor, ARGBColor buttonColor) {
         this.name = Objects.requireNonNull(name);
         this.primaryColor = Objects.requireNonNull(primaryColor);
+        this.buttonColor = Objects.requireNonNull(buttonColor);
     }
 
     /**
-     * Creates a new Theme from a HEX string (#RRGGBB or #AARRGGBB).
+     * Creates a new Theme from a single HEX color (#RRGGBB or #AARRGGBB).
+     * The given color becomes the primary background color, while the button
+     * color defaults to a standard accent color.
      */
-    public Theme(String name, String hexColor) {
-        this(name, new ARGBColor(hexColor));
+    public Theme(String name, String hexColor, String buttonHexColor) {
+        this(
+            name,
+            new ARGBColor(hexColor),
+            new ARGBColor(buttonHexColor)
+        );
     }
 
     /**
@@ -58,6 +65,54 @@ public final class Theme {
      */
     public ARGBColor getPrimaryColor() {
         return primaryColor;
+    }
+
+    /**
+     * Returns the button HEX color associated with the theme.
+     *
+     * @return the button HEX color
+     */
+    public ARGBColor getButtonColor() {
+        return buttonColor;
+    }
+
+    /**
+     * Computes whether black or white text is more readable on top of the given color.
+     * Uses the standard luminance formula:
+     *     luminance = 0.299*R + 0.587*G + 0.114*B
+     *
+     * If luminance > 128 → return BLACK, else WHITE.
+     *
+     * @param color the background color
+     * @return ARGBColor.BLACK or ARGBColor.WHITE
+     */
+    public ARGBColor getReadableTextColor(ARGBColor color) {
+        double luminance =
+                0.299 * color.red() +
+                0.587 * color.green() +
+                0.114 * color.blue();
+
+        return luminance > 128 ? ARGBColor.BLACK : ARGBColor.WHITE;
+    }
+
+    public javafx.scene.text.Font toFXFont() {
+        return javafx.scene.text.Font.font(
+                fontFamily,
+                boldText ? javafx.scene.text.FontWeight.BOLD : javafx.scene.text.FontWeight.NORMAL,
+                fontSize
+        );
+    }
+
+    public String getFontFamily() { 
+        return fontFamily; 
+    }
+
+    public int getFontSize() { 
+        return fontSize; 
+    }
+
+    public boolean isBoldText() { 
+        return boldText; 
     }
 
     @Override
