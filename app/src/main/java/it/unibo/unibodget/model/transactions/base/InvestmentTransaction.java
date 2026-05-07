@@ -52,7 +52,7 @@ public final class InvestmentTransaction extends Transaction {
             Asset fee
     ) {
         super(asset, category, date, description, notes);
-        this.unitPrice = unitPrice;
+        this.unitPrice = Objects.requireNonNull(unitPrice, "Unit price cannot be null");
         this.fee = fee;
     }
 

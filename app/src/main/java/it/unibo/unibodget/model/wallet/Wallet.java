@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.wallet;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -120,6 +121,12 @@ public abstract class Wallet<T extends Transaction> {
      * @param transaction the transaction to record
      */
     public void addTransaction(final T transaction) {
+        if (transaction == null) {
+            throw new NullPointerException("Transaction cannot be null");
+        }
+        if (transaction.getAsset().amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Transaction amount cannot be negative or zero.");
+        }
         history.addTransaction(transaction);
     }
 
