@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.wallet;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -121,11 +122,9 @@ public abstract class Wallet<T extends Transaction> {
      * @param transaction the transaction to record
      */
     public void addTransaction(final T transaction) {
-        if (transaction == null) {
-            throw new NullPointerException("Transaction cannot be null");
-        }
-        if (transaction.getAsset().amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Transaction amount cannot be negative or zero.");
+        Objects.requireNonNull(transaction, "Transaction cannot be null");
+        if (transaction.getAsset().isZero()) {
+            throw new IllegalArgumentException("Transaction amount cannot be zero.");
         }
         history.addTransaction(transaction);
     }
