@@ -39,7 +39,7 @@ public final class InvestmentTransaction extends Transaction {
      * @param notes        optional additional notes or comments
      * @param unitPrice    the historical unit price of the asset at the time
      *                     of the transaction; may be null if not applicable
-     * t@param fee          an optional fee associated with the transaction
+     * @param fee          an optional fee associated with the transaction
      *                     (e.g., broker fee); may be null
      */
     public InvestmentTransaction(
@@ -52,8 +52,27 @@ public final class InvestmentTransaction extends Transaction {
             Asset fee
     ) {
         super(asset, category, date, description, notes);
+        Objects.requireNonNull(unitPrice, "Unit price cannot be null");
+        if (unitPrice.isNegative()) {
+            throw new IllegalArgumentException("Unit price cannot be negative.");
+        }
         this.unitPrice = unitPrice;
         this.fee = fee;
+        if (fee != null && fee.isNegative()) {
+            throw new IllegalArgumentException("Fee cannot be negative.");
+        }
+    }
+
+    public static InvestmentTransaction of(
+            Asset asset,
+            Category category,
+            LocalDate date,
+            String description,
+            String notes,
+            Asset unitPrice,
+            Asset fee
+    ) {
+        return new InvestmentTransaction(asset, category, date, description, notes, unitPrice, fee);
     }
 
     /**
