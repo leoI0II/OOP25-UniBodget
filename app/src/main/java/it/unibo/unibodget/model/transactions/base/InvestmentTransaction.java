@@ -52,10 +52,11 @@ public final class InvestmentTransaction extends Transaction {
             Asset fee
     ) {
         super(asset, category, date, description, notes);
-        this.unitPrice = Objects.requireNonNull(unitPrice, "Unit price cannot be null");
+        Objects.requireNonNull(unitPrice, "Unit price cannot be null");
         if (unitPrice.isNegative()) {
             throw new IllegalArgumentException("Unit price cannot be negative.");
         }
+        this.unitPrice = unitPrice;
         this.fee = fee;
         if (fee != null && fee.isNegative()) {
             throw new IllegalArgumentException("Fee cannot be negative.");

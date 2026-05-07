@@ -222,4 +222,13 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
         return Asset.of(getBaseCurrency(), realizedPL);
     }
 
+    public boolean canSell(CurrencyUnit asset, BigDecimal qtyToSell) {
+        if (qtyToSell.signum() <= 0) {
+            throw new IllegalArgumentException("Quantity to sell must be positive.");
+        }
+        return getPositionForAsset(asset)
+            .map(pos -> pos.quantity().compareTo(qtyToSell) >= 0)
+            .orElse(false);
+    }
+
 }
