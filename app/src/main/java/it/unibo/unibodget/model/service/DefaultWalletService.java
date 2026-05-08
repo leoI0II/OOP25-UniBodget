@@ -1,4 +1,4 @@
-package it.unibo.unibodget.model.dashboard.impl;
+package it.unibo.unibodget.model.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import it.unibo.unibodget.model.dashboard.api.WalletService;
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
-import it.unibo.unibodget.model.wallet.CashAccount;
+import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.Wallet;
 
 /**
  * Default implementation of {@link WalletService}.
@@ -18,11 +17,11 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  * currently selected wallet, and delegates transaction updates to the history
  * owned by that wallet.</p>
  */
-public final class DefaultWalletService implements WalletService {
+public class DefaultWalletService<T extends Transaction, W extends Wallet<T>> implements WalletService<T, W> {
 
-    private final List<CashAccount> wallets = new ArrayList<>();
+    private final List<W> wallets = new ArrayList<>();
     private final List<WalletObserver> observers = new ArrayList<>();
-    private CashAccount currentWallet;
+    private W currentWallet;
 
     /**
      * Creates an empty wallet service.
@@ -36,23 +35,23 @@ public final class DefaultWalletService implements WalletService {
      * @param initialWallets
      *            the initial wallets
      */
-    public DefaultWalletService(final List<CashAccount> initialWallets) {
+    public DefaultWalletService(final List<W> initialWallets) {
         this.wallets.addAll(Objects.requireNonNull(initialWallets));
         this.currentWallet = this.wallets.isEmpty() ? null : this.wallets.get(0);
     }
 
     @Override
-    public List<CashAccount> getWallets() {
+    public List<W> getWallets() {
         return List.copyOf(wallets);
     }
 
     @Override
-    public Optional<CashAccount> getCurrentWallet() {
+    public Optional<W> getCurrentWallet() {
         return Optional.ofNullable(currentWallet);
     }
 
     @Override
-    public void addWallet(final CashAccount wallet) {
+    public void addWallet(final W wallet) {
         wallets.add(Objects.requireNonNull(wallet));
         if (currentWallet == null) {
             currentWallet = wallet;
@@ -63,7 +62,7 @@ public final class DefaultWalletService implements WalletService {
     @Override
     public boolean removeWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
-        final Optional<CashAccount> walletToRemove = wallets.stream()
+        final Optional<W> walletToRemove = wallets.stream()
                 .filter(wallet -> wallet.getId().equals(nonNullWalletId))
                 .findFirst();
 
@@ -84,7 +83,7 @@ public final class DefaultWalletService implements WalletService {
     @Override
     public boolean selectWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
-        final Optional<CashAccount> selectedWallet = wallets.stream()
+        final Optional<W> selectedWallet = wallets.stream()
                 .filter(wallet -> wallet.getId().equals(nonNullWalletId))
                 .findFirst();
 
@@ -98,18 +97,18 @@ public final class DefaultWalletService implements WalletService {
     }
 
     @Override
-    public List<CashTransaction> getCurrentTransactions() {
+    public List<T> getCurrentTransactions() {
         return List.copyOf(getRequiredCurrentWallet().getHistory().getTransactions());
     }
 
     @Override
-    public void addTransaction(final CashTransaction transaction) {
+    public void addTransaction(final T transaction) {
         getRequiredCurrentWallet().addTransaction(Objects.requireNonNull(transaction));
         notifyObservers();
     }
 
     @Override
-    public boolean removeTransaction(final CashTransaction transaction) {
+    public boolean removeTransaction(final T transaction) {
         final boolean removed = getRequiredCurrentWallet()
                 .getHistory()
                 .removeTransaction(Objects.requireNonNull(transaction));
@@ -120,7 +119,7 @@ public final class DefaultWalletService implements WalletService {
     }
 
     @Override
-    public void replaceTransaction(final CashTransaction oldTransaction, final CashTransaction newTransaction) {
+    public void replaceTransaction(final T oldTransaction, final T newTransaction) {
         final boolean replaced = getRequiredCurrentWallet()
                 .getHistory()
                 .replaceTransaction(
@@ -157,7 +156,7 @@ public final class DefaultWalletService implements WalletService {
      *
      * @return the current wallet
      */
-    private CashAccount getRequiredCurrentWallet() {
+    private W getRequiredCurrentWallet() {
         return Optional.ofNullable(currentWallet)
                 .orElseThrow(() -> new IllegalStateException("No current wallet selected."));
     }

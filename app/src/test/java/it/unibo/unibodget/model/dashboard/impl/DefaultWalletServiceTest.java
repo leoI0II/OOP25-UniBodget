@@ -8,22 +8,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.dashboard.api.WalletService;
+import it.unibo.unibodget.model.service.DefaultWalletService;
+import it.unibo.unibodget.model.service.WalletService;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.utils.ARGBColor;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
 class DefaultWalletServiceTest {
 
+    private WalletService<CashTransaction, CashAccount> service;
+
+    @BeforeEach
+    void setUp() {
+        service = new DefaultWalletService<>();
+    }
+
     @Test
     void shouldSetFirstAddedWalletAsCurrentWallet() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
 
         service.addWallet(wallet);
@@ -34,7 +43,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldSelectWalletById() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
         final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
 
@@ -49,7 +57,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldReturnFalseWhenSelectingUnknownWallet() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
         final CashAccount otherWallet = new CashAccount("Other wallet", FiatCurrency.USD);
 
@@ -63,7 +70,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldAddTransactionToCurrentWallet() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
         service.addWallet(wallet);
 
@@ -89,7 +95,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldRemoveTransactionFromCurrentWallet() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
         service.addWallet(wallet);
 
@@ -116,7 +121,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldClearCurrentWalletHistory() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
         service.addWallet(wallet);
 
@@ -149,7 +153,6 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldNotifyObserversWhenWalletStateChanges() {
-        final WalletService service = new DefaultWalletService();
         final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
         final AtomicBoolean notified = new AtomicBoolean(false);
 
@@ -164,9 +167,9 @@ class DefaultWalletServiceTest {
         final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
         final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
 
-        final WalletService service = new DefaultWalletService(List.of(firstWallet, secondWallet));
+        final WalletService<CashTransaction, CashAccount> wService = new DefaultWalletService<>(List.of(firstWallet, secondWallet));
 
-        assertTrue(service.getCurrentWallet().isPresent());
-        assertEquals(firstWallet, service.getCurrentWallet().get());
+        assertTrue(wService.getCurrentWallet().isPresent());
+        assertEquals(firstWallet, wService.getCurrentWallet().get());
     }
 }

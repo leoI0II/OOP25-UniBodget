@@ -1,12 +1,12 @@
-package it.unibo.unibodget.model.dashboard.api;
+package it.unibo.unibodget.model.service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
-import it.unibo.unibodget.model.wallet.CashAccount;
+import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.Wallet;
 
 /**
  * Service responsible for managing wallets and the history of the current wallet.
@@ -14,21 +14,21 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  * <p>The service exposes the available wallets, the currently selected wallet,
  * and the operations used to inspect and update the history of that wallet.</p>
  */
-public interface WalletService {
+public interface WalletService<T extends Transaction, W extends Wallet<T>> {
 
     /**
      * Returns the wallets available to the user.
      *
      * @return the available wallets
      */
-    List<CashAccount> getWallets();
+    List<W> getWallets();
 
     /**
      * Returns the currently selected wallet.
      *
      * @return the current wallet, if present
      */
-    Optional<CashAccount> getCurrentWallet();
+    Optional<W> getCurrentWallet();
 
     /**
      * Adds a wallet to the collection.
@@ -36,7 +36,7 @@ public interface WalletService {
      * @param wallet
      *            the wallet to add
      */
-    void addWallet(CashAccount wallet);
+    void addWallet(W wallet);
 
     /**
      * Removes a wallet by identifier.
@@ -61,7 +61,7 @@ public interface WalletService {
      *
      * @return the current wallet transactions
      */
-    List<CashTransaction> getCurrentTransactions();
+    List<T> getCurrentTransactions();
 
     /**
      * Adds a transaction to the current wallet history.
@@ -69,7 +69,7 @@ public interface WalletService {
      * @param transaction
      *            the transaction to add
      */
-    void addTransaction(CashTransaction transaction);
+    void addTransaction(T transaction);
 
     /**
      * Removes a transaction from the current wallet history.
@@ -78,7 +78,7 @@ public interface WalletService {
      *            the transaction to remove
      * @return {@code true} if the transaction was removed, {@code false} otherwise
      */
-    boolean removeTransaction(CashTransaction transaction);
+    boolean removeTransaction(T transaction);
 
     /**
      * Replaces a transaction in the current wallet history.
@@ -88,7 +88,7 @@ public interface WalletService {
      * @param newTransaction
      *            the replacement transaction
      */
-    void replaceTransaction(CashTransaction oldTransaction, CashTransaction newTransaction);
+    void replaceTransaction(T oldTransaction, T newTransaction);
 
     /**
      * Removes all transactions from the current wallet history.
