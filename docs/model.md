@@ -54,7 +54,7 @@ classDiagram
         +getShortName() String
         +getFullName() String
         +getByCode(String) CurrencyUnit
-        +allCurrencies() List<CurrencyUnit>
+        +allCurrencies() List~CurrencyUnit~
     }
 
     class CurrencyType {
@@ -96,6 +96,26 @@ classDiagram
         +getSign()
     }
 
+    class BankExchangeCalculator {
+
+    }
+
+    class CurrencyAlert {
+
+    }
+
+    class CurrencyConversionResult {
+
+    }
+
+    class CurrencyHistoryPoint {
+
+    }
+
+    class ExchangeRate {
+
+    }
+
     %% Relations
     Currency ..|> CurrencyUnit
     FiatCurrency ..|> CurrencyUnit
@@ -109,6 +129,67 @@ classDiagram
 
     Asset --> CurrencyUnit
 
+    %% ========= API =========
+    
+    class ExchangeRateAPI {
+        <<interface>>
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    class ExchangeRateAPIImpl{
+        -CACHE_DURATION : Duration
+        -client : HttpClient
+        -lastUpdate : Instant
+        -cachedRates : Map~CurrencyUnit, Double~
+
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+        -fetchRatesFromAPI(CurrencyUnit) Map~CurrencyUnit, Double~
+        -parseRates(String, CurrencyUnit) Map~CurrencyUnit, Double~
+        -generateMockHistory(LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    class MockExchangeRateAPI {
+        -mockRates : Map~CurrencyUnit, Double~
+
+        +MockExchangeRateAPI(CurrencyUnit, Map~CurrencyUnit, Double~)
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    %% Relations
+    ExchangeRateAPIImpl ..|> ExchangeRateAPI
+    MockExchangeRateAPI ..|> ExchangeRateAPI
+
+    %% ========= ENGIN =========
+
+    class CurrencyConverter {
+        <<interface>>
+        +convert(BigDecimal, CurrencyUnit, CurrencyUnit) CurrencyConversionResult
+    }
+
+    class BasicCurrencyConverter {
+        +BasicCurrencyConverter(ExchangeRateAPI, CurrencyUnit)
+        +convert(BigDecimal, CurrencyUnit, CurrencyUnit) CurrencyConversionResult
+    }
+
+    %% Relations
+    BasicCurrencyConverter ..|> CurrencyConverter
+    BasicCurrencyConverter --> ExchangeRateAPI
+    BasicCurrencyConverter --> CurrencyUnit
+    CurrencyConverter --> CurrencyUnit
+    CurrencyConverter --> CurrencyConversionResult
+
+    %% ========= UTIL =========
+
+    class CurrencyAlertService {
+
+    }
+
+    class CurrencySpreadTable {
+
+    }
 
     %% ============================
     %% ========= SETTINGS =========
