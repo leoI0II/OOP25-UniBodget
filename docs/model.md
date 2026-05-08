@@ -50,8 +50,11 @@ classDiagram
 
     class CurrencyUnit {
         <<interface>>
-        +getName()
-        +getType()
+        +getSymbol() String
+        +getShortName() String
+        +getFullName() String
+        +getByCode(String) CurrencyUnit
+        +allCurrencies() List<CurrencyUnit>
     }
 
     class CurrencyType {

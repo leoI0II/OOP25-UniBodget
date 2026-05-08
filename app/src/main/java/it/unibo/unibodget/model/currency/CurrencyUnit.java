@@ -59,7 +59,7 @@ public interface CurrencyUnit {
      * @param code the ISO currency code (e.g., "USD", "EUR")
      * @return the corresponding {@link CurrencyUnit}, or {@code null} if not found
      */
-    static CurrencyUnit getByCode(String code) {
+    public static CurrencyUnit getByCode(String code) {
 
         // Fiat currencies
         for (var c : FiatCurrency.values()) {

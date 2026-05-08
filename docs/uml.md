@@ -4,6 +4,8 @@ classDiagram
       +getSymbol() String
       +getShortName() String
       +getFullName() String
+      +getByCode(String) CurrencyUnit
+      +allCurrencies() List<CurrencyUnit>
     }
     class FiatCurrency{
         <<enum>>
