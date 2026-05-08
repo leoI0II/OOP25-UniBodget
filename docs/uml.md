@@ -108,6 +108,7 @@ classDiagram
         +ARGBColor(hex : String)
         +parseHexToInt(hex : String) int
         +toHexString() String
+        +toFXColor() Color
     }
 
     class Historical~T extends Transaction~ {

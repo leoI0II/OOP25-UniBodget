@@ -214,13 +214,36 @@ classDiagram
     %% ============================
 
     class ARGBColor {
-        -int alpha
-        -int red
-        -int green
-        -int blue
+        <<record>>
+
+        +TRANSPARENT : static ARGBColor
+        +BLACK : static ARGBColor
+        +WHITE : static ARGBColor
+        +RED : static ARGBColor
+        +GREEN : static ARGBColor
+        +BLUE : static ARGBColor
+        +YELLOW : static ARGBColor
+        +CYAN : static ARGBColor
+        +MAGENTA : static ARGBColor
+        +GRAY : static ARGBColor
+        +DARK_GREY : static ARGBColor
+        +LIGHT_GREY : static ARGBColor
+
+        -MIN : static int
+        -MAX : static int
+        
+        -alpha : int
+        -red : int
+        -green : int
+        -blue : int
+        
+        -checkValue(int, int) void
+        
+        +ARGBColor(int, int, int)
+        +ARGBColor(int, int, int, int)
         +ARGBColor(int)
-        +getAlpha()
-        +getRed()
-        +getGreen()
-        +getBlue()
+        +ARGBColor(hex : String)
+        +parseHexToInt(hex : String) int
+        +toHexString() String
+        +toFXColor() Color
     }
