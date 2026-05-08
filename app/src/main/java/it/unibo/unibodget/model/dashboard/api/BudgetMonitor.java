@@ -17,4 +17,3 @@ public interface BudgetMonitor {
      */
     BudgetStatus getBudgetStatus(BigDecimal currentValue, BudgetSettings settings);
 }
-
