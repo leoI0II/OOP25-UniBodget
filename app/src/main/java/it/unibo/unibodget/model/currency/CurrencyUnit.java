@@ -59,6 +59,7 @@ public interface CurrencyUnit {
      * @param code the ISO currency code (e.g., "USD", "EUR")
      * @return the corresponding {@link CurrencyUnit}, or {@code null} if not found
      */
+    /*
     public static CurrencyUnit getByCode(String code) {
 
         // Fiat currencies
@@ -85,6 +86,24 @@ public interface CurrencyUnit {
         // No match found
         return null;
     }
+    */
+
+    public static CurrencyUnit getByCode(String code) {
+        // Fiat
+        for (var c : FiatCurrency.values())
+            if (c.getCode().equalsIgnoreCase(code)) return c;
+
+        // Crypto
+        for (var c : CryptoCurrency.values())
+            if (c.getCode().equalsIgnoreCase(code)) return c;
+
+        // Stock
+        for (var c : StockMarketCurrency.values())
+            if (c.getCode().equalsIgnoreCase(code)) return c;
+
+        // Custom from JSON
+        return Currency.get(code);
+    }
 
     /**
      * Returns a list containing all available currency units in the system.
@@ -99,6 +118,7 @@ public interface CurrencyUnit {
         Collections.addAll(list, FiatCurrency.values());
         Collections.addAll(list, CryptoCurrency.values());
         Collections.addAll(list, StockMarketCurrency.values());
+        list.addAll(Currency.all());
         return list;
     }
 
