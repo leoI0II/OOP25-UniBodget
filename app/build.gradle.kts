@@ -30,6 +30,7 @@ javafx {
 dependencies {
     compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.8")
 
+    implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.jooq:jool:0.9.15")
 
