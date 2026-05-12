@@ -1,12 +1,12 @@
 package it.unibo.unibodget.model.currency;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import it.unibo.unibodget.persistency.util.FilesUtils;
 
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
 import it.unibo.unibodget.persistency.parser.impl.JsonDataParser;
@@ -32,9 +32,6 @@ public final class Currency implements CurrencyUnit {
 
     private static final Map<String, Currency> loaded = new HashMap<>();
     private static boolean initialized = false;
-
-    private static final Path PROJECT_ROOT = Path.of("").toAbsolutePath();
-    // private static final Path APP_ROOT = PROJECT_ROOT.resolve("app");
 
     /** Empty constructor required for the generic JSON parser. */
     public Currency() {}
@@ -156,7 +153,7 @@ public final class Currency implements CurrencyUnit {
         if (initialized) return;
         try {
             // Locates the JSON file inside the application resources directory
-            Path file = findFileByName("Currencies.json");
+            Path file = FilesUtils.findFileByName("Currencies.json");
             if (file == null) {
                 System.err.println("File not found: Currencies.json");
                 return;
@@ -184,30 +181,6 @@ public final class Currency implements CurrencyUnit {
         } catch (Exception e) {
             // Handles unexpected runtime errors such as IO or reflection failures
             System.err.println("Unexpected error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Searches recursively for a file with the given name inside the
-     * application resources directory.
-     *
-     * @param fileName the name of the file to search for
-     * @return the path to the file, or null if not found
-     */
-    private static Path findFileByName(String fileName) {
-        // Defines the root directory where the search begins
-        Path root = PROJECT_ROOT.resolve("app/src/main/resources");
-
-        try {
-            // Walks the directory tree and returns the first file whose name matches the requested
-            return Files.walk(root)
-                    .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName))
-                    .findFirst()
-                    .orElse(null);
-        } catch (Exception e) {
-            System.err.println("Error searching for file: " + e.getMessage());
-            // Returns null if an I/O error occurs or the directory cannot be scanned
-            return null;
         }
     }
 
