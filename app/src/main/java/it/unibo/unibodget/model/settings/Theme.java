@@ -7,13 +7,13 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 /**
  * Represents a visual theme used by the application's user interface.
  *
- * <p>A {@code Theme} defines the core visual identity of the UI, including:
+ * A {@code Theme} defines the core visual identity of the UI, including:
  * a human-readable name, a primary background color, a button color,
  * a text color, and typographic settings such as font family, size,
- * and weight.</p>
+ * and weight.
  *
- * <p>This class belongs to the model layer and contains only theme data.
- * It does not depend on JavaFX or other UI-specific APIs.</p>
+ * This class belongs to the model layer and contains only theme data.
+ * It does not depend on JavaFX or other UI-specific APIs.
  */
 public final class Theme {
 
@@ -66,9 +66,11 @@ public final class Theme {
         this.fontFamily = Objects.requireNonNull(fontFamily);
 
         if (fontSize <= 0) {
-            throw new IllegalArgumentException("Font size must be positive");
+            //throw new IllegalArgumentException("Font size must be positive");
+            this.fontSize = DEFAULT.fontSize;
+        }else{
+            this.fontSize = fontSize;
         }
-        this.fontSize = fontSize;
         this.boldText = boldText;
     }
 
@@ -110,30 +112,58 @@ public final class Theme {
         );
     }
 
+    /**
+     * Returns the human-readable name of the theme.
+     * @return  the theme name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the primary background color of the theme.
+     * @return  the primary color
+     */
     public ARGBColor getPrimaryColor() {
         return primaryColor;
     }
 
+    /**
+     * Returns the button color of the theme.
+     * @return  the button color
+     */
     public ARGBColor getButtonColor() {
         return buttonColor;
     }
 
+    /**
+     * Returns the text color of the theme.
+     * @return  the text color
+     */
     public ARGBColor getTextColor() {
         return textColor;
     }
 
+    /**
+     * Returns the font family used by the theme.
+     * @return  the font family
+     */
     public String getFontFamily() {
         return fontFamily;
     }
 
+    /**
+     * Returns the font size used by the theme.
+     * @return  the font size
+     */
     public int getFontSize() {
         return fontSize;
     }
 
+    /**
+     * Returns whether bold text is enabled for the theme.
+     * @return  true if bold text is enabled, false otherwise
+     */
     public boolean isBoldText() {
         return boldText;
     }
