@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import it.unibo.unibodget.view.UI.FXAdapter;
 
 import java.math.BigDecimal;
 
@@ -47,11 +48,14 @@ public class CurrencyConverterViewFX extends VBox {
 
         // --- THEME ---
         var theme = ThemeManager.getTheme();
-        Color fxColor = theme.getPrimaryColor().toFXColor();
-        Color textColor = theme.getTextColor().toFXColor();
-        Color buttonColor = theme.getButtonColor().toFXColor();
-        Color buttonTextColor = Theme.getReadableTextColor(theme.getButtonColor()).toFXColor();
-        var font = theme.toFXFont();
+        Color fxColor = FXAdapter.toFXColor(theme.getPrimaryColor());
+        Color textColor = FXAdapter.toFXColor(theme.getTextColor());
+        Color buttonColor = FXAdapter.toFXColor(theme.getButtonColor());
+        Color buttonTextColor = FXAdapter.toFXColor(
+                Theme.getReadableTextColor(theme.getButtonColor())
+        );
+        
+        var font = FXAdapter.toFXFont(theme);
 
         // --- Title ---
         Label title = new Label("Currency Converter");
