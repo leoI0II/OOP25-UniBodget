@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import it.unibo.unibodget.persistency.util.FilesUtils;
 
-import it.unibo.unibodget.persistency.parser.api.DataParserException;
+import it.unibo.unibodget.persistency.util.FilesUtils;
 import it.unibo.unibodget.persistency.parser.impl.JsonDataParser;
-import it.unibo.unibodget.persistency.reader.impl.JsonReader;
 
 /**
  * Represents a currency loaded from external JSON configuration.
