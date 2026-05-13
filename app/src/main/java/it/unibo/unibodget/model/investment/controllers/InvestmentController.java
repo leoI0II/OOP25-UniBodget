@@ -236,18 +236,19 @@ public interface InvestmentController {
     /**
      * Executes a sell order, recording the transaction in the source account.
      *
-     * @param sourceAccount the account to debit the sold asset from
-     * @param asset         the asset to sell
-     * @param quantity      the number of units to sell
-     * @param unitPrice     the price per unit at execution time
-     * @param fee           the transaction fee
-     * @param date          the date of the order
-     * @param notes         optional notes
+     * @param sourceAccount     the account to debit the sold asset from
+     * @param cashFlowTarget    the target of the cash flow
+     * @param asset             the asset to sell
+     * @param quantity          the number of units to sell
+     * @param unitPrice         the price per unit at execution time
+     * @param fee               the transaction fee
+     * @param date              the date of the order
+     * @param notes             optional notes
      * @return an {@link OrderResult} describing the outcome
      */
     OrderResult executeSellOrder(
         InvestmentAccount sourceAccount,
-        PaymentSource paymentDestination,
+        PaymentSource cashFlowTarget,
         CurrencyUnit asset,
         BigDecimal quantity,
         Asset unitPrice,
