@@ -93,6 +93,11 @@ public final class Settings {
         return List.copyOf(preferenceHistory);
     }
 
+    /**
+     * Adds a new entry to the preference history.
+     *
+     * @param entry the description of the change performed
+     */
     private void addToHistory(final String entry) {
         preferenceHistory.add(entry);
     }
