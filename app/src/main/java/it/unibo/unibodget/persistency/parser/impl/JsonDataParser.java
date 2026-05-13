@@ -2,7 +2,6 @@ package it.unibo.unibodget.persistency.parser.impl;
 
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
-import it.unibo.unibodget.persistency.reader.impl.JsonReader;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
