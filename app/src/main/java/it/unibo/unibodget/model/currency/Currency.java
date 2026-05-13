@@ -160,24 +160,14 @@ public final class Currency implements CurrencyUnit {
             } else {
                 System.err.println("File found: " + file.toAbsolutePath());
             }
-            // Uses JsonReader to read the file content
-            JsonReader reader = new JsonReader(file.toString());
-            String json = reader.readFile();
             // Creates a parser capable of converting JSON objects into Currency instances
             JsonDataParser<Currency> parser = new JsonDataParser<>(Currency.class);
-            // Extracts the JSON array containing the currency definitions
-            int start = json.indexOf("[");
-            int end = json.lastIndexOf("]") + 1;
-            String array = json.substring(start, end);
-            List<Currency> list = parser.parseList(array);
+            List<Currency> list = parser.loadListFromFile(file);
             // Stores each parsed currency in the internal cache using its code as the key
             for (Currency c : list) {
                 loaded.put(c.getCode().toUpperCase(), c);
             }
             initialized = true;
-        } catch (DataParserException e) {
-            // Handles errors caused by malformed JSON or mapping issues
-            System.err.println("Error parsing currencies.json: " + e.getMessage());
         } catch (Exception e) {
             // Handles unexpected runtime errors such as IO or reflection failures
             System.err.println("Unexpected error: " + e.getMessage());

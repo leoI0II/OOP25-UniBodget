@@ -2,6 +2,7 @@ package it.unibo.unibodget.persistency.parser.impl;
 
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
+import it.unibo.unibodget.persistency.reader.impl.JsonReader;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -34,9 +35,9 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Parses a JSON object and converts it into an instance of the target class.
      * The JSON must represent a single object with simple key-value pairs.
      *
-     * @param json the JSON object as a string
-     * @return an instance of the target class populated with parsed values
-     * @throws DataParserException if the JSON is malformed or cannot be mapped
+     * @param json                  the JSON object as a string
+     * @return                      an instance of the target class populated with parsed values
+     * @throws DataParserException  if the JSON is malformed or cannot be mapped
      */
     @Override
     public T parse(String json) throws DataParserException {
@@ -53,7 +54,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Only flat objects are supported. Nested structures are not handled.
      *
      * @param json the JSON object as a string
-     * @return a map containing the parsed key-value pairs
+     * @return     a map containing the parsed key-value pairs
      */
     private Map<String, Object> parseJsonObject(String json) {
         Map<String, Object> map = new HashMap<>();
@@ -79,10 +80,10 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Creates an instance of the target class and assigns values to its fields
      * based on the provided map. Field names must match JSON keys.
      *
-     * @param map a map containing JSON key-value pairs
-     * @param clazz the class to instantiate
-     * @return a populated instance of the target class
-     * @throws Exception if reflection fails or a field cannot be assigned
+     * @param map           a map containing JSON key-value pairs
+     * @param clazz         the class to instantiate
+     * @return              a populated instance of the target class
+     * @throws Exception    if reflection fails or a field cannot be assigned
      */
     private T createObjectFromMap(Map<String, Object> map, Class<T> clazz)
             throws Exception {
@@ -104,9 +105,9 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Converts a raw JSON value into the expected Java type.
      * Supports strings, integers, doubles, booleans and enums.
      *
-     * @param raw the raw value extracted from JSON
-     * @param type the expected target type
-     * @return the converted value, or null if the type is unsupported
+     * @param raw       the raw value extracted from JSON
+     * @param type      the expected target type
+     * @return          the converted value, or null if the type is unsupported
      */
     private Object convertValue(Object raw, Class<?> type) {
         String value = raw.toString();
@@ -127,9 +128,9 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Parses a JSON array containing multiple objects and converts each
      * element into an instance of the target class.
      *
-     * @param jsonArray the JSON array as a string
-     * @return a list of parsed objects
-     * @throws DataParserException if the array is malformed or parsing fails
+     * @param jsonArray             the JSON array as a string
+     * @return                      a list of parsed objects
+     * @throws DataParserException  if the array is malformed or parsing fails
      */
     public List<T> parseList(String jsonArray) throws DataParserException {
         try {
@@ -163,11 +164,11 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * Reads a JSON file, extracts the array associated with the given key,
      * and parses each element into an instance of the target class.
      *
-     * @param file the path to the JSON file
-     * @param arrayKey the key identifying the JSON array to extract
-     * @return a list of parsed objects
-     * @throws DataParserException if the file cannot be read, the key is missing,
-     *                             or the array is malformed
+     * @param file                  the path to the JSON file
+     * @param arrayKey              the key identifying the JSON array to extract
+     * @return                      a list of parsed objects
+     * @throws DataParserException  if the file cannot be read, the key is missing,
+     *                              or the array is malformed
      */
     public List<T> parseListFromFile(Path file, String arrayKey) throws DataParserException {
         try {
@@ -189,4 +190,29 @@ public final class JsonDataParser<T> implements DataParser<T> {
             throw new DataParserException("Cannot read file: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Reads a JSON file from the given path and parses it as a JSON array
+     * into a list of objects of type T. This method delegates file reading
+     * to JsonReader and JSON parsing to parseList(String), keeping the
+     * parsing workflow fully generic and independent of domain logic.
+     *
+     * @param file                  the path to the JSON file to load
+     * @return                      a list of parsed objects of type T
+     * @throws DataParserException  if the file cannot be read or the JSON content is invalid
+     * @throws IOException          if an I/O error occurs while reading the file
+     */
+    public List<T> loadListFromFile(Path file) {
+        try {
+            String json = Files.readString(file);
+            return parseList(json);
+        } catch (DataParserException e) {
+            System.err.println("Error parsing JSON from file: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (IOException e) {
+            System.err.println("Cannot read file: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
 }
