@@ -15,7 +15,14 @@ public enum FiatCurrency implements CurrencyUnit {
     EUR("€", "EUR", "Euro", "EUR"),
     USD("$", "USD", "United States Dollar", "USD"),
     GBP("£", "GBP", "Pound Sterling", "GBP"),
-    RUB("₽", "RUB", "Russian Ruble", "RUB");
+    RUB("₽", "RUB", "Russian Ruble", "RUB"),
+    JPY("¥", "JPY", "Japanese Yen", "JPY"),
+    AUD("$", "AUD", "Australian Dollar", "AUD"),
+    CAD("$", "CAD", "Canadian Dollar", "CAD"),
+    CHF("₣", "CHF", "Swiss Franc", "CHF"),
+    CNY("¥", "CNY", "Chinese Yuan", "CNY"),
+    HKD("$", "HKD", "Hong Kong Dollar", "HKD"),
+    INR("₹", "INR", "Indian Rupee", "INR");
 
     private final CurrencyType type = CurrencyType.FIAT;
     private final String symbol;

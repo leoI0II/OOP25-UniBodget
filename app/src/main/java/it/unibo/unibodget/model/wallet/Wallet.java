@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.wallet;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,7 +102,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return the {@link Historical} ledger
      */
-    public Historical<T> getHistory() {
+    public Historical<T>    getHistory() {
         return history;
     }
 
@@ -120,6 +121,10 @@ public abstract class Wallet<T extends Transaction> {
      * @param transaction the transaction to record
      */
     public void addTransaction(final T transaction) {
+        Objects.requireNonNull(transaction, "Transaction cannot be null");
+        if (transaction.getAsset().isZero()) {
+            throw new IllegalArgumentException("Transaction amount cannot be zero.");
+        }
         history.addTransaction(transaction);
     }
 

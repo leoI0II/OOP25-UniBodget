@@ -1,32 +1,64 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-final class DefaultBudgetMonitorTest {
+import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+
+class DefaultBudgetMonitorTest {
+
+    private final BudgetMonitor monitor = new DefaultBudgetMonitor();
 
     @Test
-    void shouldReturnSafeWhenUsageIsBelowWarningThreshold() {
-        final var monitor = new DefaultBudgetMonitor();
-        assertEquals("SAFE", monitor.getBudgetStatus(50.0, 100.0));
+    void shouldReturnSafeWhenCurrentValueIsBelowWarningThreshold() {
+        final DefaultBudgetSettings settings
+                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+
+        final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("500.00"), settings);
+
+        assertEquals(BudgetStatus.SAFE, result);
     }
 
     @Test
-    void shouldReturnWarningWhenUsageReachesWarningThreshold() {
-        final var monitor = new DefaultBudgetMonitor();
-        assertEquals("WARNING", monitor.getBudgetStatus(80.0, 100.0));
+    void shouldReturnWarningWhenCurrentValueReachesWarningThreshold() {
+        final DefaultBudgetSettings settings
+                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+
+        final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("800.00"), settings);
+
+        assertEquals(BudgetStatus.WARNING, result);
     }
 
     @Test
-    void shouldReturnCriticalWhenUsageReachesCriticalThreshold() {
-        final var monitor = new DefaultBudgetMonitor();
-        assertEquals("CRITICAL", monitor.getBudgetStatus(100.0, 100.0));
+    void shouldReturnCriticalWhenCurrentValueReachesLimit() {
+        final DefaultBudgetSettings settings
+                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+
+        final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("1000.00"), settings);
+
+        assertEquals(BudgetStatus.CRITICAL, result);
     }
 
     @Test
-    void shouldReturnSafeWhenLimitIsNonPositive() {
-        final var monitor = new DefaultBudgetMonitor();
-        assertEquals("SAFE", monitor.getBudgetStatus(10.0, 0.0));
+    void shouldReturnCriticalWhenCurrentValueExceedsLimit() {
+        final DefaultBudgetSettings settings
+                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+
+        final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("1200.00"), settings);
+
+        assertEquals(BudgetStatus.CRITICAL, result);
+    }
+
+    @Test
+    void shouldReturnSafeWhenLimitIsZero() {
+        final DefaultBudgetSettings settings
+                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+
+        final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("100.00"), settings);
+
+        assertEquals(BudgetStatus.SAFE, result);
     }
 }
