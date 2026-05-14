@@ -18,7 +18,16 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  */
 public class Historical<T extends Transaction> {
 
-    private final List<T> history = new ArrayList<>();
+    private final List<T> history;
+
+    
+    public Historical() {
+        this.history = new ArrayList<>();
+    }
+
+    public Historical(final List<T> history) {
+        this.history = new ArrayList<>(Objects.requireNonNull(history));
+    }
 
     /**
      * Adds a new transaction to the historical ledger.

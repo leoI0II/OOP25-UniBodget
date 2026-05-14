@@ -8,14 +8,17 @@ import org.junit.jupiter.api.Test;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 
+/**
+ * Tests for {@link DefaultBudgetMonitor}.
+ */
 class DefaultBudgetMonitorTest {
 
     private final BudgetMonitor monitor = new DefaultBudgetMonitor();
 
     @Test
     void shouldReturnSafeWhenCurrentValueIsBelowWarningThreshold() {
-        final DefaultBudgetSettings settings
-                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+        final DefaultBudgetSettings settings =
+                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"));
 
         final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("500.00"), settings);
 
@@ -24,8 +27,8 @@ class DefaultBudgetMonitorTest {
 
     @Test
     void shouldReturnWarningWhenCurrentValueReachesWarningThreshold() {
-        final DefaultBudgetSettings settings
-                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+        final DefaultBudgetSettings settings =
+                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"));
 
         final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("800.00"), settings);
 
@@ -34,8 +37,8 @@ class DefaultBudgetMonitorTest {
 
     @Test
     void shouldReturnCriticalWhenCurrentValueReachesLimit() {
-        final DefaultBudgetSettings settings
-                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+        final DefaultBudgetSettings settings =
+                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"));
 
         final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("1000.00"), settings);
 
@@ -44,8 +47,8 @@ class DefaultBudgetMonitorTest {
 
     @Test
     void shouldReturnCriticalWhenCurrentValueExceedsLimit() {
-        final DefaultBudgetSettings settings
-                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+        final DefaultBudgetSettings settings =
+                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"));
 
         final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("1200.00"), settings);
 
@@ -54,8 +57,8 @@ class DefaultBudgetMonitorTest {
 
     @Test
     void shouldReturnSafeWhenLimitIsZero() {
-        final DefaultBudgetSettings settings
-                = new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.8"));
+        final DefaultBudgetSettings settings =
+                new DefaultBudgetSettings(BigDecimal.ZERO, new BigDecimal("0.80"));
 
         final BudgetStatus result = monitor.getBudgetStatus(new BigDecimal("100.00"), settings);
 
