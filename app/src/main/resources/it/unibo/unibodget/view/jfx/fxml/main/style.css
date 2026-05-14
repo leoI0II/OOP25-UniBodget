@@ -1,0 +1,8 @@
+.menu-button .arrow-button {
+    -fx-padding: 0;
+    visibility: hidden;
+}
+.menu-button .arrow {
+    visibility: hidden;
+    -fx-padding: 0;
+}
