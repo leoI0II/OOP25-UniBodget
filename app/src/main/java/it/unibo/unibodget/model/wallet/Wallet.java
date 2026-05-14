@@ -102,7 +102,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return the {@link Historical} ledger
      */
-    public Historical<T> getHistory() {
+    public Historical<T>    getHistory() {
         return history;
     }
 
