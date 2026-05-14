@@ -89,6 +89,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * Returns the open position for a specific asset, if one exists.
      *
      * @param asset the asset to look up
+     * 
      * @return an {@link Optional} containing the {@link Position}, or empty if not held
      */
     public Optional<Position> getPositionForAsset(CurrencyUnit asset) {
@@ -184,6 +185,24 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      */
     public Asset getTotalProfitLoss() {
         return getRealizedProfitLoss().add(getUnrealizedProfitLoss());
+    }
+
+    public BigDecimal getTotalProfitLossPercentage() {
+        var totalCostBasis = getPositions().stream()
+            .map(Position::getTotalCost)
+            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+        if (totalCostBasis.amount().signum() == 0) {
+            return BigDecimal.ZERO; // Avoid division by zero; define 0% P/L when no cost basis
+        }
+        return getTotalProfitLoss().amount()
+            .divide(totalCostBasis.amount(), 10, RoundingMode.HALF_UP)
+            .multiply(BigDecimal.valueOf(100));
+    }
+
+    public Asset getTotalCostBasis() {
+        return getPositions().stream()
+            .map(Position::getTotalCost)
+            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
     /**
