@@ -66,4 +66,9 @@ public enum StockMarketCurrency implements CurrencyUnit {
     public String getCode() {
         return this.code;
     }
+
+    @Override
+    public int getDisplayDecimals() {
+        return 2;
+    }
 }

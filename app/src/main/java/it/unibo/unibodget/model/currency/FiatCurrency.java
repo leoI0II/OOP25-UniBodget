@@ -72,6 +72,11 @@ public enum FiatCurrency implements CurrencyUnit {
     }
 
     @Override
+    public int getDisplayDecimals() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return String.format(
             "%s { symbol='%s', shortName='%s', fullName='%s', code='%s' }",

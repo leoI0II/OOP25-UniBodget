@@ -102,4 +102,6 @@ public interface CurrencyUnit {
         return list;
     }
 
+    public int getDisplayDecimals();
+
 }

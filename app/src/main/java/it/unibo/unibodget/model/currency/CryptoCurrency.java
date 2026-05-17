@@ -84,6 +84,16 @@ public enum CryptoCurrency implements CurrencyUnit {
         return this.code;
     }
 
+    @Override
+    public int getDisplayDecimals() {
+        return switch(this) {
+            case BTC -> 8;
+            case ETH -> 6;
+            case USDT, EURC -> 2;
+            default -> 4;
+        };
+    }
+
     public String getApiId() {
         return this.apiId;
     }
