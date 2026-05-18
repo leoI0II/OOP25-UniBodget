@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibo.unibodget.model.settings.Settings;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -41,17 +42,20 @@ public class DefaultInvestmentController implements InvestmentController {
     private final CashAccountService cashAccountService;
     private final ExchangeRateProvider exchangeRateProvider;
     private final List<CurrencyUnit> displayCurrencies;
+    private final Settings settings;
 
     public DefaultInvestmentController(
-        InvestmentAccountService investmentAccountService,
-        CashAccountService cashAccountService,
-        ExchangeRateProvider exchangeRateProvider,
-        List<CurrencyUnit> displayCurrencies
+        final InvestmentAccountService investmentAccountService,
+        final CashAccountService cashAccountService,
+        final ExchangeRateProvider exchangeRateProvider,
+        final List<CurrencyUnit> displayCurrencies,
+        final Settings settings
     ) {
         this.investmentAccountService = Objects.requireNonNull(investmentAccountService);
         this.cashAccountService = Objects.requireNonNull(cashAccountService);
         this.exchangeRateProvider = Objects.requireNonNull(exchangeRateProvider);
         this.displayCurrencies = Objects.requireNonNull(displayCurrencies);
+        this.settings = Objects.requireNonNull(settings);
     }
     
     @Override
@@ -81,15 +85,11 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     @Override
-    public Map<CurrencyUnit, Asset> getAggregatedBalances() {
-        return getDisplayCurrencies().stream()
-            .collect(Collectors.toMap(
-                currency -> currency,
-                currency -> getAllInvestmentAccounts().stream()
-					.map(InvestmentAccount::getBalance)
-					.map(balance -> exchangeRateProvider.convert(balance, currency))
-					.reduce(Asset.zero(currency), Asset::add)
-            ));
+    public Asset getAggregatedBalance() {
+        return getAllInvestmentAccounts().stream()
+                .map(InvestmentAccount::getBalance)
+                .map(balance -> exchangeRateProvider.convert(balance, settings.getBaseCurrency()))
+                .reduce(Asset.zero(settings.getBaseCurrency()), Asset::add);
     }
 
     @Override

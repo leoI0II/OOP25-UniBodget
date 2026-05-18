@@ -54,7 +54,7 @@ public interface InvestmentController {
      *
      * @return a map from {@link CurrencyUnit} to the total {@link Asset} balance in that currency
      */
-    Map<CurrencyUnit, Asset> getAggregatedBalances();
+    Asset getAggregatedBalance();
 
     /**
      * Returns the list of currencies available for display in the UI.
