@@ -16,9 +16,9 @@
 
 <VBox maxHeight="Infinity" maxWidth="Infinity" prefHeight="700.0" prefWidth="700.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
    <children>
-      <HBox prefHeight="69.0" prefWidth="700.0">
+      <HBox prefHeight="57.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label fx:id="currentWalletName" alignment="BASELINE_LEFT" onMouseClicked="#handleCurrentWalletNameChange" prefHeight="41.0" prefWidth="319.0" text="Name">
+            <Label fx:id="currentWalletName" alignment="BASELINE_LEFT" onMouseClicked="#handleCurrentWalletNameChange" prefHeight="41.0" prefWidth="319.0" text="Name" HBox.hgrow="ALWAYS">
                <font>
                   <Font name="System Bold" size="29.0" />
                </font>
@@ -44,7 +44,7 @@
                </HBox.margin>
             </Button>
             <Region prefHeight="69.0" prefWidth="74.0" />
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="69.0" prefWidth="136.0" text="Export CSV" HBox.hgrow="ALWAYS">
+            <Button fx:id="exportToCSVBtn" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" prefHeight="69.0" prefWidth="136.0" text="Export CSV" HBox.hgrow="ALWAYS">
                <font>
                   <Font name="JetBrainsMono NF Bold" size="18.0" />
                </font>
@@ -54,12 +54,11 @@
             <Insets bottom="15.0" left="8.0" right="8.0" top="15.0" />
          </padding>
       </HBox>
-      <Region prefHeight="25.0" prefWidth="700.0" />
-      <HBox prefHeight="155.0" prefWidth="700.0">
+      <HBox prefHeight="346.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
          <children>
             <VBox prefHeight="130.0" prefWidth="340.0">
                <children>
-                  <Label prefHeight="25.0" prefWidth="340.0" text="Available balance">
+                  <Label prefHeight="25.0" prefWidth="340.0" text="Available balance" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
                      </font>
@@ -67,7 +66,7 @@
                         <Insets left="10.0" />
                      </padding>
                   </Label>
-                  <Label prefHeight="132.0" prefWidth="340.0" text="\$00.00">
+                  <Label fx:id="walletBalance" prefHeight="132.0" prefWidth="340.0" text="\$00.00" VBox.vgrow="ALWAYS">
                      <font>
                         <Font size="48.0" />
                      </font>
@@ -87,7 +86,7 @@
                         <Insets right="5.0" />
                      </padding>
                   </Label>
-                  <Label prefHeight="100.0" prefWidth="152.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="allTimeProfitValue" prefHeight="100.0" prefWidth="152.0" text="\$00.00" VBox.vgrow="ALWAYS">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -95,7 +94,7 @@
                         <Font name="FantasqueSansM Nerd Font Regular" size="28.0" />
                      </font>
                   </Label>
-                  <Label alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="152.0" text="\%0" VBox.vgrow="ALWAYS">
+                  <Label fx:id="allTimeProfitPercentage" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="152.0" text="\%0" VBox.vgrow="ALWAYS">
                      <padding>
                         <Insets right="20.0" />
                      </padding>
@@ -116,12 +115,12 @@
                         <Insets right="10.0" />
                      </padding>
                   </Label>
-                  <Label prefHeight="117.0" prefWidth="174.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="costBasisValue" prefHeight="117.0" prefWidth="174.0" text="\$00.00" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="FantasqueSansM Nerd Font Regular" size="28.0" />
                      </font>
                   </Label>
-                  <Label alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="174.0" text="\%0">
+                  <Label alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="174.0" text="\%0" VBox.vgrow="ALWAYS">
                      <padding>
                         <Insets right="20.0" />
                      </padding>
@@ -133,7 +132,7 @@
             </VBox>
          </children>
       </HBox>
-      <TabPane prefHeight="449.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+      <TabPane prefHeight="452.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab text="Assets">
             <content>

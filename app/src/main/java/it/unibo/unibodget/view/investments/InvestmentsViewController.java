@@ -1,5 +1,7 @@
 package it.unibo.unibodget.view.investments;
 
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
@@ -13,8 +15,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -24,9 +30,13 @@ import java.util.UUID;
 public class InvestmentsViewController implements SideBarDelegate {
 
     InvestmentController investmentController;
-    @FXML private VBox walletList;
     @FXML private SideBarViewController sideBarViewController;
     @FXML private Label currentWalletName;
+    @FXML private Button exportToCSVBtn;
+    @FXML private Label walletBalance;
+    @FXML private Label allTimeProfitValue;
+    @FXML private Label allTimeProfitPercentage;
+    @FXML private Label costBasisValue;
 
     @FXML private TableView<Position> positionTableView;
     @FXML private TableColumn<Position, String> tickerColumn;
@@ -99,12 +109,14 @@ public class InvestmentsViewController implements SideBarDelegate {
             var decimals = cell.getValue().getTotalCost().currency().getDisplayDecimals();
             var pl = cell.getValue().getUnrealizedProfitLoss();
             var percent = cell.getValue().getUnrealizedProfitLossPercentage();
+            var sign = pl.isNegative() ? "-" : "";
             return new SimpleStringProperty(
                     String.format(
-                            "%s %+." + decimals + "f (%%%+.2f)",
+                            "%s %s%s (%+.2f%%)",
                             pl.currency().getSymbol(),
-                            pl.amount().doubleValue(),
-                            percent.doubleValue()
+                            sign,
+                            pl.amount().setScale(decimals, RoundingMode.HALF_UP).toPlainString(),
+                            percent
                     )
             );
         });
@@ -146,7 +158,10 @@ public class InvestmentsViewController implements SideBarDelegate {
         txnQuantityColumn.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String value, boolean empty) {
+                super.updateItem(value, empty);
                 if (empty || value == null) {
+                    setText(null);
+                    setStyle("");
                     return;
                 } else {
                     setText(value);
@@ -173,8 +188,11 @@ public class InvestmentsViewController implements SideBarDelegate {
         });
 
         txnFeeColumn.setCellValueFactory(cell -> {
-            var decimals = cell.getValue().getUnitPrice().currency().getDisplayDecimals();
-            var fee = cell.getValue().getFee();
+            var fee =  cell.getValue().getFee();
+            if (fee == null) {
+                return new SimpleStringProperty("-");
+            }
+            var decimals = fee.currency().getDisplayDecimals();
             return new SimpleStringProperty(
                     String.format(
                             "%s %s (%s)",
@@ -244,9 +262,8 @@ public class InvestmentsViewController implements SideBarDelegate {
 
     @FXML
     private void handleCurrentWalletNameChange() {
-        if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
-            return;
-        }
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
+
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle(String.format("Change %s's account current name:",  investmentController.getCurrentInvestmentAccount().get().getName()));
         dialog.setHeaderText(null);
@@ -262,9 +279,91 @@ public class InvestmentsViewController implements SideBarDelegate {
         });
     }
 
+    @FXML
+    private void handleExportCSVOnMouseClicked() {
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
+
+        var account =  investmentController.getCurrentInvestmentAccount().get();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export CSV investments data");
+
+        var accountName = account.getName().replaceAll("\\s+", "_");
+        fileChooser.setInitialFileName(accountName + "_investments_data.csv");
+
+        var downloadsDir = new File(System.getProperty("user.home"), "Downloads");
+        if (downloadsDir.exists()) {
+            fileChooser.setInitialDirectory(downloadsDir);
+        }
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv")
+        );
+        var stage = (Stage) currentWalletName.getScene().getWindow();
+        var selectedFile = fileChooser.showSaveDialog(stage);
+        if (selectedFile == null) return; //user pressed cancel
+
+        var result = investmentController.exportCurrentAccountData(selectedFile);
+        switch(result) {
+            case ExportResult.Error error -> {
+                showInfoPopup(Alert.AlertType.ERROR, "Export failed: ", error.message());
+            }
+            case ExportResult.Success success -> {
+                showInfoPopup(Alert.AlertType.INFORMATION, "Export successful!",  "File saved in: " + success.file().getAbsolutePath());
+            }
+        }
+    }
+
+    private void showInfoPopup(final Alert.AlertType type, String title, final String message) {
+        // stampare un piccolo popup verde/rosso con il msg
+        var popup = new Alert(type);
+        popup.setTitle(title);
+        popup.setHeaderText(null);
+        popup.setContentText(message);
+        popup.showAndWait();
+    }
+
+    private String formatAsset(final Asset asset) {
+        var decimals = asset.currency().getDisplayDecimals();
+        var sign = asset.isNegative() ? "-" : "";
+        return String.format(
+                "%s %s%s",
+                asset.currency().getSymbol(),
+                sign,
+                asset.amount().abs().setScale(decimals, RoundingMode.HALF_UP)
+        );
+    }
+
+    private String formatPercentage(final BigDecimal value) {
+        var sign = value.signum() == -1 ? "-" : "";
+        return String.format(
+                "%s%.2f%%",
+                sign,
+                value.abs().setScale(2, RoundingMode.HALF_UP)
+        );
+    }
+
     private void refreshMainPanel() {
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
+
         changeCurrentWalletName();
 
+        walletBalance.setText(
+                formatAsset(investmentController.getCurrentBalance())
+        );
+        allTimeProfitValue.setText(
+                formatAsset(investmentController.getCurrentAllTimeProfitLoss())
+        );
+        allTimeProfitPercentage.setText(
+                formatPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
+        );
+        costBasisValue.setText(
+                formatAsset(investmentController.getCurrentTotalCostBasis())
+        );
+
+        // tables upd
+        positionTableView.getItems().setAll(investmentController.getPositions());
+        investmentTransactionTableView.getItems()
+                .setAll(investmentController.getTransactionHistory());
     }
 
     @Override
