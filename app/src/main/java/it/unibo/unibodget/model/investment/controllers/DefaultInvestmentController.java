@@ -5,15 +5,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibo.unibodget.model.investment.*;
+import it.unibo.unibodget.model.investment.observers.InvestmentOrderEventListener;
+import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.settings.Settings;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -24,11 +22,6 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
-import it.unibo.unibodget.model.investment.ExportResult;
-import it.unibo.unibodget.model.investment.OrderResult;
-import it.unibo.unibodget.model.investment.OrderType;
-import it.unibo.unibodget.model.investment.PaymentSource;
-import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
@@ -41,23 +34,37 @@ public class DefaultInvestmentController implements InvestmentController {
     private final InvestmentAccountService investmentAccountService;
     private final CashAccountService cashAccountService;
     private final ExchangeRateProvider exchangeRateProvider;
-    private final List<CurrencyUnit> displayCurrencies;
     private final Settings settings;
+    private final InvestmentsSnapshotService snapshotService;
+    private final List<InvestmentOrderEventListener> listeners = new ArrayList<>();
 
     public DefaultInvestmentController(
         final InvestmentAccountService investmentAccountService,
         final CashAccountService cashAccountService,
         final ExchangeRateProvider exchangeRateProvider,
-        final List<CurrencyUnit> displayCurrencies,
-        final Settings settings
+        final Settings settings,
+        final InvestmentsSnapshotService snapshotService
     ) {
         this.investmentAccountService = Objects.requireNonNull(investmentAccountService);
         this.cashAccountService = Objects.requireNonNull(cashAccountService);
         this.exchangeRateProvider = Objects.requireNonNull(exchangeRateProvider);
-        this.displayCurrencies = Objects.requireNonNull(displayCurrencies);
         this.settings = Objects.requireNonNull(settings);
+        this.snapshotService = Objects.requireNonNull(snapshotService);
+        addListener((account, result) -> {
+            this.snapshotService.save(account.getId(), buildSnapshot(account));
+        });
     }
-    
+
+    public void addListener(InvestmentOrderEventListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyListeners(InvestmentAccount account, OrderResult result) {
+        if (result.isSuccess()) {
+            listeners.forEach(l -> l.onOrderExecuted(account, result));
+        }
+    }
+
     @Override
     public List<InvestmentAccount> getAllInvestmentAccounts() {
         return investmentAccountService.getWallets();
@@ -90,11 +97,6 @@ public class DefaultInvestmentController implements InvestmentController {
                 .map(InvestmentAccount::getBalance)
                 .map(balance -> exchangeRateProvider.convert(balance, settings.getBaseCurrency()))
                 .reduce(Asset.zero(settings.getBaseCurrency()), Asset::add);
-    }
-
-    @Override
-    public List<CurrencyUnit> getDisplayCurrencies() {
-        return displayCurrencies;
     }
 
     @Override
@@ -289,7 +291,7 @@ public class DefaultInvestmentController implements InvestmentController {
         );
         targetAccount.addTransaction(investmentTransactionIn);
 
-		return switch (paymentSource) {
+		var orderResult = switch (paymentSource) {
 			case PaymentSource.CashAccountChannel cashSrc -> {
 				final var cashTransaction = CashTransaction.of(
 					Asset.of(cost.currency(), cost.amount().negate()), // Cash outflow
@@ -320,6 +322,10 @@ public class DefaultInvestmentController implements InvestmentController {
 				yield new OrderResult.BuyNoPaymentSuccess(investmentTransactionIn);
 			}
 		};
+
+        notifyListeners(targetAccount, orderResult);
+
+        return orderResult;
     }
 
     @Override
@@ -360,7 +366,7 @@ public class DefaultInvestmentController implements InvestmentController {
         );
         sourceAccount.addTransaction(sellTransaction);
 
-        return switch(cashFlowTarget) {
+        var orderResult = switch(cashFlowTarget) {
             case PaymentSource.CashAccountChannel cashDst -> {
                 final var cashTransaction = CashTransaction.of(
                     proceeds, // Cash inflow
@@ -389,7 +395,8 @@ public class DefaultInvestmentController implements InvestmentController {
                 yield new OrderResult.SellNoPaymentSuccess(sellTransaction);
             }
         };
-
+        notifyListeners(sourceAccount, orderResult);
+        return orderResult;
     }
 
     @Override
@@ -431,7 +438,10 @@ public class DefaultInvestmentController implements InvestmentController {
         );
         targetAccount.addTransaction(transferInTransaction);
 
-        return new OrderResult.TransferSuccess(transferOutTransaction, transferInTransaction);
+        var orderResult = new OrderResult.TransferSuccess(transferOutTransaction, transferInTransaction);
+        notifyListeners(sourceAccount, orderResult);
+        notifyListeners(targetAccount, orderResult);        // ??
+        return orderResult;
     }
 
     @Override
@@ -481,5 +491,25 @@ public class DefaultInvestmentController implements InvestmentController {
             return new ExportResult.Error(e.getMessage());
         }
     }
-    
+
+    private BalanceSnapshot buildSnapshot(final InvestmentAccount account) {
+        return new BalanceSnapshot(
+                LocalDate.now(),
+                account.getTotalProfitLoss().amount(),
+                account.getTotalCostBasis().amount()
+        );
+    }
+
+    @Override
+    public Optional<Position> getBestPerformer() {
+        return getPositions().stream()
+                .max(Comparator.comparing(Position::getUnrealizedProfitLossPercentage));
+    }
+
+    @Override
+    public Optional<Position> getWorstPerformer() {
+        return getPositions().stream()
+                .min(Comparator.comparing(Position::getUnrealizedProfitLossPercentage));
+    }
+
 }

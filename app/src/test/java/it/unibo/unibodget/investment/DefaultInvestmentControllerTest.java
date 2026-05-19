@@ -7,9 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
+import it.unibo.unibodget.model.settings.Settings;
+import it.unibo.unibodget.model.settings.Theme;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +67,12 @@ public class DefaultInvestmentControllerTest {
             new InvestmentAccountService(account),
             new CashAccountService(cashAccount),
             new MockExchangeRateProvider(),
-            List.of(FiatCurrency.USD, FiatCurrency.EUR)
+            new Settings(
+                    Theme.DEFAULT,
+                    FiatCurrency.EUR,
+                    new ArrayList<>()
+            ),
+            new CSVInvestmentsSnapshotService()
         );
     }
 
@@ -117,15 +126,11 @@ public class DefaultInvestmentControllerTest {
     void testGetAggregatedBalancesContainsBothCurrencies() {
         // 10 AAPL -> USD balance $1500, EUR balance 1500 * 0.91 = $1365
         buyAapl(BigDecimal.TEN, new BigDecimal("150"));
-        var balances = controller.getAggregatedBalances();
-        assertEquals(2, balances.size());
-        assertEquals(
-            new BigDecimal("1500").stripTrailingZeros(),
-            balances.get(FiatCurrency.USD).amount().stripTrailingZeros()
-        );
+        var balance = controller.getAggregatedBalance();
+        assertEquals(balance.currency(), new Settings().getBaseCurrency());
         assertEquals(
             new BigDecimal("1365").stripTrailingZeros(),
-            balances.get(FiatCurrency.EUR).amount().stripTrailingZeros()
+            balance.amount().stripTrailingZeros()
         );
     }
 

@@ -66,6 +66,11 @@ public final class Currency implements CurrencyUnit {
     }
 
     @Override
+    public int getDisplayDecimals() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return String.format("%s [%s] - %s", this.shortName, this.symbol, this.fullName);
     }

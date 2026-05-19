@@ -57,13 +57,6 @@ public interface InvestmentController {
     Asset getAggregatedBalance();
 
     /**
-     * Returns the list of currencies available for display in the UI.
-     *
-     * @return a list of {@link CurrencyUnit} instances
-     */
-    List<CurrencyUnit> getDisplayCurrencies();
-
-    /**
      * Returns the total current market value of the currently selected account.
      *
      * @return the current balance as an {@link Asset} in the base currency
@@ -282,4 +275,7 @@ public interface InvestmentController {
      */
     ExportResult exportCurrentAccountData(final File file);
 
+    Optional<Position> getBestPerformer();
+
+    Optional<Position> getWorstPerformer();
 }

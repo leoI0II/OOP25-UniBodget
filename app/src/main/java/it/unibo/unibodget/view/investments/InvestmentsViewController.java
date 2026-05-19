@@ -4,6 +4,7 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
+import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.wallet.Wallet;
 import it.unibo.unibodget.view.main.SideBarDelegate;
@@ -13,30 +14,44 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class InvestmentsViewController implements SideBarDelegate {
 
-    InvestmentController investmentController;
-    @FXML private SideBarViewController sideBarViewController;
+    private final InvestmentController investmentController;
+    private final InvestmentsSnapshotService snapshotService;
+
+    private SideBarViewController sideBarViewController;
     @FXML private Label currentWalletName;
-    @FXML private Button exportToCSVBtn;
     @FXML private Label walletBalance;
     @FXML private Label allTimeProfitValue;
     @FXML private Label allTimeProfitPercentage;
     @FXML private Label costBasisValue;
+
+    @FXML private Label bestPerformerPositionName;
+    @FXML private Label bestPerformerPositionValue;
+    @FXML private Label bestPerformerPositionPercentage;
+    @FXML private Label worstPerformerPositionName;
+    @FXML private Label worstPerformerPositionValue;
+    @FXML private Label worstPerformerPositionPercentage;
+
+    @FXML private LineChart<String, Number> performanceChart;
+    @FXML private CategoryAxis chartXAxis;
+    @FXML private NumberAxis chartYAxis;
+    @FXML private PieChart allocationPieChart;
+    @FXML private PieChart quantityPieChart;
 
     @FXML private TableView<Position> positionTableView;
     @FXML private TableColumn<Position, String> tickerColumn;
@@ -56,10 +71,27 @@ public class InvestmentsViewController implements SideBarDelegate {
     @FXML private TableColumn<InvestmentTransaction, String> txnFeeColumn;
     @FXML private TableColumn<InvestmentTransaction, String> txnNotesColumn;
 
+    public InvestmentsViewController(
+            InvestmentController investmentController,
+            InvestmentsSnapshotService snapshotService
+    ) {
+        this.investmentController = Objects.requireNonNull(investmentController);
+        this.snapshotService = Objects.requireNonNull(snapshotService);
+    }
+
+    public void setSideBarViewController(final SideBarViewController sideBarViewController) {
+        this.sideBarViewController = Objects.requireNonNull(sideBarViewController);
+    }
+
     @FXML
     public void initialize() {
         // chiamato automaticamente da FXMLLoader dopo il caricamento
+        setupPositionTable();
+        setupHistoryTable();
+        startPriceRefreshTimeline();
+    }
 
+    private void setupPositionTable() {
         tickerColumn.setCellValueFactory(cell ->
                 new SimpleStringProperty(
                         cell.getValue().asset().getShortName()
@@ -80,11 +112,6 @@ public class InvestmentsViewController implements SideBarDelegate {
                     )
             );
         });
-        currentMarkerPriceRefreshTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshPositionTable())
-        );
-        currentMarkerPriceRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
-        currentMarkerPriceRefreshTimeline.play();
 
         quantityColumn.setCellValueFactory(cell ->
                 new SimpleStringProperty(
@@ -139,7 +166,9 @@ public class InvestmentsViewController implements SideBarDelegate {
                 }
             }
         });
+    }
 
+    private void setupHistoryTable() {
         txnDateColumn.setCellValueFactory(cell ->
                 new SimpleStringProperty(
                         cell.getValue().getDate().toString()
@@ -207,14 +236,86 @@ public class InvestmentsViewController implements SideBarDelegate {
                     cell.getValue().getNotes()
             );
         });
+    }
 
-        sideBarViewController.setDelegate(this);
-        sideBarViewController.refresh();
+    private void refreshPerformanceLineChart() {
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
+        var account = investmentController.getCurrentInvestmentAccount().get();
+
+        var plSeries = new XYChart.Series<String, Number>();
+        plSeries.setName("Total P/L");
+
+        var costSeries = new XYChart.Series<String, Number>();
+        costSeries.setName("Cost Basis");
+
+        snapshotService.getSnapshots(account.getId())
+                .forEach(snap -> {
+                    String date = snap.timestamp().toString();
+                    plSeries.getData().add(
+                            new XYChart.Data<>(date, snap.totalPL())
+                    );
+                    costSeries.getData().add(
+                            new XYChart.Data<>(date, snap.costBasis())
+                    );
+                });
+        performanceChart.getData().clear();
+        performanceChart.getData().addAll(plSeries, costSeries);
+    }
+
+    private void refreshPie(
+            PieChart chart,
+            final List<Position> positions,
+            Function<Position, PieChart.Data> sliceFunc,
+            final String title
+    ) {
+        if (positions.isEmpty()) {
+            chart.getData().clear();
+            return;
+        }
+        var slices = positions.stream()
+                .map(sliceFunc)
+                .toList();
+        chart.getData().setAll(slices);
+        chart.setTitle(title);
+    }
+
+    private void refreshPieCharts() {
+        var positions = investmentController.getPositions();
+        refreshPie(
+                allocationPieChart,
+                positions,
+                p -> new PieChart.Data(
+                        p.asset().getShortName(),
+                        p.currentMarketValue().amount().doubleValue()
+                ),
+                "Allocation Pie"
+        );
+        refreshPie(
+                quantityPieChart,
+                positions,
+                p -> new PieChart.Data(
+                        p.asset().getShortName(),
+                        p.quantity().doubleValue()
+                ),
+                "Quantity Pie"
+        );
     }
 
     private void refreshPositionTable() {
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
+
         positionTableView.getItems().setAll(investmentController.getPositions());
         positionTableView.refresh();
+    }
+
+    private void startPriceRefreshTimeline() {
+        if (currentMarkerPriceRefreshTimeline == null) {
+            currentMarkerPriceRefreshTimeline = new Timeline(
+                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshPositionTable())
+            );
+        }
+        currentMarkerPriceRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        currentMarkerPriceRefreshTimeline.playFromStart();
     }
 
     public void stopRefresh() {
@@ -223,12 +324,8 @@ public class InvestmentsViewController implements SideBarDelegate {
         }
     }
 
-    public void setInvestmentController(final InvestmentController investmentController) {
-        this.investmentController = investmentController;
-    }
-
     public void refreshData() {
-
+        refreshMainPanel();
     }
 
     @Override
@@ -364,6 +461,36 @@ public class InvestmentsViewController implements SideBarDelegate {
         positionTableView.getItems().setAll(investmentController.getPositions());
         investmentTransactionTableView.getItems()
                 .setAll(investmentController.getTransactionHistory());
+
+        investmentController.getBestPerformer()
+                .ifPresentOrElse(p -> {
+                            bestPerformerPositionName.setText(p.asset().getShortName());
+                            bestPerformerPositionValue.setText(
+                                    formatAsset(p.getUnrealizedProfitLoss())
+                            );
+                            bestPerformerPositionPercentage.setText(
+                                    formatPercentage(p.getUnrealizedProfitLossPercentage())
+                            );
+                },
+                () -> bestPerformerPositionName.setText("N/A")
+                );
+
+        investmentController.getWorstPerformer()
+                .ifPresentOrElse(p -> {
+                    worstPerformerPositionName.setText(p.asset().getShortName());
+                    worstPerformerPositionValue.setText(
+                            formatAsset(p.getUnrealizedProfitLoss())
+                    );
+                    worstPerformerPositionPercentage.setText(
+                            formatPercentage(p.getUnrealizedProfitLossPercentage())
+                    );
+                },
+                () -> worstPerformerPositionName.setText("N/A")
+                );
+
+        refreshPieCharts();
+        refreshPerformanceLineChart();
+
     }
 
     @Override

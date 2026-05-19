@@ -2,6 +2,10 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -54,7 +58,8 @@
             <Insets bottom="15.0" left="8.0" right="8.0" top="15.0" />
          </padding>
       </HBox>
-      <HBox prefHeight="346.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+      <Region prefHeight="135.0" prefWidth="700.0" />
+      <HBox prefHeight="302.0" prefWidth="700.0">
          <children>
             <VBox prefHeight="130.0" prefWidth="340.0">
                <children>
@@ -66,7 +71,7 @@
                         <Insets left="10.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="walletBalance" prefHeight="132.0" prefWidth="340.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="walletBalance" prefHeight="153.0" prefWidth="340.0" text="\$00.00" VBox.vgrow="ALWAYS">
                      <font>
                         <Font size="48.0" />
                      </font>
@@ -132,7 +137,111 @@
             </VBox>
          </children>
       </HBox>
-      <TabPane prefHeight="452.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+      <HBox prefHeight="460.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+         <children>
+            <VBox prefHeight="220.0" prefWidth="220.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="213.0" text="Best performer" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="bestPerformerPositionName" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="205.0" text="NOME ASSET">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="bestPerformerPositionValue" prefHeight="64.0" prefWidth="199.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
+                     </font>
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </Label>
+                  <Label fx:id="bestPerformerPositionPercentage" alignment="CENTER_RIGHT" prefHeight="57.0" prefWidth="195.0" text="\%0" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
+                     </font>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </Label>
+                  <Region prefHeight="72.0" prefWidth="168.0" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+            <VBox layoutX="10.0" layoutY="10.0" prefHeight="220.0" prefWidth="220.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="213.0" text="Worst performer" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="worstPerformerPositionName" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="201.0" text="NOME ASSET">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="worstPerformerPositionValue" prefHeight="64.0" prefWidth="200.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
+                     </font>
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </Label>
+                  <Label fx:id="worstPerformerPositionPercentage" alignment="CENTER_RIGHT" prefHeight="57.0" prefWidth="196.0" text="\%0" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
+                     </font>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </Label>
+                  <Region prefHeight="72.0" prefWidth="168.0" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+            <TabPane prefHeight="264.0" prefWidth="384.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
+              <tabs>
+                <Tab text="Performance">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <LineChart fx:id="performanceChart" layoutX="-12.0" layoutY="-107.0" prefHeight="233.0" prefWidth="366.0" title="Total P/L" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                  <xAxis>
+                                      <CategoryAxis fx:id="chartXAxis" label="Date" prefHeight="20.0" prefWidth="262.0" />
+                                  </xAxis>
+                                  <yAxis>
+                                      <NumberAxis fx:id="chartYAxis" label="CURRENCY" prefHeight="156.0" prefWidth="39.0" />
+                                  </yAxis>
+                              </LineChart>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Allocation Pie">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <PieChart fx:id="allocationPieChart" labelsVisible="true" layoutX="-107.0" layoutY="-132.0" legendVisible="true" title="Allocation" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                  <Tab text="Quantity Pie">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <PieChart fx:id="quantityPieChart" layoutX="-78.0" layoutY="-117.0" title="Quantities" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+         </children>
+      </HBox>
+      <TabPane prefHeight="452.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Assets">
             <content>
