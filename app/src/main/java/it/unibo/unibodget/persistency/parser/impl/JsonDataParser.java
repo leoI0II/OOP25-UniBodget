@@ -108,6 +108,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @param type      the expected target type
      * @return          the converted value, or null if the type is unsupported
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Object convertValue(Object raw, Class<?> type) {
         String value = raw.toString();
         // Basic type conversions
