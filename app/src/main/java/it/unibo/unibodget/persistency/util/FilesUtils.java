@@ -43,7 +43,7 @@ public class FilesUtils {
      */
     public static Path findFileByName(String fileName) {
         // Defines the root directory where the search begins
-        Path root = PROJECT_ROOT.resolve("app/src/main/resources");
+        Path root = PROJECT_ROOT.resolve("src/main/resources");
 
         try {
             // Walks the directory tree and returns the first file whose name matches the requested
