@@ -1,14 +1,10 @@
 package it.unibo.unibodget.model.currency;
 
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import it.unibo.unibodget.persistency.util.FilesUtils;
-import it.unibo.unibodget.persistency.parser.impl.JsonDataParser;
 
 /**
  * Represents a currency loaded from external JSON configuration.
@@ -143,31 +139,38 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Loads currency definitions from the JSON configuration file.
-     * The file is searched inside the application resources directory.
+     * Loads currency definitions from the JSON configuration file located in the classpath
+     * at {@code /json/currency/Currencies.json}.
      * Parsed currencies are stored in a static cache and loaded only once.
+     * If the file is missing or malformed, an error is logged and loading is skipped.
      */
     private static void loadFromJson() {
         if (initialized) return;
         try {
-            // Locates the JSON file inside the application resources directory
-            Path file = FilesUtils.findFileByName("Currencies.json");
-            if (file == null) {
+            InputStream is = Currency.class.getResourceAsStream("/json/currency/Currencies.json");
+            if (is == null) {
                 System.err.println("File not found: Currencies.json");
                 return;
-            } else {
-                System.err.println("File found: " + file.toAbsolutePath());
             }
-            // Creates a parser capable of converting JSON objects into Currency instances
-            JsonDataParser<Currency> parser = new JsonDataParser<>(Currency.class);
-            List<Currency> list = parser.loadListFromFile(file);
-            // Stores each parsed currency in the internal cache using its code as the key
-            for (Currency c : list) {
+
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(is);
+            com.fasterxml.jackson.databind.JsonNode currenciesNode = root.get("currencies");
+
+            if (currenciesNode == null || !currenciesNode.isArray()) {
+                System.err.println("Key 'currencies' not found or not an array");
+                return;
+            }
+
+            for (com.fasterxml.jackson.databind.JsonNode node : currenciesNode) {
+                Currency c = mapper.treeToValue(node, Currency.class);
                 loaded.put(c.getCode().toUpperCase(), c);
+                System.out.println("\nCurrencies loaded: " + loaded.size() + "\n");
             }
+
             initialized = true;
         } catch (Exception e) {
-            // Handles unexpected runtime errors such as IO or reflection failures
             System.err.println("Unexpected error: " + e.getMessage());
         }
     }
