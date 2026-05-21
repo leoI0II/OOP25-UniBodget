@@ -32,18 +32,13 @@ public class BasicCurrencyConverter implements CurrencyConverter {
 
     @Override
     public CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to) {
-        if (from.equals(to)) {
-            return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
-        }
-
         Map<CurrencyUnit, Double> rates = api.getLatestRates(baseCurrency);
 
         BigDecimal fromRate = BigDecimal.valueOf(rates.get(from));
         BigDecimal toRate = BigDecimal.valueOf(rates.get(to));
 
-        BigDecimal amountInBase = amount.divide(fromRate, 20, RoundingMode.HALF_UP);
-        BigDecimal converted = amountInBase.multiply(toRate)
-            .setScale(10, RoundingMode.HALF_UP);
+        BigDecimal amountInBase = amount.divide(fromRate, 10, RoundingMode.HALF_UP);
+        BigDecimal converted = amountInBase.multiply(toRate);
 
         BigDecimal appliedRate = toRate.divide(fromRate, 10, RoundingMode.HALF_UP);
 
