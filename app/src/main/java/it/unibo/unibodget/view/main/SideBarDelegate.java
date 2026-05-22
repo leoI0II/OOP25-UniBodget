@@ -7,4 +7,5 @@ public interface SideBarDelegate {
     List<SideBarItem> getItems();
     String getTotalAggregatedBalance();
     void onItemSelected(UUID id);
+    void onAddWalletRequested();
 }
