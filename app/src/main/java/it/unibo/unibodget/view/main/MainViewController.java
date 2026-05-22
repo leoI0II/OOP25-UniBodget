@@ -78,6 +78,9 @@ public class MainViewController {
         ivc.setSideBarViewController(sideBarViewController);
         sideBarViewController.setDelegate(ivc);
         sideBarViewController.refresh();
+        if (!investmentController.getAllInvestmentAccounts().isEmpty()) {
+            ivc.onItemSelected(investmentController.getAllInvestmentAccounts().getFirst().getId());
+        }
 
         contentArea.getChildren().setAll(view);
     }
