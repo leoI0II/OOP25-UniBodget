@@ -39,7 +39,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
       </HBox>
-      <TabPane fx:id="transactionTypeTabPane" prefHeight="70.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="SOMETIMES">
+      <TabPane fx:id="transactionTypeTabPane" prefHeight="130.0" prefWidth="480.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab fx:id="buyTab" text="BUY">
             <content>
@@ -149,15 +149,38 @@
                </padding>
             </VBox>
             <Region prefHeight="21.0" prefWidth="460.0" />
-            <Button fx:id="addTransactionButton" mnemonicParsing="false" prefHeight="39.0" prefWidth="530.0" text="Add Transaction">
-               <font>
-                  <Font name="FantasqueSansM Nerd Font Regular" size="20.0" />
-               </font>
-               <padding>
-                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-               </padding>
-            </Button>
          </children>
       </VBox>
+      <VBox fx:id="transferFieldsPanel" managed="false" spacing="8" visible="false">
+
+         <Label text="Destination wallet" />
+         <ComboBox fx:id="destinationWalletComboBox" maxWidth="Infinity" promptText="Select destination wallet..." />
+
+         <Label text="Asset to transfer" />
+         <ComboBox fx:id="transferAssetComboBox" maxWidth="Infinity" promptText="Select asset..." />
+
+         <TextField fx:id="transferQuantityTextField" promptText="Quantity" />
+
+         <DatePicker fx:id="transferDatePicker" maxWidth="Infinity" />
+
+         <TextArea fx:id="transferNotesTextArea" prefRowCount="2" promptText="Notes..." />
+
+         <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="Quantity to transfer:" />
+            <Label fx:id="transferTotalLabel" text="0" />
+         </HBox>
+
+      </VBox>
+      <Button fx:id="addTransactionButton" mnemonicParsing="false" prefHeight="39.0" prefWidth="530.0" text="Add Transaction">
+         <font>
+            <Font name="FantasqueSansM Nerd Font Regular" size="20.0" />
+         </font>
+         <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </padding>
+      </Button>
    </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
 </VBox>

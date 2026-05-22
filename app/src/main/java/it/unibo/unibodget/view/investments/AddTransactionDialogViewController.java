@@ -7,6 +7,8 @@ import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -45,7 +47,14 @@ public class AddTransactionDialogViewController {
     @FXML private Button addTransactionButton;
 
     @FXML private VBox buySellFieldsPanel;
+    // transfer specific fields
     @FXML private VBox transferFieldsPanel;
+    @FXML private ComboBox<InvestmentAccount> destinationAccountComboBox;
+    @FXML private ComboBox<CurrencyUnit> transferAssetComboBox;
+    @FXML private TextField transferQuantityTextField;
+    @FXML private DatePicker transferDatePicker;
+    @FXML private TextArea transferNotesTextArea;
+    @FXML private Label transferTotalLabel;
 
     public AddTransactionDialogViewController(InvestmentController investmentController) {
         this.investmentController = Objects.requireNonNull(investmentController);
@@ -57,8 +66,9 @@ public class AddTransactionDialogViewController {
                 sellTab, OrderType.SELL,
                 transferTab, OrderType.TRANSFER
         );
-
+        // setup STRUTTURALE — una volta sola
         setupBuyAssetComboBox();
+        setupTransferFields();
         setupQuantityTextField();
         setupPricePerAssetTextField();
         setupDatePicker();
@@ -71,89 +81,144 @@ public class AddTransactionDialogViewController {
     }
 
     private void resetForm(Tab tab) {
-        setupBuyAssetComboBox();
-        setupQuantityTextField();
-        setupPricePerAssetTextField();
-        setupDatePicker();
-        setupFeeTextField();
-        setupNotesTextArea();
-        setupTransactionTypeTabPane();
-        setupPaymentSourceToggleButtons();
-        setupTotalSpentValueLabel();
+        // buy/sell fields
+        quantityTextField.clear();
+        pricePerAssetTextField.clear();
+        feeTextField.clear();
+        notesTextArea.clear();
+        datePicker.setValue(LocalDate.now());
+        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+        totalSpentValueLabel.setText(fmtAsset(
+                Asset.zero(baseCurrency)
+        ));
 
-        if (tab == sellTab || tab == transferTab) {
-            selectedAssetComboBox.setItems(
-                    FXCollections.observableArrayList(
-                            investmentController.getAllOwnedAssets()
-                    )
-            );
-        } else {
-            selectedAssetComboBox.setItems(
-                    FXCollections.observableArrayList(
-                            investmentController.getAllTradeableAssets()
-                    )
-            );
+        // aggiorna lista asset in base al tab
+        if (tab == sellTab) {
+            selectedAssetComboBox.setPromptText("Select asset to sell...");
+            selectedAssetComboBox.setItems(FXCollections.observableArrayList(
+                    investmentController.getAllOwnedAssets()
+            ));
+        } else if (tab == buyTab) {
+            selectedAssetComboBox.setPromptText("Select asset to buy...");
+            selectedAssetComboBox.setItems(FXCollections.observableArrayList(
+                    investmentController.getAllTradeableAssets()
+            ));
         }
         selectedAssetComboBox.setValue(
-                selectedAssetComboBox.getItems().stream()
-                        .findFirst()
-                        .orElse(null)
+                selectedAssetComboBox.getItems().stream().findFirst().orElse(null)
+        );
+
+        // transfer fields
+        transferQuantityTextField.clear();
+        transferNotesTextArea.clear();
+        transferDatePicker.setValue(LocalDate.now());
+        destinationAccountComboBox.setValue(null);
+        transferAssetComboBox.setValue(null);
+        transferTotalLabel.setText(
+            fmtAsset(Asset.zero(baseCurrency))
         );
     }
 
     private void setupAddTransactionButton() {
         addTransactionButton.setOnMouseClicked(e -> {
-            OrderType orderType = orderTypeMapByTab.get(transactionTypeTabPane.getSelectionModel().getSelectedItem());
-            var selectedAsset = selectedAssetComboBox.getValue();
-            var quantityText = quantityTextField.getText();
-            var pricePerAssetText = pricePerAssetTextField.getText();
-            if (quantityText.isBlank() || pricePerAssetText.isBlank()) {
-                // stampa popup rosso con errore e richiesta di settare quantity o price per asset
-                return;
+            var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
+            if (currentTab == transferTab) {
+                handleTransferOrder();
+            } else {
+                handleBuyOrSellOrder();
             }
-            var quantity = new BigDecimal(quantityText);
-            var pricePerAsset = Asset.of(
-                    selectedAsset,
-                    new BigDecimal(pricePerAssetText)
-            );
-            LocalDate date = datePicker.getValue();
-            var fee = feeTextField.getText().isBlank() ?
-                    Asset.zero(selectedAsset) :
-                    Asset.of(selectedAsset, new BigDecimal(feeTextField.getText()));
-            var notes = notesTextArea.getText();
-            var paymentSource = getSelectedPaymentSource();
-
-            OrderResult result = switch(orderType) {
-                case OrderType.BUY -> investmentController.executeBuyOrder(
-                        investmentController.getCurrentInvestmentAccount().get(),
-                        paymentSource,
-                        selectedAsset,
-                        quantity,
-                        pricePerAsset,
-                        fee,
-                        date,
-                        notes
-                );
-                case OrderType.SELL -> investmentController.executeSellOrder(
-                        investmentController.getCurrentInvestmentAccount().get(),
-                        paymentSource,
-                        selectedAsset,
-                        quantity,
-                        pricePerAsset,
-                        fee,
-                        date,
-                        notes
-                );
-                case OrderType.TRANSFER -> investmentController.executeTransferOrder(
-                        investmentController.getCurrentInvestmentAccount().get(),
-                        null,
-                        selectedAsset,
-                        quantity,
-                        date,
-                        notes
-                );
-            };
         });
+    }
+
+    private void handleBuyOrSellOrder() {
+        var orderType = orderTypeMapByTab.get(
+                transactionTypeTabPane.getSelectionModel().getSelectedItem()
+        );
+        var selectedAsset = selectedAssetComboBox.getValue();
+        var quantityText = quantityTextField.getText();
+        var priceText = pricePerAssetTextField.getText();
+
+        if (selectedAsset == null || quantityText.isBlank() || priceText.isBlank()) {
+            showErrorPopup("Please fill all required fields.");
+            return;
+        }
+
+        var quantity = new BigDecimal(quantityText);
+        var pricePerAsset = Asset.of(selectedAsset, new BigDecimal(priceText));
+        var fee = feeTextField.getText().isBlank()
+                ? Asset.zero(selectedAsset)
+                : Asset.of(selectedAsset, new BigDecimal(feeTextField.getText()));
+        var paymentSource = getSelectedPaymentSource();
+        var date = datePicker.getValue();
+        var notes = notesTextArea.getText();
+
+        OrderResult result = switch (orderType) {
+            case BUY -> investmentController.executeBuyOrder(
+                    investmentController.getCurrentInvestmentAccount().get(),
+                    paymentSource, selectedAsset, quantity, pricePerAsset, fee, date, notes
+            );
+            case SELL -> investmentController.executeSellOrder(
+                    investmentController.getCurrentInvestmentAccount().get(),
+                    paymentSource, selectedAsset, quantity, pricePerAsset, fee, date, notes
+            );
+            default -> throw new IllegalStateException("Unexpected order type: " + orderType);
+        };
+
+        handleOrderResult(result);
+    }
+
+    private void handleTransferOrder() {
+        var destination = destinationAccountComboBox.getValue();
+        var asset = transferAssetComboBox.getValue();
+        var quantityText = transferQuantityTextField.getText();
+
+        if (destination == null || asset == null || quantityText.isBlank()) {
+            showErrorPopup("Please fill all transfer fields.");
+            return;
+        }
+
+        var result = investmentController.executeTransferOrder(
+                investmentController.getCurrentInvestmentAccount().get(),
+                destination,
+                asset,
+                new BigDecimal(quantityText),
+                transferDatePicker.getValue(),
+                transferNotesTextArea.getText()
+        );
+
+        handleOrderResult(result);
+    }
+
+    private void handleOrderResult(OrderResult result) {
+        switch (result) {
+            case OrderResult.InsufficientFunds f ->
+                    showErrorPopup("Insufficient funds. Required: "
+                            + fmtAsset(f.required()) + ", available: " + fmtAsset(f.available()));
+            case OrderResult.InsufficientAssets a ->
+                    showErrorPopup("Insufficient assets. Required: "
+                            + a.requested() + ", available: " + a.available());
+            default -> {
+                if (result.isSuccess()) {
+                    showInfoPopup("Transaction executed successfully!");
+                    // chiudo il dialog
+                    addTransactionButton.getScene().getWindow().hide();
+                }
+            }
+        }
+    }
+
+    private void showErrorPopup(final String message) {
+        ToastNotification.showError(
+                addTransactionButton.getScene().getWindow(),
+                message
+        );
+    }
+
+    private void showInfoPopup(final String message) {
+        ToastNotification.showSuccess(
+                addTransactionButton.getScene().getWindow(),
+                message
+        );
     }
 
     private void setupTotalSpentValueLabel() {
@@ -280,10 +345,6 @@ public class AddTransactionDialogViewController {
                     } else {
                         updateTotalSpent();
                     }
-                });
-        feeTextField.textProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    updateTotalSpent();
                 });
         var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
         feeTextField.setPromptText("fee: " + fmtAsset(Asset.zero(baseCurrency)));
@@ -433,6 +494,68 @@ public class AddTransactionDialogViewController {
         transferFieldsPanel.setManaged(isTransfer);
 
         resetForm(tab);
+
+        if (isTransfer) {
+            var allAvailableAccounts = investmentController.getAllInvestmentAccounts();
+            var currentAccount = investmentController.getCurrentInvestmentAccount().get();
+            destinationAccountComboBox.setItems(
+                    FXCollections.observableArrayList(
+                            allAvailableAccounts.stream()
+                                    .filter(a -> !a.getId().equals(currentAccount.getId()))
+                                    .toList()
+                    )
+            );
+            transferAssetComboBox.setItems(
+                    FXCollections.observableArrayList(investmentController.getAllOwnedAssets())
+            );
+        }
+    }
+
+    private void setupTransferFields() {
+        // destination wallet combobox
+        destinationAccountComboBox.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(InvestmentAccount item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        destinationAccountComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(InvestmentAccount item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getName());
+            }
+        });
+
+        // asset combobox — stessa cellFactory di selectedAssetComboBox
+        transferAssetComboBox.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(CurrencyUnit item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : fmtComboBoxItemString(item));
+            }
+        });
+        transferAssetComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(CurrencyUnit item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : fmtComboBoxItemString(item));
+            }
+        });
+
+        // quantity — stesso validator numerico di quantityTextField
+        transferQuantityTextField.textProperty().addListener((obs, old, newVal) -> {
+            if (!newVal.matches("\\d*\\.?\\d*"))
+                transferQuantityTextField.setText(old);
+        });
+
+        // date — stesso del buy/sell
+        transferDatePicker.setValue(LocalDate.now());
+
+        // notes — solo clear
+        transferNotesTextArea.clear();
+        transferNotesTextArea.setPromptText("Notes...");
     }
 
     @FXML
