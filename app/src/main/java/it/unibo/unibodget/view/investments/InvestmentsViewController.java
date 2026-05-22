@@ -48,8 +48,8 @@ public class InvestmentsViewController implements SideBarDelegate {
     @FXML private Label worstPerformerPositionPercentage;
 
     @FXML private LineChart<String, Number> performanceChart;
-    @FXML private CategoryAxis chartXAxis;
-    @FXML private NumberAxis chartYAxis;
+//    @FXML private CategoryAxis chartXAxis;
+//    @FXML private NumberAxis chartYAxis;
     @FXML private PieChart allocationPieChart;
     @FXML private PieChart quantityPieChart;
 
@@ -499,5 +499,10 @@ public class InvestmentsViewController implements SideBarDelegate {
         changeCurrentWalletName();
         refreshMainPanel();
         sideBarViewController.refresh();
+    }
+
+    @Override
+    public void onAddWalletRequested() {
+
     }
 }
