@@ -20,7 +20,7 @@
 
 <VBox maxHeight="Infinity" maxWidth="Infinity" prefHeight="700.0" prefWidth="700.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
    <children>
-      <HBox prefHeight="57.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+      <HBox prefHeight="57.0" prefWidth="700.0" spacing="10.0" VBox.vgrow="ALWAYS">
          <children>
             <Label fx:id="currentWalletName" alignment="BASELINE_LEFT" onMouseClicked="#handleCurrentWalletNameChange" prefHeight="41.0" prefWidth="319.0" text="Name" HBox.hgrow="ALWAYS">
                <font>
@@ -36,7 +36,8 @@
                   <Insets left="8.0" right="15.0" />
                </HBox.margin>
             </Label>
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="69.0" prefWidth="140.0" text="Add transaction" HBox.hgrow="ALWAYS">
+            <Region prefHeight="41.0" prefWidth="80.0" HBox.hgrow="ALWAYS" />
+            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="41.0" prefWidth="165.0" text="Add transaction" HBox.hgrow="NEVER">
                <font>
                   <Font name="JetBrainsMono NF Bold" size="13.0" />
                </font>
@@ -47,8 +48,7 @@
                   <Insets />
                </HBox.margin>
             </Button>
-            <Region prefHeight="69.0" prefWidth="74.0" />
-            <Button fx:id="exportToCSVBtn" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" prefHeight="69.0" prefWidth="136.0" text="Export CSV" HBox.hgrow="ALWAYS">
+            <Button fx:id="exportToCSVBtn" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" prefHeight="41.0" prefWidth="164.0" text="Export CSV" HBox.hgrow="NEVER">
                <font>
                   <Font name="JetBrainsMono NF Bold" size="18.0" />
                </font>
@@ -58,10 +58,10 @@
             <Insets bottom="15.0" left="8.0" right="8.0" top="15.0" />
          </padding>
       </HBox>
-      <Region prefHeight="135.0" prefWidth="700.0" />
+      <Region prefHeight="224.0" prefWidth="700.0" />
       <HBox prefHeight="302.0" prefWidth="700.0">
          <children>
-            <VBox prefHeight="130.0" prefWidth="340.0">
+            <VBox prefHeight="130.0" prefWidth="340.0" HBox.hgrow="ALWAYS">
                <children>
                   <Label prefHeight="25.0" prefWidth="340.0" text="Available balance" VBox.vgrow="ALWAYS">
                      <font>
@@ -81,7 +81,7 @@
                   </Label>
                </children>
             </VBox>
-            <VBox prefHeight="129.0" prefWidth="138.0" HBox.hgrow="ALWAYS">
+            <VBox prefHeight="109.0" prefWidth="177.0" HBox.hgrow="ALWAYS">
                <children>
                   <Label alignment="CENTER_RIGHT" prefHeight="29.0" prefWidth="177.0" text="All time profit" VBox.vgrow="ALWAYS">
                      <font>
@@ -109,8 +109,8 @@
                   </Label>
                </children>
             </VBox>
-            <Region prefHeight="130.0" prefWidth="34.0" />
-            <VBox prefHeight="130.0" prefWidth="160.0" HBox.hgrow="ALWAYS">
+            <Region prefHeight="130.0" prefWidth="34.0" HBox.hgrow="ALWAYS" />
+            <VBox prefHeight="109.0" prefWidth="168.0" HBox.hgrow="ALWAYS">
                <children>
                   <Label alignment="CENTER_RIGHT" prefHeight="30.0" prefWidth="175.0" text="Cost Basis" VBox.vgrow="ALWAYS">
                      <font>
@@ -137,9 +137,9 @@
             </VBox>
          </children>
       </HBox>
-      <HBox prefHeight="460.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+      <HBox prefHeight="460.0" prefWidth="700.0" spacing="10.0" VBox.vgrow="ALWAYS">
          <children>
-            <VBox prefHeight="220.0" prefWidth="220.0" HBox.hgrow="ALWAYS">
+            <VBox maxHeight="300.0" maxWidth="250.0" prefHeight="220.0" prefWidth="220.0" HBox.hgrow="NEVER">
                <children>
                   <Label prefHeight="30.0" prefWidth="213.0" text="Best performer" VBox.vgrow="ALWAYS">
                      <font>
@@ -170,7 +170,7 @@
                   <Region prefHeight="72.0" prefWidth="168.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
-            <VBox layoutX="10.0" layoutY="10.0" prefHeight="220.0" prefWidth="220.0">
+            <VBox layoutX="10.0" layoutY="10.0" maxHeight="300.0" maxWidth="250.0" prefHeight="220.0" prefWidth="220.0" HBox.hgrow="NEVER">
                <children>
                   <Label prefHeight="30.0" prefWidth="213.0" text="Worst performer" VBox.vgrow="ALWAYS">
                      <font>
@@ -247,13 +247,13 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView layoutY="-1.0" prefHeight="420.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="positionTableView" layoutY="-1.0" prefHeight="420.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn prefWidth="185.8333282470703" text="Name/Ticker" />
-                            <TableColumn minWidth="0.0" prefWidth="96.5" text="Price" />
-                              <TableColumn prefWidth="87.5" text="Quantity" />
-                              <TableColumn prefWidth="125.16665649414062" text="Total cost" />
-                              <TableColumn prefWidth="97.83334350585938" text="Profit/Loss (%)" />
+                            <TableColumn fx:id="tickerColumn" prefWidth="185.8333282470703" text="Name/Ticker" />
+                            <TableColumn fx:id="priceColumn" minWidth="0.0" prefWidth="96.5" text="Price" />
+                              <TableColumn fx:id="quantityColumn" prefWidth="87.5" text="Quantity" />
+                              <TableColumn fx:id="totalCostColumn" prefWidth="125.16665649414062" text="Total cost" />
+                              <TableColumn fx:id="profitLossColumn" prefWidth="97.83334350585938" text="Profit/Loss (%)" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -266,14 +266,14 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView layoutX="33.0" layoutY="33.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="investmentTransactionTableView" layoutX="33.0" layoutY="33.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn prefWidth="130.33333587646484" text="Date" />
-                            <TableColumn prefWidth="122.0" text="Asset" />
-                              <TableColumn prefWidth="114.33334350585938" text="Quantity" />
-                              <TableColumn prefWidth="78.66665649414062" text="Unit price" />
-                              <TableColumn prefWidth="120.49996948242188" text="Fee" />
-                              <TableColumn prefWidth="132.5" text="Note" />
+                            <TableColumn fx:id="txnDateColumn" prefWidth="130.33333587646484" text="Date" />
+                            <TableColumn fx:id="txnAssetColumn" prefWidth="122.0" text="Asset" />
+                              <TableColumn fx:id="txnQuantityColumn" prefWidth="114.33334350585938" text="Quantity" />
+                              <TableColumn fx:id="txnUnitPriceColumn" prefWidth="78.66665649414062" text="Unit price" />
+                              <TableColumn fx:id="txnFeeColumn" prefWidth="120.49996948242188" text="Fee" />
+                              <TableColumn fx:id="txnNotesColumn" prefWidth="132.5" text="Note" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
