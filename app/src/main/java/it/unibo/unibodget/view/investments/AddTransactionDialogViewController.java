@@ -10,6 +10,7 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,6 +43,9 @@ public class AddTransactionDialogViewController {
     @FXML private ComboBox<Object> paymentSourceComboBox;
     @FXML private Label totalSpentValueLabel;
     @FXML private Button addTransactionButton;
+
+    @FXML private VBox buySellFieldsPanel;
+    @FXML private VBox transferFieldsPanel;
 
     public AddTransactionDialogViewController(InvestmentController investmentController) {
         this.investmentController = Objects.requireNonNull(investmentController);
@@ -422,6 +426,12 @@ public class AddTransactionDialogViewController {
     }
 
     private void onTabChanged(Tab tab) {
+        boolean isTransfer = tab == transferTab;
+        buySellFieldsPanel.setVisible(!isTransfer);
+        buySellFieldsPanel.setManaged(!isTransfer);
+        transferFieldsPanel.setVisible(isTransfer);
+        transferFieldsPanel.setManaged(isTransfer);
+
         resetForm(tab);
     }
 
