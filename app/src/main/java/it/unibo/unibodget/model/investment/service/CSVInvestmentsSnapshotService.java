@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +59,15 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
         }
     }
 
+    private LocalDateTime parseTimestamp(String s) {
+        try {
+            return LocalDateTime.parse(s);
+        } catch (DateTimeParseException e) {
+            // fallback per file vecchi con LocalDate
+            return LocalDate.parse(s).atStartOfDay();
+        }
+    }
+
     @Override
     public List<BalanceSnapshot> getSnapshots(UUID accountId) {
         var filePath = fileFor(accountId);
@@ -71,7 +81,7 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
         ) {
             return parser.getRecords().stream()
                     .map(record -> new BalanceSnapshot(
-                            LocalDateTime.parse(record.get(0)),
+                            parseTimestamp(record.get(0)),
                             new BigDecimal(record.get(1)),
                             new BigDecimal(record.get(2))
                     ))
