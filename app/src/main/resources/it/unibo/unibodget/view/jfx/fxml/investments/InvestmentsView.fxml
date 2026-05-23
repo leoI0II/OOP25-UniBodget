@@ -37,7 +37,7 @@
                </HBox.margin>
             </Label>
             <Region prefHeight="41.0" prefWidth="80.0" HBox.hgrow="ALWAYS" />
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="41.0" prefWidth="165.0" text="Add transaction" HBox.hgrow="NEVER">
+            <Button fx:id="addTransactionButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" prefHeight="41.0" prefWidth="165.0" text="Add transaction" HBox.hgrow="NEVER">
                <font>
                   <Font name="JetBrainsMono NF Bold" size="13.0" />
                </font>
@@ -71,7 +71,7 @@
                         <Insets left="10.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="walletBalance" prefHeight="153.0" prefWidth="340.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="walletBalance" prefHeight="153.0" prefWidth="340.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
                      <font>
                         <Font size="48.0" />
                      </font>
@@ -91,7 +91,7 @@
                         <Insets right="5.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="allTimeProfitValue" prefHeight="100.0" prefWidth="152.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="allTimeProfitValue" prefHeight="100.0" prefWidth="152.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -120,7 +120,7 @@
                         <Insets right="10.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="costBasisValue" prefHeight="117.0" prefWidth="174.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="costBasisValue" prefHeight="117.0" prefWidth="174.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="FantasqueSansM Nerd Font Regular" size="28.0" />
                      </font>
@@ -151,7 +151,7 @@
                         <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
                      </font>
                   </Label>
-                  <Label fx:id="bestPerformerPositionValue" prefHeight="64.0" prefWidth="199.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="bestPerformerPositionValue" prefHeight="64.0" prefWidth="199.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
                      </font>
@@ -182,7 +182,7 @@
                         <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
                      </font>
                   </Label>
-                  <Label fx:id="worstPerformerPositionValue" prefHeight="64.0" prefWidth="200.0" text="\$00.00" VBox.vgrow="ALWAYS">
+                  <Label fx:id="worstPerformerPositionValue" prefHeight="64.0" prefWidth="200.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
                      <font>
                         <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
                      </font>

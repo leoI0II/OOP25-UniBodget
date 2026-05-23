@@ -19,15 +19,18 @@ public class MainViewController {
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
     private final DashboardFacade dashboardFacade;
+    private final ViewControllersFactory viewControllersFactory;
 
     public MainViewController(
             InvestmentController investmentController,
             InvestmentsSnapshotService snapshotService,
-            DashboardFacade dashboardFacade
+            DashboardFacade dashboardFacade,
+            ViewControllersFactory viewControllersFactory
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
         this.dashboardFacade = Objects.requireNonNull(dashboardFacade);
+        this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
     }
 
     @FXML
@@ -63,11 +66,7 @@ public class MainViewController {
         FXMLLoader fxmlLoader = new FXMLLoader(
                 getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/investments/InvestmentsView.fxml")
         );
-        var factory = new ViewControllersFactory(
-                investmentController,
-                snapshotService
-        );
-        fxmlLoader.setControllerFactory(factory::create);
+        fxmlLoader.setControllerFactory(viewControllersFactory::create);
         Node view = null;
         try {
             view = fxmlLoader.load();

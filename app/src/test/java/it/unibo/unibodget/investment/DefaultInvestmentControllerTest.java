@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
+import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
 import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.Theme;
@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.converter.provider.MockExchangeRateProvider;
-import it.unibo.unibodget.model.converter.provider.MockPriceProvider;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.FiatCurrency;
@@ -48,13 +47,13 @@ public class DefaultInvestmentControllerTest {
     private DefaultInvestmentController controller;
     private InvestmentAccount account;
     private CashAccount cashAccount;
-    private MockPriceProvider priceProvider;
+    private ExchangeRateProvider exchangeRateProvider;
 
     @BeforeEach
     void setUp() {
-        priceProvider = new MockPriceProvider();
+        exchangeRateProvider = new MockExchangeRateProvider();
 
-        account = new InvestmentAccount("Test Portfolio", FiatCurrency.USD, priceProvider);
+        account = new InvestmentAccount("Test Portfolio", FiatCurrency.USD, exchangeRateProvider);
 
         // Cash account funded with $10 000
         cashAccount = new CashAccount("Test Cash", FiatCurrency.USD);
@@ -290,14 +289,14 @@ public class DefaultInvestmentControllerTest {
     @Test
     void testCanTransferBetweenDifferentAccountsWithSufficientPosition() {
         buyBtc(BigDecimal.TEN);
-        var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        var other = new InvestmentAccount("Other", FiatCurrency.USD, exchangeRateProvider);
         assertTrue(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanTransferWithInsufficientPositionReturnsFalse() {
         buyBtc(BigDecimal.ONE);
-        var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        var other = new InvestmentAccount("Other", FiatCurrency.USD, exchangeRateProvider);
         assertFalse(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.TEN));
     }
 
@@ -386,7 +385,7 @@ public class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderSuccess() {
         buyBtc(BigDecimal.TEN);
-        var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        var other = new InvestmentAccount("Other", FiatCurrency.USD, exchangeRateProvider);
         var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.ONE, TODAY, ""
         );
@@ -413,7 +412,7 @@ public class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderWithInsufficientPositionReturnsError() {
         buyBtc(BigDecimal.ONE);
-        var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        var other = new InvestmentAccount("Other", FiatCurrency.USD, exchangeRateProvider);
         var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.TEN, TODAY, ""
         );

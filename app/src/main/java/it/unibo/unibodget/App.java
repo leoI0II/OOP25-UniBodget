@@ -1,7 +1,6 @@
 package it.unibo.unibodget;
 
 import it.unibo.unibodget.model.converter.provider.MockExchangeRateProvider;
-import it.unibo.unibodget.model.converter.provider.MockPriceProvider;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
 import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;

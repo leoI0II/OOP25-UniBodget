@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
+import it.unibo.unibodget.model.converter.provider.MockExchangeRateProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.converter.provider.MockPriceProvider;
-import it.unibo.unibodget.model.converter.provider.PriceProvider;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.FiatCurrency;
@@ -21,12 +21,12 @@ import it.unibo.unibodget.model.wallet.InvestmentAccount;
 public class InvestmentAccountTest {
     
     private InvestmentAccount account;
-    private PriceProvider mockPriceProvider;
+    private ExchangeRateProvider exchangeRateProvider;
 
     @BeforeEach
     void setUp() {
-        mockPriceProvider = new MockPriceProvider();
-        account = new InvestmentAccount("Test Account", FiatCurrency.USD, mockPriceProvider);
+        exchangeRateProvider = new MockExchangeRateProvider();
+        account = new InvestmentAccount("Test Account", FiatCurrency.USD, exchangeRateProvider);
     }
 
     @Test

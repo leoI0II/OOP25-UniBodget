@@ -154,7 +154,7 @@
       <VBox fx:id="transferFieldsPanel" managed="false" spacing="8" visible="false">
 
          <Label text="Destination wallet" />
-         <ComboBox fx:id="destinationWalletComboBox" maxWidth="Infinity" promptText="Select destination wallet..." />
+         <ComboBox fx:id="destinationAccountComboBox" maxWidth="Infinity" promptText="Select destination wallet..." />
 
          <Label text="Asset to transfer" />
          <ComboBox fx:id="transferAssetComboBox" maxWidth="Infinity" promptText="Select asset..." />
