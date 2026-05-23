@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Tests for {@link DefaultDashboardSnapshot}.
@@ -45,7 +46,8 @@ class DefaultDashboardSnapshotTest {
                 new BigDecimal("0.80"),
                 BudgetStatus.SAFE,
                 List.of(summary),
-                List.of(insight)
+                List.of(insight),
+                List.<CashAccount>of()
         );
 
         assertEquals(1, snapshot.getFriendLoanSummaries().size());
@@ -53,6 +55,8 @@ class DefaultDashboardSnapshotTest {
 
         assertEquals(1, snapshot.getWalletInsights().size());
         assertEquals("Spending", snapshot.getWalletInsights().get(0).title());
+
+        assertEquals(0, snapshot.getAllWallets().size());
 
         assertThrows(
                 UnsupportedOperationException.class,
@@ -62,6 +66,11 @@ class DefaultDashboardSnapshotTest {
         assertThrows(
                 UnsupportedOperationException.class,
                 () -> snapshot.getWalletInsights().add(insight)
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> snapshot.getAllWallets().add(new CashAccount("Extra", null))
         );
     }
 }

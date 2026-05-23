@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
@@ -30,6 +31,7 @@ class DefaultDashboardFacadeTest {
     private DefaultBudgetMonitor budgetMonitor;
     private DefaultFriendLoanSummaryService friendLoanSummaryService;
     private DefaultWalletInsightService walletInsightService;
+    private CategoryCatalog categoryCatalog;
     private DefaultDashboardFacade dashboardFacade;
 
     @BeforeEach
@@ -39,12 +41,15 @@ class DefaultDashboardFacadeTest {
         budgetMonitor = new DefaultBudgetMonitor();
         friendLoanSummaryService = new DefaultFriendLoanSummaryService();
         walletInsightService = new DefaultWalletInsightService();
+        categoryCatalog = new CategoryCatalog();
+
         dashboardFacade = new DefaultDashboardFacade(
                 walletService,
                 categoryService,
                 budgetMonitor,
                 friendLoanSummaryService,
-                walletInsightService
+                walletInsightService,
+                categoryCatalog
         );
     }
 
@@ -95,6 +100,8 @@ class DefaultDashboardFacadeTest {
         assertEquals(BudgetStatus.SAFE, snapshot.getBudgetStatus());
         assertEquals(0, snapshot.getFriendLoanSummaries().size());
         assertEquals(3, snapshot.getWalletInsights().size());
+        assertEquals(1, snapshot.getAllWallets().size());
+        assertEquals("Main wallet", snapshot.getAllWallets().get(0).getName());
     }
 
     @Test
@@ -157,6 +164,7 @@ class DefaultDashboardFacadeTest {
         assertEquals(BudgetStatus.SAFE, snapshot.getBudgetStatus());
         assertEquals(0, snapshot.getFriendLoanSummaries().size());
         assertEquals(3, snapshot.getWalletInsights().size());
+        assertEquals(2, snapshot.getAllWallets().size());
     }
 
     @Test
@@ -203,5 +211,6 @@ class DefaultDashboardFacadeTest {
         assertEquals(0, new BigDecimal("40.00").compareTo(snapshot.getFriendLoanSummaries().get(0).getTotalReceived()));
         assertEquals(0, new BigDecimal("60.00").compareTo(snapshot.getFriendLoanSummaries().get(0).getNetBalance()));
         assertEquals(3, snapshot.getWalletInsights().size());
+        assertEquals(1, snapshot.getAllWallets().size());
     }
 }
