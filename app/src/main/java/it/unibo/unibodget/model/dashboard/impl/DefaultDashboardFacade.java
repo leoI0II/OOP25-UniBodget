@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
@@ -24,7 +25,8 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  * <p>
  * This class coordinates the services involved in the dashboard subsystem and
  * exposes a single method that returns a consistent snapshot of the current
- * dashboard state for the selected cash wallet.</p>
+ * dashboard state for the selected cash wallet.
+ * </p>
  */
 public final class DefaultDashboardFacade implements DashboardFacade {
 
@@ -33,29 +35,37 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     private final BudgetMonitor budgetMonitor;
     private final FriendLoanSummaryService friendLoanSummaryService;
     private final WalletInsightService walletInsightService;
+    private final CategoryCatalog categoryCatalog;
 
     /**
      * Creates a new dashboard facade with the required collaborating services.
      *
-     * @param walletService the service exposing cash wallets and the current
-     * wallet history
-     * @param categoryService the service exposing aggregated values by category
-     * @param budgetMonitor the component evaluating the current budget status
-     * @param friendLoanSummaryService the service computing friend-loan
-     * summaries
-     * @param walletInsightService the service computing dashboard insights
+     * @param walletService
+     *            the service exposing cash wallets and the current wallet history
+     * @param categoryService
+     *            the service exposing aggregated values by category
+     * @param budgetMonitor
+     *            the component evaluating the current budget status
+     * @param friendLoanSummaryService
+     *            the service computing friend-loan summaries
+     * @param walletInsightService
+     *            the service computing dashboard insights
+     * @param categoryCatalog
+     *            the shared category catalog
      */
     public DefaultDashboardFacade(
             final CashAccountService walletService,
             final CategoryService categoryService,
             final BudgetMonitor budgetMonitor,
             final FriendLoanSummaryService friendLoanSummaryService,
-            final WalletInsightService walletInsightService) {
+            final WalletInsightService walletInsightService,
+            final CategoryCatalog categoryCatalog) {
         this.walletService = Objects.requireNonNull(walletService);
         this.categoryService = Objects.requireNonNull(categoryService);
         this.budgetMonitor = Objects.requireNonNull(budgetMonitor);
         this.friendLoanSummaryService = Objects.requireNonNull(friendLoanSummaryService);
         this.walletInsightService = Objects.requireNonNull(walletInsightService);
+        this.categoryCatalog = Objects.requireNonNull(categoryCatalog);
     }
 
     /**
@@ -70,16 +80,17 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         categoryService.recomputeFromTransactions(currentTransactions);
 
         final DefaultBudgetSettings settings = currentWallet.getBudgetSettings();
+        final List<CashAccount> allWallets = walletService.getWallets();
 
         final BigDecimal monthlyBudgetUsage = computeCurrentMonthBudgetUsage(currentTransactions);
-        final BudgetStatus budgetStatus
-                = budgetMonitor.getBudgetStatus(monthlyBudgetUsage, settings);
+        final BudgetStatus budgetStatus =
+                budgetMonitor.getBudgetStatus(monthlyBudgetUsage, settings);
 
-        final List<FriendLoanSummary> friendLoanSummaries
-                = friendLoanSummaryService.summarize(currentTransactions);
+        final List<FriendLoanSummary> friendLoanSummaries =
+                friendLoanSummaryService.summarize(currentTransactions);
 
-        final List<WalletInsight> walletInsights
-                = walletInsightService.computeInsights(currentTransactions);
+        final List<WalletInsight> walletInsights =
+                walletInsightService.computeInsights(currentTransactions);
 
         return new DefaultDashboardSnapshot(
                 currentWallet.getName(),
@@ -93,8 +104,17 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 settings.getWarningThreshold(),
                 budgetStatus,
                 friendLoanSummaries,
-                walletInsights
+                walletInsights,
+                allWallets
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CategoryCatalog getCategoryCatalog() {
+        return categoryCatalog;
     }
 
     /**
@@ -103,16 +123,22 @@ public final class DefaultDashboardFacade implements DashboardFacade {
      * <p>
      * Only transactions in the current month and current year whose category
      * type is {@link CategoryType#EXPENSE} or {@link CategoryType#FRIEND_LOAN}
-     * are counted. Each matching transaction contributes its absolute
-     * amount.</p>
+     * are counted. Each matching transaction contributes its absolute amount.
+     * </p>
      *
-     * @param transactions the transactions to inspect
+     * @param transactions
+     *            the transactions to inspect
      * @return the total amount contributing to the current monthly budget
      */
     private BigDecimal computeCurrentMonthBudgetUsage(final List<CashTransaction> transactions) {
         final LocalDate now = LocalDate.now();
 
         return transactions.stream()
+                .filter(Objects::nonNull)
+                .filter(transaction -> transaction.getDate() != null)
+                .filter(transaction -> transaction.getCategory() != null)
+                .filter(transaction -> transaction.getAsset() != null)
+                .filter(transaction -> transaction.getAsset().amount() != null)
                 .filter(transaction -> transaction.getDate().getYear() == now.getYear())
                 .filter(transaction -> transaction.getDate().getMonth() == now.getMonth())
                 .filter(transaction -> {
