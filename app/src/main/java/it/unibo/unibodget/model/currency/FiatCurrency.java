@@ -73,10 +73,7 @@ public enum FiatCurrency implements CurrencyUnit {
 
     @Override
     public String toString() {
-        return String.format(
-            "%s { symbol='%s', shortName='%s', fullName='%s', code='%s' }",
-            this.name(), symbol, shortName, fullName, code
-        );
+        return this.symbol + " " + this.shortName;
     }
 
 }
