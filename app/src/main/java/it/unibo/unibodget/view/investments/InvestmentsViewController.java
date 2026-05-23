@@ -10,17 +10,24 @@ import it.unibo.unibodget.model.wallet.Wallet;
 import it.unibo.unibodget.view.main.SideBarDelegate;
 import it.unibo.unibodget.view.main.SideBarItem;
 import it.unibo.unibodget.view.main.SideBarViewController;
+import it.unibo.unibodget.view.main.ViewControllersFactory;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -32,8 +39,10 @@ public class InvestmentsViewController implements SideBarDelegate {
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
+    private final ViewControllersFactory viewControllersFactory;
 
     private SideBarViewController sideBarViewController;
+    @FXML private Button addTransactionButton;
     @FXML private Label currentWalletName;
     @FXML private Label walletBalance;
     @FXML private Label allTimeProfitValue;
@@ -73,10 +82,12 @@ public class InvestmentsViewController implements SideBarDelegate {
 
     public InvestmentsViewController(
             InvestmentController investmentController,
-            InvestmentsSnapshotService snapshotService
+            InvestmentsSnapshotService snapshotService,
+            ViewControllersFactory viewControllersFactory
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
+        this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
     }
 
     public void setSideBarViewController(final SideBarViewController sideBarViewController) {
@@ -410,6 +421,34 @@ public class InvestmentsViewController implements SideBarDelegate {
         }
     }
 
+    @FXML
+    private void handleAddTransactionButtonClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/investments/AddTransactionDialog.fxml")
+            );
+            loader.setControllerFactory(viewControllersFactory::create);
+
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
+            dialog.initOwner(addTransactionButton.getScene().getWindow());
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initStyle(StageStyle.UNDECORATED); // no title bar
+            dialog.setScene(new Scene(root));
+            dialog.setWidth(450);
+            dialog.setHeight(620);
+            dialog.setResizable(false);
+            dialog.showAndWait();
+
+            // dopo che l'utente chiude il dialog, aggiorna la view
+            refreshData();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load AddTransactionDialog", e);
+        }
+    }
+
     private void showInfoPopup(final Alert.AlertType type, String title, final String message) {
         // stampare un piccolo popup verde/rosso con il msg
         var popup = new Alert(type);
@@ -490,7 +529,7 @@ public class InvestmentsViewController implements SideBarDelegate {
 
         refreshPieCharts();
         refreshPerformanceLineChart();
-
+        sideBarViewController.refresh();
     }
 
     @Override
