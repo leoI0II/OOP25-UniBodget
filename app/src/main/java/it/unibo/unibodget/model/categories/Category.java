@@ -30,8 +30,6 @@ public final class Category extends BasicCategory {
             new Category("Investment Sell", new ARGBColor(0xFFFFC107), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
     public static final Category FRIEND_LOAN =
             new Category("Friend Loan", new ARGBColor(0xFF795548), CategoryType.FRIEND_LOAN, CategoryOrigin.DEFAULT, true);
-    public static final Category BANK_LOAN =
-            new Category("Bank Loan", new ARGBColor(0xFF607D8B), CategoryType.BANK_LOAN, CategoryOrigin.DEFAULT, true);
 
     private final CategoryOrigin origin;
     private boolean active;
@@ -75,8 +73,7 @@ public final class Category extends BasicCategory {
                 TRANSFER,
                 INVESTMENT_BUY,
                 INVESTMENT_SELL,
-                FRIEND_LOAN,
-                BANK_LOAN
+                FRIEND_LOAN
         );
     }
 
