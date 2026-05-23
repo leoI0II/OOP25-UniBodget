@@ -4,6 +4,8 @@ classDiagram
       +getSymbol() String
       +getShortName() String
       +getFullName() String
+      +getByCode(String) CurrencyUnit
+      +allCurrencies() List~CurrencyUnit~
     }
     class FiatCurrency{
         <<enum>>
@@ -42,6 +44,52 @@ classDiagram
         +toString() String
     }
     Asset --> CurrencyUnit : uses
+
+    class ExchangeRateAPI {
+        <<interface>>
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    class ExchangeRateAPIImpl{
+        -CACHE_DURATION : Duration
+        -client : HttpClient
+        -lastUpdate : Instant
+        -cachedRates : Map~CurrencyUnit, Double~
+
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+        -fetchRatesFromAPI(CurrencyUnit) Map~CurrencyUnit, Double~
+        -parseRates(String, CurrencyUnit) Map~CurrencyUnit, Double~
+        -generateMockHistory(LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    class MockExchangeRateAPI {
+        -mockRates : Map~CurrencyUnit, Double~
+
+        +MockExchangeRateAPI(CurrencyUnit, Map~CurrencyUnit, Double~)
+        +getLatestRates(CurrencyUnit) Map~CurrencyUnit, Double~
+        +getHistoricalRates(CurrencyUnit, CurrencyUnit, LocalDate, LocalDate) Map~LocalDate, Double~
+    }
+
+    ExchangeRateAPIImpl ..|> ExchangeRateAPI
+    MockExchangeRateAPI ..|> ExchangeRateAPI
+
+    class CurrencyConverter {
+        <<interface>>
+        +convert(BigDecimal, CurrencyUnit, CurrencyUnit) CurrencyConversionResult
+    }
+
+    class BasicCurrencyConverter {
+        +BasicCurrencyConverter(ExchangeRateAPI, CurrencyUnit)
+        +convert(BigDecimal, CurrencyUnit, CurrencyUnit) CurrencyConversionResult
+    }
+
+    BasicCurrencyConverter ..|> CurrencyConverter
+    BasicCurrencyConverter --> ExchangeRateAPI
+    BasicCurrencyConverter --> CurrencyUnit
+    CurrencyConverter --> CurrencyUnit
+    CurrencyConverter --> CurrencyConversionResult
 
     class Transaction {
         <<abstract sealed>>
@@ -108,6 +156,7 @@ classDiagram
         +ARGBColor(hex : String)
         +parseHexToInt(hex : String) int
         +toHexString() String
+        +toFXColor() Color
     }
 
     class Historical~T extends Transaction~ {

@@ -15,7 +15,18 @@ public enum CryptoCurrency implements CurrencyUnit {
 
     BTC("₿", "BTC", "Bitcoin", "BTC", "bitcoin"),
     ETH("Ξ", "ETH", "Ethereum", "ETH", "ethereum"),
-    SOL("◎", "SOL", "Solana", "SOL", "solana");
+    SOL("◎", "SOL", "Solana", "SOL", "solana"),
+    USDT("₮", "USDT", "Tether", "USDT", "tether"),
+    ADA("₳", "ADA", "Cardano", "ADA", "cardano"),
+    XRP("✕", "XRP", "Ripple", "XRP", "ripple"),
+    DOT("●", "DOT", "Polkadot", "DOT", "polkadot"),
+    DOGE("Ð", "DOGE", "Dogecoin", "DOGE", "dogecoin"),
+    AVAX("A", "AVAX", "Avalanche", "AVAX", "avalanche-2"),
+    MATIC("M", "MATIC", "Polygon", "MATIC", "matic-network"),
+    LTC("Ł", "LTC", "Litecoin", "LTC", "litecoin"),
+    XLM("Ł", "XLM", "Stellar", "XLM", "stellar"),
+    LINK("⛓", "LINK", "Chainlink", "LINK", "chainlink"),
+    UNI("U", "UNI", "Uniswap", "UNI", "uniswap");
 
     private final CurrencyType type = CurrencyType.CRYPTO;
     private final String symbol;

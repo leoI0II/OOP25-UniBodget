@@ -23,10 +23,10 @@ Il progetto è organizzato in più parti:
 ### **1. Model**
 Contiene tutte le classi del dominio, suddivise in package:
 
-- `model.currency` → Currency, Asset
-- `model.investments` → Investment
-- `model.movements` → Movements, Historical
-- `model.settings` → UserData, Theme, BudgetLimit  
+- `model.currency` → Currency (diff type and values), Asset
+- `model.transactions` → Transaction (diff types), Historical
+- `model.settings` → Settings, Theme, BudgetLimit
+- `model.wallet` → CashAccount, InvestmentAccount, Wallet
 
 Tutte le classi sono compatibili con il parser generico.
 

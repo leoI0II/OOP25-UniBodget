@@ -4,21 +4,30 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Default immutable implementation of {@link DashboardSnapshot}.
  */
 public final class DefaultDashboardSnapshot implements DashboardSnapshot {
 
+    private final String walletName;
+    private final String walletCurrency;
     private final BigDecimal totalBalance;
     private final List<Transaction> recentTransactions;
     private final Map<String, BigDecimal> categorySummaries;
+    private final BigDecimal budgetLimit;
+    private final BigDecimal warningThreshold;
     private final BudgetStatus budgetStatus;
+    private final List<FriendLoanSummary> friendLoanSummaries;
+    private final List<WalletInsight> walletInsights;
+    private final List<CashAccount> allWallets;
 
     private final BigDecimal friendLoanGivenTotal;
     private final BigDecimal friendLoanReceivedTotal;
@@ -29,35 +38,60 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     /**
      * Creates a new dashboard snapshot.
      *
-     * @param totalBalance the total balance shown in the dashboard
-     * @param recentTransactions the recent transactions shown in the dashboard
-     * @param categorySummaries the aggregated values by category
-     * @param budgetStatus the current budget status
-     * @param friendLoanGivenTotal the total amount lent to friends
-     * @param friendLoanReceivedTotal the total amount borrowed from friends
-     * @param friendLoanNetBalance the net balance of friend loans
-     * @param bankLoanTotal the total amount associated with bank loans
-     * @param topCategories the top category summaries
+     * @param walletName
+     *            the name of the currently selected wallet
+     * @param walletCurrency
+     *            the textual representation of the wallet base currency
+     * @param totalBalance
+     *            the total balance shown in the dashboard
+     * @param recentTransactions
+     *            the recent transactions shown in the dashboard
+     * @param categorySummaries
+     *            the aggregated values by category
+     * @param budgetLimit
+     *            the configured budget limit of the current wallet
+     * @param warningThreshold
+     *            the configured warning threshold of the current wallet
+     * @param budgetStatus
+     *            the current budget status
+     * @param friendLoanSummaries
+     *            the friend-loan summaries associated with the current wallet
+     * @param walletInsights
+     *            the dashboard insights associated with the current wallet
      */
     public DefaultDashboardSnapshot(
+            final String walletName,
+            final String walletCurrency,
             final BigDecimal totalBalance,
             final List<CashTransaction> recentTransactions,
             final Map<String, BigDecimal> categorySummaries,
+            final BigDecimal budgetLimit,
+            final BigDecimal warningThreshold,
             final BudgetStatus budgetStatus,
-            final BigDecimal friendLoanGivenTotal,
-            final BigDecimal friendLoanReceivedTotal,
-            final BigDecimal friendLoanNetBalance,
-            final BigDecimal bankLoanTotal,
-            final Map<String, BigDecimal> topCategories) {
-        this.totalBalance = totalBalance;
-        this.recentTransactions = List.copyOf(recentTransactions);
-        this.categorySummaries = Map.copyOf(categorySummaries);
-        this.budgetStatus = budgetStatus;
-        this.friendLoanGivenTotal = friendLoanGivenTotal;
-        this.friendLoanReceivedTotal = friendLoanReceivedTotal;
-        this.friendLoanNetBalance = friendLoanNetBalance;
-        this.bankLoanTotal = bankLoanTotal;
-        this.topCategories = Map.copyOf(topCategories);
+            final List<FriendLoanSummary> friendLoanSummaries,
+            final List<WalletInsight> walletInsights,
+            final List<CashAccount> allWallets) {
+        this.walletName = Objects.requireNonNull(walletName);
+        this.walletCurrency = Objects.requireNonNull(walletCurrency);
+        this.totalBalance = Objects.requireNonNull(totalBalance);
+        this.recentTransactions = List.copyOf(Objects.requireNonNull(recentTransactions));
+        this.categorySummaries = Map.copyOf(Objects.requireNonNull(categorySummaries));
+        this.budgetLimit = Objects.requireNonNull(budgetLimit);
+        this.warningThreshold = Objects.requireNonNull(warningThreshold);
+        this.budgetStatus = Objects.requireNonNull(budgetStatus);
+        this.friendLoanSummaries = List.copyOf(Objects.requireNonNull(friendLoanSummaries));
+        this.walletInsights = List.copyOf(Objects.requireNonNull(walletInsights));
+        this.allWallets = List.copyOf(Objects.requireNonNull(allWallets));
+    }
+
+    @Override
+    public String getWalletName() {
+        return walletName;
+    }
+
+    @Override
+    public String getWalletCurrency() {
+        return walletCurrency;
     }
 
     @Override
@@ -76,32 +110,32 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     }
 
     @Override
+    public BigDecimal getBudgetLimit() {
+        return budgetLimit;
+    }
+
+    @Override
+    public BigDecimal getWarningThreshold() {
+        return warningThreshold;
+    }
+
+    @Override
     public BudgetStatus getBudgetStatus() {
         return budgetStatus;
     }
 
     @Override
-    public BigDecimal getFriendLoanGivenTotal() {
-        return friendLoanGivenTotal;
+    public List<FriendLoanSummary> getFriendLoanSummaries() {
+        return Collections.unmodifiableList(friendLoanSummaries);
     }
 
     @Override
-    public BigDecimal getFriendLoanReceivedTotal() {
-        return friendLoanReceivedTotal;
+    public List<WalletInsight> getWalletInsights() {
+        return Collections.unmodifiableList(walletInsights);
     }
 
     @Override
-    public BigDecimal getFriendLoanNetBalance() {
-        return friendLoanNetBalance;
-    }
-
-    @Override
-    public BigDecimal getBankLoanTotal() {
-        return bankLoanTotal;
-    }
-
-    @Override
-    public Map<String, BigDecimal> getTopCategories() {
-        return Collections.unmodifiableMap(topCategories);
+    public List<CashAccount> getAllWallets() {
+        return Collections.unmodifiableList(allWallets);
     }
 }

@@ -114,4 +114,5 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     public String toHexString() {
         return String.format("#%02X%02X%02X%02X", alpha, red, green, blue);
     }
+    
 }

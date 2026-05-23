@@ -7,12 +7,10 @@ package it.unibo.unibodget.model.categories;
  * - income categories (money received)
  * - expense categories (money spent)
  * - friend‑to‑friend loan categories
- * - bank‑related loan categories
  */
 public enum CategoryType {
     INCOME,
     EXPENSE,
     TRANSFER,
-    FRIEND_LOAN,
-    BANK_LOAN;
+    FRIEND_LOAN;
 }

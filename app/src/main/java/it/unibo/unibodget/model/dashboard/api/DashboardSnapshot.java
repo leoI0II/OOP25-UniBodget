@@ -4,37 +4,69 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
+import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
 import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
- * Immutable read model containing the information required by the dashboard.
+ * Immutable snapshot of the information required by the dashboard view.
  *
- * A snapshot groups together the current total balance, the recent transactions,
- * the category summaries, the current budget status, and the derived values
- * used by advanced dashboard widgets.
+ * <p>
+ * A snapshot represents a coherent view of the currently selected wallet,
+ * including identity, balance, recent transactions, category summaries, budget
+ * configuration, and budget status.</p>
  */
 public interface DashboardSnapshot {
 
     /**
-     * Returns the total balance shown in the dashboard.
+     * Returns the name of the currently selected wallet.
+     *
+     * @return the current wallet name
+     */
+    String getWalletName();
+
+    /**
+     * Returns the textual representation of the current wallet base currency.
+     *
+     * @return the wallet currency
+     */
+    String getWalletCurrency();
+
+    /**
+     * Returns the total balance of the current wallet.
      *
      * @return the total dashboard balance
      */
     BigDecimal getTotalBalance();
 
     /**
-     * Returns the recent transactions shown in the dashboard.
+     * Returns the recent transactions associated with the current wallet.
      *
      * @return the recent transactions
      */
     List<Transaction> getRecentTransactions();
 
     /**
-     * Returns the aggregated amounts grouped by category.
+     * Returns the aggregated amounts by category.
      *
      * @return the category summaries
      */
     Map<String, BigDecimal> getCategorySummaries();
+
+    /**
+     * Returns the configured budget limit of the current wallet.
+     *
+     * @return the budget limit
+     */
+    BigDecimal getBudgetLimit();
+
+    /**
+     * Returns the configured warning threshold of the current wallet.
+     *
+     * @return the warning threshold
+     */
+    BigDecimal getWarningThreshold();
 
     /**
      * Returns the current budget status.
@@ -44,39 +76,23 @@ public interface DashboardSnapshot {
     BudgetStatus getBudgetStatus();
 
     /**
-     * Returns the total amount of money lent to friends.
+     * Returns the friend-loan summaries associated with the current wallet.
      *
-     * @return the total friend loans given
+     * @return the friend-loan summaries
      */
-    BigDecimal getFriendLoanGivenTotal();
+    List<FriendLoanSummary> getFriendLoanSummaries();
 
+    List<CashAccount> getAllWallets();
     /**
-     * Returns the total amount of money borrowed from friends.
+     * Returns the wallet insights associated with the current wallet.
      *
-     * @return the total friend loans received
-     */
-    BigDecimal getFriendLoanReceivedTotal();
-
-    /**
-     * Returns the net balance of friend loans.
-     * A positive value means that friends owe money to the user.
-     * A negative value means that the user owes money to friends.
+     * <p>
+     * This method is defined as a default method to preserve compatibility with
+     * existing implementations of the interface.</p>
      *
-     * @return the net friend loan balance
+     * @return the wallet insights, or an empty list when not available
      */
-    BigDecimal getFriendLoanNetBalance();
-
-    /**
-     * Returns the aggregated total amount associated with bank loans.
-     *
-     * @return the total bank loan amount
-     */
-    BigDecimal getBankLoanTotal();
-
-    /**
-     * Returns the top category summaries ordered by absolute value descending.
-     *
-     * @return the top category summaries
-     */
-    Map<String, BigDecimal> getTopCategories();
+    default List<WalletInsight> getWalletInsights() {
+        return List.of();
+    }
 }

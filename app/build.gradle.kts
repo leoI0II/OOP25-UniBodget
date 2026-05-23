@@ -28,18 +28,15 @@ dependencies {
 
     runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
 
-    // Testing
     testImplementation(libs.junit.jupiter)
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Utilities
     implementation(libs.guava)
 }
 
 application {
-    mainClass.set("it.unibo.unibodget.Unibodget")
-
+    mainClass.set("it.unibo.unibodget.app.UnibodgetApp")
 }
 
 tasks.test {
