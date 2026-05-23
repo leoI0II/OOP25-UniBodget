@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.unibo.unibodget.model.currency.*;
 import it.unibo.unibodget.model.investment.*;
 import it.unibo.unibodget.model.investment.observers.InvestmentOrderEventListener;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
@@ -18,10 +19,6 @@ import org.apache.commons.csv.CSVPrinter;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
-import it.unibo.unibodget.model.currency.Asset;
-import it.unibo.unibodget.model.currency.CryptoCurrency;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
@@ -185,7 +182,7 @@ public class DefaultInvestmentController implements InvestmentController {
     ) {
         var nativeTotalCost = unitPrice.multiply(quantity);
         nativeTotalCost = addFee ? nativeTotalCost.add(fee) : nativeTotalCost.subtract(fee);
-        final CurrencyUnit targetCurrency = targetCurrencyOf(paymentSource, nativeTotalCost.currency());
+        final CurrencyUnit targetCurrency = targetCurrencyOf(paymentSource, getCurrentAccountOrThrow().getBaseCurrency());
 
         return nativeTotalCost.currency().equals(targetCurrency) 
             ? nativeTotalCost 

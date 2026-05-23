@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import it.unibo.unibodget.model.converter.provider.PriceProvider;
+import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.Position;
@@ -25,7 +25,7 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
  */
 public class InvestmentAccount extends Wallet<InvestmentTransaction> {
 
-    private final PriceProvider priceProvider;
+    private final ExchangeRateProvider exchangeRateProvider;
 
     /**
      * Creates an InvestmentAccount with an existing transaction history.
@@ -33,15 +33,15 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param name          the display name; if empty a default name is generated
      * @param baseCurrency  the currency in which the balance is expressed
      * @param history       the pre-existing transaction ledger
-     * @param priceProvider the provider used to fetch current market prices
+     * @param exchangeRateProvider the provider used to fetch current market prices
      */
     public InvestmentAccount(
         String name, 
         CurrencyUnit baseCurrency, 
         Historical<InvestmentTransaction> history,
-        PriceProvider priceProvider) {
+        ExchangeRateProvider exchangeRateProvider) {
         super(name, baseCurrency, history, "Investment Account");
-        this.priceProvider = Objects.requireNonNull(priceProvider, "Price provider cannot be null");
+        this.exchangeRateProvider = Objects.requireNonNull(exchangeRateProvider, "Price provider cannot be null");
     }
 
     /**
@@ -49,10 +49,10 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      *
      * @param name         the display name; if empty a default name is generated
      * @param baseCurrency the currency in which the balance is expressed
-     * @param priceProvider the provider for fetching market prices
+     * @param exchangeRateProvider the provider for fetching market prices
      */
-    public InvestmentAccount(String name, CurrencyUnit baseCurrency, PriceProvider priceProvider) {
-        this(name, baseCurrency, new Historical<>(), priceProvider);
+    public InvestmentAccount(String name, CurrencyUnit baseCurrency, ExchangeRateProvider exchangeRateProvider) {
+        this(name, baseCurrency, new Historical<>(), exchangeRateProvider);
     }
 
     /**
@@ -131,7 +131,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
         var avgCost = totalQty.signum() == 0
                 ? BigDecimal.ZERO
                 : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
-        Asset currentPrice = priceProvider.getCurrentPrice(asset, getBaseCurrency());
+        Asset currentPrice = exchangeRateProvider.convert(new Asset(asset, BigDecimal.ONE), getBaseCurrency());
         Asset currentMarketValue = currentPrice.multiply(totalQty);
         return new Position(
             asset, 
