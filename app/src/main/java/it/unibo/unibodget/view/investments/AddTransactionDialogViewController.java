@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -137,6 +138,7 @@ public class AddTransactionDialogViewController {
         var selectedAsset = selectedAssetComboBox.getValue();
         var quantityText = quantityTextField.getText();
         var priceText = pricePerAssetTextField.getText();
+        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
 
         if (selectedAsset == null || quantityText.isBlank() || priceText.isBlank()) {
             showErrorPopup("Please fill all required fields.");
@@ -144,10 +146,10 @@ public class AddTransactionDialogViewController {
         }
 
         var quantity = new BigDecimal(quantityText);
-        var pricePerAsset = Asset.of(selectedAsset, new BigDecimal(priceText));
+        var pricePerAsset = Asset.of(baseCurrency, new BigDecimal(priceText));
         var fee = feeTextField.getText().isBlank()
-                ? Asset.zero(selectedAsset)
-                : Asset.of(selectedAsset, new BigDecimal(feeTextField.getText()));
+                ? Asset.zero(baseCurrency)
+                : Asset.of(baseCurrency, new BigDecimal(feeTextField.getText()));
         var paymentSource = getSelectedPaymentSource();
         var date = datePicker.getValue();
         var notes = notesTextArea.getText();
@@ -288,6 +290,7 @@ public class AddTransactionDialogViewController {
         paymentSourceToggleGroup.selectedToggleProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     updatePaymentSourceToggleGroup(newValue);
+                    updateTotalSpent();
                 });
         setupPaymentSourceComboBox();
         updatePaymentSourceToggleGroup(cashAccountToggleButton);
@@ -373,12 +376,9 @@ public class AddTransactionDialogViewController {
                 (observable, oldValue, newValue) -> {
                     if (!newValue.matches("\\d*\\.?\\d*"))      // [0..9]+.?[0..9]+
                         quantityTextField.setText(oldValue);
+                    else
+                        updateTotalSpent();
                 });
-        quantityTextField.textProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    updateTotalSpent();
-                }
-        );
         quantityTextField.setPromptText("0.00");
     }
 
@@ -402,22 +402,23 @@ public class AddTransactionDialogViewController {
             }
             var quantity = new BigDecimal(qText);
             var pricePerAsset = Asset.of(
-                    selectedAsset,
+                    baseCurrency,
                     new BigDecimal(priceTxt)
             );
             var fee = feeTextField.getText().isBlank() ?
-                    Asset.zero(selectedAsset) :
+                    Asset.zero(baseCurrency) :
                     Asset.of(
-                            selectedAsset,
+                            baseCurrency,
                             new BigDecimal(feeTextField.getText())
                     );
+            var paymentSource = getSelectedPaymentSource();
             var totalSpent = investmentController.estimateOrderCost(
                     orderTypeMapByTab.get(currentTabSelected),
                     selectedAsset,
                     quantity,
                     pricePerAsset,
                     fee,
-                    getSelectedPaymentSource()
+                    paymentSource
             );
             totalSpentValueLabel.setText(fmtAsset(totalSpent));
         } catch (NumberFormatException e) {
@@ -466,6 +467,7 @@ public class AddTransactionDialogViewController {
                                 .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
                                 .toPlainString()
                 );
+                updateTotalSpent();
             }
         });
         selectedAssetComboBox.valueProperty().addListener(
@@ -560,6 +562,7 @@ public class AddTransactionDialogViewController {
 
     @FXML
     private void handleCloseDialog() {
-
+        Stage stage = (Stage) addTransactionButton.getScene().getWindow();
+        stage.close();
     }
 }
