@@ -44,6 +44,7 @@ public class AddTransactionDialogViewController {
     @FXML private ToggleButton stableCoinToggleButton;
     @FXML private ToggleButton noPaymentToggleButton;
     @FXML private ComboBox<Object> paymentSourceComboBox;
+    @FXML private Label totalSpentReceivedTextLabel;
     @FXML private Label totalSpentValueLabel;
     @FXML private Button addTransactionButton;
 
@@ -79,6 +80,17 @@ public class AddTransactionDialogViewController {
         setupPaymentSourceToggleButtons();
         setupTotalSpentValueLabel();
         setupAddTransactionButton();
+        setupTotalSpentReceivedTextLabel();
+    }
+
+    private void setupTotalSpentReceivedTextLabel() {
+        var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
+        OrderType orderType = orderTypeMapByTab.get(currentTab);
+        totalSpentReceivedTextLabel.setText(switch(orderType) {
+            case BUY -> "Total Spent";
+            case SELL -> "Total Received";
+            case TRANSFER -> "Total Transferred";
+        });
     }
 
     private void resetForm(Tab tab) {
@@ -118,6 +130,7 @@ public class AddTransactionDialogViewController {
         transferTotalLabel.setText(
             fmtAsset(Asset.zero(baseCurrency))
         );
+        setupTotalSpentReceivedTextLabel();
     }
 
     private void setupAddTransactionButton() {
