@@ -43,7 +43,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("it.unibo.unibodget.unibodget")
+    mainClass.set("it.unibo.unibodget.app.UnibodgetApp")
 }
 
 tasks.test {

@@ -1,11 +1,7 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
-import it.unibo.unibodget.model.utils.ARGBColor;
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
-
-import java.lang.reflect.*;
-import java.util.*;
 
 public final class JsonDataParser<T> implements DataParser<T> {
 
