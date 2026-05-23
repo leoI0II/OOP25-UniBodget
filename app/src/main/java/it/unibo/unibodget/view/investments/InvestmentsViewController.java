@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -261,7 +263,8 @@ public class InvestmentsViewController implements SideBarDelegate {
 
         snapshotService.getSnapshots(account.getId())
                 .forEach(snap -> {
-                    String date = snap.timestamp().toString();
+                    String date = snap.timestamp()
+                            .format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"));
                     plSeries.getData().add(
                             new XYChart.Data<>(date, snap.totalPL())
                     );

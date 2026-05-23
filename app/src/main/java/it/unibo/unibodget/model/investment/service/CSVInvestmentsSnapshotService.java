@@ -71,7 +71,7 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
         ) {
             return parser.getRecords().stream()
                     .map(record -> new BalanceSnapshot(
-                            LocalDate.parse(record.get(0)),
+                            LocalDateTime.parse(record.get(0)),
                             new BigDecimal(record.get(1)),
                             new BigDecimal(record.get(2))
                     ))
