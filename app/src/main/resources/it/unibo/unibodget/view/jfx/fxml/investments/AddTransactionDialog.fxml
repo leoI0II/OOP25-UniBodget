@@ -18,22 +18,14 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.AddTransactionDialogViewController">
    <children>
-      <HBox prefHeight="50.0" prefWidth="500.0" spacing="10.0" VBox.vgrow="NEVER">
+      <HBox prefHeight="50.0" spacing="10.0" VBox.vgrow="NEVER">
          <children>
-            <Label prefHeight="63.0" prefWidth="220.0" text="Add Transaction" HBox.hgrow="NEVER">
-               <font>
-                  <Font size="24.0" />
-               </font>
-               <padding>
-                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-               </padding>
+            <Label text="Add Transaction">
+               <font><Font size="18.0" /></font>
+               <padding><Insets bottom="8.0" left="8.0" top="8.0" /></padding>
             </Label>
-            <Region prefHeight="50.0" prefWidth="156.0" HBox.hgrow="ALWAYS" />
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleCloseDialog" prefHeight="50.0" prefWidth="96.0" text="X" HBox.hgrow="NEVER">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#handleCloseDialog" prefHeight="40.0" prefWidth="40.0" text="X" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -70,15 +62,22 @@
                <children>
                   <VBox prefHeight="90.0" prefWidth="250.0" HBox.hgrow="ALWAYS">
                      <children>
-                        <Label prefHeight="30.0" prefWidth="202.0" text="Quantity">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                           <padding>
-                              <Insets left="10.0" right="10.0" />
-                           </padding>
-                        </Label>
-                        <TextField fx:id="quantityTextField" prefHeight="40.0" prefWidth="202.0">
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="30.0" prefWidth="120.0" text="Quantity" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Region prefHeight="43.0" prefWidth="60.0" HBox.hgrow="ALWAYS" />
+                              <ToggleButton fx:id="maxQuantityToggleButton" mnemonicParsing="false" prefHeight="29.0" prefWidth="81.0" text="MAX" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </ToggleButton>
+                           </children>
+                        </HBox>
+                        <TextField fx:id="quantityTextField" prefHeight="100.0" prefWidth="187.0">
                            <padding>
                               <Insets left="10.0" right="10.0" />
                            </padding>
@@ -93,7 +92,7 @@
                               <Font size="15.0" />
                            </font>
                            <padding>
-                              <Insets left="10.0" right="10.0" />
+                              <Insets right="10.0" />
                            </padding>
                         </Label>
                         <TextField fx:id="pricePerAssetTextField" prefHeight="40.0" prefWidth="202.0">
@@ -151,26 +150,72 @@
             <Region prefHeight="21.0" prefWidth="460.0" VBox.vgrow="ALWAYS" />
          </children>
       </VBox>
-      <VBox fx:id="transferFieldsPanel" managed="false" spacing="8" visible="false">
 
-         <Label text="Destination wallet" />
-         <ComboBox fx:id="destinationAccountComboBox" maxWidth="Infinity" promptText="Select destination wallet..." />
+      <!-- CAMPI TRANSFER -->
+      <VBox fx:id="transferFieldsPanel" managed="false" prefWidth="500.0" spacing="10.0" visible="false" VBox.vgrow="ALWAYS">
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <children>
 
-         <Label text="Asset to transfer" />
-         <ComboBox fx:id="transferAssetComboBox" maxWidth="Infinity" promptText="Select asset..." />
+            <ComboBox fx:id="destinationAccountComboBox" maxWidth="1.7976931348623157E308" prefHeight="50.0" promptText="Destination wallet ..." />
 
-         <TextField fx:id="transferQuantityTextField" promptText="Quantity" />
+            <HBox maxWidth="1.7976931348623157E308" prefHeight="74.0" spacing="8.0">
+               <children>
+                  <VBox HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label text="Asset to transfer">
+                           <font><Font size="15.0" /></font>
+                           <padding><Insets left="10.0" right="10.0" /></padding>
+                        </Label>
+                        <ComboBox fx:id="transferAssetComboBox" maxWidth="1.7976931348623157E308" promptText="Select asset ..." />
+                     </children>
+                  </VBox>
+                  <VBox HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label text="Quantity">
+                           <font><Font size="15.0" /></font>
+                           <padding><Insets left="10.0" right="10.0" /></padding>
+                        </Label>
+                        <HBox spacing="4.0">
+                           <children>
+                              <TextField fx:id="transferQuantityTextField" maxWidth="1.7976931348623157E308" promptText="0.00" HBox.hgrow="ALWAYS" />
+                              <ToggleButton fx:id="transferMaxQuantityToggleButton" prefHeight="26.0" text="MAX" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
 
-         <DatePicker fx:id="transferDatePicker" maxWidth="Infinity" />
+            <HBox maxWidth="1.7976931348623157E308" prefHeight="50.0" spacing="8.0">
+               <children>
+                  <DatePicker fx:id="transferDatePicker" minWidth="150.0" prefHeight="44.0" prefWidth="200.0" />
+                  <TextArea fx:id="transferNotesTextArea" prefHeight="49.0" promptText="Notes ..." HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
 
-         <TextArea fx:id="transferNotesTextArea" prefRowCount="2" promptText="Notes..." />
+            <Region prefHeight="10.0" VBox.vgrow="ALWAYS" />
 
-         <HBox alignment="CENTER_LEFT" spacing="8">
-            <Label text="Quantity to transfer:" />
-            <Label fx:id="transferTotalLabel" text="0" />
-         </HBox>
+            <VBox maxWidth="1.7976931348623157E308" spacing="6.0" VBox.vgrow="NEVER">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <children>
+                  <Label text="Quantity to transfer">
+                     <font><Font size="18.0" /></font>
+                     <padding><Insets left="10.0" /></padding>
+                  </Label>
+                  <Label fx:id="transferTotalLabel" text="0.00">
+                     <font><Font size="27.0" /></font>
+                     <padding><Insets left="10.0" /></padding>
+                  </Label>
+               </children>
+            </VBox>
 
+         </children>
       </VBox>
+
       <Button fx:id="addTransactionButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="39.0" prefWidth="530.0" text="Add Transaction" VBox.vgrow="ALWAYS">
          <font>
             <Font name="FantasqueSansM Nerd Font Regular" size="20.0" />
