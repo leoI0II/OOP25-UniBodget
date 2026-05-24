@@ -11,6 +11,7 @@ import it.unibo.unibodget.view.main.SideBarDelegate;
 import it.unibo.unibodget.view.main.SideBarItem;
 import it.unibo.unibodget.view.main.SideBarViewController;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
@@ -447,8 +448,13 @@ public class InvestmentsViewController implements SideBarDelegate {
             // dopo che l'utente chiude il dialog, aggiorna la view
             refreshData();
 
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot load AddTransactionDialog", e);
+        } catch (Exception e) {
+            System.err.println("=== DIALOG ERROR ===");
+            e.printStackTrace();
+            ToastNotification.showError(
+                    addTransactionButton.getScene().getWindow(),
+                    "Error opening dialog: " + e.getMessage()
+            );
         }
     }
 
