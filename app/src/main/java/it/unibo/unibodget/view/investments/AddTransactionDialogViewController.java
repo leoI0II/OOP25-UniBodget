@@ -36,6 +36,7 @@ public class AddTransactionDialogViewController {
     private Map<Tab, OrderType> orderTypeMapByTab;      // no puo essere final a causa che gli tab sono caricati dopo
     @FXML private ComboBox<CurrencyUnit> selectedAssetComboBox;
     @FXML private TextField quantityTextField;
+    @FXML private ToggleButton maxQuantityToggleButton;     // solo per SELL
     @FXML private TextField pricePerAssetTextField;
     @FXML private DatePicker datePicker;
     @FXML private TextField feeTextField;
@@ -54,6 +55,7 @@ public class AddTransactionDialogViewController {
     @FXML private ComboBox<InvestmentAccount> destinationAccountComboBox;
     @FXML private ComboBox<CurrencyUnit> transferAssetComboBox;
     @FXML private TextField transferQuantityTextField;
+    @FXML private ToggleButton transferMaxQuantityToggleButton;
     @FXML private DatePicker transferDatePicker;
     @FXML private TextArea transferNotesTextArea;
     @FXML private Label transferTotalLabel;
@@ -383,6 +385,38 @@ public class AddTransactionDialogViewController {
         pricePerAssetTextField.setPromptText(fmtAsset(Asset.zero(baseCurrency)));
     }
 
+    private void setupMaxQuantityButton(
+            final ToggleButton btn,
+            final ComboBox<CurrencyUnit> comboBox,
+            final TextField qtyTextField) {
+        btn.selectedProperty().addListener(
+                (observable, wasSelected, isSelected) -> {
+                    if (isSelected) {
+                        var asset = comboBox.getValue();
+                        if (asset == null) {
+                            btn.setSelected(false);
+                            return;
+                        }
+                        investmentController.getPositions().stream()
+                                .filter(p -> p.asset().equals(asset))
+                                .findFirst()
+                                .ifPresentOrElse(
+                                        p -> {
+                                            qtyTextField.setText(
+                                                    p.quantity().stripTrailingZeros().toPlainString()
+                                            );
+                                            qtyTextField.setDisable(true);
+                                        },
+                                        () -> btn.setSelected(false)
+                                );
+                    } else {
+                        qtyTextField.setDisable(false);
+                        qtyTextField.clear();
+                    }
+                }
+        );
+    }
+
     private void setupQuantityTextField() {
         quantityTextField.clear();
         quantityTextField.textProperty().addListener(
@@ -393,6 +427,16 @@ public class AddTransactionDialogViewController {
                         updateTotalSpent();
                 });
         quantityTextField.setPromptText("0.00");
+
+        setupMaxQuantityButton(maxQuantityToggleButton, selectedAssetComboBox, quantityTextField);
+        // all initialize cmq si apre il tab BUY a cui non serve il btn
+        maxQuantityToggleButton.setVisible(false);
+        maxQuantityToggleButton.setManaged(false);
+        selectedAssetComboBox.valueProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    maxQuantityToggleButton.setSelected(false);
+                }
+        );
     }
 
     private String fmtAsset(final Asset asset) {
@@ -508,6 +552,9 @@ public class AddTransactionDialogViewController {
         transferFieldsPanel.setVisible(isTransfer);
         transferFieldsPanel.setManaged(isTransfer);
 
+        maxQuantityToggleButton.setVisible(tab == sellTab);
+        maxQuantityToggleButton.setManaged(tab == sellTab);
+
         resetForm(tab);
 
         if (isTransfer) {
@@ -571,6 +618,7 @@ public class AddTransactionDialogViewController {
         // notes — solo clear
         transferNotesTextArea.clear();
         transferNotesTextArea.setPromptText("Notes...");
+        setupMaxQuantityButton(transferMaxQuantityToggleButton, transferAssetComboBox, transferQuantityTextField);
     }
 
     @FXML
