@@ -7,19 +7,21 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="700.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
+<VBox minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
    <children>
       <HBox prefHeight="60.0" prefWidth="150.0" spacing="8.0">
          <children>
-            <Button mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" text="Close" textAlignment="JUSTIFY" wrapText="true">
+            <Button minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" text="Close" textAlignment="JUSTIFY" wrapText="true">
                <font>
                   <Font name="JetBrainsMono NF Bold" size="14.0" />
                </font>
             </Button>
-            <MenuButton alignment="CENTER" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" stylesheets="@style.css" text="Menu">
+            <Region prefHeight="41.0" prefWidth="30.0" HBox.hgrow="ALWAYS" />
+            <MenuButton alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" stylesheets="@style.css" text="Menu">
                <items>
                   <MenuItem mnemonicParsing="false" text="Dashboard" />
                   <MenuItem mnemonicParsing="false" text="Converter" />
@@ -40,12 +42,12 @@
       </HBox>
       <ScrollPane prefHeight="555.0" prefWidth="150.0" VBox.vgrow="ALWAYS">
          <content>
-            <VBox fx:id="walletList" prefHeight="548.0" prefWidth="147.0" spacing="8.0">
+            <VBox fx:id="walletList" prefHeight="548.0" prefWidth="198.0" spacing="8.0">
                <padding>
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
                <children>
-                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="72.0" prefWidth="137.0" text="+">
+                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="72.0" prefWidth="203.0" text="+">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>
@@ -54,19 +56,18 @@
             </VBox>
          </content>
       </ScrollPane>
-      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="150.0">
-         <children>
-            <Label alignment="CENTER" prefHeight="100.0" prefWidth="75.0" text="Total:">
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="18.0" />
-               </font>
-            </Label>
-            <Label fx:id="totalBalanceLabel" prefHeight="100.0" prefWidth="75.0" text="\$0.00">
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="18.0" />
-               </font>
-            </Label>
-         </children>
-      </HBox>
+      <Label prefHeight="35.0" prefWidth="217.0" text="Total:">
+         <font>
+            <Font name="JetBrainsMono NF Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="totalBalanceLabel" alignment="CENTER_RIGHT" prefHeight="63.0" prefWidth="203.0" text="\$0.00">
+         <font>
+            <Font name="JetBrainsMono NF Bold" size="22.0" />
+         </font>
+         <padding>
+            <Insets right="10.0" />
+         </padding>
+      </Label>
    </children>
 </VBox>

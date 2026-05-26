@@ -11,7 +11,7 @@
             fx:controller="it.unibo.unibodget.view.main.MainViewController"
             prefHeight="700.0" prefWidth="900.0">
     <children>
-        <fx:include fx:id="sideBar" source="SideBarView.fxml"/>  <!-- carica la side bar una volta sola per tutti i contesti -->
+        <fx:include fx:id="sideBar" source="/it/unibo/unibodget/view/jfx/fxml/main/SideBarView.fxml"/>  <!-- carica la side bar una volta sola per tutti i contesti -->
         <StackPane fx:id="contentArea" HBox.hgrow="ALWAYS"/> <!-- cambia il contenuto del contesto -->
     </children>
 </HBox>
