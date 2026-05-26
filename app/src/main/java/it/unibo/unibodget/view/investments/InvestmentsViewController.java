@@ -2,15 +2,16 @@ package it.unibo.unibodget.view.investments;
 
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.investment.ExportResult;
+import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.OrderResultEvent;
 import it.unibo.unibodget.model.wallet.Wallet;
-import it.unibo.unibodget.view.main.SideBarDelegate;
-import it.unibo.unibodget.view.main.SideBarItem;
-import it.unibo.unibodget.view.main.SideBarViewController;
-import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.main.*;
+import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -21,10 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -38,7 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class InvestmentsViewController implements SideBarDelegate {
+public class InvestmentsViewController extends BaseViewController implements SideBarDelegate {
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -46,6 +44,7 @@ public class InvestmentsViewController implements SideBarDelegate {
 
     private SideBarViewController sideBarViewController;
     @FXML private Button addTransactionButton;
+    private Window addTransactionDialog;
     @FXML private Label currentWalletName;
     @FXML private Label walletBalance;
     @FXML private Label allTimeProfitValue;

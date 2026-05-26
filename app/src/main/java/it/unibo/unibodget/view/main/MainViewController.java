@@ -12,14 +12,15 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.util.Objects;
 
-public class MainViewController {
+public class MainViewController extends BaseViewController {
 
-    @FXML private SideBarViewController sideBarViewController;
+    @FXML private SideBarViewController sideBarController;
     @FXML private StackPane contentArea;
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
     private final DashboardFacade dashboardFacade;
     private final ViewControllersFactory viewControllersFactory;
+    private BaseViewController currentVC;           // salvo la ref al view controller corrente per pulire i dati con dispose() alla fine dell utilizzo
 
     public MainViewController(
             InvestmentController investmentController,

@@ -6,8 +6,12 @@ import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.OrderResultEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import it.unibo.unibodget.view.main.BaseViewController;
+import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -24,7 +28,7 @@ import java.util.Objects;
 
 import static java.util.Map.entry;
 
-public class AddTransactionDialogViewController {
+public class AddTransactionDialogViewController extends BaseViewController {
 
     private final InvestmentController investmentController;
 
