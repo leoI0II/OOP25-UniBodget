@@ -90,6 +90,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
+
+        subscribe(OrderResultEvent.class, this::onOrderResultEvent);
     }
 
     public void setSideBarViewController(final SideBarViewController sideBarViewController) {
@@ -433,8 +435,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             loader.setControllerFactory(viewControllersFactory::create);
 
             Parent root = loader.load();
+            var addTransactionController = (BaseViewController) loader.getController();
 
             Stage dialog = new Stage();
+            addTransactionDialog = dialog;
             dialog.initOwner(addTransactionButton.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.initStyle(StageStyle.UNDECORATED); // no title bar
@@ -442,7 +446,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.setWidth(450);
             dialog.setHeight(620);
             dialog.setResizable(false);
+            dialog.setOnCloseRequest(event -> addTransactionController.dispose());
             dialog.showAndWait();
+
+            addTransactionController.dispose();
 
             // dopo che l'utente chiude il dialog, aggiorna la view
             refreshData();
@@ -454,6 +461,12 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                     addTransactionButton.getScene().getWindow(),
                     "Error opening dialog: " + e.getMessage()
             );
+        }
+    }
+
+    private void onOrderResultEvent(final OrderResultEvent event) {
+        if (event.result.isSuccess()) {
+            addTransactionDialog.hide();        // se success, nascondo la finestra
         }
     }
 

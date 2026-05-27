@@ -55,6 +55,7 @@ public class SideBarViewController {
     private Node createAddWalletTile() {
         var btn = new Button("+ Add wallet");
         btn.setMaxWidth(Double.MAX_VALUE);  // occupa tutta la larghezza
+        btn.setPrefHeight(50);
         btn.setOnAction(e -> handleAddWallet());
         return btn;
     }

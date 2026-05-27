@@ -30,6 +30,12 @@ public class ViewControllersFactory {
         if (controllerClass == AddTransactionDialogViewController.class) {
             return new AddTransactionDialogViewController(investmentController);
         }
+        if (controllerClass == MainViewController.class) {
+            return new MainViewController(investmentController,
+                    snapshotService,
+                    null,
+                    this);
+        }
 
         try {
             return controllerClass.getDeclaredConstructor().newInstance();

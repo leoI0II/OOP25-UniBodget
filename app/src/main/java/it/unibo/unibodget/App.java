@@ -9,6 +9,7 @@ import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 import it.unibo.unibodget.view.investments.InvestmentsViewController;
+import it.unibo.unibodget.view.main.MainViewController;
 import it.unibo.unibodget.view.main.SideBarViewController;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
 import javafx.application.Application;
@@ -38,30 +39,19 @@ public class App extends Application {
         investmentsService.addWallet(new InvestmentAccount("Binance", FiatCurrency.USD, new MockExchangeRateProvider()));
         investmentsService.addWallet(new InvestmentAccount("OKX", FiatCurrency.USD, new MockExchangeRateProvider()));
 
-        FXMLLoader sideBarLoader = new FXMLLoader(getClass()
-                .getResource("/it/unibo/unibodget/view/jfx/fxml/main/SideBarView.fxml")
-        );
-        Node sideBar = sideBarLoader.load();
-        SideBarViewController sideBarVC = sideBarLoader.getController();
-
-        FXMLLoader investmentsPageLoader = new FXMLLoader(
+        FXMLLoader mainViewPage = new FXMLLoader(
                 getClass().getResource(
-                        "/it/unibo/unibodget/view/jfx/fxml/investments/InvestmentsView.fxml"
+                        "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"
                 )
         );
         var factory = new ViewControllersFactory(investmentsController, snapshotService);
-        investmentsPageLoader.setControllerFactory(factory::create);
-        Node investmentsPageView = investmentsPageLoader.load();
-
-        // collegamento side bar
-        InvestmentsViewController investmentsVC = investmentsPageLoader.getController();
-        investmentsVC.setSideBarViewController(sideBarVC);
-        sideBarVC.setDelegate(investmentsVC);
-        investmentsVC.onItemSelected(investmentsController.getAllInvestmentAccounts().getFirst().getId());
+        mainViewPage.setControllerFactory(factory::create);
+        Node mainViewNode = mainViewPage.load();
+        MainViewController mainVC = mainViewPage.getController();
 
         // metto tutto in un Hbox temp
-        var root = new HBox(sideBar, investmentsPageView);
-        HBox.setHgrow(investmentsPageView, Priority.ALWAYS);
+        var root = new HBox(mainViewNode);
+        HBox.setHgrow(mainViewNode, Priority.ALWAYS);
 
         primaryStage.setScene(new Scene(root, 900, 700));
         primaryStage.setTitle("Investments");
