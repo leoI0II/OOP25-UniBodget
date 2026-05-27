@@ -184,7 +184,6 @@ public class AddTransactionDialogViewController extends BaseViewController {
             );
             default -> throw new IllegalStateException("Unexpected order type: " + orderType);
         };
-
         handleOrderResult(result);
     }
 
@@ -206,26 +205,11 @@ public class AddTransactionDialogViewController extends BaseViewController {
                 transferDatePicker.getValue(),
                 transferNotesTextArea.getText()
         );
-
         handleOrderResult(result);
     }
 
     private void handleOrderResult(OrderResult result) {
-        switch (result) {
-            case OrderResult.InsufficientFunds f ->
-                    showErrorPopup("Insufficient funds. Required: "
-                            + fmtAsset(f.required()) + ", available: " + fmtAsset(f.available()));
-            case OrderResult.InsufficientAssets a ->
-                    showErrorPopup("Insufficient assets. Required: "
-                            + a.requested() + ", available: " + a.available());
-            default -> {
-                if (result.isSuccess()) {
-                    showInfoPopup("Transaction executed successfully!");
-                    // chiudo il dialog
-                    addTransactionButton.getScene().getWindow().hide();
-                }
-            }
-        }
+        MessageBus.send(new OrderResultEvent(result));
     }
 
     private void showErrorPopup(final String message) {
@@ -252,20 +236,15 @@ public class AddTransactionDialogViewController extends BaseViewController {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty ||  item == null) {
+                if (empty || item == null) {
                     setText(null);
-                } else {
-                    if (cashAccountToggleButton.isSelected()) {
-                        var account = (CashAccount) item;
-                        setText(account.getName());
-                    } else if (stableCoinToggleButton.isSelected()) {
-                        var stable = (CurrencyUnit) item;
-                        setText(fmtComboBoxItemString(stable));
-                    } else if (noPaymentToggleButton.isSelected()) {
-                        setText("No Payment");
-                    } else {
-                        setText(null);
-                    }
+                    return;
+                }
+                // pattern matching invece di cast basato su toggle
+                switch (item) {
+                    case CashAccount account -> setText(account.getName());
+                    case CurrencyUnit stable -> setText(fmtComboBoxItemString(stable));
+                    default -> setText(item.toString());
                 }
             }
         });
@@ -274,21 +253,17 @@ public class AddTransactionDialogViewController extends BaseViewController {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
+                super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText("");
+                    setText(null);
+                    return;
                 }
-                else {
-                    if (cashAccountToggleButton.isSelected()) {
-                        var account = (CashAccount) item;
-                        setText(account.getName());
-                    } else if (stableCoinToggleButton.isSelected()) {
-                        var stable = (CurrencyUnit) item;
-                        setText(fmtComboBoxItemString(stable));
-                    } else if (noPaymentToggleButton.isSelected()) {
-                        setText("No Payment");
-                    }
+                // pattern matching invece di cast basato su toggle
+                switch (item) {
+                    case CashAccount account -> setText(account.getName());
+                    case CurrencyUnit stable -> setText(fmtComboBoxItemString(stable));
+                    default -> setText(item.toString());
                 }
-
             }
         });
         paymentSourceComboBox.setOnAction(event -> {
@@ -302,20 +277,32 @@ public class AddTransactionDialogViewController extends BaseViewController {
 
     private void setupPaymentSourceToggleButtons() {
         ToggleGroup paymentSourceToggleGroup = new ToggleGroup();
+
         cashAccountToggleButton.setToggleGroup(paymentSourceToggleGroup);
+        boolean noAvailableCashAccounts = investmentController.getAvailableCashAccounts().isEmpty();
+        cashAccountToggleButton.setDisable(noAvailableCashAccounts);
+
+        // di default voglio gli stable, se ci sono
         stableCoinToggleButton.setToggleGroup(paymentSourceToggleGroup);
+        boolean noStablesInOwn = investmentController.getOwnedStableCoins().isEmpty();
+        stableCoinToggleButton.setDisable(noStablesInOwn);
+        stableCoinToggleButton.setSelected(!noStablesInOwn);
+
+        // se non ci sono stable, allora uso no payment
         noPaymentToggleButton.setToggleGroup(paymentSourceToggleGroup);
-        cashAccountToggleButton.setSelected(true);
+        noPaymentToggleButton.setSelected(noStablesInOwn);
+
         paymentSourceToggleGroup.selectedToggleProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     updatePaymentSourceToggleGroup(newValue);
                     updateTotalSpent();
                 });
         setupPaymentSourceComboBox();
-        updatePaymentSourceToggleGroup(cashAccountToggleButton);
+        updatePaymentSourceToggleGroup(stableCoinToggleButton);
     }
 
     private void updatePaymentSourceToggleGroup(Toggle selected) {
+        paymentSourceComboBox.setValue(null);
         if (selected == cashAccountToggleButton) {
             paymentSourceComboBox.setDisable(false);
             paymentSourceComboBox.setItems(
@@ -323,6 +310,9 @@ public class AddTransactionDialogViewController extends BaseViewController {
                             investmentController.getAvailableCashAccounts()
                     )
             );
+            if (!investmentController.getAvailableCashAccounts().isEmpty()) {
+                paymentSourceComboBox.setValue(investmentController.getAvailableCashAccounts().getFirst());
+            }
         } else if (selected == stableCoinToggleButton) {
             paymentSourceComboBox.setDisable(false);
             paymentSourceComboBox.setItems(
@@ -330,26 +320,30 @@ public class AddTransactionDialogViewController extends BaseViewController {
                             investmentController.getOwnedStableCoins()
                     )
             );
+            if (!investmentController.getOwnedStableCoins().isEmpty()) {
+                paymentSourceComboBox.setValue(investmentController.getOwnedStableCoins().getFirst());
+            }
         } else if (selected == noPaymentToggleButton) {
             paymentSourceComboBox.setDisable(true);
             paymentSourceComboBox.setValue(null);
+
         }
     }
 
     private PaymentSource getSelectedPaymentSource() {
-        if (cashAccountToggleButton.isSelected()) {
-            var account = (CashAccount) paymentSourceComboBox.getValue();
-            if (account == null) return new PaymentSource.NoPaymentChannel();
-            return new PaymentSource.CashAccountChannel(account);
-        } else if (stableCoinToggleButton.isSelected()) {
-            var stable = (CurrencyUnit) paymentSourceComboBox.getValue();
-            return new PaymentSource.StableCoinPositionChannel(
-                    investmentController.getCurrentInvestmentAccount().get(),
-                    stable
-            );
-        } else {
-            return new PaymentSource.NoPaymentChannel();
-        }
+        var value = paymentSourceComboBox.getValue();
+
+        return switch (value) {
+            case CashAccount account ->
+                    new PaymentSource.CashAccountChannel(account);
+            case CurrencyUnit stable ->
+                    new PaymentSource.StableCoinPositionChannel(
+                            investmentController.getCurrentInvestmentAccount().get(),
+                            stable
+                    );
+            case null, default ->
+                    new PaymentSource.NoPaymentChannel();
+        };
     }
 
     private void setupNotesTextArea() {
