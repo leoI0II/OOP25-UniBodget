@@ -107,7 +107,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         notesTextArea.clear();
         datePicker.setValue(LocalDate.now());
         var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
-        totalSpentValueLabel.setText(fmtAsset(
+        totalSpentValueLabel.setText(AssetFormatter.ofAsset(
                 Asset.zero(baseCurrency)
         ));
 
@@ -134,7 +134,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         destinationAccountComboBox.setValue(null);
         transferAssetComboBox.setValue(null);
         transferTotalLabel.setText(
-            fmtAsset(Asset.zero(baseCurrency))
+            AssetFormatter.ofAsset(Asset.zero(baseCurrency))
         );
         setupTotalSpentReceivedTextLabel();
     }
@@ -244,7 +244,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
 
     private void setupTotalSpentValueLabel() {
         var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
-        totalSpentValueLabel.setText(fmtAsset(Asset.zero(baseCurrency)));
+        totalSpentValueLabel.setText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
     }
 
     private void setupPaymentSourceComboBox() {
@@ -369,7 +369,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
                     }
                 });
         var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
-        feeTextField.setPromptText("fee: " + fmtAsset(Asset.zero(baseCurrency)));
+        feeTextField.setPromptText("fee: " + AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
     }
 
     private void setupDatePicker() {
@@ -386,7 +386,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         var baseCurrency = investmentController.getCurrentInvestmentAccount()
                 .get()
                 .getBaseCurrency();
-        pricePerAssetTextField.setPromptText(fmtAsset(Asset.zero(baseCurrency)));
+        pricePerAssetTextField.setPromptText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
     }
 
     private void setupMaxQuantityButton(
@@ -443,12 +443,6 @@ public class AddTransactionDialogViewController extends BaseViewController {
         );
     }
 
-    private String fmtAsset(final Asset asset) {
-        return asset.currency().getSymbol() + " " + asset.amount().setScale(
-                asset.currency().getDisplayDecimals(), RoundingMode.HALF_UP
-        ).toPlainString();
-    }
-
     private void updateTotalSpent() {
         try {
             // prendo tutti i dati scelti dall utente e setto il Label di totale da spendere
@@ -458,7 +452,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
             var priceTxt = pricePerAssetTextField.getText();
             var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
             if (qText.isBlank() || priceTxt.isBlank()) {
-                totalSpentValueLabel.setText(fmtAsset(Asset.zero(baseCurrency)));
+                totalSpentValueLabel.setText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
                 return;
             }
             var quantity = new BigDecimal(qText);
@@ -481,7 +475,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
                     fee,
                     paymentSource
             );
-            totalSpentValueLabel.setText(fmtAsset(totalSpent));
+            totalSpentValueLabel.setText(AssetFormatter.ofAsset(totalSpent));
         } catch (NumberFormatException e) {
             totalSpentValueLabel.setText("Invalid input");
         }

@@ -466,42 +466,22 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         popup.showAndWait();
     }
 
-    private String formatAsset(final Asset asset) {
-        var decimals = asset.currency().getDisplayDecimals();
-        var sign = asset.isNegative() ? "-" : "";
-        return String.format(
-                "%s %s%s",
-                asset.currency().getSymbol(),
-                sign,
-                asset.amount().abs().setScale(decimals, RoundingMode.HALF_UP)
-        );
-    }
-
-    private String formatPercentage(final BigDecimal value) {
-        var sign = value.signum() == -1 ? "-" : "";
-        return String.format(
-                "%s%.2f%%",
-                sign,
-                value.abs().setScale(2, RoundingMode.HALF_UP)
-        );
-    }
-
     private void refreshMainPanel() {
         if (investmentController.getCurrentInvestmentAccount().isEmpty()) return;
 
         changeCurrentWalletName();
 
         walletBalance.setText(
-                formatAsset(investmentController.getCurrentBalance())
+                AssetFormatter.ofAsset(investmentController.getCurrentBalance())
         );
         allTimeProfitValue.setText(
-                formatAsset(investmentController.getCurrentAllTimeProfitLoss())
+                AssetFormatter.ofAsset(investmentController.getCurrentAllTimeProfitLoss())
         );
         allTimeProfitPercentage.setText(
-                formatPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
+                AssetFormatter.ofPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
         );
         costBasisValue.setText(
-                formatAsset(investmentController.getCurrentTotalCostBasis())
+                AssetFormatter.ofAsset(investmentController.getCurrentTotalCostBasis())
         );
 
         // tables upd
@@ -513,10 +493,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                 .ifPresentOrElse(p -> {
                             bestPerformerPositionName.setText(p.asset().getShortName());
                             bestPerformerPositionValue.setText(
-                                    formatAsset(p.getUnrealizedProfitLoss())
+                                    AssetFormatter.ofAsset(p.getUnrealizedProfitLoss())
                             );
                             bestPerformerPositionPercentage.setText(
-                                    formatPercentage(p.getUnrealizedProfitLossPercentage())
+                                    AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
                             );
                 },
                 () -> bestPerformerPositionName.setText("N/A")
@@ -526,10 +506,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                 .ifPresentOrElse(p -> {
                     worstPerformerPositionName.setText(p.asset().getShortName());
                     worstPerformerPositionValue.setText(
-                            formatAsset(p.getUnrealizedProfitLoss())
+                            AssetFormatter.ofAsset(p.getUnrealizedProfitLoss())
                     );
                     worstPerformerPositionPercentage.setText(
-                            formatPercentage(p.getUnrealizedProfitLossPercentage())
+                            AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
                     );
                 },
                 () -> worstPerformerPositionName.setText("N/A")
