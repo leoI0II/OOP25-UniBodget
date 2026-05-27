@@ -10,6 +10,8 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
 
 /**
  * Abstract base class representing a financial wallet that holds a ledger of transactions.
@@ -126,6 +128,7 @@ public abstract class Wallet<T extends Transaction> {
             throw new IllegalArgumentException("Transaction amount cannot be zero.");
         }
         history.addTransaction(transaction);
+        MessageBus.send(new TransactionAddedEvent(this, transaction));
     }
 
     /**

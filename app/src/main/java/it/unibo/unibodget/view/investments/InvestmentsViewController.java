@@ -465,7 +465,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     }
 
     private void onOrderResultEvent(final OrderResultEvent event) {
-        if (event.result.isSuccess()) {
+        if (event.result().isSuccess()) {
             addTransactionDialog.hide();        // se success, nascondo la finestra
         }
     }

@@ -101,7 +101,7 @@ public class MainViewController extends BaseViewController {
 
     private void onOrderResultEvent(final OrderResultEvent event) {
         final var window = contentArea.getScene().getWindow();
-        switch (event.result) {
+        switch (event.result()) {
             case OrderResult.InsufficientFunds f ->
                     ToastNotification.showError(window,
                             "Insufficient funds. Required: "
@@ -111,7 +111,7 @@ public class MainViewController extends BaseViewController {
                             "Insufficient assets. Required: "
                             + a.requested() + ", available: " + a.available());
             default -> {
-                if (event.result.isSuccess()) {
+                if (event.result().isSuccess()) {
                     ToastNotification.showSuccess(window,
                             "Transaction executed successfully!");
                 }

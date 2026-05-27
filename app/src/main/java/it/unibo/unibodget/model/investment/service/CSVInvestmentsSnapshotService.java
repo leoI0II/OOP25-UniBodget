@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.investment.service;
 
 import it.unibo.unibodget.model.investment.BalanceSnapshot;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.wallet.InvestmentAccount;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -31,10 +34,18 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IllegalStateException("Unable to create data directory: " + dir.getAbsolutePath());
         }
+
+        MessageBus.subscribe(TransactionAddedEvent.class, this::onTransactionAddedEvent);
     }
 
     public CSVInvestmentsSnapshotService() {
         this(DEFAULT_DATA_DIR);
+    }
+
+    private void onTransactionAddedEvent(TransactionAddedEvent event) {
+        if (event.wallet() instanceof InvestmentAccount account) {
+            save(account.getId(), BalanceSnapshot.buildInvestmentSnapshot(account));
+        }
     }
 
     private Path fileFor(UUID accountId) {
