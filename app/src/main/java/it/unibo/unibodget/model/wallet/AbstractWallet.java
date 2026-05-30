@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
 
@@ -23,12 +23,11 @@ import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
  * <p>The balance is never stored as a field: subclasses must compute it dynamically from
  * the transaction history by implementing {@link #getBalance()}.
  *
- * @param <T> the type of {@link Transaction} this wallet accepts
+ * @param <T> the type of {@link AbstractTransaction} this wallet accepts
  */
-public abstract class Wallet<T extends Transaction> {
+public abstract class AbstractWallet<T extends AbstractTransaction> {
 
-    private static final Map<String, AtomicInteger> nameCounters = new ConcurrentHashMap<>();
-    
+    private static final Map<String, AtomicInteger> NAME_COUNTERS = new ConcurrentHashMap<>();
     private final UUID id;
     private String name;
     private final Historical<T> history;
@@ -44,7 +43,7 @@ public abstract class Wallet<T extends Transaction> {
      * @param history      the pre-existing transaction ledger
      * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
      */
-    protected Wallet(final String name, final CurrencyUnit baseCurrency,
+    protected AbstractWallet(final String name, final CurrencyUnit baseCurrency,
                      final Historical<T> history, final String typePrefix) {
         this.id = UUID.randomUUID();
         this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
@@ -60,14 +59,14 @@ public abstract class Wallet<T extends Transaction> {
      * @param baseCurrency the reference currency used to express the balance
      * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
      */
-    protected Wallet(final String name, final CurrencyUnit baseCurrency, final String typePrefix) {
+    protected AbstractWallet(final String name, final CurrencyUnit baseCurrency, final String typePrefix) {
         this(name, baseCurrency, new Historical<>(), typePrefix);
     }
 
     // typePrefix is provided by the subclass because Java generics are erased at runtime:
     // Wallet cannot inspect T to determine whether it is CashTransaction or InvestmentTransaction.
     private static String generateDefaultName(final String typePrefix) {
-        return typePrefix + " " + nameCounters
+        return typePrefix + " " + NAME_COUNTERS
             .computeIfAbsent(typePrefix, k -> new AtomicInteger(0))
             .incrementAndGet();
     }
@@ -104,7 +103,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return the {@link Historical} ledger
      */
-    public Historical<T>    getHistory() {
+    public Historical<T> getHistory() {
         return history;
     }
 

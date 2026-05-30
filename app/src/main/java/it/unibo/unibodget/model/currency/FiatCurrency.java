@@ -1,14 +1,10 @@
 package it.unibo.unibodget.model.currency;
 
 /**
- * Enum to represent fiat currencies.
- * 
- * Each enum constant defines:
- * - type (fixed to "Fiat")
- * - symbol
- * - short ISO name
- * - full name
- * - ISO code
+ * Supported fiat currencies.
+ *
+ * <p>Each constant carries a display symbol, short ISO name, full name,
+ * and currency code. All fiat currencies use 2 decimal places for display.</p>
  */
 public enum FiatCurrency implements CurrencyUnit {
 
@@ -33,49 +29,60 @@ public enum FiatCurrency implements CurrencyUnit {
     /**
      * Constructs a fiat currency definition.
      *
-     * @param type      the type of currency (fixed to "Fiat" for this enum)
      * @param symbol    the graphical symbol of the currency
      * @param shortName the short identifier (ISO-like code)
      * @param fullName  the full descriptive name
      * @param code      the standardized currency code
      */
-    FiatCurrency(String symbol, String shortName, String fullName, String code) {
+    FiatCurrency(
+            final String symbol,
+            final String shortName,
+            final String fullName,
+            final String code
+    ) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
         this.code = code;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
         return this.type;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getSymbol() { 
-        return this.symbol; 
+    public String getSymbol() {
+        return this.symbol;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getShortName() { 
-        return this.shortName; 
+    public String getShortName() {
+        return this.shortName;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getFullName() { 
-        return this.fullName; 
+    public String getFullName() {
+        return this.fullName;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getCode() {
         return this.code;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getDisplayDecimals() {
         return 2;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return String.format(
@@ -83,5 +90,4 @@ public enum FiatCurrency implements CurrencyUnit {
             this.name(), symbol, shortName, fullName, code
         );
     }
-
 }

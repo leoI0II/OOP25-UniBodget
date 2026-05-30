@@ -8,4 +8,4 @@ package it.unibo.unibodget.model.utils.event;
  * public record BudgetCreated(BigDecimal amount) implements MessageEvent {}
  * }</pre>
  */
-public interface MessageEvent {}
+public interface MessageEvent { }

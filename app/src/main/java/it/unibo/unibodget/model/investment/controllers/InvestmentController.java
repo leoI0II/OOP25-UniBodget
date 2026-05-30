@@ -4,7 +4,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -272,10 +271,23 @@ public interface InvestmentController {
 
     /**
      * Exports the current account's transaction data to an external format (e.g. CSV).
+     *
+     * @param file the File where the datas would be stored
+     * @return an {@link ExportResult} that describe if the export was successful or not
      */
-    ExportResult exportCurrentAccountData(final File file);
+    ExportResult exportCurrentAccountData(File file);
 
+    /**
+     * Returns the best performing position based on unrealized Profit/Loss percentage.
+     *
+     * @return an {@link Optional} containing the best performing {@link Position}, or empty if there are no positions
+     */
     Optional<Position> getBestPerformer();
 
+    /**
+     * Returns the worst performing position based on unrealized Profit/Loss percentage.
+     *
+     * @return an {@link Optional} containing the worst performing {@link Position}, or empty if there are no positions
+     */
     Optional<Position> getWorstPerformer();
 }

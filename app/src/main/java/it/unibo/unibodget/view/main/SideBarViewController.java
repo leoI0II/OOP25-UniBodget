@@ -6,34 +6,54 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+/**
+ * JavaFX controller for the sidebar view.
+ *
+ * <p>Renders the list of wallet tiles and the aggregated total balance label.
+ * Delegates data retrieval and selection callbacks to a {@link SideBarDelegate}.</p>
+ */
 public class SideBarViewController {
+
+    private static final int ADD_WALLET_TILE_HEIGHT = 50;
 
     @FXML private VBox walletList;
     @FXML private Label totalBalanceLabel;
     private SideBarDelegate delegate;
 
+    /**
+     * Called automatically by {@code FXMLLoader} after the FXML is loaded.
+     */
     @FXML
-    public void initialize() {
-        // chiamato automaticamente da FXMLLoader dopo il caricamento
-    }
+    public void initialize() { }
 
+    /**
+     * Sets the delegate and immediately refreshes the sidebar.
+     *
+     * @param delegate the object supplying wallet items and handling selection events
+     */
     public void setDelegate(final SideBarDelegate delegate) {
         this.delegate = delegate;
         refresh();
     }
 
+    /**
+     * Rebuilds the wallet tile list and updates the total balance label from the delegate.
+     * Does nothing if the delegate has not been set.
+     */
     public void refresh() {
-        if (delegate == null) return;
+        if (delegate == null) {
+            return;
+        }
         walletList.getChildren().clear();
-        for (var item : delegate.getItems()) {
+        for (final var item : delegate.getItems()) {
             walletList.getChildren().add(createTile(item));
         }
-        walletList.getChildren().add(createAddWalletTile()); // sempre in fondo
+        walletList.getChildren().add(createAddWalletTile());
         totalBalanceLabel.setText(delegate.getTotalAggregatedBalance());
     }
 
     private Node createTile(final SideBarItem item) {
-        var tile = new VBox();
+        final var tile = new VBox();
         tile.getChildren().addAll(
                 new Label(item.name()),
                 new Label(item.balance())
@@ -48,14 +68,12 @@ public class SideBarViewController {
         return tile;
     }
 
-    private void handleAddWallet() {
-
-    }
+    private void handleAddWallet() { }
 
     private Node createAddWalletTile() {
-        var btn = new Button("+ Add wallet");
+        final var btn = new Button("+ Add wallet");
         btn.setMaxWidth(Double.MAX_VALUE);  // occupa tutta la larghezza
-        btn.setPrefHeight(50);
+        btn.setPrefHeight(ADD_WALLET_TILE_HEIGHT);
         btn.setOnAction(e -> handleAddWallet());
         return btn;
     }

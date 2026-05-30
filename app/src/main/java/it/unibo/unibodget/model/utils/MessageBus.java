@@ -38,10 +38,10 @@ import java.util.function.Consumer;
  */
 public final class MessageBus {
 
-    private static final MessageBus instance = new MessageBus();
+    private static final MessageBus INSTANCE = new MessageBus();
     private final Map<Class<?>, List<Consumer<?>>> subscribers = new HashMap<>();
 
-    private MessageBus() {}
+    private MessageBus() { }
 
     /**
      * Registers a subscriber for a specific event type.
@@ -55,8 +55,11 @@ public final class MessageBus {
      * @param subscriber the consumer to invoke when an event of {@code type} is sent
      * @return the subscriber itself, to be used as a token for {@link #unsubscribe}
      */
-    public static <T extends MessageEvent> Consumer<T> subscribe(Class<T> type, Consumer<T> subscriber) {
-        instance.subscribers.computeIfAbsent(type, k -> new ArrayList<>()).add(subscriber);
+    public static <T extends MessageEvent> Consumer<T> subscribe(
+            final Class<T> type,
+            final Consumer<T> subscriber
+    ) {
+        INSTANCE.subscribers.computeIfAbsent(type, k -> new ArrayList<>()).add(subscriber);
         return subscriber;
     }
 
@@ -70,14 +73,14 @@ public final class MessageBus {
      *
      * @param msg the event to publish; must implement {@link MessageEvent}
      */
-    public static void send(MessageEvent msg) {
-        var classType = msg.getClass();
-        var subs = instance.subscribers.get(classType);
+    public static void send(final MessageEvent msg) {
+        final var classType = msg.getClass();
+        final var subs = INSTANCE.subscribers.get(classType);
         if (subs == null) {
             return;
         }
-        for (var sub : subs) {
-            ((Consumer<MessageEvent>)sub).accept(msg);
+        for (final var sub : subs) {
+            ((Consumer<MessageEvent>) sub).accept(msg);
         }
     }
 
@@ -90,9 +93,12 @@ public final class MessageBus {
      * @return {@code true} if the subscriber was found and removed,
      *         {@code false} if it wasn't registered
      */
-    public static <T extends MessageEvent> boolean unsubscribe(Class<T> event, Consumer<T> subscriber) {
-        if (instance.subscribers.containsKey(event)) {
-            return instance.subscribers.get(event).remove(subscriber);
+    public static <T extends MessageEvent> boolean unsubscribe(
+            final Class<T> event,
+            final Consumer<T> subscriber
+    ) {
+        if (INSTANCE.subscribers.containsKey(event)) {
+            return INSTANCE.subscribers.get(event).remove(subscriber);
         }
         return false;
     }
@@ -117,9 +123,9 @@ public final class MessageBus {
      *
      * @param subscribers the list of consumer tokens to remove
      */
-    public static void unsubscribeAll(List<Consumer<?>> subscribers) {
-        for (var subscriber : subscribers) {
-            for (var entry : instance.subscribers.entrySet()) {
+    public static void unsubscribeAll(final List<Consumer<?>> subscribers) {
+        for (final var subscriber : subscribers) {
+            for (final var entry : INSTANCE.subscribers.entrySet()) {
                 entry.getValue().remove(subscriber);
             }
         }

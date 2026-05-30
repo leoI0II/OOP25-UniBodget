@@ -7,20 +7,44 @@ import it.unibo.unibodget.view.investments.InvestmentsViewController;
 
 import java.util.Objects;
 
+/**
+ * Factory for JavaFX view controllers.
+ *
+ * <p>Used as a custom {@code Callback} with {@code FXMLLoader.setControllerFactory} so that
+ * controllers requiring constructor injection receive their dependencies automatically.
+ * Controllers not explicitly handled here are instantiated via their no-arg constructor
+ * through reflection.</p>
+ */
 public class ViewControllersFactory {
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
 
+    /**
+     * Creates the factory with the shared services injected into every controller that needs them.
+     *
+     * @param investmentController the investment controller shared across investment views
+     * @param snapshotService      the snapshot service used to persist portfolio balance history
+     */
     public ViewControllersFactory(
-            InvestmentController investmentController,
-            InvestmentsSnapshotService snapshotService
+            final InvestmentController investmentController,
+            final InvestmentsSnapshotService snapshotService
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
     }
 
-    public Object create(Class<?> controllerClass) {
+    /**
+     * Creates and returns an instance of the requested controller class.
+     *
+     * <p>Known controller types are constructed with their required dependencies.
+     * Any other class is instantiated reflectively via its no-arg constructor.</p>
+     *
+     * @param controllerClass the class of the controller to create
+     * @return a fully initialised controller instance
+     * @throws RuntimeException if the class has no accessible no-arg constructor
+     */
+    public Object create(final Class<?> controllerClass) {
         if (controllerClass == InvestmentsViewController.class) {
             return new InvestmentsViewController(investmentController, snapshotService, this);
         }
@@ -39,7 +63,7 @@ public class ViewControllersFactory {
 
         try {
             return controllerClass.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException e) {
+        } catch (final ReflectiveOperationException e) {
             throw new RuntimeException("Cannot create controller: " + controllerClass, e);
         }
     }

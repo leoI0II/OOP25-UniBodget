@@ -7,67 +7,116 @@ import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 import it.unibo.unibodget.view.main.BaseViewController;
 import it.unibo.unibodget.view.utils.AssetFormatter;
-import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.Map.entry;
+/**
+ * Controller for the dialog window that allows the user to add a new investment transaction
+ * (e.g., buy, sell, or transfer assets).
+ */
+public final class AddTransactionDialogViewController extends BaseViewController {
 
-public class AddTransactionDialogViewController extends BaseViewController {
-
+    private static final String INPUT_VALUE_REGEX = "\\d*\\.?\\d*";     // [0..9]+.?[0..9]+
     private final InvestmentController investmentController;
 
     // contenitori per tab BUY
-    @FXML private TabPane transactionTypeTabPane;
-    @FXML private Tab buyTab;
-    @FXML private Tab sellTab;
-    @FXML private Tab transferTab;
+    @FXML
+    private TabPane transactionTypeTabPane;
+    @FXML
+    private Tab buyTab;
+    @FXML
+    private Tab sellTab;
+    @FXML
+    private Tab transferTab;
     private Map<Tab, OrderType> orderTypeMapByTab;      // no puo essere final a causa che gli tab sono caricati dopo
-    @FXML private ComboBox<CurrencyUnit> selectedAssetComboBox;
-    @FXML private TextField quantityTextField;
-    @FXML private ToggleButton maxQuantityToggleButton;     // solo per SELL
-    @FXML private TextField pricePerAssetTextField;
-    @FXML private DatePicker datePicker;
-    @FXML private TextField feeTextField;
-    @FXML private TextArea notesTextArea;
-    @FXML private ToggleButton cashAccountToggleButton;
-    @FXML private ToggleButton stableCoinToggleButton;
-    @FXML private ToggleButton noPaymentToggleButton;
-    @FXML private ComboBox<Object> paymentSourceComboBox;
-    @FXML private Label totalSpentReceivedTextLabel;
-    @FXML private Label totalSpentValueLabel;
-    @FXML private Button addTransactionButton;
+    @FXML
+    private ComboBox<CurrencyUnit> selectedAssetComboBox;
+    @FXML
+    private TextField quantityTextField;
+    @FXML
+    private ToggleButton maxQuantityToggleButton;     // solo per SELL
+    @FXML
+    private TextField pricePerAssetTextField;
+    @FXML
+    private DatePicker datePicker;
+    @FXML
+    private TextField feeTextField;
+    @FXML
+    private TextArea notesTextArea;
+    @FXML
+    private ToggleButton cashAccountToggleButton;
+    @FXML
+    private ToggleButton stableCoinToggleButton;
+    @FXML
+    private ToggleButton noPaymentToggleButton;
+    @FXML
+    private ComboBox<Object> paymentSourceComboBox;
+    @FXML
+    private Label totalSpentReceivedTextLabel;
+    @FXML
+    private Label totalSpentValueLabel;
+    @FXML
+    private Button addTransactionButton;
 
-    @FXML private VBox buySellFieldsPanel;
+    @FXML
+    private VBox buySellFieldsPanel;
     // transfer specific fields
-    @FXML private VBox transferFieldsPanel;
-    @FXML private ComboBox<InvestmentAccount> destinationAccountComboBox;
-    @FXML private ComboBox<CurrencyUnit> transferAssetComboBox;
-    @FXML private TextField transferQuantityTextField;
-    @FXML private ToggleButton transferMaxQuantityToggleButton;
-    @FXML private DatePicker transferDatePicker;
-    @FXML private TextArea transferNotesTextArea;
-    @FXML private Label transferTotalLabel;
+    @FXML
+    private VBox transferFieldsPanel;
+    @FXML
+    private ComboBox<InvestmentAccount> destinationAccountComboBox;
+    @FXML
+    private ComboBox<CurrencyUnit> transferAssetComboBox;
+    @FXML
+    private TextField transferQuantityTextField;
+    @FXML
+    private ToggleButton transferMaxQuantityToggleButton;
+    @FXML
+    private DatePicker transferDatePicker;
+    @FXML
+    private TextArea transferNotesTextArea;
+    @FXML
+    private Label transferTotalLabel;
 
-    public AddTransactionDialogViewController(InvestmentController investmentController) {
+    /**
+     * Constructs a new {@code AddTransactionDialogViewController}.
+     *
+     * @param investmentController the controller handling investment-related business logic
+     */
+    public AddTransactionDialogViewController(final InvestmentController investmentController) {
         this.investmentController = Objects.requireNonNull(investmentController);
     }
 
+    /**
+     * Initializes the controller, configuring all UI components, setting up bindings,
+     * and establishing initial state after FXML injection.
+     */
     public void initialize() {
         orderTypeMapByTab = Map.of(
                 buyTab, OrderType.BUY,
@@ -90,23 +139,23 @@ public class AddTransactionDialogViewController extends BaseViewController {
     }
 
     private void setupTotalSpentReceivedTextLabel() {
-        var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
-        OrderType orderType = orderTypeMapByTab.get(currentTab);
-        totalSpentReceivedTextLabel.setText(switch(orderType) {
+        final var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
+        final OrderType orderType = orderTypeMapByTab.get(currentTab);
+        totalSpentReceivedTextLabel.setText(switch (orderType) {
             case BUY -> "Total Spent";
             case SELL -> "Total Received";
             case TRANSFER -> "Total Transferred";
         });
     }
 
-    private void resetForm(Tab tab) {
+    private void resetForm(final Tab tab) {
         // buy/sell fields
         quantityTextField.clear();
         pricePerAssetTextField.clear();
         feeTextField.clear();
         notesTextArea.clear();
         datePicker.setValue(LocalDate.now());
-        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+        final var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
         totalSpentValueLabel.setText(AssetFormatter.ofAsset(
                 Asset.zero(baseCurrency)
         ));
@@ -134,14 +183,14 @@ public class AddTransactionDialogViewController extends BaseViewController {
         destinationAccountComboBox.setValue(null);
         transferAssetComboBox.setValue(null);
         transferTotalLabel.setText(
-            AssetFormatter.ofAsset(Asset.zero(baseCurrency))
+                AssetFormatter.ofAsset(Asset.zero(baseCurrency))
         );
         setupTotalSpentReceivedTextLabel();
     }
 
     private void setupAddTransactionButton() {
         addTransactionButton.setOnMouseClicked(e -> {
-            var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
+            final var currentTab = transactionTypeTabPane.getSelectionModel().getSelectedItem();
             if (currentTab == transferTab) {
                 handleTransferOrder();
             } else {
@@ -151,29 +200,29 @@ public class AddTransactionDialogViewController extends BaseViewController {
     }
 
     private void handleBuyOrSellOrder() {
-        var orderType = orderTypeMapByTab.get(
+        final var orderType = orderTypeMapByTab.get(
                 transactionTypeTabPane.getSelectionModel().getSelectedItem()
         );
-        var selectedAsset = selectedAssetComboBox.getValue();
-        var quantityText = quantityTextField.getText();
-        var priceText = pricePerAssetTextField.getText();
-        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+        final var selectedAsset = selectedAssetComboBox.getValue();
+        final var quantityText = quantityTextField.getText();
+        final var priceText = pricePerAssetTextField.getText();
+        final var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
 
         if (selectedAsset == null || quantityText.isBlank() || priceText.isBlank()) {
-            showErrorPopup("Please fill all required fields.");
+            MessageBus.send(new MainErrorNotificationEvent("Please fill all required fields."));
             return;
         }
 
-        var quantity = new BigDecimal(quantityText);
-        var pricePerAsset = Asset.of(baseCurrency, new BigDecimal(priceText));
-        var fee = feeTextField.getText().isBlank()
+        final var quantity = new BigDecimal(quantityText);
+        final var pricePerAsset = Asset.of(baseCurrency, new BigDecimal(priceText));
+        final var fee = feeTextField.getText().isBlank()
                 ? Asset.zero(baseCurrency)
                 : Asset.of(baseCurrency, new BigDecimal(feeTextField.getText()));
-        var paymentSource = getSelectedPaymentSource();
-        var date = datePicker.getValue();
-        var notes = notesTextArea.getText();
+        final var paymentSource = getSelectedPaymentSource();
+        final var date = datePicker.getValue();
+        final var notes = notesTextArea.getText();
 
-        OrderResult result = switch (orderType) {
+        final OrderResult result = switch (orderType) {
             case BUY -> investmentController.executeBuyOrder(
                     investmentController.getCurrentInvestmentAccount().get(),
                     paymentSource, selectedAsset, quantity, pricePerAsset, fee, date, notes
@@ -188,16 +237,16 @@ public class AddTransactionDialogViewController extends BaseViewController {
     }
 
     private void handleTransferOrder() {
-        var destination = destinationAccountComboBox.getValue();
-        var asset = transferAssetComboBox.getValue();
-        var quantityText = transferQuantityTextField.getText();
+        final var destination = destinationAccountComboBox.getValue();
+        final var asset = transferAssetComboBox.getValue();
+        final var quantityText = transferQuantityTextField.getText();
 
         if (destination == null || asset == null || quantityText.isBlank()) {
-            showErrorPopup("Please fill all transfer fields.");
+            MessageBus.send(new MainErrorNotificationEvent("Please fill all transfer fields."));
             return;
         }
 
-        var result = investmentController.executeTransferOrder(
+        final var result = investmentController.executeTransferOrder(
                 investmentController.getCurrentInvestmentAccount().get(),
                 destination,
                 asset,
@@ -208,33 +257,19 @@ public class AddTransactionDialogViewController extends BaseViewController {
         handleOrderResult(result);
     }
 
-    private void handleOrderResult(OrderResult result) {
+    private void handleOrderResult(final OrderResult result) {
         MessageBus.send(new OrderResultEvent(result));
     }
 
-    private void showErrorPopup(final String message) {
-        ToastNotification.showError(
-                addTransactionButton.getScene().getWindow(),
-                message
-        );
-    }
-
-    private void showInfoPopup(final String message) {
-        ToastNotification.showSuccess(
-                addTransactionButton.getScene().getWindow(),
-                message
-        );
-    }
-
     private void setupTotalSpentValueLabel() {
-        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+        final var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
         totalSpentValueLabel.setText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
     }
 
     private void setupPaymentSourceComboBox() {
         paymentSourceComboBox.setCellFactory(lc -> new ListCell<Object>() {
             @Override
-            protected void updateItem(Object item, boolean empty) {
+            protected void updateItem(final Object item, final boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -251,7 +286,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         // asset selezionato
         paymentSourceComboBox.setButtonCell(new ListCell<Object>() {
             @Override
-            protected void updateItem(Object item, boolean empty) {
+            protected void updateItem(final Object item, final boolean empty) {
                 super.updateItem(item, empty);
                 super.updateItem(item, empty);
                 if (empty || item == null) {
@@ -266,9 +301,6 @@ public class AddTransactionDialogViewController extends BaseViewController {
                 }
             }
         });
-        paymentSourceComboBox.setOnAction(event -> {
-            // TODO: al momento vuoto...
-        });
         paymentSourceComboBox.valueProperty()
                 .addListener((obs, old, newVal) -> {
                     updateTotalSpent();
@@ -276,15 +308,15 @@ public class AddTransactionDialogViewController extends BaseViewController {
     }
 
     private void setupPaymentSourceToggleButtons() {
-        ToggleGroup paymentSourceToggleGroup = new ToggleGroup();
+        final ToggleGroup paymentSourceToggleGroup = new ToggleGroup();
 
         cashAccountToggleButton.setToggleGroup(paymentSourceToggleGroup);
-        boolean noAvailableCashAccounts = investmentController.getAvailableCashAccounts().isEmpty();
+        final boolean noAvailableCashAccounts = investmentController.getAvailableCashAccounts().isEmpty();
         cashAccountToggleButton.setDisable(noAvailableCashAccounts);
 
         // di default voglio gli stable, se ci sono
         stableCoinToggleButton.setToggleGroup(paymentSourceToggleGroup);
-        boolean noStablesInOwn = investmentController.getOwnedStableCoins().isEmpty();
+        final boolean noStablesInOwn = investmentController.getOwnedStableCoins().isEmpty();
         stableCoinToggleButton.setDisable(noStablesInOwn);
         stableCoinToggleButton.setSelected(!noStablesInOwn);
 
@@ -301,7 +333,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         updatePaymentSourceToggleGroup(stableCoinToggleButton);
     }
 
-    private void updatePaymentSourceToggleGroup(Toggle selected) {
+    private void updatePaymentSourceToggleGroup(final Toggle selected) {
         paymentSourceComboBox.setValue(null);
         if (selected == cashAccountToggleButton) {
             paymentSourceComboBox.setDisable(false);
@@ -331,18 +363,15 @@ public class AddTransactionDialogViewController extends BaseViewController {
     }
 
     private PaymentSource getSelectedPaymentSource() {
-        var value = paymentSourceComboBox.getValue();
+        final var value = paymentSourceComboBox.getValue();
 
         return switch (value) {
-            case CashAccount account ->
-                    new PaymentSource.CashAccountChannel(account);
-            case CurrencyUnit stable ->
-                    new PaymentSource.StableCoinPositionChannel(
-                            investmentController.getCurrentInvestmentAccount().get(),
-                            stable
-                    );
-            case null, default ->
-                    new PaymentSource.NoPaymentChannel();
+            case CashAccount account -> new PaymentSource.CashAccountChannel(account);
+            case CurrencyUnit stable -> new PaymentSource.StableCoinPositionChannel(
+                    investmentController.getCurrentInvestmentAccount().get(),
+                    stable
+            );
+            case null, default -> new PaymentSource.NoPaymentChannel();
         };
     }
 
@@ -356,13 +385,13 @@ public class AddTransactionDialogViewController extends BaseViewController {
         feeTextField.clear();
         feeTextField.textProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (!newValue.matches("\\d*\\.?\\d*")) {     // [0..9]+.?[0..9]+
+                    if (!newValue.matches(INPUT_VALUE_REGEX)) {     // [0..9]+.?[0..9]+
                         feeTextField.setText(oldValue);
                     } else {
                         updateTotalSpent();
                     }
                 });
-        var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+        final var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
         feeTextField.setPromptText("fee: " + AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
     }
 
@@ -377,7 +406,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
                     updateTotalSpent();
                 }
         );
-        var baseCurrency = investmentController.getCurrentInvestmentAccount()
+        final var baseCurrency = investmentController.getCurrentInvestmentAccount()
                 .get()
                 .getBaseCurrency();
         pricePerAssetTextField.setPromptText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
@@ -390,7 +419,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
         btn.selectedProperty().addListener(
                 (observable, wasSelected, isSelected) -> {
                     if (isSelected) {
-                        var asset = comboBox.getValue();
+                        final var asset = comboBox.getValue();
                         if (asset == null) {
                             btn.setSelected(false);
                             return;
@@ -419,10 +448,11 @@ public class AddTransactionDialogViewController extends BaseViewController {
         quantityTextField.clear();
         quantityTextField.textProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (!newValue.matches("\\d*\\.?\\d*"))      // [0..9]+.?[0..9]+
+                    if (!newValue.matches(INPUT_VALUE_REGEX)) {      // [0..9]+.?[0..9]+
                         quantityTextField.setText(oldValue);
-                    else
+                    } else {
                         updateTotalSpent();
+                    }
                 });
         quantityTextField.setPromptText("0.00");
 
@@ -440,28 +470,28 @@ public class AddTransactionDialogViewController extends BaseViewController {
     private void updateTotalSpent() {
         try {
             // prendo tutti i dati scelti dall utente e setto il Label di totale da spendere
-            var currentTabSelected = transactionTypeTabPane.getSelectionModel().getSelectedItem();
-            var selectedAsset = selectedAssetComboBox.getValue();
-            var qText = quantityTextField.getText();
-            var priceTxt = pricePerAssetTextField.getText();
-            var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
+            final var currentTabSelected = transactionTypeTabPane.getSelectionModel().getSelectedItem();
+            final var selectedAsset = selectedAssetComboBox.getValue();
+            final var qText = quantityTextField.getText();
+            final var priceTxt = pricePerAssetTextField.getText();
+            final var baseCurrency = investmentController.getCurrentInvestmentAccount().get().getBaseCurrency();
             if (qText.isBlank() || priceTxt.isBlank()) {
                 totalSpentValueLabel.setText(AssetFormatter.ofAsset(Asset.zero(baseCurrency)));
                 return;
             }
-            var quantity = new BigDecimal(qText);
-            var pricePerAsset = Asset.of(
+            final var quantity = new BigDecimal(qText);
+            final var pricePerAsset = Asset.of(
                     baseCurrency,
                     new BigDecimal(priceTxt)
             );
-            var fee = feeTextField.getText().isBlank() ?
-                    Asset.zero(baseCurrency) :
-                    Asset.of(
+            final var fee = feeTextField.getText().isBlank()
+                    ? Asset.zero(baseCurrency)
+                    : Asset.of(
                             baseCurrency,
                             new BigDecimal(feeTextField.getText())
                     );
-            var paymentSource = getSelectedPaymentSource();
-            var totalSpent = investmentController.estimateOrderCost(
+            final var paymentSource = getSelectedPaymentSource();
+            final var totalSpent = investmentController.estimateOrderCost(
                     orderTypeMapByTab.get(currentTabSelected),
                     selectedAsset,
                     quantity,
@@ -470,7 +500,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
                     paymentSource
             );
             totalSpentValueLabel.setText(AssetFormatter.ofAsset(totalSpent));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             totalSpentValueLabel.setText("Invalid input");
         }
     }
@@ -479,19 +509,18 @@ public class AddTransactionDialogViewController extends BaseViewController {
         return currencyUnit.getFullName() + " " + currencyUnit.getShortName();
     }
 
-    // TODO pensare se per caso farlo piu generico e passare come argomento la lista di quello da visualizzare
     private void setupBuyAssetComboBox() {
         selectedAssetComboBox.setPromptText("Select asset to buy ...");
         selectedAssetComboBox.setItems(
                 FXCollections.observableArrayList(
-                    investmentController.getAllTradeableAssets()
+                        investmentController.getAllTradeableAssets()
                 )
         );
         selectedAssetComboBox.setCellFactory(lc -> new ListCell<>() {
             @Override
-            protected void updateItem(CurrencyUnit item, boolean empty) {
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
-                if (empty ||  item == null) {
+                if (empty || item == null) {
                     setText(null);
                 } else {
                     setText(fmtComboBoxItemString(item));
@@ -502,15 +531,15 @@ public class AddTransactionDialogViewController extends BaseViewController {
         // asset selezionato
         selectedAssetComboBox.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(CurrencyUnit item, boolean empty) {
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? "" : fmtComboBoxItemString(item));
             }
         });
         selectedAssetComboBox.setOnAction(event -> {
-            var selected = selectedAssetComboBox.getValue();
+            final var selected = selectedAssetComboBox.getValue();
             if (selected != null) {
-                var price = investmentController.getCurrentMarketPrice(selected);
+                final var price = investmentController.getCurrentMarketPrice(selected);
                 pricePerAssetTextField.setText(
                         price.amount()
                                 .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
@@ -537,8 +566,8 @@ public class AddTransactionDialogViewController extends BaseViewController {
                 });
     }
 
-    private void onTabChanged(Tab tab) {
-        boolean isTransfer = tab == transferTab;
+    private void onTabChanged(final Tab tab) {
+        final boolean isTransfer = tab == transferTab;
         buySellFieldsPanel.setVisible(!isTransfer);
         buySellFieldsPanel.setManaged(!isTransfer);
         transferFieldsPanel.setVisible(isTransfer);
@@ -550,8 +579,8 @@ public class AddTransactionDialogViewController extends BaseViewController {
         resetForm(tab);
 
         if (isTransfer) {
-            var allAvailableAccounts = investmentController.getAllInvestmentAccounts();
-            var currentAccount = investmentController.getCurrentInvestmentAccount().get();
+            final var allAvailableAccounts = investmentController.getAllInvestmentAccounts();
+            final var currentAccount = investmentController.getCurrentInvestmentAccount().get();
             destinationAccountComboBox.setItems(
                     FXCollections.observableArrayList(
                             allAvailableAccounts.stream()
@@ -569,14 +598,14 @@ public class AddTransactionDialogViewController extends BaseViewController {
         // destination wallet combobox
         destinationAccountComboBox.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(InvestmentAccount item, boolean empty) {
+            protected void updateItem(final InvestmentAccount item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : item.getName());
             }
         });
         destinationAccountComboBox.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(InvestmentAccount item, boolean empty) {
+            protected void updateItem(final InvestmentAccount item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? "" : item.getName());
             }
@@ -585,14 +614,14 @@ public class AddTransactionDialogViewController extends BaseViewController {
         // asset combobox — stessa cellFactory di selectedAssetComboBox
         transferAssetComboBox.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(CurrencyUnit item, boolean empty) {
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : fmtComboBoxItemString(item));
             }
         });
         transferAssetComboBox.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(CurrencyUnit item, boolean empty) {
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? "" : fmtComboBoxItemString(item));
             }
@@ -600,8 +629,9 @@ public class AddTransactionDialogViewController extends BaseViewController {
 
         // quantity — stesso validator numerico di quantityTextField
         transferQuantityTextField.textProperty().addListener((obs, old, newVal) -> {
-            if (!newVal.matches("\\d*\\.?\\d*"))
+            if (!newVal.matches(INPUT_VALUE_REGEX)) {
                 transferQuantityTextField.setText(old);
+            }
         });
 
         // date — stesso del buy/sell
@@ -615,7 +645,7 @@ public class AddTransactionDialogViewController extends BaseViewController {
 
     @FXML
     private void handleCloseDialog() {
-        Stage stage = (Stage) addTransactionButton.getScene().getWindow();
+        final Stage stage = (Stage) addTransactionButton.getScene().getWindow();
         stage.close();
     }
 }

@@ -8,18 +8,15 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
- * Represents a snapshot of an open position on a single investment asset.
+ * Snapshot of an open position on a single investment asset at a given moment.
  *
- * <p>A position is always derived from the transaction history; it is never
- * stored as state. The fields capture the current state at the moment of
- * computation.
+ * <p>A position is always computed from the transaction history and never stored as mutable state.
+ * It captures the net quantity held, the weighted average cost basis, and the current market value.</p>
  *
- * This class is a record, which provides immutability, value-based equality, and a concise syntax.
- * 
- * @param asset                the asset held (ex. AAPL, BTC)
- * @param quantity             the net quantity currently held
- * @param averageBasisCost     the weighted average cost per unit (in baseCurrency)
- * @param currentMarketValue   the current market value of the position (in baseCurrency)
+ * @param asset              the asset held (e.g. AAPL, BTC)
+ * @param quantity           the net quantity currently held
+ * @param averageBasisCost   the weighted average purchase cost per unit, expressed in the base currency
+ * @param currentMarketValue the current total market value of the position, expressed in the base currency
  */
 public record Position(
     CurrencyUnit asset,
@@ -27,8 +24,9 @@ public record Position(
     Asset averageBasisCost,
     Asset currentMarketValue
 ) {
-    
     /**
+     * Validates that none of the record components are null.
+     *
      * @throws NullPointerException if any parameter is null
      */
     public Position {

@@ -5,26 +5,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 
 /**
  * Represents an ordered collection of transactions.
  *
- * Acts as a historical ledger, storing a chronological list
- * of {@link Transaction} objects (or subclasses such as InvestmentTransaction).
- * It provides basic operations for:
- * - adding a new transaction
- * - retrieving the full immutable history
+ * <p>Acts as a historical ledger, storing a chronological list of {@link AbstractTransaction}
+ * objects. It provides basic operations for:
+ * <ul>
+ *   <li>adding a new transaction</li>
+ *   <li>removing or replacing an existing transaction</li>
+ *   <li>retrieving the full immutable history</li>
+ *   <li>clearing all recorded transactions</li>
+ * </ul>
+ *
+ * @param <T> the concrete transaction type stored in this ledger
  */
-public class Historical<T extends Transaction> {
+public class Historical<T extends AbstractTransaction> {
 
     private final List<T> history;
 
-    
+    /** Creates a new empty ledger. */
     public Historical() {
         this.history = new ArrayList<>();
     }
 
+    /**
+     * Creates a new ledger pre-populated with the given transactions.
+     *
+     * @param history the initial list of transactions; must not be {@code null}
+     * @throws NullPointerException if {@code history} is {@code null}
+     */
     public Historical(final List<T> history) {
         this.history = new ArrayList<>(Objects.requireNonNull(history));
     }
@@ -32,9 +43,10 @@ public class Historical<T extends Transaction> {
     /**
      * Adds a new transaction to the historical ledger.
      *
-     * @param transaction the transaction to add; must not be null
+     * @param transaction the transaction to add; must not be {@code null}
+     * @throws NullPointerException if {@code transaction} is {@code null}
      */
-    public void addTransaction(T transaction) {
+    public void addTransaction(final T transaction) {
         history.add(Objects.requireNonNull(transaction));
     }
 
@@ -52,23 +64,26 @@ public class Historical<T extends Transaction> {
      * Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was found and removed, {@code false} otherwise
      */
-    public boolean removeTransaction(T transaction) {
+    public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
     /**
      * Replaces an existing transaction with a new one, preserving its position in the ledger.
      * Uses {@link Object#equals} to locate {@code oldTransaction}.
-     * Does nothing if {@code oldTransaction} is not found.
      *
-     * @param oldTransaction the transaction to replace; must not be null
-     * @param newTransaction the replacement transaction; must not be null
+     * @param oldTransaction the transaction to replace; must not be {@code null}
+     * @param newTransaction the replacement transaction; must not be {@code null}
+     * @return {@code true} if the replacement succeeded, {@code false} if {@code oldTransaction}
+     *         was not found in the ledger
+     * @throws NullPointerException if either argument is {@code null}
      */
-    public boolean replaceTransaction(T oldTransaction, T newTransaction) {
+    public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
         Objects.requireNonNull(oldTransaction);
         Objects.requireNonNull(newTransaction);
-        int index = history.indexOf(oldTransaction);
+        final int index = history.indexOf(oldTransaction);
         if (index == -1) {
             return false;
         }
@@ -83,6 +98,7 @@ public class Historical<T extends Transaction> {
         history.clear();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -95,9 +111,9 @@ public class Historical<T extends Transaction> {
         return Objects.equals(history, other.history);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return Objects.hash(history);
     }
-
 }

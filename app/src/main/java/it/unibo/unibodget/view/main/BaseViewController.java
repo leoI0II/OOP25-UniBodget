@@ -26,10 +26,14 @@ public class BaseViewController implements Disposable {
      * @param subscriber The callback method of the interested instance
      * @param <T> A custom-made event that implement the {@link MessageEvent} marker interface
      */
-    protected <T extends MessageEvent> void subscribe(Class<T> eventType, Consumer<T> subscriber) {
+    protected <T extends MessageEvent> void subscribe(
+            final Class<T> eventType,
+            final Consumer<T> subscriber
+    ) {
         subscribers.add(MessageBus.subscribe(eventType, subscriber));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void dispose() {
         MessageBus.unsubscribeAll(subscribers);
@@ -37,6 +41,9 @@ public class BaseViewController implements Disposable {
         onDispose();
     }
 
-    // le sottoclassi devono override questa invece di dispose()
-    protected void onDispose() {}
+    /**
+     * Template-method hook called at the end of {@link #dispose()}.
+     * Override to perform custom cleanup logic when this controller is destroyed.
+     */
+    protected void onDispose() { }
 }
