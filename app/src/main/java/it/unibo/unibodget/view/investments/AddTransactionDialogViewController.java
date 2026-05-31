@@ -288,7 +288,6 @@ public final class AddTransactionDialogViewController extends BaseViewController
             @Override
             protected void updateItem(final Object item, final boolean empty) {
                 super.updateItem(item, empty);
-                super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     return;
@@ -329,8 +328,8 @@ public final class AddTransactionDialogViewController extends BaseViewController
                     updatePaymentSourceToggleGroup(newValue);
                     updateTotalSpent();
                 });
-        setupPaymentSourceComboBox();
-        updatePaymentSourceToggleGroup(stableCoinToggleButton);
+        final var defaultToggle = noStablesInOwn ? noPaymentToggleButton : stableCoinToggleButton;
+        updatePaymentSourceToggleGroup(defaultToggle);
     }
 
     private void updatePaymentSourceToggleGroup(final Toggle selected) {

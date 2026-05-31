@@ -55,10 +55,7 @@ public class App extends Application {
         mainViewPage.setControllerFactory(factory::create);
         final Node mainViewNode = mainViewPage.load();
 
-        // wrap content in a temporary HBox layout
-        final var root = new HBox(mainViewNode);
-        HBox.setHgrow(mainViewNode, Priority.ALWAYS);
-
+        final HBox root = (HBox) mainViewNode;
         primaryStage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         primaryStage.setTitle("Investments");
         primaryStage.show();

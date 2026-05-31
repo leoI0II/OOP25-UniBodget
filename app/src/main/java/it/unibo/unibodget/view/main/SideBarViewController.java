@@ -1,10 +1,23 @@
 package it.unibo.unibodget.view.main;
 
+import it.unibo.unibodget.model.utils.event.MessageEvent;
+import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
+import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * JavaFX controller for the sidebar view.
@@ -12,13 +25,18 @@ import javafx.scene.layout.VBox;
  * <p>Renders the list of wallet tiles and the aggregated total balance label.
  * Delegates data retrieval and selection callbacks to a {@link SideBarDelegate}.</p>
  */
-public class SideBarViewController {
+public class SideBarViewController extends BaseViewController {
 
     private static final int ADD_WALLET_TILE_HEIGHT = 50;
 
     @FXML private VBox walletList;
     @FXML private Label totalBalanceLabel;
     private SideBarDelegate delegate;
+    private final ViewControllersFactory viewControllersFactory;
+
+    public SideBarViewController(ViewControllersFactory viewControllersFactory) {
+        this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
+    }
 
     /**
      * Called automatically by {@code FXMLLoader} after the FXML is loaded.
@@ -68,7 +86,9 @@ public class SideBarViewController {
         return tile;
     }
 
-    private void handleAddWallet() { }
+    private void handleAddWallet() {
+        delegate.onAddWalletRequested();
+    }
 
     private Node createAddWalletTile() {
         final var btn = new Button("+ Add wallet");
@@ -77,5 +97,4 @@ public class SideBarViewController {
         btn.setOnAction(e -> handleAddWallet());
         return btn;
     }
-
 }

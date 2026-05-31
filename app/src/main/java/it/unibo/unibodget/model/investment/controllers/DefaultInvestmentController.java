@@ -24,6 +24,9 @@ import it.unibo.unibodget.model.investment.PaymentSource;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.settings.Settings;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.CreateNewInvestmentWalletRequestedEvent;
+import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -70,6 +73,16 @@ public class DefaultInvestmentController implements InvestmentController {
         this.exchangeRateProvider = Objects.requireNonNull(exchangeRateProvider);
         this.settings = Objects.requireNonNull(settings);
         this.snapshotService = Objects.requireNonNull(snapshotService);
+
+        MessageBus.subscribe(CreateNewInvestmentWalletRequestedEvent.class, this::onCreateNewWalletRequestedEvent);
+    }
+
+    private void onCreateNewWalletRequestedEvent(final CreateNewInvestmentWalletRequestedEvent event) {
+        final var name = event.name();
+        final var currency = event.currency();
+        final var newWallet = new InvestmentAccount(name, currency, exchangeRateProvider);
+        investmentAccountService.addWallet(newWallet);
+        MessageBus.send(new NewWalletAddedEvent());
     }
 
     /**

@@ -8,13 +8,10 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
+import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
-import it.unibo.unibodget.view.main.BaseViewController;
-import it.unibo.unibodget.view.main.SideBarDelegate;
-import it.unibo.unibodget.view.main.SideBarItem;
-import it.unibo.unibodget.view.main.SideBarViewController;
-import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.main.*;
 import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
@@ -34,6 +31,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -60,10 +58,14 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private static final int REFRESH_EACH_SECONDS = 60;
     private static final int ADD_TRANSACTION_DIALOG_WIN_WIDTH = 450;
     private static final int ADD_TRANSACTION_DIALOG_WIN_HEIGHT = 620;
+    private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
+    private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
     private final ViewControllersFactory viewControllersFactory;
+    @FXML private VBox investmentsVBoxPage;
+    private Window addNewWalletDialog;
 
     private SideBarViewController sideBarViewController;
     @FXML
@@ -146,6 +148,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
 
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
+        subscribe(NewWalletAddedEvent.class, this::onNewWalletAddedEvent);
     }
 
     /**
@@ -427,6 +430,12 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         }
 
         final TextInputDialog dialog = new TextInputDialog();
+        dialog.initOwner(currentWalletName.getScene().getWindow());
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initStyle(StageStyle.UNDECORATED);
+        dialog.setWidth(400);
+        dialog.setHeight(400);
+        dialog.setResizable(false);
         dialog.setTitle(String.format("Change %s's account current name:",
                 investmentController.getCurrentInvestmentAccount().get().getName()));
         dialog.setHeaderText(null);
@@ -525,24 +534,9 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * @param event the order-result event received from the message bus
      */
     private void onOrderResultEvent(final OrderResultEvent event) {
-        if (event.result().isSuccess()) {
+        if (event.result().isSuccess() && addTransactionDialog != null) {
             addTransactionDialog.hide();
         }
-    }
-
-    /**
-     * Displays a blocking popup to the user.
-     *
-     * @param type    the alert type ({@link Alert.AlertType#INFORMATION}, {@link Alert.AlertType#ERROR}, …)
-     * @param title   the popup window title
-     * @param message the body message
-     */
-    private void showInfoPopup(final Alert.AlertType type, final String title, final String message) {
-        final var popup = new Alert(type);
-        popup.setTitle(title);
-        popup.setHeaderText(null);
-        popup.setContentText(message);
-        popup.showAndWait();
     }
 
     /**
@@ -595,12 +589,48 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         investmentController.selectWallet(id);
         changeCurrentWalletName();
         refreshMainPanel();
-        sideBarViewController.refresh();
     }
 
     /** {@inheritDoc} */
     @Override
     public void onAddWalletRequested() {
+        try {
+            final FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/investments/AddNewWalletDialog.fxml"));
+            loader.setControllerFactory(viewControllersFactory::create);
 
+            final Parent root = loader.load();
+            final var addNewWalletVC = (AddNewWalletDialogViewController) loader.getController();
+            addNewWalletVC.setAppContext(AppContext.INVESTMENTS);
+
+            final Stage dialog = new Stage();
+            addNewWalletDialog = dialog;
+            dialog.initOwner(investmentsVBoxPage.getScene().getWindow());
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initStyle(StageStyle.UNDECORATED);
+            dialog.setScene(new Scene(root));
+            dialog.setWidth(ADD_NEW_WALLET_DIALOG_WIDTH);
+            dialog.setHeight(ADD_NEW_WALLET_DIALOG_HEIGHT);
+            dialog.setResizable(false);
+            dialog.setOnCloseRequest(event -> addNewWalletVC.dispose());
+            dialog.showAndWait();
+
+            addNewWalletVC.dispose();
+            sideBarViewController.refresh();
+
+        } catch (final IOException e) {
+            System.err.println("=== DIALOG ERROR ===");
+            e.printStackTrace();
+            ToastNotification.showError(
+                    investmentsVBoxPage.getScene().getWindow(),
+                    "Error opening dialog: " + e.getMessage());
+        }
+    }
+
+    private void onNewWalletAddedEvent(final NewWalletAddedEvent event) {
+        if (addNewWalletDialog == null) {
+            return;
+        }
+        addNewWalletDialog.hide();
     }
 }

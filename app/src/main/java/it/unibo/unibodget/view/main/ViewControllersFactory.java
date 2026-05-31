@@ -2,6 +2,7 @@ package it.unibo.unibodget.view.main;
 
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
+import it.unibo.unibodget.view.investments.AddNewWalletDialogViewController;
 import it.unibo.unibodget.view.investments.AddTransactionDialogViewController;
 import it.unibo.unibodget.view.investments.InvestmentsViewController;
 
@@ -49,7 +50,7 @@ public class ViewControllersFactory {
             return new InvestmentsViewController(investmentController, snapshotService, this);
         }
         if (controllerClass == SideBarViewController.class) {
-            return new SideBarViewController();
+            return new SideBarViewController(this);
         }
         if (controllerClass == AddTransactionDialogViewController.class) {
             return new AddTransactionDialogViewController(investmentController);
@@ -59,6 +60,9 @@ public class ViewControllersFactory {
                     snapshotService,
                     null,
                     this);
+        }
+        if (controllerClass == AddNewWalletDialogViewController.class) {
+            return new AddNewWalletDialogViewController(investmentController);
         }
 
         try {
