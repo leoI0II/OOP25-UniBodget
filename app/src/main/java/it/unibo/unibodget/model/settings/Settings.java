@@ -19,6 +19,7 @@ public final class Settings {
     private Theme theme;
     private CurrencyUnit baseCurrency;
     private final List<String> preferenceHistory;
+    private WindowPreferences windowPrefs = new WindowPreferences();
 
     /**
      * Creates a new Settings object with default values.
@@ -27,6 +28,7 @@ public final class Settings {
         this.theme = Theme.DEFAULT;
         this.baseCurrency = FiatCurrency.EUR;
         this.preferenceHistory = new ArrayList<>();
+        this.windowPrefs = new WindowPreferences();
     }
 
     /**
@@ -39,11 +41,13 @@ public final class Settings {
     public Settings(
             final Theme theme,
             final CurrencyUnit baseCurrency,
-            final List<String> preferenceHistory
+            final List<String> preferenceHistory,
+            final WindowPreferences windowPrefs
     ) {
         this.theme = Objects.requireNonNull(theme);
         this.baseCurrency = Objects.requireNonNull(baseCurrency);
         this.preferenceHistory = new ArrayList<>(Objects.requireNonNull(preferenceHistory));
+        this.windowPrefs = Objects.requireNonNull(windowPrefs);
     }
 
     /**
@@ -52,7 +56,7 @@ public final class Settings {
      * @return the current theme
      */
     public Theme getTheme() {
-        return theme;
+        return this.theme;
     }
 
     /**
@@ -71,7 +75,7 @@ public final class Settings {
      * @return the base currency
      */
     public CurrencyUnit getBaseCurrency() {
-        return baseCurrency;
+        return this.baseCurrency;
     }
 
     /**
@@ -90,7 +94,7 @@ public final class Settings {
      * @return the preference history
      */
     public List<String> getPreferenceHistory() {
-        return List.copyOf(preferenceHistory);
+        return List.copyOf(this.preferenceHistory);
     }
 
     /**
@@ -99,15 +103,34 @@ public final class Settings {
      * @param entry the description of the change performed
      */
     private void addToHistory(final String entry) {
-        preferenceHistory.add(entry);
+        this.preferenceHistory.add(entry);
+    }
+
+    /**
+     * Returns the window preferences.
+     *
+     * @return the window preferences
+     */
+    public WindowPreferences getWindowPrefs() { 
+        return this.windowPrefs; 
+    }
+
+    /**
+     * Sets the window preferences.
+     *
+     * @param prefs the new window preferences
+     */
+    public void setWindowPrefs(WindowPreferences prefs) { 
+        this.windowPrefs = prefs; 
     }
 
     @Override
     public String toString() {
         return "Settings{"
-                + "theme=" + theme
-                + ", baseCurrency=" + baseCurrency
-                + ", preferenceHistory=" + preferenceHistory
+                + "theme=" + this.theme
+                + ", baseCurrency=" + this.baseCurrency
+                + ", preferenceHistory=" + this.preferenceHistory
+                + ", windowPrefs=" + this.windowPrefs
                 + '}';
     }
 
@@ -120,13 +143,14 @@ public final class Settings {
             return false;
         }
         final Settings other = (Settings) o;
-        return Objects.equals(theme, other.theme)
-                && Objects.equals(baseCurrency, other.baseCurrency)
-                && Objects.equals(preferenceHistory, other.preferenceHistory);
+        return Objects.equals(this.theme, other.theme)
+                && Objects.equals(this.baseCurrency, other.baseCurrency)
+                && Objects.equals(this.preferenceHistory, other.preferenceHistory)
+                && Objects.equals(this.windowPrefs, other.windowPrefs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(theme, baseCurrency, preferenceHistory);
+        return Objects.hash(this.theme, this.baseCurrency, this.preferenceHistory, this.windowPrefs);
     }
 }
