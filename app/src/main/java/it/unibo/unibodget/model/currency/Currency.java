@@ -140,7 +140,8 @@ public final class Currency implements CurrencyUnit {
 
     /**
      * Loads currency definitions from the JSON configuration file located in the classpath
-     * at {@code /json/currency/Currencies.json}.
+     * at {@code /json/currency/Currencies.json}, using Lazy Initialization.
+     * The JSON file is expected to contain an array of currency objects under the key "currencies".
      * Parsed currencies are stored in a static cache and loaded only once.
      * If the file is missing or malformed, an error is logged and loading is skipped.
      */
