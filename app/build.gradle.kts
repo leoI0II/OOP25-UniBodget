@@ -34,6 +34,10 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.jooq:jool:0.9.15")
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+
     runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
 
     testImplementation(libs.junit.jupiter)
@@ -44,7 +48,10 @@ dependencies {
 }
 
 application {
-    mainClass.set("it.unibo.unibodget.unibodget")
+    //mainClass.set("it.unibo.unibodget.unibodget")
+    mainClass.set("it.unibo.unibodget.view.currency_converter.TestCurrencyConverterTestApp")
+    //mainClass.set("it.unibo.unibodget.persistency.parser.impl.TestBudgetLimitParsing")
+    //mainClass.set("it.unibo.unibodget.view.currency_converter.SimpleLabelOutputTest")
 }
 
 tasks.test {
