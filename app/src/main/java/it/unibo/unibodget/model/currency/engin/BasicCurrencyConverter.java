@@ -37,6 +37,8 @@ public class BasicCurrencyConverter implements CurrencyConverter {
     @Override
     public CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to) {
         if (from.getType() == CurrencyType.STOCK || to.getType() == CurrencyType.STOCK) {
+            String errorMsg = "Conversion involving STOCK-type currencies is not supported.";
+            System.err.println(errorMsg);
             throw new IllegalArgumentException("Le valute di tipo STOCK non sono supportate per la conversione.");
         }
 
