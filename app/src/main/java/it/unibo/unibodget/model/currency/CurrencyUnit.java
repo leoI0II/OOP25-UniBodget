@@ -3,6 +3,10 @@ package it.unibo.unibodget.model.currency;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * Interface to represent a generic currency unit.
@@ -59,35 +63,6 @@ public interface CurrencyUnit {
      * @param code the ISO currency code (e.g., "USD", "EUR")
      * @return the corresponding {@link CurrencyUnit}, or {@code null} if not found
      */
-    /*
-    public static CurrencyUnit getByCode(String code) {
-
-        // Fiat currencies
-        for (var c : FiatCurrency.values()) {
-            if (c.getCode().equalsIgnoreCase(code)) {
-                return c;
-            }
-        }
-        
-        // Crypto currencies
-        for (var c : CryptoCurrency.values()) {
-            if (c.getCode().equalsIgnoreCase(code)) {
-                return c;
-            }
-        }
-
-        // Stock market currencies
-        for (var c : StockMarketCurrency.values()) {
-            if (c.getCode().equalsIgnoreCase(code)) {
-                return c;
-            }
-        }
-
-        // No match found
-        return null;
-    }
-    */
-
     public static CurrencyUnit getByCode(String code) {
         // Fiat
         for (var c : FiatCurrency.values())
@@ -120,6 +95,22 @@ public interface CurrencyUnit {
         Collections.addAll(list, StockMarketCurrency.values());
         list.addAll(Currency.all());
         return list;
+    }
+
+    /**
+     * Returns a list containing the basic currency units available for conversion.
+     * This excludes stock market currencies.
+     *
+     * @return a list of basic {@link CurrencyUnit} instances
+     */
+    public static List<CurrencyUnit> basicCurrencies() {
+        List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
+        ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
+            list.stream()
+            .filter(c -> c.getType() != CurrencyType.STOCK)
+            .collect(Collectors.toList())
+        );
+        return filteredCurrencies;
     }
 
 }
