@@ -108,8 +108,11 @@ public interface CurrencyUnit {
         ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
             list.stream()
             .filter(c -> c.getType() != CurrencyType.STOCK)
+            .filter(c -> c.getType() != CurrencyType.CUSTOM)
+            .filter(c -> c.getType() != CurrencyType.CRYPTO)
             .collect(Collectors.toList())
         );
+        System.out.println("Filtered Currencies: " + filteredCurrencies);
         return filteredCurrencies;
     }
 
