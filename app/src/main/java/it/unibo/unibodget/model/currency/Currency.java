@@ -5,16 +5,24 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Represents a currency loaded from external JSON configuration.
- * 
- * A Currency instance defines:
- * - type: the category of the currency
- * - symbol: graphical representation
- * - shortName: short identifier
- * - fullName: full descriptive name
- * - code: standardized currency code
+ * <p>
+ * A {@code Currency} instance defines:
+ * <ul>
+ *     <li>the {@link CurrencyType} category</li>
+ *     <li>a graphical symbol</li>
+ *     <li>a short identifier</li>
+ *     <li>a full descriptive name</li>
+ *     <li>a standardized ISO-like currency code</li>
+ * </ul>
+ * <p>
+ * Currency objects may be created dynamically or loaded from the JSON file
+ * {@code /json/currency/Currencies.json}. Loaded currencies are cached using
+ * lazy initialization.
  */
 public final class Currency implements CurrencyUnit {
 
@@ -27,30 +35,34 @@ public final class Currency implements CurrencyUnit {
     private static final Map<String, Currency> loaded = new HashMap<>();
     private static boolean initialized = false;
 
-    /** Empty constructor required for the generic JSON parser. */
+    /**
+     * Empty constructor required for JSON deserialization via Jackson.
+     * <p>
+     * Fields are populated automatically when mapping JSON nodes.
+     */
     public Currency() {}
 
     /**
-     * Creates a new dynamic currency.
+     * Creates a new dynamic currency instance.
      *
-     * @param type      the type of currency
-     * @param symbol    the graphical symbol of the currency
-     * @param shortName the short identifier
+     * @param type      the currency type; must not be {@code null}
+     * @param symbol    the graphical symbol; must not be {@code null}
+     * @param shortName the short identifier; must not be {@code null}
      * @param fullName  the full descriptive name
-     * @param code      the standardized currency code
+     * @param code      the standardized currency code; must not be {@code null}
      */
     public Currency(CurrencyType type, String symbol, String shortName, String fullName, String code) {
         this.type = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);
         this.shortName = Objects.requireNonNull(shortName);
-        this.fullName = Objects.requireNonNull(fullName);
+        this.fullName = fullName;
         this.code = Objects.requireNonNull(code);
     }
 
     /**
      * Returns the currency type.
      *
-     * @return the type of this currency
+     * @return the {@link CurrencyType} of this currency
      */
     @Override
     public CurrencyType getType() {
@@ -58,9 +70,9 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the currency symbol.
+     * Returns the graphical symbol of the currency.
      *
-     * @return the symbol of this currency
+     * @return the symbol string
      */
     @Override
     public String getSymbol() {
@@ -68,9 +80,9 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the currency short name.
+     * Returns the short identifier of the currency.
      *
-     * @return the short name of this currency
+     * @return the short name
      */
     @Override
     public String getShortName() {
@@ -78,9 +90,9 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the currency full name.
+     * Returns the full descriptive name of the currency.
      *
-     * @return the full name of this currency
+     * @return the full name
      */
     @Override
     public String getFullName() {
@@ -88,25 +100,43 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the currency code.
+     * Returns the standardized currency code.
      *
-     * @return the code of this currency
+     * @return the currency code
      */
     @Override
     public String getCode() {
         return this.code;
     }
 
+    /**
+     * Returns a human-readable representation of the currency.
+     *
+     * @return a formatted string containing short name, symbol, and full name
+     */
     @Override
     public String toString() {
         return String.format("%s [%s] - %s", this.shortName, this.symbol, this.fullName);
     }
 
+    /**
+     * Computes the hash code using the currency code.
+     *
+     * @return the hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.code);
     }
 
+    /**
+     * Compares this currency with another object for equality.
+     * <p>
+     * Two currencies are considered equal if they share the same code.
+     *
+     * @param obj the object to compare
+     * @return {@code true} if the other object is a {@code Currency} with the same code
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -116,11 +146,12 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the currency associated with the given code.
-     * The lookup is case-insensitive.
+     * Retrieves a currency by its code (case-insensitive).
+     * <p>
+     * If currencies have not yet been loaded, the JSON configuration file is parsed.
      *
-     * @param code the currency code to search for
-     * @return the matching currency, or null if not found
+     * @param code the currency code to search for; must not be {@code null}
+     * @return the matching {@code Currency}, or {@code null} if no match is found
      */
     public static Currency get(String code) {
         loadFromJson();
@@ -128,10 +159,11 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns all loaded currencies. If currencies have not been loaded yet,
-     * the JSON configuration file is parsed before returning the collection.
+     * Returns all loaded currencies.
+     * <p>
+     * If currencies have not yet been loaded, the JSON configuration file is parsed.
      *
-     * @return a collection of all available currencies
+     * @return a collection containing all available {@code Currency} instances
      */
     public static Collection<Currency> all() {
         loadFromJson();
@@ -139,14 +171,19 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Loads currency definitions from the JSON configuration file located in the classpath
-     * at {@code /json/currency/Currencies.json}, using Lazy Initialization.
-     * The JSON file is expected to contain an array of currency objects under the key "currencies".
-     * Parsed currencies are stored in a static cache and loaded only once.
-     * If the file is missing or malformed, an error is logged and loading is skipped.
+     * Loads currency definitions from the JSON configuration file located at
+     * {@code /json/currency/Currencies.json}.
+     * <p>
+     * This method uses lazy initialization: currencies are loaded only once.
+     * The JSON file must contain an array under the key {@code "currencies"}.
+     * Each element is mapped to a {@code Currency} instance using Jackson.
+     * <p>
+     * If the file is missing, malformed, or unreadable, an error is logged and
+     * loading is aborted without throwing exceptions.
      */
     private static void loadFromJson() {
         if (initialized) return;
+
         try {
             InputStream is = Currency.class.getResourceAsStream("/json/currency/Currencies.json");
             if (is == null) {
@@ -154,26 +191,26 @@ public final class Currency implements CurrencyUnit {
                 return;
             }
 
-            com.fasterxml.jackson.databind.ObjectMapper mapper =
-                    new com.fasterxml.jackson.databind.ObjectMapper();
-            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(is);
-            com.fasterxml.jackson.databind.JsonNode currenciesNode = root.get("currencies");
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(is);
+            JsonNode currenciesNode = root.get("currencies");
 
             if (currenciesNode == null || !currenciesNode.isArray()) {
                 System.err.println("Key 'currencies' not found or not an array");
                 return;
             }
 
-            for (com.fasterxml.jackson.databind.JsonNode node : currenciesNode) {
+            for (JsonNode node : currenciesNode) {
                 Currency c = mapper.treeToValue(node, Currency.class);
                 loaded.put(c.getCode().toUpperCase(), c);
-                System.out.println("\nCurrencies loaded: " + loaded.size() + "\n");
+                System.out.println("\nCurrencies loaded: " + loaded.size()
+                        + " - " + c.getCode() + " - " + c.getFullName());
             }
 
             initialized = true;
+
         } catch (Exception e) {
             System.err.println("Unexpected error: " + e.getMessage());
         }
     }
-
 }
