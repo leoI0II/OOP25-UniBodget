@@ -1,0 +1,22 @@
+{
+    "theme": {
+        "name": "",
+        "primaryHex": ""
+    },
+
+    "baseCurrency": {
+        "type": "",
+        "symbol": "",
+        "shortName": "",
+        "fullName": "",
+        "code": ""
+    },
+
+    "budgetLimit": {
+        "amount": 0.0,
+        "currency": ""
+    },
+
+    "preferenceHistory": [
+    ]
+}

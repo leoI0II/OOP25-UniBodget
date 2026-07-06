@@ -1,0 +1,116 @@
+{
+  "currencies": [
+    {
+      "type": "CUSTOM",
+      "symbol": "¥",
+      "shortName": "JPY",
+      "fullName": "Japanese Yen",
+      "code": "JPY"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "CHF",
+      "shortName": "CHF",
+      "fullName": "Swiss Franc",
+      "code": "CHF"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "C$",
+      "shortName": "CAD",
+      "fullName": "Canadian Dollar",
+      "code": "CAD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "A$",
+      "shortName": "AUD",
+      "fullName": "Australian Dollar",
+      "code": "AUD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "NZ$",
+      "shortName": "NZD",
+      "fullName": "New Zealand Dollar",
+      "code": "NZD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "₽",
+      "shortName": "RUB",
+      "fullName": "Russian Ruble",
+      "code": "RUB"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "₹",
+      "shortName": "INR",
+      "fullName": "Indian Rupee",
+      "code": "INR"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "₩",
+      "shortName": "KRW",
+      "fullName": "South Korean Won",
+      "code": "KRW"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "R$",
+      "shortName": "BRL",
+      "fullName": "Brazilian Real",
+      "code": "BRL"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "MX$",
+      "shortName": "MXN",
+      "fullName": "Mexican Peso",
+      "code": "MXN"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "HK$",
+      "shortName": "HKD",
+      "fullName": "Hong Kong Dollar",
+      "code": "HKD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "S$",
+      "shortName": "SGD",
+      "fullName": "Singapore Dollar",
+      "code": "SGD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "kr",
+      "shortName": "SEK",
+      "fullName": "Swedish Krona",
+      "code": "SEK"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "kr",
+      "shortName": "NOK",
+      "fullName": "Norwegian Krone",
+      "code": "NOK"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "kr",
+      "shortName": "DKK",
+      "fullName": "Danish Krone",
+      "code": "DKK"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "ZAR",
+      "shortName": "ZAR",
+      "fullName": "South African Rand",
+      "code": "ZAR"
+    }
+  ]
+}
