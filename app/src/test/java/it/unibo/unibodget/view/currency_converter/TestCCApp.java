@@ -16,7 +16,7 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
  * </ul>
  * and then launches {@link CurrencyConverterViewFX}.
  */
-public class TmpCCApp2 {
+public class TestCCApp {
 
     /**
      * Entry point for launching the standalone Currency Converter dashboard.
