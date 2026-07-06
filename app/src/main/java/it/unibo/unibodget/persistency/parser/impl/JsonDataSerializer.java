@@ -32,6 +32,10 @@ import java.util.*;
  */
 public final class JsonDataSerializer<T> implements DataSerializer<T> {
 
+    public JsonDataSerializer() {
+        // No initialization needed
+    }
+
     /**
      * Creates a new serializer instance.
      *

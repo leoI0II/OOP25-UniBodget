@@ -11,8 +11,10 @@ import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.dashboard.api.WalletService;
+import it.unibo.unibodget.model.service.WalletService;
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Default implementation of {@link DashboardFacade}.
@@ -22,7 +24,7 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  */
 public final class DefaultDashboardFacade implements DashboardFacade {
 
-    private final WalletService walletService;
+    private final WalletService<CashTransaction, CashAccount> walletService;
     private final CategoryService categoryService;
     private final BudgetMonitor budgetMonitor;
     private final BudgetSettings budgetSettings;
@@ -40,7 +42,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
      *            the user-defined budget configuration
      */
     public DefaultDashboardFacade(
-            final WalletService walletService,
+            final WalletService<CashTransaction, CashAccount> walletService,
             final CategoryService categoryService,
             final BudgetMonitor budgetMonitor,
             final BudgetSettings budgetSettings) {

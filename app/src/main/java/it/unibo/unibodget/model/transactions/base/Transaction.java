@@ -6,6 +6,9 @@ import java.util.Objects;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * Represents a basic financial transaction recorded by the system.
  *
@@ -18,6 +21,11 @@ import it.unibo.unibodget.model.currency.Asset;
  *
  * This class is immutable: all fields are final and set at construction time.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
+    @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
+})
 public sealed abstract class Transaction permits CashTransaction, InvestmentTransaction {
 
     private final Asset asset;

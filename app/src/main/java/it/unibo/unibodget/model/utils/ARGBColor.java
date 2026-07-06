@@ -1,5 +1,7 @@
 package it.unibo.unibodget.model.utils;
 
+import javafx.scene.paint.Color;
+
 /**
  * An immutable representation of a color in the ARGB (Alpha, Red, Green, Blue) color space.
  * Each component is an 8-bit value ranging from 0 to 255.
@@ -114,4 +116,19 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     public String toHexString() {
         return String.format("#%02X%02X%02X%02X", alpha, red, green, blue);
     }
+
+    /**
+     * Converts this ARGBColor into a JavaFX Color instance.
+     *
+     * @return a JavaFX Color with the same ARGB components
+     */
+    public Color toFXColor() {
+        return Color.rgb(
+            this.red,
+            this.green,
+            this.blue,
+            this.alpha / 255.0
+        );
+    }
+    
 }

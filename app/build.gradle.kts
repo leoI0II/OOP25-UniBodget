@@ -6,14 +6,13 @@
  */
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
+    java
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.danilopianini.gradle-java-qa") version "1.155.0"
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
@@ -32,7 +31,6 @@ javafx {
     modules("javafx.controls")
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -44,7 +42,42 @@ application {
     mainClass.set("it.unibo.unibodget.unibodget")
 }
 
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
+javafx {
+    version = "21.0.2"
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
+}
+
+dependencies {
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.8")
+
+    implementation("org.apache.commons:commons-csv:1.10.0")
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.jooq:jool:0.9.15")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
+
+    testImplementation(libs.junit.jupiter)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation(libs.guava)
+}
+
+application {
+    //mainClass.set("it.unibo.unibodget.unibodget")
+    mainClass.set("it.unibo.unibodget.view.currency_converter.TmpCCApp")
+    //mainClass.set("it.unibo.unibodget.persistency.parser.impl.TestBudgetLimitParsing")
+    //mainClass.set("it.unibo.unibodget.view.currency_converter.SimpleLabelOutputTest")
+}
+
+tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<Javadoc>().configureEach {
+    isFailOnError = false
 }

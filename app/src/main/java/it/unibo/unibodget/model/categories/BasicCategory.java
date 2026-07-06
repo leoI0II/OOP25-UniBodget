@@ -2,6 +2,8 @@ package it.unibo.unibodget.model.categories;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
@@ -19,6 +21,7 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  *
  * This class behaves as a value object: equality is based on both name and color.
  */
+@JsonIgnoreProperties({"defaultCategories"})
 public abstract class BasicCategory {
 
     private String name;

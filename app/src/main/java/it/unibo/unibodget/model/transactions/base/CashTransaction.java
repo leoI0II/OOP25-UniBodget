@@ -24,4 +24,8 @@ public final class CashTransaction extends Transaction {
         super(asset, category, date, description, notes);
     }
     
+    public static CashTransaction of(Asset asset, Category category, LocalDate date, String description, String notes) {
+        return new CashTransaction(asset, category, date, description, notes);
+    }
+    
 }
