@@ -7,6 +7,7 @@ import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,13 +48,16 @@ public class BasicCurrencyConverter implements CurrencyConverter {
         }
 
         Map<CurrencyUnit, Double> rates = api.getLatestRates(baseCurrency);
+        Map<String, Double> normalized = new HashMap<>();
+        rates.forEach((unit, value) -> normalized.put(unit.getCode(), value));
 
-        if (!rates.containsKey(from) || !rates.containsKey(to)) {
+        if (!normalized.containsKey(from.getCode()) || !normalized.containsKey(to.getCode())) {
+            System.out.println("1. Exchange rates not available for the selected currencies: " + from.getCode() + " or " + to.getCode());
             throw new IllegalArgumentException("Tasso di cambio non disponibile per le valute selezionate.");
         }
 
-        BigDecimal fromRate = BigDecimal.valueOf(rates.get(from));
-        BigDecimal toRate = BigDecimal.valueOf(rates.get(to));
+        BigDecimal fromRate = BigDecimal.valueOf(normalized.get(from.getCode()));
+        BigDecimal toRate   = BigDecimal.valueOf(normalized.get(to.getCode()));
 
         BigDecimal amountInBase = amount.divide(fromRate, 20, RoundingMode.HALF_UP);
         BigDecimal converted = amountInBase.multiply(toRate)

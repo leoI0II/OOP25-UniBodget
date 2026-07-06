@@ -1,11 +1,17 @@
 package it.unibo.unibodget.model.currency;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.unibo.unibodget.persistency.ModelFileManager;
+import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
@@ -34,6 +40,10 @@ public final class Currency implements CurrencyUnit {
 
     private static final Map<String, Currency> loaded = new HashMap<>();
     private static boolean initialized = false;
+
+    private static final Path PATH = Path.of("app/data/json/currency/Currencies.json");
+    private static final String RESOURCE = "/json/currency/Currencies.json";
+    //private static ModelFileManager<Currency> manager;
 
     /**
      * Empty constructor required for JSON deserialization via Jackson.
@@ -144,73 +154,58 @@ public final class Currency implements CurrencyUnit {
         Currency other = (Currency) obj;
         return Objects.equals(this.code, other.code);
     }
-
+    
     /**
-     * Retrieves a currency by its code (case-insensitive).
-     * <p>
-     * If currencies have not yet been loaded, the JSON configuration file is parsed.
+     * Initializes the currency manager by loading all currency definitions
+     * from the JSON configuration file.
      *
-     * @param code the currency code to search for; must not be {@code null}
-     * @return the matching {@code Currency}, or {@code null} if no match is found
+     * <p>The method parses the "currencies" array, stores each entry in an
+     * internal map keyed by its ISO code (upper‑case), and marks the manager
+     * as initialized. If loading fails, a RuntimeException is thrown.
      */
-    public static Currency get(String code) {
-        loadFromJson();
-        return loaded.get(code.toUpperCase());
+    public static void init() {
+        try {
+            ModelFileManager<Currency> mgr =
+                new ModelFileManager<>(PATH, RESOURCE, Currency.class);
+            mgr.open();
+            List<Currency> list = mgr.loadList("currencies");
+            loaded.clear();
+            list.forEach(c -> loaded.put(c.getCode().toUpperCase(), c));
+            initialized = true;
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot initialize Currency manager", e);
+        }
     }
 
     /**
-     * Returns all loaded currencies.
-     * <p>
-     * If currencies have not yet been loaded, the JSON configuration file is parsed.
+     * Returns all currencies loaded from the JSON file.
      *
-     * @return a collection containing all available {@code Currency} instances
+     * <p>If the manager is not yet initialized, the JSON file is parsed
+     * automatically.
+     *
+     * @return a collection of all available Currency instances
      */
     public static Collection<Currency> all() {
-        loadFromJson();
+        if (!initialized) {
+            init();
+        }
         return loaded.values();
     }
 
     /**
-     * Loads currency definitions from the JSON configuration file located at
-     * {@code /json/currency/Currencies.json}.
-     * <p>
-     * This method uses lazy initialization: currencies are loaded only once.
-     * The JSON file must contain an array under the key {@code "currencies"}.
-     * Each element is mapped to a {@code Currency} instance using Jackson.
-     * <p>
-     * If the file is missing, malformed, or unreadable, an error is logged and
-     * loading is aborted without throwing exceptions.
+     * Retrieves a currency by its ISO code (case‑insensitive).
+     *
+     * <p>If the manager is not yet initialized, the JSON file is parsed
+     * automatically.
+     *
+     * @param code the ISO currency code; must not be null
+     * @return the matching Currency, or null if no match exists
      */
-    private static void loadFromJson() {
-        if (initialized) return;
-
-        try {
-            InputStream is = Currency.class.getResourceAsStream("/json/currency/Currencies.json");
-            if (is == null) {
-                System.err.println("File not found: Currencies.json");
-                return;
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(is);
-            JsonNode currenciesNode = root.get("currencies");
-
-            if (currenciesNode == null || !currenciesNode.isArray()) {
-                System.err.println("Key 'currencies' not found or not an array");
-                return;
-            }
-
-            for (JsonNode node : currenciesNode) {
-                Currency c = mapper.treeToValue(node, Currency.class);
-                loaded.put(c.getCode().toUpperCase(), c);
-                System.out.println("\nCurrencies loaded: " + loaded.size()
-                        + " - " + c.getCode() + " - " + c.getFullName());
-            }
-
-            initialized = true;
-
-        } catch (Exception e) {
-            System.err.println("Unexpected error: " + e.getMessage());
+    public static Currency get(String code) {
+        if (!initialized) {
+            init();
         }
+        return loaded.get(code.toUpperCase());
     }
+
 }

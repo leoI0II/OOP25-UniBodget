@@ -1,6 +1,7 @@
 package it.unibo.unibodget.view.currency_converter;
 
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
+import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
@@ -137,21 +138,32 @@ public class ConverterWidgetFX {
         amountField.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8; -fx-text-fill: white;");
 
         /* ---------- CURRENCY BOXES ---------- */
-        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
-        CurrencyUnit.basicCurrencies().forEach(currencies::add);
-
+        //final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
+        //CurrencyUnit.basicCurrencies().forEach(currencies::add);
+        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList(Currency.all());
+        
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
+
+        //fromBox.setValue(currencies.get(0));
+        //toBox.setValue(currencies.get(1));
+
+        fromBox.setValue(Currency.get("EUR"));
+        toBox.setValue(Currency.get("USD"));
+        System.out.println("FROM selected: " + fromBox.getValue().getClass());
+        System.out.println("FROM code: " + fromBox.getValue().getCode());
+        System.out.println("TO selected: " + toBox.getValue().getClass());
+        System.out.println("TO code: " + toBox.getValue().getCode());
 
         configureCurrencyBox(fromBox, font);
         configureCurrencyBox(toBox, font);
 
         // Default selection
-        final FiatCurrency[] fiat = FiatCurrency.values();
-        if (fiat.length >= 2) {
-            fromBox.setValue(fiat[0]);
-            toBox.setValue(fiat[1]);
-        }
+        //final FiatCurrency[] fiat = FiatCurrency.values();
+        //if (fiat.length >= 2) {
+        //    fromBox.setValue(fiat[0]);
+        //    toBox.setValue(fiat[1]);
+        //}
 
         /* ---------- LABELS ---------- */
         final Label amountLabel = createMutedLabel("Amount", font, textColor);
@@ -324,9 +336,16 @@ public class ConverterWidgetFX {
      * @return a string representation, e.g., "€ EUR" for Euro
     */
     private String formatCurrency(final CurrencyUnit currency) {
-        return (currency instanceof FiatCurrency fiat)
-                ? fiat.getSymbol() + " " + fiat.getShortName()
-                : currency.getCode();
+        //return (currency instanceof FiatCurrency fiat)
+        //        ? fiat.getSymbol() + " " + fiat.getShortName()
+        //        : currency.getCode();
+        if (currency instanceof FiatCurrency fiat) {
+            return fiat.getSymbol() + " " + fiat.getShortName();
+        }
+        if (currency instanceof it.unibo.unibodget.model.currency.Currency c) {
+            return c.getSymbol() + " " + c.getShortName();
+        }
+        return currency.getCode();
     }
 
     /** Parses a decimal number from user input. 
