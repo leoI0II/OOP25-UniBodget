@@ -1,5 +1,7 @@
 package it.unibo.unibodget.view.currency_converter;
 
+import java.time.LocalDate;
+
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
@@ -13,8 +15,9 @@ import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.view.UI.FXAdapter;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
-
+import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -116,12 +119,20 @@ public final class CurrencyConverterViewFX extends Application {
         /* -------------------- HISTORICAL CHART BUTTON -------------------- */
         final Button showChartButton = new Button("Show Chart");
         showChartButton.setOnAction(e -> {
-            final ExchangeRateAPIClient historyApi = new ExchangeRateAPIClient();
+            //final ExchangeRateAPIClient historyApi = new ExchangeRateAPIClient();
+            ExchangeRateAPI historyApi;
+        try {
+                historyApi = new ExchangeRateAPIClient();
+                historyApi.getHistoricalRates(FiatCurrency.EUR, FiatCurrency.USD,
+                                                LocalDate.now().minusDays(5), LocalDate.now());
+        } catch (Throwable t) {
+                System.out.println("Offline mode: using mock history");
+                historyApi = new MockExchangeRateAPI(FiatCurrency.EUR, MockExchangeRateAPI.defaultMockRates());
+        }
             final BasicCurrencyConverter historyConverter =
                     new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
             final CurrencyConverterController historyController =
                     new CurrencyConverterController(historyApi, historyConverter);
-
             CurrencyHistoryChartView.showInNewWindow(historyController);
         });
 

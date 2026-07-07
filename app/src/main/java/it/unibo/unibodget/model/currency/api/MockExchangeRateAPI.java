@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.api;
 
+import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 import java.time.LocalDate;
@@ -44,5 +45,35 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
         }
 
         return history;
+    }
+
+    public static Map<CurrencyUnit, Double> defaultMockRates() {
+        Map<CurrencyUnit, Double> map = new HashMap<>();
+        map.put(CurrencyUnit.getByCode("EUR"), 1.0);
+        map.put(CurrencyUnit.getByCode("USD"), 1.1);
+        map.put(CurrencyUnit.getByCode("CAD"), 1.6);
+        map.put(CurrencyUnit.getByCode("JPY"), 170.0);
+        return map;
+    }
+
+    /**
+     * Generates a mock map of exchange rates for all available currencies.
+     * Each currency is assigned a random exchange rate between 0.5 and 1.5
+     * relative to a base currency (e.g., EUR).
+     *
+     * @return a map of {@link CurrencyUnit} to mock exchange rates
+     */
+    public static Map<CurrencyUnit, Double> generateMockRatesFromCurrencies() {
+        Map<CurrencyUnit, Double> map = new HashMap<>();
+        //parsing from json
+        for (var currency : Currency.all()) {
+            CurrencyUnit unit = CurrencyUnit.getByCode(currency.getCode());
+            if (unit != null) {
+                // generate a simple mock value via random
+                double mockValue = 0.5 + Math.random();
+                map.put(unit, mockValue);
+            }
+        }
+        return map;
     }
 }

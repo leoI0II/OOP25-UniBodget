@@ -60,5 +60,4 @@ public class MockExchangeRateProvider implements ExchangeRateProvider {
         );
         return Asset.of(target, src.amount().multiply(rate));
     }
-
 }
