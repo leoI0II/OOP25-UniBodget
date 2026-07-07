@@ -1,6 +1,5 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
