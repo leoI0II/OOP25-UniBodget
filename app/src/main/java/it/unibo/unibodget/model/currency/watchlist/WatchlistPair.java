@@ -1,6 +1,5 @@
 package it.unibo.unibodget.model.currency.watchlist;
 
-import it.unibo.unibodget.model.currency.CurrencyUnit;
 import java.util.Objects;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Objects;
  * @throws IllegalArgumentException if {@code from} and {@code to} are the same currency
  * @throws NullPointerException     if either parameter is null
  */
-public record WatchlistPair(CurrencyUnit from, CurrencyUnit to) {
+public record WatchlistPair(String from, String to) {
 
     /**
      * Constructor used to validate the pair.
@@ -41,7 +40,7 @@ public record WatchlistPair(CurrencyUnit from, CurrencyUnit to) {
      */
     @Override
     public String toString() {
-        return from.getCode() + " ➔ " + to.getCode();
+        return from + " ➔ " + to;
     }
 
     /**
@@ -51,9 +50,8 @@ public record WatchlistPair(CurrencyUnit from, CurrencyUnit to) {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof WatchlistPair other
-                && from.equals(other.from)
-                && to.equals(other.to);
+        if (!(obj instanceof WatchlistPair other)) return false;
+        return from.equals(other.from) && to.equals(other.to);
     }
 
     /**
