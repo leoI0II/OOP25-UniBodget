@@ -87,9 +87,15 @@ public class ConverterWidgetFX {
     }
 
     /**
-     * Allows external components (e.g., Watchlist) to set the selected currencies.
+     * Sets the currencies for the converter.
+     *
+     * @param fromCode the ISO code of the source currency
+     * @param toCode the ISO code of the target currency
      */
-    public void setCurrencies(CurrencyUnit from, CurrencyUnit to) {
+    public void setCurrencies(String fromCode, String toCode) {
+        CurrencyUnit from = Currency.get(fromCode);
+        CurrencyUnit to = Currency.get(toCode);
+
         fromBox.setValue(from);
         toBox.setValue(to);
     }
@@ -146,7 +152,7 @@ public class ConverterWidgetFX {
         toBox.setItems(currencies);
 
         //fromBox.setValue(currencies.get(0));
-        //toBox.setValue(currencies.get(1));
+        toBox.setValue(currencies.get(1));
 
         fromBox.setValue(Currency.get("EUR"));
         toBox.setValue(Currency.get("USD"));
@@ -336,9 +342,6 @@ public class ConverterWidgetFX {
      * @return a string representation, e.g., "€ EUR" for Euro
     */
     private String formatCurrency(final CurrencyUnit currency) {
-        //return (currency instanceof FiatCurrency fiat)
-        //        ? fiat.getSymbol() + " " + fiat.getShortName()
-        //        : currency.getCode();
         if (currency instanceof FiatCurrency fiat) {
             return fiat.getSymbol() + " " + fiat.getShortName();
         }
