@@ -6,6 +6,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Mock implementation of {@link ExchangeRateAPI} used for testing or offline mode.
@@ -47,12 +48,38 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
         return history;
     }
 
-    public static Map<CurrencyUnit, Double> defaultMockRates() {
-        Map<CurrencyUnit, Double> map = new HashMap<>();
-        map.put(CurrencyUnit.getByCode("EUR"), 1.0);
-        map.put(CurrencyUnit.getByCode("USD"), 1.1);
-        map.put(CurrencyUnit.getByCode("CAD"), 1.6);
-        map.put(CurrencyUnit.getByCode("JPY"), 170.0);
+    /*
+     * Generates a mock historical exchange-rate time-series for testing purposes.
+     *
+     * @param from the start date of the historical interval (inclusive)
+     * @param to the end date of the historical interval (inclusive)
+     * @return a map of dates to mock exchange-rate values
+     */
+    public static Map<LocalDate, Double> generateMockHistory(LocalDate from, LocalDate to) {
+        Map<LocalDate, Double> history = new TreeMap<>();
+        LocalDate date = from;
+        double baseValue = 1.14; // medium value
+        while (!date.isAfter(to)) {
+            // little daily variation
+            double delta = (Math.random() - 0.5) * 0.2;
+            baseValue += delta;
+            history.put(date, baseValue);
+            date = date.plusDays(1);
+        }
+        return history;
+    }
+
+    /**
+     * Generates a mock map of exchange rates for a given base currency.
+     * Each currency is assigned a random exchange rate between 0.5 and 1.5
+     * relative to the specified base currency.
+     *
+     * @param base the base currency for which the mock rates are generated
+     * @return a map of {@link CurrencyUnit} to mock exchange rates
+     */
+    public static Map<CurrencyUnit, Double> generateMockLatestRates(CurrencyUnit base) {
+        Map<CurrencyUnit, Double> map = generateMockRatesFromCurrencies();
+        map.put(base, 1.0);
         return map;
     }
 

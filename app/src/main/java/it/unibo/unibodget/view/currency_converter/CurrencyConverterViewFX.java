@@ -1,11 +1,13 @@
 package it.unibo.unibodget.view.currency_converter;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.Currency;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
@@ -119,16 +121,37 @@ public final class CurrencyConverterViewFX extends Application {
         /* -------------------- HISTORICAL CHART BUTTON -------------------- */
         final Button showChartButton = new Button("Show Chart");
         showChartButton.setOnAction(e -> {
-            //final ExchangeRateAPIClient historyApi = new ExchangeRateAPIClient();
-            ExchangeRateAPI historyApi;
-        try {
-                historyApi = new ExchangeRateAPIClient();
-                historyApi.getHistoricalRates(FiatCurrency.EUR, FiatCurrency.USD,
-                                                LocalDate.now().minusDays(5), LocalDate.now());
-        } catch (Throwable t) {
+            ExchangeRateAPI historyApi = new ExchangeRateAPIClient();
+            Map<LocalDate, Double> history = historyApi.getHistoricalRates(
+                    FiatCurrency.EUR,
+                    FiatCurrency.USD,
+                    LocalDate.now().minusDays(5),
+                    LocalDate.now()
+            );
+
+            // if https call result nothing -> offline/error mode on
+            if (history.isEmpty()) {
                 System.out.println("Offline mode: using mock history");
-                historyApi = new MockExchangeRateAPI(FiatCurrency.EUR, MockExchangeRateAPI.defaultMockRates());
-        }
+
+                Map<LocalDate, Double> mockHistory =
+                        MockExchangeRateAPI.generateMockHistory(
+                                LocalDate.now().minusDays(5),
+                                LocalDate.now()
+                        );
+
+                historyApi = new MockExchangeRateAPI(
+                        FiatCurrency.EUR,
+                        MockExchangeRateAPI.generateMockLatestRates(FiatCurrency.EUR)
+                ) {
+                    @Override
+                    public Map<LocalDate, Double> getHistoricalRates(
+                            CurrencyUnit base, CurrencyUnit target,
+                            LocalDate from, LocalDate to) {
+                        return mockHistory;
+                    }
+                };
+            }
+
             final BasicCurrencyConverter historyConverter =
                     new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
             final CurrencyConverterController historyController =

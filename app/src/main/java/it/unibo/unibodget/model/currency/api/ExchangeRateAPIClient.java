@@ -58,7 +58,8 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
             System.out.println("DEBUG JSON: " + json);
             return parseFrankfurterJson(json, target.getCode());
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("Historical API failed, switching to offline.");
             return new TreeMap<>();
         }
     }
@@ -102,41 +103,39 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
     }
 
     /**
-     * Performs an HTTP GET request to the specified URL and returns the
-     * response body as a string.
+     * Fetches the raw JSON response from the specified URL using an HTTP GET request.
      * <p>
-     * Behavior:
-     * <ul>
-     *     <li>Uses Java's {@link HttpClient} with automatic redirect handling.</li>
-     *     <li>Sets a User-Agent header to avoid certain API rejections.</li>
-     *     <li>Throws an exception if the HTTP status code is not 200.</li>
-     * </ul>
-     *
+     * The method handles redirects and sets a user-agent header to avoid
+     * request rejections. If the request fails or returns a non-200 status code,
+     * an empty string is returned.
+     * 
      * @param url the URL to fetch
-     * @return the response body as a string
-     * @throws Exception if the request fails or returns a non-200 status code
+     * @return the raw JSON response as a string, or an empty string on failure
      */
-    private String fetchJson(String url) throws Exception {
-        HttpClient client = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .build();
+    private String fetchJson(String url) {
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .build();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("User-Agent", "Mozilla/5.0")
-                .GET()
-                .build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("User-Agent", "Mozilla/5.0")
+                    .GET()
+                    .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() != 200) {
-            System.out.println("HTTP error: " + response.statusCode()
-                    + " - " + response.body());
-            throw new RuntimeException("HTTP error: " + response.statusCode());
+            if (response.statusCode() != 200) {
+                System.out.println("HTTP error: " + response.statusCode());
+                return "";
+            }
+            return response.body();
+        } catch (Exception e) {
+            // offline, DNS error, connect error, timeout, ecc.
+            return "";
         }
-
-        return response.body();
     }
 
     /**
