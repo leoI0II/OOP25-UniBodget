@@ -30,6 +30,8 @@ public final class WatchlistWidgetFX {
      */
     public WatchlistWidgetFX(WatchListController controller, ConverterWidgetFX converter) {
         listView.setItems(items);
+        items.addAll(controller.getFavorites());
+        
         final Label title = new Label("My Watchlist");
 
         // Refresh highlighting when the converter selection changes
@@ -39,8 +41,8 @@ public final class WatchlistWidgetFX {
         // Save button: stores the current converter pair into the watchlist
         Button saveButton = new Button("Save couple in watchlist");
         saveButton.setOnAction(e -> {
-            CurrencyUnit from = converter.fromBox.getValue();
-            CurrencyUnit to = converter.toBox.getValue();
+            String from = converter.fromBox.getValue().getCode();
+            String to = converter.toBox.getValue().getCode();
 
             if (from != null && to != null && !from.equals(to)) {
                 WatchlistPair newPair = new WatchlistPair(from, to);
@@ -86,7 +88,8 @@ public final class WatchlistWidgetFX {
                 CurrencyUnit currentTo = converter.toBox.getValue();
 
                 if (currentFrom != null && currentTo != null && !currentFrom.equals(currentTo)) {
-                    WatchlistPair currentPair = new WatchlistPair(currentFrom, currentTo);
+                    WatchlistPair currentPair =
+                        new WatchlistPair(currentFrom.getCode(), currentTo.getCode());
 
                     if (item.equals(currentPair)) {
                         setStyle("-fx-background-color: #333333; -fx-text-fill: white;");
