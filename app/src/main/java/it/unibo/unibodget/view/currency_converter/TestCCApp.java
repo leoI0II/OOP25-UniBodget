@@ -1,6 +1,5 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
@@ -39,7 +38,7 @@ public class TestCCApp {
      * @param args ignored
      */
     public static void main(String[] args) {
-
+        
         // 1. API for exchange rates (historical + latest)
         ExchangeRateAPI api = new ExchangeRateAPIImpl();
         
