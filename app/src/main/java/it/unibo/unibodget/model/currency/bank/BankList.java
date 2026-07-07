@@ -1,0 +1,125 @@
+package it.unibo.unibodget.model.currency.bank;
+
+import it.unibo.unibodget.persistency.ModelFileManager;
+
+import java.nio.file.Path;
+import java.util.*;
+
+public final class BankList {
+
+    private static final Path PATH = Path.of("app/data/json/currency/bank/Banks.json");
+    private static final String RESOURCE = "/json/currency/bank/Banks.json";
+
+    private static boolean initialized = false;
+    private static final List<Bank> loaded = new ArrayList<>();
+
+    /**
+     * Initializes the bank list by loading from the JSON 
+     * resource file if it has not already been initialized.
+     * <p>
+     * If the JSON file is empty or cannot be loaded, a set of mock banks will
+     * be generated and used instead. 
+     * This ensures that the application always has a valid set of banks to work with.
+     */
+    public BankList() {
+        if (!initialized) {
+            init();
+        }
+    }
+
+    /**
+     * Returns an unmodifiable view of the list of banks currently loaded in memory.
+     * <p>
+     * This method ensures that the internal list cannot be modified externally,
+     * preserving the integrity of the bank data.
+     * 
+     * @return an unmodifiable list of loaded banks; never {@code null}
+     */
+    public List<Bank> getBanks() {
+        return Collections.unmodifiableList(loaded);
+    }
+
+    /**
+     * Adds a bank to the internal list if it is not already present.
+     * <p>
+     * If the bank is added, the updated list is saved to the JSON resource file.
+     *
+     * @param bank the bank to add; must not be {@code null}
+     * @return {@code true} if the bank was added, {@code false} otherwise
+     */
+    public boolean add(Bank bank) {
+        boolean added = !loaded.contains(bank);
+        if (added) {
+            loaded.add(bank);
+            save();
+        }
+        return added;
+    }
+
+    /**
+     * Saves the current list of banks to the JSON resource file.
+     * <p>
+     * This method is called whenever a new bank is added to ensure that
+     * the persistent storage reflects the current state of the in-memory list.
+     */
+    private static void save() {
+        try {
+            ModelFileManager<Bank> mgr =
+                    new ModelFileManager<>(PATH, RESOURCE, Bank.class);
+            mgr.open();
+            mgr.saveList("banks", loaded);
+            mgr.close();
+        } catch (Exception e) {
+            System.out.println("BankList save failed");
+        }
+    }
+
+    /**
+     * Initializes the bank list by loading from the JSON 
+     * resource file if it has not already been initialized.
+     * <p>
+     * If the JSON file is empty or cannot be loaded, a set of mock banks will
+     * be generated and used instead. 
+     * This ensures that the application always has a valid set of banks to work with.
+     */
+    public static void init() {
+        try {
+            ModelFileManager<Bank> mgr =
+                    new ModelFileManager<>(PATH, RESOURCE, Bank.class);
+            mgr.open();
+
+            var list = mgr.loadList("banks");
+            mgr.close();
+
+            if (list == null || list.isEmpty()) {
+                System.out.println("Banks JSON empty → using mock banks");
+                loaded.clear();
+                loaded.addAll(generateMockBanks());
+            } else {
+                loaded.clear();
+                loaded.addAll(list);
+                System.out.println("Banks loaded → " + loaded.size());
+            }
+            initialized = true;
+        } catch (Exception e) {
+            System.out.println("Banks load failed → using mock banks");
+            loaded.clear();
+            loaded.addAll(generateMockBanks());
+            initialized = true;
+        }
+    }
+
+    /**
+     * Generates a list of mock banks for use 
+     * when the JSON file is unavailable or empty.
+     *
+     * @return a list of mock banks
+     */
+    private static List<Bank> generateMockBanks() {
+        return List.of(
+                new Bank("Intesa San Paolo", 1.0, 0.5),
+                new Bank("BPER", 2.0, 1.0),
+                new Bank("Banca di Romagna", 3.0, 1.5)
+        );
+    }
+}

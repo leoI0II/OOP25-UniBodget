@@ -1,7 +1,19 @@
-[
-  {
-    "name": "",
-    "fixedFee": 0.0,
-    "percentageFee": 0.0
-  }
-]
+{
+  "banks": [
+    {
+      "name": "Unibank",
+      "fixedFee": 1.0,
+      "percentageFee": 0.5
+    },
+    {
+      "name": "EuroBank",
+      "fixedFee": 2.0,
+      "percentageFee": 1.0
+    },
+    {
+      "name": "SafeBank",
+      "fixedFee": 3.0,
+      "percentageFee": 1.5
+    }
+  ]
+}

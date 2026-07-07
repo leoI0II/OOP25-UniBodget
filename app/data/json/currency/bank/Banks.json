@@ -1,7 +1,7 @@
-[
-  {
-    "name": "",
-    "fixedFee": 0.0,
-    "percentageFee": 0.0
-  }
-]
+{
+  "banks" : [ {
+    "name" : "Unibank",
+    "fixedFee" : 1.0,
+    "percentageFee" : 0.5
+  } ]
+}
