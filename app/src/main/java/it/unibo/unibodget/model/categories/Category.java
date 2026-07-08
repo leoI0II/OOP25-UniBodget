@@ -80,22 +80,47 @@ public final class Category extends BasicCategory {
         );
     }
 
+    /**
+     * Returns the origin of the category.
+     *
+     * @return the {@link CategoryOrigin} of this category
+     */
     public CategoryOrigin getOrigin() {
         return origin;
     }
 
+    /**
+     * Returns whether the category is active.
+     *
+     * @return {@code true} if the category is active, {@code false} otherwise
+     */
     public boolean isActive() {
         return active;
     }
 
+    /**
+     * Sets the active status of the category.
+     *
+     * @param active the new active status
+     */
     public boolean isDefault() {
         return origin == CategoryOrigin.DEFAULT;
     }
 
+    /**
+     * Returns whether the category is a custom category.
+     *
+     * @return {@code true} if the category is custom, {@code false} otherwise
+     */
     public boolean isCustom() {
         return origin == CategoryOrigin.CUSTOM;
     }
 
+    /**
+     * Archives the category, making it inactive.
+     *
+     * @throws IllegalStateException if the category is a default category
+     */
     public void archive() {
         if (isDefault()) {
             throw new IllegalStateException("Default categories cannot be archived.");
@@ -103,6 +128,11 @@ public final class Category extends BasicCategory {
         this.active = false;
     }
 
+    /**
+     * Reactivates the category, making it active again.
+     *
+     * @throws IllegalStateException if the category is a default category
+     */
     public void reactivate() {
         if (isDefault()) {
             throw new IllegalStateException("Default categories are always active.");
