@@ -1,22 +1,31 @@
 {
+  "settings": {
     "theme": {
-        "name": "",
-        "primaryHex": ""
+      "name": "Light",
+      "primaryColor": { "hex": "#FFFFFF" },
+      "buttonColor": { "hex": "#DDDDDD" },
+      "textColor": { "hex": "#000000" },
+      "fontFamily": "Arial",
+      "fontSize": 14,
+      "boldText": false
     },
 
     "baseCurrency": {
-        "type": "",
-        "symbol": "",
-        "shortName": "",
-        "fullName": "",
-        "code": ""
+      "type": "FIAT",
+      "symbol": "€",
+      "shortName": "EUR",
+      "fullName": "Euro",
+      "code": "EUR"
     },
 
-    "budgetLimit": {
-        "amount": 0.0,
-        "currency": ""
-    },
+    "preferenceHistory": [],
 
-    "preferenceHistory": [
-    ]
+    "windowPrefs": {
+      "width": 1280,
+      "height": 720,
+      "maximized": false
+    }
+  },
+
+  "history": []
 }
