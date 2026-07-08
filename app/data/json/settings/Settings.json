@@ -1,31 +1,80 @@
 {
-  "settings": {
-    "theme": {
-      "name": "Light",
-      "primaryColor": { "hex": "#FFFFFF" },
-      "buttonColor": { "hex": "#DDDDDD" },
-      "textColor": { "hex": "#000000" },
-      "fontFamily": "Arial",
-      "fontSize": 14,
-      "boldText": false
+  "settings" : {
+    "theme" : {
+      "name" : "Custom",
+      "primaryColor" : {
+        "alpha" : 255,
+        "red" : 255,
+        "green" : 255,
+        "blue" : 255
+      },
+      "buttonColor" : {
+        "alpha" : 255,
+        "red" : 192,
+        "green" : 192,
+        "blue" : 192
+      },
+      "textColor" : {
+        "alpha" : 255,
+        "red" : 0,
+        "green" : 0,
+        "blue" : 0
+      },
+      "fontFamily" : "AkayaKanadaka",
+      "fontSize" : 14,
+      "boldText" : false
     },
-
-    "baseCurrency": {
-      "type": "FIAT",
-      "symbol": "€",
-      "shortName": "EUR",
-      "fullName": "Euro",
-      "code": "EUR"
+    "baseCurrency" : {
+      "type" : "FIAT",
+      "symbol" : "€",
+      "shortName" : "EUR",
+      "fullName" : "Euro",
+      "code" : "EUR"
     },
-
-    "preferenceHistory": [],
-
-    "windowPrefs": {
-      "width": 1280,
-      "height": 720,
-      "maximized": false
+    "preferenceHistory" : [ "Theme changed to: Light", "Base currency changed to: EUR { symbol='€', shortName='EUR', fullName='Euro', code='EUR' }", "Theme changed to: Custom", "Base currency changed to: EUR [€] - Euro" ],
+    "windowPrefs" : {
+      "width" : 1280.0,
+      "height" : 720.0,
+      "maximized" : false
     }
   },
-
-  "history": []
+  "history" : [ {
+    "theme" : {
+      "name" : "Custom",
+      "primaryColor" : {
+        "alpha" : 255,
+        "red" : 255,
+        "green" : 255,
+        "blue" : 255
+      },
+      "buttonColor" : {
+        "alpha" : 255,
+        "red" : 192,
+        "green" : 192,
+        "blue" : 192
+      },
+      "textColor" : {
+        "alpha" : 255,
+        "red" : 0,
+        "green" : 0,
+        "blue" : 0
+      },
+      "fontFamily" : "AkayaKanadaka",
+      "fontSize" : 14,
+      "boldText" : false
+    },
+    "baseCurrency" : {
+      "type" : "FIAT",
+      "symbol" : "€",
+      "shortName" : "EUR",
+      "fullName" : "Euro",
+      "code" : "EUR"
+    },
+    "preferenceHistory" : [ "Theme changed to: Light", "Base currency changed to: EUR { symbol='€', shortName='EUR', fullName='Euro', code='EUR' }", "Theme changed to: Custom", "Base currency changed to: EUR [€] - Euro" ],
+    "windowPrefs" : {
+      "width" : 1280.0,
+      "height" : 720.0,
+      "maximized" : false
+    }
+  } ]
 }

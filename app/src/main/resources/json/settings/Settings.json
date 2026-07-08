@@ -2,30 +2,16 @@
   "settings": {
     "theme": {
       "name": "Light",
-      "primaryColor": { "hex": "#FFFFFF" },
-      "buttonColor": { "hex": "#DDDDDD" },
-      "textColor": { "hex": "#000000" },
+      "primaryColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
+      "buttonColor": { "alpha": 255, "red": 192, "green": 192, "blue": 192 },
+      "textColor": { "alpha": 255, "red": 0, "green": 0, "blue": 0 },
       "fontFamily": "Arial",
       "fontSize": 14,
       "boldText": false
     },
-
-    "baseCurrency": {
-      "type": "FIAT",
-      "symbol": "€",
-      "shortName": "EUR",
-      "fullName": "Euro",
-      "code": "EUR"
-    },
-
+    "baseCurrency": [ "it.unibo.unibodget.model.currency.FiatCurrency", "EUR" ],
     "preferenceHistory": [],
-
-    "windowPrefs": {
-      "width": 1280,
-      "height": 720,
-      "maximized": false
-    }
+    "windowPrefs": { "width": 1280.0, "height": 720.0, "maximized": false }
   },
-
   "history": []
 }

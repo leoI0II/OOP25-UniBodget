@@ -1,7 +1,133 @@
-[
-    {
-        "name": "",
-        "colorHex": "",
-        "type": ""
-    }
-]
+{
+  "categories" : [ {
+    "name" : "Food",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 255,
+      "green" : 152,
+      "blue" : 0
+    },
+    "type" : "EXPENSE",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Rent",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 156,
+      "green" : 39,
+      "blue" : 176
+    },
+    "type" : "EXPENSE",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Savings",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 76,
+      "green" : 175,
+      "blue" : 80
+    },
+    "type" : "INCOME",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Transport",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 0,
+      "green" : 150,
+      "blue" : 136
+    },
+    "type" : "EXPENSE",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Transfer",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 33,
+      "green" : 150,
+      "blue" : 243
+    },
+    "type" : "TRANSFER",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Investment Buy",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 255,
+      "green" : 193,
+      "blue" : 7
+    },
+    "type" : "EXPENSE",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Investment Sell",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 255,
+      "green" : 193,
+      "blue" : 7
+    },
+    "type" : "INCOME",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Friend Loan",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 121,
+      "green" : 85,
+      "blue" : 72
+    },
+    "type" : "FRIEND_LOAN",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Bank Loan",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 96,
+      "green" : 125,
+      "blue" : 139
+    },
+    "type" : "BANK_LOAN",
+    "origin" : "DEFAULT",
+    "active" : true,
+    "custom" : false,
+    "default" : true
+  }, {
+    "name" : "Gym",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 33,
+      "green" : 150,
+      "blue" : 243
+    },
+    "type" : "EXPENSE",
+    "origin" : "CUSTOM",
+    "active" : true,
+    "custom" : true,
+    "default" : false
+  } ]
+}
