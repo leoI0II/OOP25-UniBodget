@@ -2,6 +2,9 @@ package it.unibo.unibodget.model.categories;
 
 import java.util.List;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import it.unibo.unibodget.model.utils.ARGBColor;
 
@@ -12,6 +15,7 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  * - origin (default or custom)
  * - active flag for archive/reactivate behavior
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Category extends BasicCategory {
 
     public static final Category FOOD =
@@ -36,12 +40,13 @@ public final class Category extends BasicCategory {
     private final CategoryOrigin origin;
     private boolean active;
 
+    @JsonCreator
     public Category(
-            final String name,
-            final ARGBColor color,
-            final CategoryType type,
-            final CategoryOrigin origin,
-            final boolean active) {
+            @JsonProperty("name") final String name,
+            @JsonProperty("colorHex") final ARGBColor color,
+            @JsonProperty("type") final CategoryType type,
+            @JsonProperty("origin") final CategoryOrigin origin,
+            @JsonProperty("active") final boolean active) {
         super(name, color, type);
         this.origin = Objects.requireNonNull(origin);
         if (origin == CategoryOrigin.DEFAULT && !active) {
