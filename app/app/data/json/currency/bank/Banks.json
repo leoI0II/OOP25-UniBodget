@@ -5,7 +5,7 @@
     "percentageFee" : 0.5
   }, {
     "name" : "Prova",
-    "fixedFee" : 4.0,
-    "percentageFee" : 2.0
+    "fixedFee" : 2.0,
+    "percentageFee" : 3.0
   } ]
 }

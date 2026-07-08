@@ -7,7 +7,7 @@ import java.util.*;
 
 public final class BankList {
 
-    private static final Path PATH = Path.of("app/data/json/currency/bank/Banks.json");
+    private static final Path PATH = Path.of("data/json/currency/bank/Banks.json");
     private static final String RESOURCE = "/json/currency/bank/Banks.json";
 
     private static boolean initialized = false;

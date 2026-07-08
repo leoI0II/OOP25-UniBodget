@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Food",
+        "colorHex": "#FF9800",
+        "type": "EXPENSE"
+    },
+    {
+        "name": "Rent",
+        "colorHex": "#9C27B0",
+        "type": "EXPENSE"
+    },
+    {
+        "name": "Savings",
+        "colorHex": "#4CAF50",
+        "type": "INCOME"
+    },
+    {
+        "name": "Transport",
+        "colorHex": "#009688",
+        "type": "EXPENSE"
+    }
+]

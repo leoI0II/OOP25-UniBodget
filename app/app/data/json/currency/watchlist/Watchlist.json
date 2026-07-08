@@ -3,9 +3,6 @@
     "from" : "CAD",
     "to" : "USD"
   }, {
-    "from" : "EUR",
-    "to" : "NZD"
-  }, {
     "from" : "HKD",
     "to" : "ZAR"
   }, {

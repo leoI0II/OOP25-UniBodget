@@ -16,7 +16,7 @@ import it.unibo.unibodget.persistency.ModelFileManager;
  */
 public final class WatchList {
 
-    private static final Path PATH = Path.of("app/data/json/currency/watchlist/Watchlist.json");
+    private static final Path PATH = Path.of("data/json/currency/watchlist/Watchlist.json");
     private static final String RESOURCE = "/json/currency/watchlist/Watchlist.json";
 
     private static boolean initialized = false;
