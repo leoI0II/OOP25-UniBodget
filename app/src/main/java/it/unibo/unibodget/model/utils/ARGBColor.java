@@ -130,5 +130,19 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
             this.alpha / 255.0
         );
     }
+
+    /**
+     * Returns the string representation of this color 
+     * in a 6-character hexadecimal format (ignoring alpha).
+     *
+     * @return a formatted string in the form of {@code #RRGGBB}
+     *         (e.g., {@code #FF0000} for pure red)
+     */
+    public String toHex() {
+        return String.format("#%02X%02X%02X",
+                this.red(),
+                this.green(),
+                this.blue());
+    }
     
 }
