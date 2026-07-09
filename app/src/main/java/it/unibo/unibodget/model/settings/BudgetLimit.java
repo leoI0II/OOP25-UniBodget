@@ -7,6 +7,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 /**
  * Represents a single global budget limit chosen by the user.
  * It contains only an amount and a currency.
+ * UNUSED AT THE MOMENT
  */
 public class BudgetLimit {
     
