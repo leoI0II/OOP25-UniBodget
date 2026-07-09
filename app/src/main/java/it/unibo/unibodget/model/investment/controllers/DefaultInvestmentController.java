@@ -168,9 +168,9 @@ public class DefaultInvestmentController implements InvestmentController {
 
     private CurrencyUnit targetCurrencyOf(PaymentSource paymentSource, CurrencyUnit def) {
         return switch(paymentSource) {
-            case PaymentSource.FromCashAccount cashSrc -> cashSrc.account().getBaseCurrency();
-            case PaymentSource.FromStableCoinPosition stableCoinSrc -> stableCoinSrc.stableCoin();
-            case PaymentSource.NoPaymentSource noSrc -> def; // If no payment source specified, default to the asset's currency for cost estimation
+            case PaymentSource.CashAccountChannel cashSrc -> cashSrc.account().getBaseCurrency();
+            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> stableCoinSrc.stableCoin();
+            case PaymentSource.NoPaymentChannel noSrc -> def; // If no payment source specified, default to the asset's currency for cost estimation
         };
     }
 
@@ -208,8 +208,8 @@ public class DefaultInvestmentController implements InvestmentController {
 
     private Optional<Asset> availableAsset(PaymentSource paymentSource) {
         return switch(paymentSource) {
-            case PaymentSource.FromCashAccount cashSrc -> Optional.of(cashSrc.account().getBalance());
-            case PaymentSource.FromStableCoinPosition stableCoinSrc -> {
+            case PaymentSource.CashAccountChannel cashSrc -> Optional.of(cashSrc.account().getBalance());
+            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> {
                 final var stableCoinPosition = stableCoinSrc.account().getPositions().stream()
                     .filter(pos -> pos.asset().equals(stableCoinSrc.stableCoin()))
                     .findFirst();
@@ -218,7 +218,7 @@ public class DefaultInvestmentController implements InvestmentController {
                     .orElse(Asset.zero(stableCoinSrc.stableCoin()))
                 );
             }
-            case PaymentSource.NoPaymentSource noSrc -> Optional.empty(); // If no payment source specified, available amount is considered zero for the purpose of cost comparison
+            case PaymentSource.NoPaymentChannel noSrc -> Optional.empty(); // If no payment source specified, available amount is considered zero for the purpose of cost comparison
         };
     }
 
@@ -290,7 +290,7 @@ public class DefaultInvestmentController implements InvestmentController {
         targetAccount.addTransaction(investmentTransactionIn);
 
 		return switch (paymentSource) {
-			case PaymentSource.FromCashAccount cashSrc -> {
+			case PaymentSource.CashAccountChannel cashSrc -> {
 				final var cashTransaction = CashTransaction.of(
 					Asset.of(cost.currency(), cost.amount().negate()), // Cash outflow
 					Category.INVESTMENT_BUY,
@@ -302,7 +302,7 @@ public class DefaultInvestmentController implements InvestmentController {
 				cashSrc.account().addTransaction(cashTransaction);
 				yield new OrderResult.BuyWithCashSuccess(cashTransaction, investmentTransactionIn);
 			}
-			case PaymentSource.FromStableCoinPosition stableCoinSrc -> {
+			case PaymentSource.StableCoinPositionChannel stableCoinSrc -> {
 				final var investmentTransactionOut = InvestmentTransaction.of(
 					Asset.of(stableCoinSrc.stableCoin(), cost.amount().negate()), // Stablecoin outflow
 					Category.INVESTMENT_SELL,
@@ -316,7 +316,7 @@ public class DefaultInvestmentController implements InvestmentController {
 				stableCoinSrc.account().addTransaction(investmentTransactionOut);
 				yield new OrderResult.BuyWithStablesSuccess(investmentTransactionOut, investmentTransactionIn);
 			}
-			case PaymentSource.NoPaymentSource noSrc -> {
+			case PaymentSource.NoPaymentChannel noSrc -> {
 				yield new OrderResult.BuyNoPaymentSuccess(investmentTransactionIn);
 			}
 		};
@@ -325,7 +325,7 @@ public class DefaultInvestmentController implements InvestmentController {
     @Override
     public OrderResult executeSellOrder(
         InvestmentAccount sourceAccount,
-        PaymentSource paymentDestination,
+        PaymentSource cashFlowTarget,
         CurrencyUnit asset, 
         BigDecimal quantity,
         Asset unitPrice, 
@@ -346,7 +346,7 @@ public class DefaultInvestmentController implements InvestmentController {
         }
 
         final var proceeds = estimateOrderCost(
-            OrderType.SELL, asset, quantity, unitPrice, fee, paymentDestination
+            OrderType.SELL, asset, quantity, unitPrice, fee, cashFlowTarget
         );
 
         final var sellTransaction = InvestmentTransaction.of(
@@ -360,8 +360,8 @@ public class DefaultInvestmentController implements InvestmentController {
         );
         sourceAccount.addTransaction(sellTransaction);
 
-        return switch(paymentDestination) {
-            case PaymentSource.FromCashAccount cashDst -> {
+        return switch(cashFlowTarget) {
+            case PaymentSource.CashAccountChannel cashDst -> {
                 final var cashTransaction = CashTransaction.of(
                     proceeds, // Cash inflow
                     Category.INVESTMENT_SELL,
@@ -372,7 +372,7 @@ public class DefaultInvestmentController implements InvestmentController {
                 cashDst.account().addTransaction(cashTransaction);
                 yield new OrderResult.SellWithCashSuccess(sellTransaction, cashTransaction);
             }
-            case PaymentSource.FromStableCoinPosition stableCoinDst -> {
+            case PaymentSource.StableCoinPositionChannel stableCoinDst -> {
                 final var stableCoinBuyTransaction = InvestmentTransaction.of(
                     Asset.of(stableCoinDst.stableCoin(), exchangeRateProvider.convert(proceeds, stableCoinDst.stableCoin()).amount()), // Stablecoin inflow
                     Category.INVESTMENT_BUY,
@@ -385,7 +385,7 @@ public class DefaultInvestmentController implements InvestmentController {
                 stableCoinDst.account().addTransaction(stableCoinBuyTransaction);
                 yield new OrderResult.SellWithStablesSuccess(sellTransaction, stableCoinBuyTransaction);
             }
-            case PaymentSource.NoPaymentSource noDst -> {
+            case PaymentSource.NoPaymentChannel noDst -> {
                 yield new OrderResult.SellNoPaymentSuccess(sellTransaction);
             }
         };

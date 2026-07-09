@@ -26,8 +26,6 @@ public final class CategoryCatalog {
                 .forEach(customCategories::add);
     }
 
-    
-
     /**
      * Creates a new category catalog with the given list of custom categories.
      *
@@ -67,7 +65,7 @@ public final class CategoryCatalog {
     }
 
     /**
-     * Returns the list of active categories (both default and custom).
+     * Returns the list of active categories.
      *
      * @return the list of active categories
      */
@@ -115,6 +113,7 @@ public final class CategoryCatalog {
         if (existsByName(category.getName())) {
             throw new IllegalArgumentException("A category with the same name already exists.");
         }
+        // Persist the new custom category using CategoryManager
         System.out.println("Adding custom category: " + category);
         customCategories.add(category);
         CategoryManager.add(category);
@@ -159,4 +158,5 @@ public final class CategoryCatalog {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Custom category not found: " + categoryName));
     }
+    
 }

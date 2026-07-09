@@ -5,11 +5,11 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 
 public sealed interface PaymentSource 
-    permits PaymentSource.FromCashAccount, 
-            PaymentSource.FromStableCoinPosition, 
-            PaymentSource.NoPaymentSource {
+    permits PaymentSource.CashAccountChannel, 
+            PaymentSource.StableCoinPositionChannel, 
+            PaymentSource.NoPaymentChannel {
 
-    record FromCashAccount(CashAccount account) implements PaymentSource {}
-    record FromStableCoinPosition(InvestmentAccount account, CurrencyUnit stableCoin) implements PaymentSource {}
-    record NoPaymentSource() implements PaymentSource {}    // if the checkbox of src is not selected
+    record CashAccountChannel(CashAccount account) implements PaymentSource {}
+    record StableCoinPositionChannel(InvestmentAccount account, CurrencyUnit stableCoin) implements PaymentSource {}
+    record NoPaymentChannel() implements PaymentSource {}    // if the checkbox of src is not selected
 }

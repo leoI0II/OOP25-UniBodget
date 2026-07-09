@@ -1,48 +1,53 @@
 package it.unibo.unibodget.model.wallet;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
 import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 
 /**
- * A wallet that holds {@link CashTransaction} entries and computes its balance
- * by summing all transaction amounts in the base currency.
+ * Cash wallet aggregate root.
+ *
+ * It owns its transaction history and its budget settings.
  */
-public class CashAccount extends Wallet<CashTransaction> {
+public final class CashAccount extends Wallet<CashTransaction> {
 
-    /**
-     * Creates a CashAccount with an existing transaction history.
-     *
-     * @param name         the display name; if empty a default name is generated
-     * @param baseCurrency the currency in which the balance is expressed
-     * @param history      the pre-existing transaction ledger
-     */
-    public CashAccount(String name, CurrencyUnit baseCurrency, Historical<CashTransaction> history) {
+    private DefaultBudgetSettings budgetSettings;
+
+    public CashAccount(
+            final String name,
+            final CurrencyUnit baseCurrency,
+            final Historical<CashTransaction> history,
+            final DefaultBudgetSettings budgetSettings) {
         super(name, baseCurrency, history, "Cash Account");
+        this.budgetSettings = Objects.requireNonNull(budgetSettings);
     }
 
-    /**
-     * Creates a CashAccount with an empty transaction history.
-     *
-     * @param name         the display name; if empty a default name is generated
-     * @param baseCurrency the currency in which the balance is expressed
-     */
-    public CashAccount(String name, CurrencyUnit baseCurrency) {
-        this(name, baseCurrency, new Historical<>());
+    public CashAccount(final String name, final CurrencyUnit baseCurrency) {
+        this(
+                name,
+                baseCurrency,
+                new Historical<>(),
+                new DefaultBudgetSettings(BigDecimal.ZERO)
+        );
     }
 
-    /**
-     * Computes the balance by summing the amounts of all recorded transactions.
-     * A positive result indicates net income; negative indicates net expense.
-     *
-     * @return an {@link Asset} representing the total balance in the base currency
-     */
+    public DefaultBudgetSettings getBudgetSettings() {
+        return budgetSettings;
+    }
+
+    public void setBudgetSettings(final DefaultBudgetSettings budgetSettings) {
+        this.budgetSettings = Objects.requireNonNull(budgetSettings);
+    }
+
     @Override
     public Asset getBalance() {
         return getHistory().getTransactions().stream()
-            .map(CashTransaction::getAsset)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .map(CashTransaction::getAsset)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
-
 }

@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +21,9 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.utils.ARGBColor;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
+/**
+ * Tests for {@link DefaultWalletService}.
+ */
 class DefaultWalletServiceTest {
 
     private WalletService<CashTransaction, CashAccount> service;
@@ -167,9 +169,25 @@ class DefaultWalletServiceTest {
         final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
         final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
 
-        final WalletService<CashTransaction, CashAccount> wService = new DefaultWalletService<>(List.of(firstWallet, secondWallet));
+        final WalletService<CashTransaction, CashAccount> walletService =
+                new DefaultWalletService<>(List.of(firstWallet, secondWallet));
 
-        assertTrue(wService.getCurrentWallet().isPresent());
-        assertEquals(firstWallet, wService.getCurrentWallet().get());
+        assertTrue(walletService.getCurrentWallet().isPresent());
+        assertEquals(firstWallet, walletService.getCurrentWallet().get());
+    }
+
+    @Test
+    void shouldSelectAnotherWalletWhenCurrentWalletIsRemoved() {
+        final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
+        final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
+
+        service.addWallet(firstWallet);
+        service.addWallet(secondWallet);
+
+        final boolean removed = service.removeWallet(firstWallet.getId());
+
+        assertTrue(removed);
+        assertTrue(service.getCurrentWallet().isPresent());
+        assertEquals(secondWallet, service.getCurrentWallet().get());
     }
 }

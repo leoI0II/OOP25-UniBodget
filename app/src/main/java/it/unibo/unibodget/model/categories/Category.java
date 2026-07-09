@@ -168,4 +168,5 @@ public final class Category extends BasicCategory {
     public int hashCode() {
         return Objects.hash(super.hashCode(), origin, active);
     }
+
 }
