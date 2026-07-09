@@ -2,7 +2,6 @@ package it.unibo.unibodget.model.categories;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
