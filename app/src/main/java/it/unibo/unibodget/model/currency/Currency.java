@@ -36,9 +36,7 @@ public final class Currency implements CurrencyUnit {
     private static final Map<String, Currency> loaded = new HashMap<>();
     private static boolean initialized = false;
 
-    //private static final Path PATH = Path.of("app/data/json/currency/Currencies.json");
     private static final Path PATH = Path.of("data/json/currency/Currencies.json");
-
     private static final String RESOURCE = "/json/currency/Currencies.json"; 
 
     /**
