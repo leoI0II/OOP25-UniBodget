@@ -170,6 +170,7 @@ public final class Currency implements CurrencyUnit {
             }
             loaded.clear();
             list.forEach(c -> loaded.put(c.getCode().toUpperCase(), c));
+            list.replaceAll(c -> loaded.getOrDefault(c.getCode().toUpperCase(), c));
             initialized = true;
         } catch (Exception e) {
             System.out.println("Currency JSON load failed → using mock currencies");

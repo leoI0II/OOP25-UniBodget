@@ -27,8 +27,6 @@ import javafx.collections.ObservableList;
  * Additional fields or methods may be implemented by specific currency types
  * (e.g., crypto API identifiers), but they are not required by this interface.
  */
-@JsonSerialize(using = CurrencyUnitSerializer.class)
-@JsonDeserialize(using = CurrencyUnitDeserializer.class)
 public interface CurrencyUnit {
 
     /**
