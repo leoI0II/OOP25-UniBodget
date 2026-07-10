@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.settings;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,9 @@ public final class Settings {
     private List<SettingsSnapshot> preferenceHistory;
 
     private WindowPreferences windowPrefs;
+
+    @JsonIgnore
+    private LocalDate lastModified;
 
     /**
      * Creates a Settings instance with default values:
@@ -112,6 +116,22 @@ public final class Settings {
     public void setPreferenceHistory(List<SettingsSnapshot> list) {
         this.preferenceHistory.clear();
         if (list != null) this.preferenceHistory.addAll(list);
+    }
+
+    /**
+     * Get LocalDate last modified
+     * @return LocalDate last modified
+     */
+    public LocalDate getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Set LocalDate last modified
+     * @param date LocalDate last modified
+     */
+    public void setLastModified(LocalDate date) {
+        this.lastModified = date;
     }
 
     /**

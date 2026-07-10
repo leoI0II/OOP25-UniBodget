@@ -56,6 +56,11 @@ public final class SettingsController {
      * @param newTheme the theme to apply
      */
     public void changeTheme(Theme newTheme) {
+        Theme oldTheme = settings.getTheme();
+        settings.setLastModified(java.time.LocalDate.now());
+        if (oldTheme.equals(newTheme)) {
+            return;
+        }
         // Update model
         settings.setTheme(newTheme);
         // Update global theme manager
@@ -71,6 +76,11 @@ public final class SettingsController {
      * @param newBase the new base currency code
      */
     public void changeBaseCurrency(String newBase) {
+        String oldBase = settings.getBaseCurrency();
+        settings.setLastModified(java.time.LocalDate.now());
+        if (oldBase.equals(newBase)) {
+            return;
+        }
         // Update model
         settings.setBaseCurrency(newBase);
         // Update global currency context
@@ -85,6 +95,12 @@ public final class SettingsController {
      * @param prefs the new window preferences
      */
     public void updateWindowPrefs(WindowPreferences prefs) {
+        WindowPreferences old = settings.getWindowPrefs();
+        settings.setLastModified(java.time.LocalDate.now());
+        if (old.equals(prefs)) {
+            return;
+        }
+
         settings.setWindowPrefs(prefs);
         manager.saveCurrent(settings);
     }
@@ -94,6 +110,7 @@ public final class SettingsController {
      * and persisting the updated settings.
      */
     public void saveConfiguration() {
+        settings.setLastModified(java.time.LocalDate.now());
         // Add snapshot of current state
         settings.addSnapshotToHistory();
         // Persist changes
@@ -111,6 +128,7 @@ public final class SettingsController {
     public void applyConfiguration(SettingsSnapshot snap) {
         // Replace settings with snapshot
         this.settings = Settings.fromSnapshot(snap);
+        settings.setLastModified(java.time.LocalDate.now());
         // Update global managers
         ThemeManager.setTheme(settings.getTheme());
         CurrencyContext.setBase(settings.getBaseCurrency());
