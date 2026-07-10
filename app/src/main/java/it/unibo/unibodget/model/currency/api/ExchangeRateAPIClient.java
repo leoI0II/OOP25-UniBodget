@@ -85,7 +85,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      * @param target the target currency code (e.g., "USD")
      * @return a sorted map of dates and exchange rates
      */
-    private Map<LocalDate, Double> parseFrankfurterJson(String json, String target) {
+    protected Map<LocalDate, Double> parseFrankfurterJson(String json, String target) {
         Map<LocalDate, Double> history = new TreeMap<>();
 
         Pattern p = Pattern.compile(
