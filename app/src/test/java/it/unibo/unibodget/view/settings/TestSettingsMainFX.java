@@ -1,0 +1,60 @@
+package it.unibo.unibodget.view.settings;
+
+import it.unibo.unibodget.controller.settings.SettingsController;
+import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.settings.WindowPreferences;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.TabPane;
+import javafx.stage.Stage;
+
+public final class TestSettingsMainFX extends Application {
+
+    @Override
+    public void start(Stage stage) {
+
+        SettingsController controller = new SettingsController();
+        WindowPreferences savedPrefs = controller.getSettings().getWindowPrefs();
+
+        TabPane pane = new TabPane();
+        pane.getTabs().add(new SettingsTabFX(controller).create(stage));
+
+        Scene scene = new Scene(pane, savedPrefs.getWidth(), savedPrefs.getHeight());
+        stage.setScene(scene);
+        stage.setTitle("Settings Manager");
+        stage.setMaximized(savedPrefs.isMaximized());
+        ThemeManager.applyThemeToScene(scene);
+        
+        stage.show();
+
+        // Auto-update WindowPreferences
+        stage.widthProperty().addListener((obs, oldV, newV) -> {
+            controller.updateWindowPrefs(new WindowPreferences(
+                    stage.getWidth(),
+                    stage.getHeight(),
+                    stage.isMaximized()
+            ));
+        });
+
+        stage.heightProperty().addListener((obs, oldV, newV) -> {
+            controller.updateWindowPrefs(new WindowPreferences(
+                    stage.getWidth(),
+                    stage.getHeight(),
+                    stage.isMaximized()
+            ));
+        });
+
+        stage.maximizedProperty().addListener((obs, oldV, newV) -> {
+            controller.updateWindowPrefs(new WindowPreferences(
+                    stage.getWidth(),
+                    stage.getHeight(),
+                    stage.isMaximized()
+            ));
+        });
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

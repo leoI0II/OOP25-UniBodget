@@ -4,45 +4,68 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 
 /**
- * Represents global user preferences for the application.
+ * Represents the global user preferences for the application.
  *
- * <p>This includes visual preferences shared across all views and
- * the system default currency used to display aggregated totals
- * across multiple wallets.</p>
+ * <p>This includes:</p>
+ * <ul>
+ *     <li>the current UI theme</li>
+ *     <li>the base currency used across all views</li>
+ *     <li>a history of saved configurations</li>
+ *     <li>window size and layout preferences</li>
+ * </ul>
+ *
+ * <p>The class is fully serializable via Jackson and supports
+ * snapshot‑based persistence for undo/restore operations.</p>
  */
 public final class Settings {
 
     private Theme theme;
-    private CurrencyUnit baseCurrency;
-    private final List<String> preferenceHistory;
-    private WindowPreferences windowPrefs = new WindowPreferences();
+    private String baseCurrency;
+
+    @JsonProperty("preferenceHistory")
+    private List<SettingsSnapshot> preferenceHistory;
+
+    private WindowPreferences windowPrefs;
 
     /**
-     * Creates a new Settings object with default values.
+     * Creates a Settings instance with default values:
+     * <ul>
+     *     <li>Theme: {@link Theme#DEFAULT}</li>
+     *     <li>Base currency: EUR</li>
+     *     <li>Empty preference history</li>
+     *     <li>Default window preferences</li>
+     * </ul>
      */
     public Settings() {
         this.theme = Theme.DEFAULT;
-        this.baseCurrency = FiatCurrency.EUR;
+        this.baseCurrency = FiatCurrency.EUR.getShortName();
         this.preferenceHistory = new ArrayList<>();
         this.windowPrefs = new WindowPreferences();
     }
 
     /**
-     * Creates a new Settings object with custom values.
+     * Creates a Settings instance from JSON.
      *
-     * @param theme the selected theme
-     * @param baseCurrency the system default currency
-     * @param preferenceHistory the history of user preference changes
+     * @param theme             the selected theme
+     * @param baseCurrency      the base currency code (e.g. "EUR")
+     * @param preferenceHistory the list of saved snapshots
+     * @param windowPrefs       window layout preferences
      */
+    @JsonCreator
     public Settings(
-            final Theme theme,
-            final CurrencyUnit baseCurrency,
-            final List<String> preferenceHistory,
-            final WindowPreferences windowPrefs
+        @JsonProperty("theme") Theme theme,
+        @JsonProperty("baseCurrency") String baseCurrency,
+        @JsonProperty("preferenceHistory") List<SettingsSnapshot> preferenceHistory,
+        @JsonProperty("windowPrefs") WindowPreferences windowPrefs
     ) {
         this.theme = Objects.requireNonNull(theme);
         this.baseCurrency = Objects.requireNonNull(baseCurrency);
@@ -50,107 +73,97 @@ public final class Settings {
         this.windowPrefs = Objects.requireNonNull(windowPrefs);
     }
 
-    /**
-     * Returns the active theme.
-     *
-     * @return the current theme
-     */
-    public Theme getTheme() {
-        return this.theme;
-    }
+    /** Returns the current theme. */
+    public Theme getTheme() { return theme; }
 
     /**
-     * Updates the active theme.
+     * Sets the theme and records a snapshot if the theme actually changed.
      *
-     * @param theme the new theme
+     * <p>This ensures that the history only grows when meaningful
+     * changes occur.</p>
      */
-    public void setTheme(final Theme theme) {
-        this.theme = Objects.requireNonNull(theme);
-        addToHistory("Theme changed to: " + theme.getName());
+    public void setTheme(Theme theme) { 
+        if (!theme.equals(this.theme)) {
+            addSnapshotToHistory();   // Save previous configuration
+        }
+        this.theme = theme; 
     }
 
-    /**
-     * Returns the system default currency used for aggregated totals.
-     *
-     * @return the base currency
+    /** 
+     * Returns the base currency code (e.g. "EUR"). 
      */
-    public CurrencyUnit getBaseCurrency() {
-        return this.baseCurrency;
-    }
+    public String getBaseCurrency() { return baseCurrency; }
+
+    /** 
+     * Sets the base currency code. 
+     */
+    public void setBaseCurrency(String currency) { this.baseCurrency = currency; }
 
     /**
-     * Updates the system default currency.
-     *
-     * @param currency the new base currency
+     * Returns an immutable view of the preference history.
      */
-    public void setBaseCurrency(final CurrencyUnit currency) {
-        this.baseCurrency = Objects.requireNonNull(currency);
-        addToHistory("Base currency changed to: " + currency);
-    }
-
-    /**
-     * Returns an immutable copy of the preference history.
-     *
-     * @return the preference history
-     */
-    public List<String> getPreferenceHistory() {
+    public List<SettingsSnapshot> getPreferenceHistory() {
         return List.copyOf(this.preferenceHistory);
     }
 
     /**
-     * Adds a new entry to the preference history.
-     *
-     * @param entry the description of the change performed
+     * Replaces the entire preference history.
      */
-    private void addToHistory(final String entry) {
-        this.preferenceHistory.add(entry);
+    public void setPreferenceHistory(List<SettingsSnapshot> list) {
+        this.preferenceHistory.clear();
+        if (list != null) this.preferenceHistory.addAll(list);
     }
 
     /**
-     * Returns the window preferences.
-     *
-     * @return the window preferences
+     * Appends a new snapshot representing the current settings state.
+     */
+    public void addSnapshotToHistory() {
+        this.preferenceHistory.add(SettingsSnapshot.of(this));
+    }
+
+    /**
+     * Creates a new Settings instance from a snapshot.
+     * The history is intentionally reset.
+     */
+    public static Settings fromSnapshot(SettingsSnapshot snap) {
+        return new Settings(
+            snap.getTheme(), 
+            snap.getBaseCurrency(), 
+            new ArrayList<>(), 
+            snap.getWindowPrefs());
+    }
+
+    /**
+     * Returns a deep copy of this Settings instance.
+     */
+    public Settings copy() {
+        return new Settings(
+            theme, 
+            baseCurrency, 
+            new ArrayList<>(preferenceHistory), 
+            windowPrefs);
+    }
+
+    /** 
+     * Returns the window layout preferences.
      */
     public WindowPreferences getWindowPrefs() { 
-        return this.windowPrefs; 
+        return windowPrefs; 
     }
 
-    /**
-     * Sets the window preferences.
-     *
-     * @param prefs the new window preferences
-     */
+    /** Sets the window layout preferences. */
     public void setWindowPrefs(WindowPreferences prefs) { 
         this.windowPrefs = prefs; 
     }
 
-    @Override
-    public String toString() {
-        return "Settings{"
-                + "theme=" + this.theme
-                + ", baseCurrency=" + this.baseCurrency
-                + ", preferenceHistory=" + this.preferenceHistory
-                + ", windowPrefs=" + this.windowPrefs
-                + '}';
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Settings)) {
-            return false;
-        }
-        final Settings other = (Settings) o;
-        return Objects.equals(this.theme, other.theme)
-                && Objects.equals(this.baseCurrency, other.baseCurrency)
-                && Objects.equals(this.preferenceHistory, other.preferenceHistory)
-                && Objects.equals(this.windowPrefs, other.windowPrefs);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.theme, this.baseCurrency, this.preferenceHistory, this.windowPrefs);
+    /**
+     * Resolves the base currency code into a {@link CurrencyUnit}.
+     *
+     * <p>This method is ignored during JSON serialization and used
+     * only at runtime.</p>
+     */
+    @JsonIgnore
+    public CurrencyUnit getBaseCurrencyUnit() {
+        return Currency.get(baseCurrency);
     }
 }

@@ -86,4 +86,5 @@ public final class WindowPreferences {
     public void setMaximized(boolean maximized) { 
         this.maximized = maximized; 
     }
+    
 }
