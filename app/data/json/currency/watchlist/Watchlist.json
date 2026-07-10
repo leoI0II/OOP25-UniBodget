@@ -4,6 +4,9 @@
     "to" : "USD"
   }, {
     "from" : "EUR",
+    "to" : "USD"
+  }, {
+    "from" : "EUR",
     "to" : "NZD"
   }, {
     "from" : "HKD",

@@ -1,0 +1,125 @@
+{
+  "investmentAccounts" : [ {
+    "name" : "Stocks Portfolio",
+    "baseCurrency" : "EUR",
+    "history" : {
+      "transactions" : [ {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "USD",
+          "amount" : 1E+1,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : [ 2026, 7, 10 ],
+        "description" : "Buy Apple",
+        "notes" : null,
+        "unitPrice" : {
+          "currency" : "USD",
+          "amount" : 1.5E+2,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USD",
+          "amount" : 2,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        }
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "USD",
+          "amount" : -5,
+          "zero" : false,
+          "negative" : true,
+          "positive" : false
+        },
+        "category" : {
+          "name" : "Investment Sell",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "INCOME",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : [ 2026, 7, 10 ],
+        "description" : "Sell Apple",
+        "notes" : null,
+        "unitPrice" : {
+          "currency" : "USD",
+          "amount" : 1.7E+2,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : null
+      } ]
+    },
+    "id" : "ccf12ce5-cc59-4990-bd1a-5ce567799ea1"
+  }, {
+    "name" : "Crypto Portfolio",
+    "baseCurrency" : "EUR",
+    "history" : {
+      "transactions" : [ {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "USD",
+          "amount" : 3,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : [ 2026, 7, 10 ],
+        "description" : "Buy crypto",
+        "notes" : null,
+        "unitPrice" : {
+          "currency" : "USD",
+          "amount" : 1E+2,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : null
+      } ]
+    },
+    "id" : "06c78454-98ba-4a23-b59c-7d2c959aa430"
+  } ]
+}

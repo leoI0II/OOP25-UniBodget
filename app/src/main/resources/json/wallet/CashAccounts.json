@@ -1,0 +1,21 @@
+{
+  "cashAccounts" : [ {
+    "name" : "Test1",
+    "baseCurrency" : "EUR",
+    "history" : {
+      "transactions" : [ ]
+    },
+    "budgetSettings" : {
+      "limitValue" : 0,
+      "warningThreshold" : 0.8
+    },
+    "id" : "4303c089-4be3-4f0b-a98f-7097671492a5",
+    "balance" : {
+      "currency" : "EUR",
+      "amount" : 0,
+      "negative" : false,
+      "positive" : false,
+      "zero" : true
+    }
+  } ]
+}
