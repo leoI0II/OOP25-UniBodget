@@ -1,141 +1,14 @@
 {
   "cashAccounts" : [ {
-    "name" : "Main Wallet",
+    "name" : "Wallet",
     "baseCurrency" : "EUR",
     "history" : {
-      "transactions" : [ {
-        "transactionType" : "cash",
-        "asset" : {
-          "currency" : "EUR",
-          "amount" : 2E+3,
-          "zero" : false,
-          "negative" : false,
-          "positive" : true
-        },
-        "category" : {
-          "name" : "Savings",
-          "colorHex" : {
-            "alpha" : 255,
-            "red" : 76,
-            "green" : 175,
-            "blue" : 80
-          },
-          "type" : "INCOME",
-          "origin" : "DEFAULT",
-          "active" : true,
-          "default" : true,
-          "custom" : false
-        },
-        "date" : [ 2026, 7, 10 ],
-        "description" : "Salary",
-        "notes" : null,
-        "friendLoanId" : null,
-        "friendName" : null,
-        "friendLoanTransaction" : false
-      }, {
-        "transactionType" : "cash",
-        "asset" : {
-          "currency" : "EUR",
-          "amount" : -5E+1,
-          "zero" : false,
-          "negative" : true,
-          "positive" : false
-        },
-        "category" : {
-          "name" : "Food",
-          "colorHex" : {
-            "alpha" : 255,
-            "red" : 255,
-            "green" : 152,
-            "blue" : 0
-          },
-          "type" : "EXPENSE",
-          "origin" : "DEFAULT",
-          "active" : true,
-          "default" : true,
-          "custom" : false
-        },
-        "date" : [ 2026, 7, 10 ],
-        "description" : "Dinner",
-        "notes" : null,
-        "friendLoanId" : null,
-        "friendName" : null,
-        "friendLoanTransaction" : false
-      }, {
-        "transactionType" : "cash",
-        "asset" : {
-          "currency" : "EUR",
-          "amount" : -2E+1,
-          "zero" : false,
-          "negative" : true,
-          "positive" : false
-        },
-        "category" : {
-          "name" : "Transport",
-          "colorHex" : {
-            "alpha" : 255,
-            "red" : 0,
-            "green" : 150,
-            "blue" : 136
-          },
-          "type" : "EXPENSE",
-          "origin" : "DEFAULT",
-          "active" : true,
-          "default" : true,
-          "custom" : false
-        },
-        "date" : [ 2026, 7, 10 ],
-        "description" : "Bus",
-        "notes" : null,
-        "friendLoanId" : null,
-        "friendName" : null,
-        "friendLoanTransaction" : false
-      } ]
+      "transactions" : [ ]
     },
     "budgetSettings" : {
       "limitValue" : 0,
       "warningThreshold" : 0.8
     },
-    "id" : "189d8148-d8f5-4a2c-92b3-7c696e2683f0"
-  }, {
-    "name" : "Travel Wallet",
-    "baseCurrency" : "EUR",
-    "history" : {
-      "transactions" : [ {
-        "transactionType" : "cash",
-        "asset" : {
-          "currency" : "EUR",
-          "amount" : -3E+2,
-          "zero" : false,
-          "negative" : true,
-          "positive" : false
-        },
-        "category" : {
-          "name" : "Transport",
-          "colorHex" : {
-            "alpha" : 255,
-            "red" : 0,
-            "green" : 150,
-            "blue" : 136
-          },
-          "type" : "EXPENSE",
-          "origin" : "DEFAULT",
-          "active" : true,
-          "default" : true,
-          "custom" : false
-        },
-        "date" : [ 2026, 7, 10 ],
-        "description" : "Trip",
-        "notes" : null,
-        "friendLoanId" : null,
-        "friendName" : null,
-        "friendLoanTransaction" : false
-      } ]
-    },
-    "budgetSettings" : {
-      "limitValue" : 0,
-      "warningThreshold" : 0.8
-    },
-    "id" : "7e27c4f3-90d3-426e-a9f9-617c247730c4"
+    "id" : "f548cefd-e458-4a6a-be4d-1e44cdf45e42"
   } ]
 }

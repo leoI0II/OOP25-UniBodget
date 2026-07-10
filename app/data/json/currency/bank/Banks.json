@@ -1,11 +1,7 @@
 {
   "banks" : [ {
-    "name" : "Unibank",
+    "name" : "NewBank",
     "fixedFee" : 1.0,
-    "percentageFee" : 0.5
-  }, {
-    "name" : "Prova",
-    "fixedFee" : 4.0,
-    "percentageFee" : 2.0
+    "percentageFee" : 1.0
   } ]
 }

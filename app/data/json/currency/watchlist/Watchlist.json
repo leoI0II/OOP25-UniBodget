@@ -1,18 +1,3 @@
 {
-  "watchlist" : [ {
-    "from" : "CAD",
-    "to" : "USD"
-  }, {
-    "from" : "EUR",
-    "to" : "USD"
-  }, {
-    "from" : "EUR",
-    "to" : "NZD"
-  }, {
-    "from" : "HKD",
-    "to" : "ZAR"
-  }, {
-    "from" : "DKK",
-    "to" : "ZAR"
-  } ]
+  "watchlist" : [ ]
 }

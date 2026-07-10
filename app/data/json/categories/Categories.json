@@ -117,12 +117,12 @@
     "custom" : false,
     "default" : true
   }, {
-    "name" : "Gym",
+    "name" : "Duplicate",
     "colorHex" : {
       "alpha" : 255,
-      "red" : 33,
-      "green" : 150,
-      "blue" : 243
+      "red" : 0,
+      "green" : 255,
+      "blue" : 0
     },
     "type" : "EXPENSE",
     "origin" : "CUSTOM",

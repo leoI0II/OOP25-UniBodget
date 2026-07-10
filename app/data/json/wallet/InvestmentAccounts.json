@@ -23,8 +23,8 @@
           "type" : "EXPENSE",
           "origin" : "DEFAULT",
           "active" : true,
-          "default" : true,
-          "custom" : false
+          "custom" : false,
+          "default" : true
         },
         "date" : [ 2026, 7, 10 ],
         "description" : "Buy Apple",
@@ -63,8 +63,8 @@
           "type" : "INCOME",
           "origin" : "DEFAULT",
           "active" : true,
-          "default" : true,
-          "custom" : false
+          "custom" : false,
+          "default" : true
         },
         "date" : [ 2026, 7, 10 ],
         "description" : "Sell Apple",
@@ -79,7 +79,7 @@
         "fee" : null
       } ]
     },
-    "id" : "ccf12ce5-cc59-4990-bd1a-5ce567799ea1"
+    "id" : "cfef0171-1bc9-41b1-a51e-57b7f1a73da8"
   }, {
     "name" : "Crypto Portfolio",
     "baseCurrency" : "EUR",
@@ -104,8 +104,8 @@
           "type" : "EXPENSE",
           "origin" : "DEFAULT",
           "active" : true,
-          "default" : true,
-          "custom" : false
+          "custom" : false,
+          "default" : true
         },
         "date" : [ 2026, 7, 10 ],
         "description" : "Buy crypto",
@@ -120,6 +120,6 @@
         "fee" : null
       } ]
     },
-    "id" : "06c78454-98ba-4a23-b59c-7d2c959aa430"
+    "id" : "4d23f496-d443-4390-838f-f7bf5f3c24e4"
   } ]
 }
