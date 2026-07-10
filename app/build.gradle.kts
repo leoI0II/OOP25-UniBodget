@@ -57,6 +57,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 
     runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
 
@@ -68,10 +70,7 @@ dependencies {
 }
 
 application {
-    //mainClass.set("it.unibo.unibodget.unibodget")
-    mainClass.set("it.unibo.unibodget.view.currency_converter.TmpCCApp")
-    //mainClass.set("it.unibo.unibodget.persistency.parser.impl.TestBudgetLimitParsing")
-    //mainClass.set("it.unibo.unibodget.view.currency_converter.SimpleLabelOutputTest")
+    mainClass.set("it.unibo.unibodget.unibodget")
 }
 
 tasks.test {
