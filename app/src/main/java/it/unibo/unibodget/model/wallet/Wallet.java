@@ -6,6 +6,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
@@ -45,6 +49,28 @@ public abstract class Wallet<T extends Transaction> {
     protected Wallet(final String name, final CurrencyUnit baseCurrency,
                      final Historical<T> history, final String typePrefix) {
         this.id = UUID.randomUUID();
+        this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
+        this.baseCurrency = baseCurrency;
+        this.history = history;
+    }
+
+    /**
+     * Creates a wallet with a specific ID and existing transaction history.
+     *
+     * @param id           the unique identifier of this wallet
+     * @param name         the display name of this wallet; if empty a default is generated
+     * @param baseCurrency the reference currency used to express the balance
+     * @param history      the pre-existing transaction ledger
+     * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
+     */
+    @JsonCreator
+    protected Wallet(
+            @JsonProperty("id") UUID id,
+            @JsonProperty("name") String name,
+            @JsonProperty("baseCurrency") CurrencyUnit baseCurrency,
+            @JsonProperty("history") Historical<T> history,
+            String typePrefix) {
+        this.id = id != null ? id : UUID.randomUUID();
         this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
         this.baseCurrency = baseCurrency;
         this.history = history;
@@ -134,6 +160,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return an {@link Asset} representing the current balance in the base currency
      */
+    @JsonIgnore
     public abstract Asset getBalance();
 
 }
