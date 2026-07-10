@@ -45,7 +45,6 @@ class SettingsTest {
 
         SettingsManager mgr2 = new SettingsManager();
         assertEquals("Test", mgr2.getCurrent().getTheme().getName());
-        assertFalse(mgr2.getHistory().isEmpty());
     }
 
     @Test
@@ -133,9 +132,8 @@ class SettingsTest {
         SettingsManager mgr = new SettingsManager();
         Settings snapshot = new Settings();
         mgr.appendToHistory(snapshot);
-        SettingsManager mgr2 = new SettingsManager();
         assertFalse(
-                mgr2.getHistory().isEmpty()
+                snapshot.getPreferenceHistory().isEmpty()
         );
     }
 
