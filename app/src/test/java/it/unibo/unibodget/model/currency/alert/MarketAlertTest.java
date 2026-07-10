@@ -13,7 +13,6 @@ class MarketAlertTest {
     @Test
     void shouldDelegateToAlertService() {
         CurrencyAlertService service = new CurrencyAlertService();
-        MarketAlert market = new MarketAlert(service);
 
         CurrencyAlert alert = new CurrencyAlert(FiatCurrency.EUR, FiatCurrency.USD, 1.10, true);
         service.addAlert(alert);
