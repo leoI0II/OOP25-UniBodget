@@ -1,0 +1,95 @@
+package it.unibo.unibodget.model.transactions.base;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+
+class CashTransactionTest {
+
+    @Test
+    void shouldCreateStandardTransaction() {
+        CashTransaction t = new CashTransaction(
+                new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
+                Category.FOOD,                      // categoria reale
+                LocalDate.of(2024, 1, 1),
+                "desc",
+                "notes"
+        );
+
+        assertFalse(t.isFriendLoanTransaction());
+        assertTrue(t.getFriendLoanId().isEmpty());
+        assertTrue(t.getFriendName().isEmpty());
+    }
+
+    @Test
+    void shouldCreateFriendLoanTransaction() {
+        UUID id = UUID.randomUUID();
+
+        CashTransaction t = new CashTransaction(
+                new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
+                Category.FRIEND_LOAN,               // categoria reale
+                LocalDate.of(2024, 1, 1),
+                "desc",
+                "notes",
+                id,
+                "Alice"
+        );
+
+        assertTrue(t.isFriendLoanTransaction());
+        assertEquals(id, t.getFriendLoanId().get());
+        assertEquals("Alice", t.getFriendName().get());
+    }
+
+    @Test
+    void shouldFailIfOnlyOneFriendLoanFieldProvided() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
+                        Category.FRIEND_LOAN,
+                        LocalDate.now(),
+                        "d",
+                        "n",
+                        UUID.randomUUID(),
+                        null
+                )
+        );
+    }
+
+    @Test
+    void shouldFailIfFriendLoanCategoryWithoutMetadata() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
+                        Category.FRIEND_LOAN,
+                        LocalDate.now(),
+                        "d",
+                        "n",
+                        null,
+                        null
+                )
+        );
+    }
+
+    @Test
+    void shouldFailIfNonFriendLoanCategoryHasMetadata() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
+                        Category.FOOD,                 // NON FRIEND_LOAN
+                        LocalDate.now(),
+                        "d",
+                        "n",
+                        UUID.randomUUID(),
+                        "Bob"
+                )
+        );
+    }
+
+}
