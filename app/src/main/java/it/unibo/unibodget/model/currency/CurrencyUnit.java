@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -24,6 +27,8 @@ import javafx.collections.ObservableList;
  * Additional fields or methods may be implemented by specific currency types
  * (e.g., crypto API identifiers), but they are not required by this interface.
  */
+@JsonSerialize(using = CurrencyUnitSerializer.class)
+@JsonDeserialize(using = CurrencyUnitDeserializer.class)
 public interface CurrencyUnit {
 
     /**
