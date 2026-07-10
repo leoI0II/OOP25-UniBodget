@@ -6,6 +6,8 @@ import java.util.Objects;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -48,7 +50,14 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
      *                     may be null
      * @param notes        optional additional notes or comments; may be null
      */
-    public Transaction(Asset asset, Category category, LocalDate date, String description, String notes) {
+    @JsonCreator
+    public Transaction(
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes) {
+
         this.asset = Objects.requireNonNull(asset);
         this.category = Objects.requireNonNull(category);
         this.date = Objects.requireNonNull(date);
@@ -131,4 +140,5 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
                ", notes='" + notes + '\'' +
                '}';
     }
+    
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.time.YearMonth;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import it.unibo.unibodget.model.transactions.base.Transaction;
 
@@ -19,8 +20,8 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  */
 public class Historical<T extends Transaction> {
 
+    @JsonProperty("transactions")
     private final List<T> history;
-
     
     public Historical() {
         this.history = new ArrayList<>();
@@ -44,6 +45,7 @@ public class Historical<T extends Transaction> {
      *
      * @return an unmodifiable list containing all recorded transactions
      */
+    @JsonProperty("transactions")
     public List<T> getTransactions() {
         return Collections.unmodifiableList(history);
     }

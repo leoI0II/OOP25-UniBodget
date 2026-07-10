@@ -3,6 +3,9 @@ package it.unibo.unibodget.model.transactions.base;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
@@ -42,22 +45,26 @@ public final class InvestmentTransaction extends Transaction {
      * @param fee          an optional fee associated with the transaction
      *                     (e.g., broker fee); may be null
      */
+    @JsonCreator
     public InvestmentTransaction(
-            Asset asset,
-            Category category,
-            LocalDate date,
-            String description,
-            String notes,
-            Asset unitPrice,
-            Asset fee
-    ) {
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes,
+            @JsonProperty("unitPrice") final Asset unitPrice,
+            @JsonProperty("fee") final Asset fee) {
+
         super(asset, category, date, description, notes);
+
         Objects.requireNonNull(unitPrice, "Unit price cannot be null");
         if (unitPrice.isNegative()) {
             throw new IllegalArgumentException("Unit price cannot be negative.");
         }
+
         this.unitPrice = unitPrice;
         this.fee = fee;
+
         if (fee != null && fee.isNegative()) {
             throw new IllegalArgumentException("Fee cannot be negative.");
         }

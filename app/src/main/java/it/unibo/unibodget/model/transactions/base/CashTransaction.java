@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
@@ -35,11 +37,11 @@ public final class CashTransaction extends Transaction {
      * @param notes optional additional notes or comments; may be null
      */
     public CashTransaction(
-            final Asset asset,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes) {
+        final Asset asset,
+        final Category category,
+        final LocalDate date,
+        final String description,
+        final String notes) {
         this(asset, category, date, description, notes, null, null);
     }
 
@@ -71,14 +73,15 @@ public final class CashTransaction extends Transaction {
      * {@link CategoryType#FRIEND_LOAN}, or if only one of the two friend-loan
      * fields is provided
      */
+    @JsonCreator
     public CashTransaction(
-            final Asset asset,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes,
-            final UUID friendLoanId,
-            final String friendName) {
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes,
+            @JsonProperty("friendLoanId") final UUID friendLoanId,
+            @JsonProperty("friendName") final String friendName) {
         super(asset, category, date, description, notes);
 
         final boolean hasLoanId = friendLoanId != null;
@@ -161,4 +164,5 @@ public final class CashTransaction extends Transaction {
                 + ", friendName='" + friendName + '\''
                 + '}';
     }
+
 }
