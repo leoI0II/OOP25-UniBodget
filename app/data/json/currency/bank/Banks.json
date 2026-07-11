@@ -3,5 +3,9 @@
     "name" : "NewBank",
     "fixedFee" : 1.0,
     "percentageFee" : 1.0
+  }, {
+    "name" : "CustomBank",
+    "fixedFee" : 2.0,
+    "percentageFee" : 1.0
   } ]
 }
