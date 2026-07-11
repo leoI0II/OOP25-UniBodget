@@ -1,105 +1,56 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+//import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import it.unibo.unibodget.model.currency.CurrencyUnitDeserializer;
 
-/**
- * Centralized Jackson configuration for UniBodget persistence.
- * <p>
- * This class exposes a single shared {@link ObjectMapper} instance
- * configured with:
- * <ul>
- *     <li>registered modules (JavaTime, etc.)</li>
- *     <li>safe deserialization settings</li>
- *     <li>pretty-printing</li>
- *     <li>mixins for polymorphic types and ignored fields</li>
- * </ul>
- * <p>
- * It is used by all JSON-based persistence components to ensure
- * consistent serialization/deserialization across the entire app.
- */
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
 public final class PersistenceJacksonConfig {
 
-    /** 
-     * Shared, pre-configured ObjectMapper instance.
-     * Immutable and thread-safe after construction.
-     */
-    private static final ObjectMapper MAPPER = build();
+    private static final ObjectMapper MAPPER = create();
 
-    /** 
-     * Private constructor: this is a pure utility class.
-     */
-    private PersistenceJacksonConfig() {
-        // Prevent instantiation
-    }
+    private PersistenceJacksonConfig() { }
 
-    /**
-     * Returns the shared ObjectMapper used throughout UniBodget.
-     *
-     * @return configured ObjectMapper
-     */
     public static ObjectMapper mapper() {
         return MAPPER;
     }
 
-    /**
-     * Builds and configures the ObjectMapper instance.
-     * <p>
-     * Settings applied:
-     * <ul>
-     *     <li><strong>findAndRegisterModules()</strong> — enables support for JavaTime, JDK8 types, etc.</li>
-     *     <li><strong>FAIL_ON_UNKNOWN_PROPERTIES = false</strong> — allows forward-compatible JSON</li>
-     *     <li><strong>WRITE_DATES_AS_TIMESTAMPS disabled</strong> </li>
-     *     <li><strong>INDENT_OUTPUT enabled</strong> — pretty-print JSON</li>
-     * </ul>
-     * <p>
-     * Mixins:
-     * <ul>
-     *     <li>{@link CurrencyUnitTypeMixin} — enables polymorphic serialization for CurrencyUnit</li>
-     *     <li>{@link IgnorePriceProviderMixin} — hides the priceProvider field in InvestmentAccount</li>
-     * </ul>
-     */
-    private static ObjectMapper build() {
-        ObjectMapper mapper = new ObjectMapper()
-                .findAndRegisterModules() // JavaTimeModule, JDK8 module, etc.
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false) // ignore extra fields
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // use readable ISO dates
-                .enable(SerializationFeature.INDENT_OUTPUT); // pretty-print
+    private static ObjectMapper create() {
+        ObjectMapper mapper = new ObjectMapper();
 
-        // Add mixins to customize serialization/deserialization behavior
-        mapper.addMixIn(CurrencyUnit.class, CurrencyUnitTypeMixin.class);
-        mapper.addMixIn(InvestmentAccount.class, IgnorePriceProviderMixin.class);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        SimpleModule module = new SimpleModule();
+
+        // Currency
+        module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
+
+        // LocalDate as ISO string
+        module.addSerializer(LocalDate.class, new LocalDateSerializer());
+        module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+
+        module.addSerializer(new OptionalUUIDSerializer());
+        /*module.addSerializer(
+            (Class<Optional<UUID>>) (Class<?>) Optional.class,
+            new OptionalUUIDSerializer()
+        );*/
+        module.addDeserializer(Optional.class,new OptionalUUIDDeserializer());
+
+        mapper.registerModule(module);
+        //mapper.registerModule(new Jdk8Module());
+        //mapper.registerModule(new JavaTimeModule());
 
         return mapper;
-    }
-
-    /**
-     * Mixin enabling polymorphic serialization for CurrencyUnit.
-     * <p>
-     * Jackson will include a "@type" field containing the concrete class name.
-     * This is required because CurrencyUnit is an abstract type with multiple implementations.
-     */
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.CLASS,
-            include = JsonTypeInfo.As.PROPERTY,
-            property = "@type"
-    )
-    private interface CurrencyUnitTypeMixin {
-        // No methods: annotation-only mixin
-    }
-
-    /**
-     * To ignore the "priceProvider" field
-     * when serializing/deserializing InvestmentAccount.
-     */
-    @JsonIgnoreProperties({"priceProvider"})
-    private interface IgnorePriceProviderMixin {
-        // No methods: annotation-only mixin
     }
 }
