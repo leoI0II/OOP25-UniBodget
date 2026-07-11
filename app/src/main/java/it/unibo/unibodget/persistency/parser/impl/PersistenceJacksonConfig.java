@@ -24,6 +24,7 @@ public final class PersistenceJacksonConfig {
         return MAPPER;
     }
 
+    @SuppressWarnings("unchecked")
     private static ObjectMapper create() {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -40,11 +41,11 @@ public final class PersistenceJacksonConfig {
         module.addSerializer(LocalDate.class, new LocalDateSerializer());
         module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
 
-        module.addSerializer(new OptionalUUIDSerializer());
-        /*module.addSerializer(
+        //module.addSerializer(new OptionalUUIDSerializer());
+        module.addSerializer(
             (Class<Optional<UUID>>) (Class<?>) Optional.class,
             new OptionalUUIDSerializer()
-        );*/
+        );
         module.addDeserializer(Optional.class,new OptionalUUIDDeserializer());
 
         mapper.registerModule(module);
