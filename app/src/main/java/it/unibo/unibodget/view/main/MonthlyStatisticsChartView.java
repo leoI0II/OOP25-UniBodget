@@ -18,10 +18,12 @@ import java.time.format.DateTimeFormatter;
  * JavaFX view responsible for rendering a bar chart of per‑category totals
  * for a specific month, along with a summary row showing income, expenses,
  * and net balance.
+ * 
  * <p>
  * This class is presentation‑only: it receives a fully prepared
  * {@link MonthlyStatistics} instance via {@link #setData(MonthlyStatistics)}
  * and draws it. No filtering, aggregation, or date logic is performed here.
+ * 
  * <p>
  * The chart displays one bar per category, colored according to the
  * {@link CategoryType} (income or expense). Summary labels provide a quick
@@ -31,6 +33,7 @@ public final class MonthlyStatisticsChartView extends VBox {
 
     private static final DateTimeFormatter MONTH_FORMAT =
             DateTimeFormatter.ofPattern("MMMM yyyy");
+    private static final int HBOX_SPACING = 20;
 
     private final CategoryAxis xAxis = new CategoryAxis();
     private final NumberAxis yAxis = new NumberAxis();
@@ -44,6 +47,7 @@ public final class MonthlyStatisticsChartView extends VBox {
     /**
      * Creates a new {@code MonthlyStatisticsChartView} with default spacing,
      * padding, axis labels, and summary row styling.
+     * 
      * <p>
      * The chart is configured without animations and without a legend,
      * since each bar already represents a single category.
@@ -62,7 +66,7 @@ public final class MonthlyStatisticsChartView extends VBox {
         expenseLabel.setStyle("-fx-text-fill: #c62828;");
         netLabel.setStyle("-fx-font-weight: bold;");
 
-        HBox summaryRow = new HBox(20, incomeLabel, expenseLabel, netLabel);
+        final HBox summaryRow = new HBox(HBOX_SPACING, incomeLabel, expenseLabel, netLabel);
 
         getChildren().addAll(titleLabel, summaryRow, chart);
     }
@@ -70,6 +74,7 @@ public final class MonthlyStatisticsChartView extends VBox {
     /**
      * Populates the chart and summary labels with the data contained in the
      * given {@link MonthlyStatistics} object.
+     * 
      * <p>
      * Behavior:
      * <ul>
@@ -83,7 +88,7 @@ public final class MonthlyStatisticsChartView extends VBox {
      *
      * @param stats the monthly statistics to display; may be {@code null}
      */
-    public void setData(MonthlyStatistics stats) {
+    public void setData(final MonthlyStatistics stats) {
         chart.getData().clear();
 
         if (stats == null) {
@@ -99,7 +104,7 @@ public final class MonthlyStatisticsChartView extends VBox {
         expenseLabel.setText("Expense: " + stats.getTotalExpense());
         netLabel.setText("Net: " + stats.getNetBalance());
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        final XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Categories");
 
         for (CategoryTotal categoryTotal : stats.getCategoryTotals()) {
@@ -115,6 +120,7 @@ public final class MonthlyStatisticsChartView extends VBox {
 
     /**
      * Applies a color to a bar once its underlying JavaFX node becomes available.
+     * 
      * <p>
      * JavaFX creates the bar's node lazily, only after the data has been added
      * to a rendered chart. Therefore, styling must be applied via a listener
@@ -124,12 +130,12 @@ public final class MonthlyStatisticsChartView extends VBox {
      * @param data the chart data point whose bar should be styled
      * @param type the category type determining the bar color
      */
-    private void colorBarWhenReady(XYChart.Data<String, Number> data, CategoryType type) {
+    private void colorBarWhenReady(final XYChart.Data<String, Number> data, final CategoryType type) {
         data.nodeProperty().addListener((obs, oldNode, newNode) -> {
             if (newNode != null) {
-                String color = type == CategoryType.INCOME ? "#2e7d32"
-                        : type == CategoryType.EXPENSE ? "#c62828"
-                        : "#757575";
+                final String color = type == CategoryType.INCOME ? "#2e7d32"
+                                : type == CategoryType.EXPENSE ? "#c62828"
+                                : "#757575";
                 newNode.setStyle("-fx-bar-fill: " + color + ";");
             }
         });
