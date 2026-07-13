@@ -2,18 +2,25 @@ package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import java.net.URI;
-import java.net.http.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.regex.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Client implementation of {@link ExchangeRateAPI} that retrieves historical
  * currency exchange rates from the Frankfurter API.
+ * 
  * <p>
  * This class performs HTTP GET requests, parses JSON responses using a
  * lightweight regular-expression-based extractor, and returns a chronological
  * map of exchange rates keyed by {@link LocalDate}.
+ * 
  * <p>
  * Notes:
  * <ul>
@@ -26,6 +33,8 @@ import java.util.regex.*;
  * </ul>
  */
 public class ExchangeRateAPIClient implements ExchangeRateAPI {
+
+    private final static int OK_CODE = 200;
 
     /**
      * Fetches historical exchange rates for a given currency pair within the
@@ -43,10 +52,10 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      */
     @Override
     public Map<LocalDate, Double> getHistoricalRates(
-            CurrencyUnit base, CurrencyUnit target,
-            LocalDate from, LocalDate to) {
+            final CurrencyUnit base, final CurrencyUnit target,
+            final LocalDate from, final LocalDate to) {
 
-        String urlString = String.format(
+        final String urlString = String.format(
                 "https://api.frankfurter.app/%s..%s?from=%s&to=%s",
                 from, to, base.getCode(), target.getCode()
         );
@@ -54,10 +63,10 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
         System.out.println("DEBUG URL: " + urlString);
 
         try {
-            String json = fetchJson(urlString);
+            final String json = fetchJson(urlString);
             System.out.println("DEBUG JSON: " + json);
             return parseFrankfurterJson(json, target.getCode());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             //e.printStackTrace();
             System.out.println("Historical API failed, switching to offline.");
             return new TreeMap<>();
@@ -67,6 +76,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
     /**
      * Parses the JSON returned by the Frankfurter API to extract historical
      * exchange rates for the specified target currency.
+     * 
      * <p>
      * Expected JSON format:
      * <pre>
@@ -76,7 +86,8 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      *     "2026-06-06": {"USD": 1.06}
      *   }
      * }
-     * </pre>
+     * </p>
+     * 
      * <p>
      * A regular expression is used to extract date–rate pairs without relying
      * on external JSON libraries.
@@ -85,17 +96,17 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      * @param target the target currency code (e.g., "USD")
      * @return a sorted map of dates and exchange rates
      */
-    protected Map<LocalDate, Double> parseFrankfurterJson(String json, String target) {
-        Map<LocalDate, Double> history = new TreeMap<>();
+    protected Map<LocalDate, Double> parseFrankfurterJson(final String json, final String target) {
+        final Map<LocalDate, Double> history = new TreeMap<>();
 
-        Pattern p = Pattern.compile(
+        final Pattern p = Pattern.compile(
                 "\"(\\d{4}-\\d{2}-\\d{2})\":\\{[^}]*\"" + target + "\":([\\d.]+)\\}"
         );
-        Matcher m = p.matcher(json);
+        final Matcher m = p.matcher(json);
 
         while (m.find()) {
-            LocalDate date = LocalDate.parse(m.group(1));
-            double rate = Double.parseDouble(m.group(2));
+            final LocalDate date = LocalDate.parse(m.group(1));
+            final double rate = Double.parseDouble(m.group(2));
             history.put(date, rate);
         }
 
@@ -104,6 +115,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
 
     /**
      * Fetches the raw JSON response from the specified URL using an HTTP GET request.
+     * 
      * <p>
      * The method handles redirects and sets a user-agent header to avoid
      * request rejections. If the request fails or returns a non-200 status code,
@@ -112,13 +124,13 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      * @param url the URL to fetch
      * @return the raw JSON response as a string, or an empty string on failure
      */
-    private String fetchJson(String url) {
+    private String fetchJson(final String url) {
         try {
-            HttpClient client = HttpClient.newBuilder()
+            final HttpClient client = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.ALWAYS)
                     .build();
 
-            HttpRequest request = HttpRequest.newBuilder()
+            final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("User-Agent", "Mozilla/5.0")
                     .GET()
@@ -127,12 +139,12 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
             HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != OK_CODE) {
                 System.out.println("HTTP error: " + response.statusCode());
                 return "";
             }
             return response.body();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // offline, DNS error, connect error, timeout, ecc.
             return "";
         }
@@ -140,6 +152,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
 
     /**
      * Retrieves the latest exchange rates for the given base currency.
+     * 
      * <p>
      * This implementation currently returns an empty map and serves as a
      * placeholder for future API integration.
@@ -148,7 +161,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      * @return an empty map (not yet implemented)
      */
     @Override
-    public Map<CurrencyUnit, Double> getLatestRates(CurrencyUnit base) {
+    public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         return new HashMap<>();
     }
 }

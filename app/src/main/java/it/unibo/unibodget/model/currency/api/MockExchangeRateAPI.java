@@ -17,27 +17,30 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
 
     private final Map<CurrencyUnit, Double> mockRates = new HashMap<>();
 
+    private final static double MEDIUM_VALUE = 1.14;
+    private static final double DAILY_VAR = 0.2;
+
     /**
      * Creates a new mock API with predefined exchange rates.
      *
      * @param base the base currency for which the mock rates are defined
      * @param rates a map of target currencies to their mock exchange-rate values
      */
-    public MockExchangeRateAPI(CurrencyUnit base, Map<CurrencyUnit, Double> rates) {
+    public MockExchangeRateAPI(final CurrencyUnit base, final Map<CurrencyUnit, Double> rates) {
         mockRates.putAll(rates);
     }
 
     @Override
-    public Map<CurrencyUnit, Double> getLatestRates(CurrencyUnit base) {
+    public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         return mockRates;
     }
 
     @Override
-    public Map<LocalDate, Double> getHistoricalRates(CurrencyUnit base, CurrencyUnit target,
-                                                     LocalDate from, LocalDate to) {
-        Map<LocalDate, Double> history = new HashMap<>();
+    public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
+                                                    final LocalDate from, final LocalDate to) {
+        final Map<LocalDate, Double> history = new HashMap<>();
 
-        double value = mockRates.getOrDefault(target, 1.0);
+        final double value = mockRates.getOrDefault(target, 1.0);
 
         LocalDate date = from;
         while (!date.isAfter(to)) {
@@ -48,20 +51,20 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
         return history;
     }
 
-    /*
+    /**
      * Generates a mock historical exchange-rate time-series for testing purposes.
      *
      * @param from the start date of the historical interval (inclusive)
      * @param to the end date of the historical interval (inclusive)
      * @return a map of dates to mock exchange-rate values
      */
-    public static Map<LocalDate, Double> generateMockHistory(LocalDate from, LocalDate to) {
-        Map<LocalDate, Double> history = new TreeMap<>();
+    public static Map<LocalDate, Double> generateMockHistory(final LocalDate from, final LocalDate to) {
+        final Map<LocalDate, Double> history = new TreeMap<>();
         LocalDate date = from;
-        double baseValue = 1.14; // medium value
+        double baseValue = MEDIUM_VALUE; // medium value
         while (!date.isAfter(to)) {
             // little daily variation
-            double delta = (Math.random() - 0.5) * 0.2;
+            final double delta = (Math.random() - 0.5) * DAILY_VAR;
             baseValue += delta;
             history.put(date, baseValue);
             date = date.plusDays(1);
@@ -77,8 +80,8 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
      * @param base the base currency for which the mock rates are generated
      * @return a map of {@link CurrencyUnit} to mock exchange rates
      */
-    public static Map<CurrencyUnit, Double> generateMockLatestRates(CurrencyUnit base) {
-        Map<CurrencyUnit, Double> map = generateMockRatesFromCurrencies();
+    public static Map<CurrencyUnit, Double> generateMockLatestRates(final CurrencyUnit base) {
+        final Map<CurrencyUnit, Double> map = generateMockRatesFromCurrencies();
         map.put(base, 1.0);
         return map;
     }
@@ -91,13 +94,13 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
      * @return a map of {@link CurrencyUnit} to mock exchange rates
      */
     public static Map<CurrencyUnit, Double> generateMockRatesFromCurrencies() {
-        Map<CurrencyUnit, Double> map = new HashMap<>();
+        final Map<CurrencyUnit, Double> map = new HashMap<>();
         //parsing from json
-        for (var currency : Currency.all()) {
-            CurrencyUnit unit = CurrencyUnit.getByCode(currency.getCode());
+        for (final var currency : Currency.all()) {
+            final CurrencyUnit unit = CurrencyUnit.getByCode(currency.getCode());
             if (unit != null) {
                 // generate a simple mock value via random
-                double mockValue = 0.5 + Math.random();
+                final double mockValue = 0.5 + Math.random();
                 map.put(unit, mockValue);
             }
         }

@@ -11,6 +11,7 @@ import it.unibo.unibodget.persistency.ModelFileManager;
 
 /**
  * Represents a currency loaded from external JSON configuration.
+ * 
  * <p>
  * A {@code Currency} instance defines:
  * <ul>
@@ -20,12 +21,18 @@ import it.unibo.unibodget.persistency.ModelFileManager;
  *     <li>a full descriptive name</li>
  *     <li>a standardized ISO-like currency code</li>
  * </ul>
+ * 
  * <p>
  * Currency objects may be created dynamically or loaded from the JSON file
  * {@code /json/currency/Currencies.json}. Loaded currencies are cached using
  * lazy initialization.
  */
 public final class Currency implements CurrencyUnit {
+    private static final Map<String, Currency> LOADED = new HashMap<>();
+    private static boolean initialized = false;
+
+    private static final Path PATH = Path.of("data/json/currency/Currencies.json");
+    private static final String RESOURCE = "/json/currency/Currencies.json"; 
 
     private CurrencyType type;
     private String symbol;
@@ -33,18 +40,15 @@ public final class Currency implements CurrencyUnit {
     private String fullName;
     private String code;
 
-    private static final Map<String, Currency> loaded = new HashMap<>();
-    private static boolean initialized = false;
-
-    private static final Path PATH = Path.of("data/json/currency/Currencies.json");
-    private static final String RESOURCE = "/json/currency/Currencies.json"; 
-
     /**
      * Empty constructor required for JSON deserialization via Jackson.
+     * 
      * <p>
      * Fields are populated automatically when mapping JSON nodes.
      */
-    public Currency() {}
+    public Currency() {
+        // Prevent instantion
+    }
 
     /**
      * Creates a new dynamic currency instance.
@@ -55,7 +59,8 @@ public final class Currency implements CurrencyUnit {
      * @param fullName  the full descriptive name
      * @param code      the standardized currency code; must not be {@code null}
      */
-    public Currency(CurrencyType type, String symbol, String shortName, String fullName, String code) {
+    public Currency(final CurrencyType type, final String symbol, final String shortName, 
+                    final String fullName, final String code) {
         this.type = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);
         this.shortName = Objects.requireNonNull(shortName);
@@ -142,10 +147,14 @@ public final class Currency implements CurrencyUnit {
      * @return {@code true} if the other object is a {@code Currency} with the same code
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Currency)) return false;
-        Currency other = (Currency) obj;
+    public boolean equals(final Object obj) {
+        if (this == obj){
+            return true;
+        }
+        if (!(obj instanceof Currency)){
+            return false;
+        }
+        final Currency other = (Currency) obj;
         return Objects.equals(this.code, other.code);
     }
     
@@ -159,7 +168,7 @@ public final class Currency implements CurrencyUnit {
      */
     public static void init() {
         try {
-            ModelFileManager<Currency> mgr =
+            final ModelFileManager<Currency> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Currency.class);
             mgr.open();
             List<Currency> list = mgr.loadList("currencies");
@@ -168,15 +177,15 @@ public final class Currency implements CurrencyUnit {
                 System.out.println("Currency JSON empty → using mock currencies");
                 list = generateMockCurrencies();
             }
-            loaded.clear();
-            list.forEach(c -> loaded.put(c.getCode().toUpperCase(), c));
-            list.replaceAll(c -> loaded.getOrDefault(c.getCode().toUpperCase(), c));
+            LOADED.clear();
+            list.forEach(c -> LOADED.put(c.getCode().toUpperCase(), c));
+            list.replaceAll(c -> LOADED.getOrDefault(c.getCode().toUpperCase(), c));
             initialized = true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("Currency JSON load failed → using mock currencies");
-            loaded.clear();
+            LOADED.clear();
             generateMockCurrencies().forEach(
-                c -> loaded.put(c.getCode().toUpperCase(), c)
+                c -> LOADED.put(c.getCode().toUpperCase(), c)
             );
             initialized = true;
         }
@@ -200,7 +209,8 @@ public final class Currency implements CurrencyUnit {
     /**
      * Returns all currencies loaded from the JSON file.
      *
-     * <p>If the manager is not yet initialized, the JSON file is parsed
+     * <p>
+     * If the manager is not yet initialized, the JSON file is parsed
      * automatically.
      *
      * @return a collection of all available Currency instances
@@ -209,23 +219,24 @@ public final class Currency implements CurrencyUnit {
         if (!initialized) {
             init();
         }
-        return loaded.values();
+        return LOADED.values();
     }
 
     /**
      * Retrieves a currency by its ISO code (case‑insensitive).
      *
-     * <p>If the manager is not yet initialized, the JSON file is parsed
+     * <p>
+     * If the manager is not yet initialized, the JSON file is parsed
      * automatically.
      *
      * @param code the ISO currency code; must not be null
      * @return the matching Currency, or null if no match exists
      */
-    public static Currency get(String code) {
+    public static Currency get(final String code) {
         if (!initialized) {
             init();
         }
-        return loaded.get(code.toUpperCase());
+        return LOADED.get(code.toUpperCase());
     }
 
 }
