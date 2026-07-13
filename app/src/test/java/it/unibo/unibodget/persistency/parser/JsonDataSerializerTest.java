@@ -77,6 +77,7 @@ public final class JsonDataSerializerTest {
      * Asset instances.
      */
     @Test
+    @SuppressWarnings("rawtypes")
     @DisplayName("Serialize List<Asset>")
     void testSerializeAssetList() throws DataSerializerException {
         List<Asset> list = List.of(

@@ -261,4 +261,36 @@ public final class ModelFileManager<T> implements AutoCloseable {
         return node instanceof ObjectNode ? (ObjectNode) node : mapper.createObjectNode();
     }
 
+    /**
+     * Loads the list of objects stored under the configured list key.
+     *
+     * @return the list of deserialized objects
+     * @throws IOException if the configured list key is missing/invalid
+     * @throws IllegalStateException if no list key was configured for this manager
+     */
+    public List<T> loadList() throws IOException {
+        requireListKey();
+        return loadList(listKey);
+    }
+
+    /**
+     * Saves a list of objects under the configured list key.
+     *
+     * @param list the list to save
+     * @throws IOException if writing fails
+     * @throws IllegalStateException if no list key was configured for this manager
+     */
+    public void saveList(List<T> list) throws IOException {
+        requireListKey();
+        saveList(listKey, list);
+    }
+
+    private void requireListKey() {
+        if (listKey == null) {
+            throw new IllegalStateException(
+                "No list key configured for this ModelFileManager. "
+                + "Use the 4-arg constructor to set or call saveList(key, list)/loadList(key) ");
+        }
+    }
+
 }
