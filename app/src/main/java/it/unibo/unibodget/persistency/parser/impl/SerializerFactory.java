@@ -4,10 +4,17 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializer;
 import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 import it.unibo.unibodget.persistency.util.FilesUtils;
 
+/**
+ * Factory responsible for creating {@link DataSerializer} instances
+ * based on the file extension of the target output file.
+ * <p>
+ * Supports JSON serialization and throws an exception for unsupported formats.
+ * </p>
+ */
 public final class SerializerFactory {
 
     private SerializerFactory() {
-        
+        // Utility class
     }
     
     /**

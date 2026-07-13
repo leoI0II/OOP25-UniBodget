@@ -14,17 +14,42 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Centralized Jackson configuration for the persistency module.
+ * <p>
+ * Provides a preconfigured {@link ObjectMapper} with custom serializers
+ * and deserializers for application-specific types such as
+ * {@link CurrencyUnit}, {@link LocalDate}, and {@link Optional}.
+ * </p>
+ *
+ * <p>The mapper is created once and reused through {@link #mapper()}.</p>
+ */
 public final class PersistenceJacksonConfig {
 
     private static final ObjectMapper MAPPER = create();
 
     private PersistenceJacksonConfig() { }
 
+    /**
+     * Returns the shared, preconfigured {@link ObjectMapper} instance.
+     *
+     * @return the configured mapper used for serialization and deserialization
+     */
     public static ObjectMapper mapper() {
         return MAPPER;
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * Builds and configures the {@link ObjectMapper} used for persistence.
+     * <p>
+     * The mapper is initialized with custom serializers and deserializers
+     * for application-specific types (e.g., {@link CurrencyUnit}, {@link LocalDate},
+     * and {@link Optional}). Standard Jackson features are also adjusted.
+     * </p>
+     *
+     * @return a fully configured {@link ObjectMapper} instance
+     */
     private static ObjectMapper create() {
         ObjectMapper mapper = new ObjectMapper();
 

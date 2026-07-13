@@ -22,4 +22,5 @@ public final class JsonComplexDataSerializer<T> implements DataSerializer<T> {
             throw new DataSerializerException("Jackson serialization failed", e);
         }
     }
+
 }
