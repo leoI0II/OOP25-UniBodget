@@ -107,8 +107,8 @@ public final class MonthlyStatisticsChartView extends VBox {
         final XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Categories");
 
-        for (CategoryTotal categoryTotal : stats.getCategoryTotals()) {
-            XYChart.Data<String, Number> data =
+        for (final CategoryTotal categoryTotal : stats.getCategoryTotals()) {
+            final XYChart.Data<String, Number> data =
                     new XYChart.Data<>(categoryTotal.categoryName(),
                                        categoryTotal.total().abs());
             series.getData().add(data);
