@@ -4,10 +4,12 @@ import java.util.Objects;
 
 /**
  * Represents a preset currency conversion pair stored in the user's watchlist.
+ * 
  * <p>
  * A {@code WatchlistPair} defines a frequently used conversion direction,
  * such as EUR → USD, allowing the UI to quickly recall preferred currency
  * pairs without requiring the user to manually reselect them each time.
+ * 
  * <p>
  * This record is immutable and acts as a value object within the currency
  * converter module. Two pairs are considered equal if both their {@code from}
@@ -49,8 +51,10 @@ public record WatchlistPair(String from, String to) {
      * @return true if both the base and target currencies match
      */
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof WatchlistPair other)) return false;
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof WatchlistPair other)) {
+            return false;
+        }
         return from.equals(other.from) && to.equals(other.to);
     }
 

@@ -19,7 +19,9 @@ import javafx.stage.Stage;
  */
 public final class SettingsViewManager {
 
-    private SettingsViewManager() {}
+    private SettingsViewManager() {
+        // Prevent instantiation
+    }
 
     /**
      * Opens the Settings window as a standalone JavaFX stage.
@@ -35,22 +37,22 @@ public final class SettingsViewManager {
      *
      * @param stage the stage to configure and display
      */
-    public static void openSettings(Stage stage) {
+    public static void openSettings(final Stage stage) {
 
         // Controller used to load and save settings
-        SettingsController controller = new SettingsController();
+        final SettingsController controller = new SettingsController();
 
         // Load previously saved window preferences
-        WindowPreferences savedPrefs = controller.getSettings().getWindowPrefs();
+        final WindowPreferences savedPrefs = controller.getSettings().getWindowPrefs();
 
         // Build UI
-        TabPane pane = new TabPane();
+        final TabPane pane = new TabPane();
         pane.getTabs().add(
                 new SettingsTabFX(controller).create(stage)
         );
 
         // Create scene using saved width/height
-        Scene scene = new Scene(
+        final Scene scene = new Scene(
                 pane,
                 savedPrefs.getWidth(),
                 savedPrefs.getHeight()

@@ -13,13 +13,17 @@ import javafx.scene.control.ComboBox;
  */
 public final class BaseCurrencySelectorFX {
 
+    private BaseCurrencySelectorFX() {
+        // Prevent instantiation
+    }
+
     /**
      * Creates a ComboBox containing all available {@link CurrencyUnit} values.
      *
      * @return a ComboBox populated with all currencies
      */
     public static ComboBox<CurrencyUnit> createCurrencySelector() {
-        ComboBox<CurrencyUnit> box = new ComboBox<>();
+        final ComboBox<CurrencyUnit> box = new ComboBox<>();
         box.getItems().addAll(Currency.all());
         return box;
     }

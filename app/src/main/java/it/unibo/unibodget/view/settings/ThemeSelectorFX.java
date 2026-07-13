@@ -12,6 +12,10 @@ import javafx.scene.control.ComboBox;
  */
 public final class ThemeSelectorFX {
 
+    private ThemeSelectorFX() {
+        // Prevent instantiation
+    }
+
     /**
      * Creates a ComboBox containing all available themes.
      *
@@ -20,10 +24,10 @@ public final class ThemeSelectorFX {
     public static ComboBox<Theme> createThemeSelector() {
 
         // Create the selector
-        ComboBox<Theme> box = new ComboBox<>();
+        final ComboBox<Theme> box = new ComboBox<>();
 
         // Load all themes from ThemeList
-        ThemeList list = new ThemeList();
+        final ThemeList list = new ThemeList();
         box.getItems().addAll(list.getThemes());
 
         return box;

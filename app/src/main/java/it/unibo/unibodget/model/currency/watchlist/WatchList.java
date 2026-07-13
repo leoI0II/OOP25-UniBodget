@@ -20,7 +20,7 @@ public final class WatchList {
     private static final String RESOURCE = "/json/currency/watchlist/Watchlist.json";
 
     private static boolean initialized = false;
-    private static final Set<WatchlistPair> loaded = new HashSet<>();
+    private static final Set<WatchlistPair> LOADED = new HashSet<>();
 
     public WatchList() {
         if (!initialized) {
@@ -32,9 +32,11 @@ public final class WatchList {
      * Adds a currency to the user's watchlist.
      * @param pair the watchlist pair to add.
      */
-    public boolean add(WatchlistPair pair) {
-        boolean added = loaded.add(pair);
-        if (added) save();
+    public boolean add(final WatchlistPair pair) {
+        final boolean added = LOADED.add(pair);
+        if (added){
+            save();
+        }
         return added;
     }
 
@@ -42,9 +44,11 @@ public final class WatchList {
      * Removes a currency from the user's watchlist.
      * @param pair the watchlist pair to remove.
      */
-    public boolean remove(WatchlistPair pair) {
-        boolean removed = loaded.remove(pair);
-        if (removed) save();
+    public boolean remove(final WatchlistPair pair) {
+        final boolean removed = LOADED.remove(pair);
+        if (removed){
+            save();
+        }
         return removed;
     }
 
@@ -54,20 +58,20 @@ public final class WatchList {
      * @return a set of preferred currencies.
      */
     public Set<WatchlistPair> getFavorites() {
-        return Collections.unmodifiableSet(loaded);
+        return Collections.unmodifiableSet(LOADED);
     }
 
-    /*
+    /**
      * Saves the current watchlist to the JSON file.
      */
     private static void save() {
         try {
-            ModelFileManager<WatchlistPair> mgr =
+            final ModelFileManager<WatchlistPair> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
             mgr.open();
-            mgr.saveList("watchlist", new ArrayList<>(loaded));
+            mgr.saveList("watchlist", new ArrayList<>(LOADED));
             mgr.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("WatchList save failed");
         }
     }
@@ -77,7 +81,7 @@ public final class WatchList {
      */
     public static void init() {
         try {
-            ModelFileManager<WatchlistPair> mgr =
+            final ModelFileManager<WatchlistPair> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
             mgr.open();
             // load from json
@@ -85,18 +89,18 @@ public final class WatchList {
             mgr.close();
             if (list == null || list.isEmpty()) {
                 System.out.println("WatchList JSON empty → using empty list");
-                loaded.clear();
-                loaded.addAll(generateMockWatchlist());
+                LOADED.clear();
+                LOADED.addAll(generateMockWatchlist());
             } else {
-                loaded.clear();
-                loaded.addAll(list);
-                System.out.println("WatchList loaded from JSON → " + loaded.size() + " items");
+                LOADED.clear();
+                LOADED.addAll(list);
+                System.out.println("WatchList loaded from JSON → " + LOADED.size() + " items");
             }
             initialized = true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("WatchList load failed → using empty list");
-            loaded.clear();
-            loaded.addAll(generateMockWatchlist());
+            LOADED.clear();
+            LOADED.addAll(generateMockWatchlist());
             initialized = true;
         }
     }

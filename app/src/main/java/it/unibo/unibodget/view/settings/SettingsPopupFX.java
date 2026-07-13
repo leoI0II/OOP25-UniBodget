@@ -1,11 +1,21 @@
 package it.unibo.unibodget.view.settings;
 
 import it.unibo.unibodget.controller.settings.SettingsController;
-import it.unibo.unibodget.model.settings.*;
 import it.unibo.unibodget.model.currency.Currency;
+import it.unibo.unibodget.model.settings.Settings;
+import it.unibo.unibodget.model.settings.SettingsSnapshot;
+import it.unibo.unibodget.model.settings.Theme;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.utils.ARGBColor;
-
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -33,7 +43,7 @@ public final class SettingsPopupFX {
      *
      * @param controller the controller managing settings persistence and updates
      */
-    public SettingsPopupFX(SettingsController controller) {
+    public SettingsPopupFX(final SettingsController controller) {
         this.controller = controller;
     }
 
@@ -45,33 +55,33 @@ public final class SettingsPopupFX {
      *
      * @param owner the parent window that owns this popup
      */
-    public void show(Stage owner) {
+    public void show(final Stage owner) {
 
         // Create modal dialog
-        Dialog<Void> dialog = new Dialog<>();
+        final Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Settings");
 
         // Load current settings
-        Settings current = controller.getSettings();
+        final Settings current = controller.getSettings();
         // Previous configuration
-        ComboBox<SettingsSnapshot> historyBox = new ComboBox<>();
+        final ComboBox<SettingsSnapshot> historyBox = new ComboBox<>();
         historyBox.getItems().addAll(controller.getAllSavedConfigurations());
         historyBox.setPromptText("Previous configurations");
 
         // Custom rendering of snapshot entries
         historyBox.setCellFactory(list -> new ListCell<>() {
             @Override
-            protected void updateItem(SettingsSnapshot item, boolean empty) {
+            protected void updateItem(final SettingsSnapshot item, final boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText("");
                 } else {
                     // Show date + theme summary + base currency
-                    String hex = item.getTheme().getPrimaryColor().toHex();
-                    String font = item.getTheme().getFontFamily();
-                    int size = item.getTheme().getFontSize();
+                    final String hex = item.getTheme().getPrimaryColor().toHex();
+                    final String font = item.getTheme().getFontFamily();
+                    final int size = item.getTheme().getFontSize();
                     setText(item.getSavedAt() + " · " + hex + " · "
                             + font + " " + size + "pt · " + item.getBaseCurrency());
                 }
@@ -80,27 +90,27 @@ public final class SettingsPopupFX {
         historyBox.setButtonCell(historyBox.getCellFactory().call(null));
 
         // Primary color (HEX)
-        TextField colorField = new TextField(current.getTheme().getPrimaryColor().toHex());
+        final TextField colorField = new TextField(current.getTheme().getPrimaryColor().toHex());
 
         // Font family selector
-        ComboBox<String> fontBox = new ComboBox<>();
+        final ComboBox<String> fontBox = new ComboBox<>();
         fontBox.getItems().addAll(Font.getFamilies());
         fontBox.setValue(current.getTheme().getFontFamily());
 
         // Font size selector
-        Spinner<Integer> fontSize = new Spinner<>(8, 40, current.getTheme().getFontSize());
+        final Spinner<Integer> fontSize = new Spinner<>(8, 40, current.getTheme().getFontSize());
 
         // Bold toggle
-        CheckBox boldCheck = new CheckBox("Bold");
+        final CheckBox boldCheck = new CheckBox("Bold");
         boldCheck.setSelected(current.getTheme().isBoldText());
 
         // Base currency
-        ComboBox<Currency> currencyBox = new ComboBox<>();
+        final ComboBox<Currency> currencyBox = new ComboBox<>();
         currencyBox.getItems().addAll(Currency.all());
         currencyBox.setValue(Currency.get(current.getBaseCurrency()));
 
         // Layout
-        GridPane grid = new GridPane();
+        final GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
@@ -112,7 +122,7 @@ public final class SettingsPopupFX {
         grid.addRow(5, new Label("Base currency:"), currencyBox);
 
         // Buttons
-        ButtonType saveButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
+        final ButtonType saveButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
         dialog.getDialogPane().setContent(grid);
 
@@ -128,7 +138,7 @@ public final class SettingsPopupFX {
                 }
 
                 // Build new theme from user input
-                Theme newTheme = new Theme(
+                final Theme newTheme = new Theme(
                         "Custom",
                         new ARGBColor(colorField.getText()),
                         current.getTheme().getButtonColor(),
@@ -139,10 +149,10 @@ public final class SettingsPopupFX {
                 );
 
                 // Selected base currency
-                String newCurrency = currencyBox.getValue().getShortName();
+                final String newCurrency = currencyBox.getValue().getShortName();
 
                 // If nothing changed → do nothing
-                boolean unchanged = newTheme.equals(current.getTheme())
+                final boolean unchanged = newTheme.equals(current.getTheme())
                         && newCurrency.equals(current.getBaseCurrency());
                 if (unchanged) {
                     return null;

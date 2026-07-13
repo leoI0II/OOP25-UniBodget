@@ -22,7 +22,7 @@ public final class SettingsTabFX {
      *
      * @param controller the settings controller used to load and save preferences
      */
-    public SettingsTabFX(SettingsController controller) {
+    public SettingsTabFX(final SettingsController controller) {
         this.controller = controller;
     }
 
@@ -32,13 +32,13 @@ public final class SettingsTabFX {
      * @param owner the main application window, used as the parent for the popup
      * @return a non-closable {@link Tab} containing the settings button
      */
-    public Tab create(Stage owner) {
+    public Tab create(final Stage owner) {
 
         // Create the tab shown in the main UI
-        Tab tab = new Tab("Settings");
+        final Tab tab = new Tab("Settings");
 
         // Button that opens the popup dialog
-        Button openPopup = new Button("Settings");
+        final Button openPopup = new Button("Settings");
 
         // When clicked → show the popup
         openPopup.setOnAction(e -> new SettingsPopupFX(controller).show(owner));
