@@ -9,7 +9,18 @@ public final class CurrencyPlaceholder implements CurrencyUnit {
 
     private final String code;
 
-    public CurrencyPlaceholder(String code) {
+    /**
+     * Creates a new placeholder currency used during JSON deserialization.
+     *
+     * <p>
+     * The placeholder stores only the currency code. After all currency
+     * definitions are loaded, {@link Currency#init()} replaces instances of
+     * {@code CurrencyPlaceholder} with fully initialized {@link Currency} objects.
+     * </p>
+     *
+     * @param code the ISO-like currency code extracted from JSON
+     */
+    public CurrencyPlaceholder(final String code) {
         this.code = code;
     }
 
