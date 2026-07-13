@@ -41,4 +41,15 @@ public final class OptionalUUIDDeserializer extends JsonDeserializer<Optional<UU
         return Optional.of(UUID.fromString(raw));
     }
 
+    /**
+     * Called by Jackson when the JSON token is literally {@code null} —
+     * in that case {@link #deserialize} is never invoked. Without this
+     * override, a JSON null would deserialize to a Java {@code null}
+     * instead of {@code Optional.empty()}.
+     */
+    @Override
+    public Optional<UUID> getNullValue(DeserializationContext ctxt) {
+        return Optional.empty();
+    }
+
 }

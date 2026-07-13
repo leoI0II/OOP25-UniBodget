@@ -61,6 +61,7 @@ public final class JsonParserDispatcher {
      * @return {@code true} if the complex parser should be used, {@code false} otherwise
      */
     private static boolean shouldUseComplexParser(Class<?> type) {
+        if (type.isArray()) return true; 
         if (Collection.class.isAssignableFrom(type)) return true;
         if (Map.class.isAssignableFrom(type)) return true;
         if (type.isRecord()) return true;

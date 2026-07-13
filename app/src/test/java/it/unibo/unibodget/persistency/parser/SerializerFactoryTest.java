@@ -1,4 +1,4 @@
-package it.unibo.unibodget.persistency.serializer;
+package it.unibo.unibodget.persistency.parser;
 
 import static org.junit.jupiter.api.Assertions.*;
 

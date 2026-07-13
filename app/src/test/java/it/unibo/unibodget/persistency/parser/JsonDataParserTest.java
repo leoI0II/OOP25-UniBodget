@@ -1,34 +1,77 @@
 package it.unibo.unibodget.persistency.parser;
 
-import it.unibo.unibodget.model.utils.ARGBColor;
-import it.unibo.unibodget.persistency.parser.api.DataParser;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
 import it.unibo.unibodget.persistency.parser.impl.JsonDataParser;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+class JsonDataParserTest {
 
-import java.util.List;
+    @Test
+    void testParsesSimpleObject() throws DataParserException {
+        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
 
-import static org.junit.jupiter.api.Assertions.*;
+        String json = """
+            { "name": "Arianna", "value": 10 }
+        """;
 
-/**
- * Unit tests for {@link JsonDataParser}.
- *
- * This test suite verifies correct JSON parsing for:
- * - primitive and boxed types
- * - String values
- * - enums
- * - arrays
- * - lists
- * - ARGBColor values encoded as { "value": <int> }
- * - POJOs with public fields accessed via reflection
- *
- * The tests ensure that the parser correctly reconstructs Java objects
- * from JSON structures using the reflection‑based logic implemented in
- * {@link JsonDataParser}.
- */
-public final class JsonDataParserTest {
+        TestDto dto = parser.parse(json);
 
-    
+        assertEquals("Arianna", dto.name);
+        assertEquals(10, dto.value);
+    }
+
+    @Test
+    void testParsesList() throws DataParserException {
+        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+
+        String json = """
+            [
+                { "name": "A", "value": 1 },
+                { "name": "B", "value": 2 }
+            ]
+        """;
+
+        List<TestDto> list = parser.parseList(json);
+
+        assertEquals(2, list.size());
+        assertEquals("A", list.get(0).name);
+        assertEquals(2, list.get(1).value);
+    }
+
+    @Test
+    void testParseListFromFile() throws DataParserException, IOException {
+        Path temp = Files.createTempFile("json", ".txt");
+        Files.writeString(temp, """
+            {
+                "items": [
+                    { "name": "A", "value": 1 },
+                    { "name": "B", "value": 2 }
+                ]
+            }
+        """);
+
+        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+
+        List<TestDto> list = parser.parseListFromFile(temp, "items");
+
+        assertEquals(2, list.size());
+        assertEquals("B", list.get(1).name);
+    }
+
+    @Test
+    void testMalformedJsonThrows() {
+        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+
+        assertThrows(DataParserException.class,
+            () -> parser.parse("{ \"value\": notANumber }"));
+    }
+
 }

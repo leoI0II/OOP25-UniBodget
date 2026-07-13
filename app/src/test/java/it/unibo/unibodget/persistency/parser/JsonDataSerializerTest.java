@@ -1,4 +1,4 @@
-package it.unibo.unibodget.persistency.serializer;
+package it.unibo.unibodget.persistency.parser;
 
 import it.unibo.unibodget.persistency.parser.api.DataSerializer;
 import it.unibo.unibodget.persistency.parser.api.DataSerializerException;

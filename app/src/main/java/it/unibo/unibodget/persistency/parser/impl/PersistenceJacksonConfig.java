@@ -45,7 +45,7 @@ public final class PersistenceJacksonConfig {
      * <p>
      * The mapper is initialized with custom serializers and deserializers
      * for application-specific types (e.g., {@link CurrencyUnit}, {@link LocalDate},
-     * and {@link Optional}). Standard Jackson features are also adjusted.
+     * and {@link Optional}). Standard Jackson features are also adjusted
      * </p>
      *
      * @return a fully configured {@link ObjectMapper} instance
