@@ -29,13 +29,12 @@ public class JsonFileCreator extends BasicFileCreator<String> {
      */
     @Override
     public Path open(Path path) throws IOException {
-        boolean existed = Files.exists(path);
+        boolean existed = path != null && Files.exists(path);
         Path created = super.open(path);
-
         if (!existed) {
             Files.writeString(created, "{}");
         }
-
         return created;
     }
+
 }
