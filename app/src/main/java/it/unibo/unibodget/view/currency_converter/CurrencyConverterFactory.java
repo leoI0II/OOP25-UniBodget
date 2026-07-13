@@ -24,6 +24,10 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
  */
 public final class CurrencyConverterFactory {
 
+    private CurrencyConverterFactory() {
+        // Prevent instantiation
+    }
+
     /**
      * Creates and configures a {@link CurrencyConverterController}.
      *
@@ -42,9 +46,9 @@ public final class CurrencyConverterFactory {
 
         ExchangeRateAPI api = new ExchangeRateAPIImpl();
 
-        FiatCurrency baseCurrency = FiatCurrency.EUR;
+        final FiatCurrency baseCurrency = FiatCurrency.EUR;
 
-        Map<CurrencyUnit, Double> latest =
+        final Map<CurrencyUnit, Double> latest =
                 api.getLatestRates(baseCurrency);
 
         // Fallback to mock API if the real one does not provide enough data
@@ -55,7 +59,7 @@ public final class CurrencyConverterFactory {
             );
         }
 
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(api, baseCurrency);
 
         return new CurrencyConverterController(api, converter);

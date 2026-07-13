@@ -110,8 +110,7 @@ public final class CurrencyHistoryChartView extends VBox {
         stage.setTitle("Currency History - Live Data");
         stage.setScene(new Scene(view, SCENE_WIDTH, SCENE_HEIGHT));
         stage.show();
-        return stage;
-        
+        return stage;   
     }
 
     /* =============== UI CONFIGURATION ===================== */
@@ -133,7 +132,7 @@ public final class CurrencyHistoryChartView extends VBox {
         // Converter that shows only currency code
         final StringConverter<CurrencyUnit> codeOnly = new StringConverter<>() {
             @Override
-            public String toString(CurrencyUnit unit) {
+            public String toString(final CurrencyUnit unit) {
                 return unit == null ? "" : unit.getCode();
             }
 
@@ -227,7 +226,7 @@ public final class CurrencyHistoryChartView extends VBox {
         }
 
         // Main series
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        final XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName(seriesName);
 
         for (final CurrencyHistoryPoint p : points) {
@@ -244,7 +243,7 @@ public final class CurrencyHistoryChartView extends VBox {
             final XYChart.Series<String, Number> thresholdSeries = new XYChart.Series<>();
             thresholdSeries.setName("Threshold (" + threshold + ")");
 
-            for (CurrencyHistoryPoint p : points) {
+            for (final CurrencyHistoryPoint p : points) {
                 thresholdSeries.getData().add(new XYChart.Data<>(
                         p.getDate().format(DATE_FORMAT),
                         threshold
@@ -279,7 +278,7 @@ public final class CurrencyHistoryChartView extends VBox {
 
     /** 
      * Returns the underlying chart node for embedding in other layouts.
-     *  
+     * 
      * @return the underlying chart node
      */
     public Node getChartNode() {

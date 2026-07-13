@@ -25,7 +25,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -37,6 +41,7 @@ import javafx.scene.control.Button;
 
 /**
  * Main dashboard screen for all currency‑related operations.
+ * 
  * <p>
  * This JavaFX view hosts multiple widgets:
  * <ul>
@@ -45,6 +50,7 @@ import javafx.scene.control.Button;
  *     <li>{@link BankConverterWidgetFX} – bank‑mediated conversion with fees</li>
  *     <li>Historical chart viewer</li>
  * </ul>
+ * 
  * <p>
  * The dashboard applies theme‑aware styling, window preferences, and
  * orchestrates the interaction between widgets.
@@ -52,12 +58,13 @@ import javafx.scene.control.Button;
 public final class CurrencyConverterViewFX extends Application {
 
     private static final double ROOT_PADDING = 35;
+    private static final int DAYS_TO_SUBTRACT = 5;
 
     /** Shared controller injected via launchWith(). */
     private static CurrencyConverterController sharedController;
 
     /** Window size and maximize preferences. */
-    private static final WindowPreferences prefs = new WindowPreferences();
+    private static final WindowPreferences PREFS = new WindowPreferences();
 
     /**
      * Launches the JavaFX application with a pre‑initialized controller.
@@ -122,7 +129,7 @@ public final class CurrencyConverterViewFX extends Application {
         final Button showChartButton = new Button("Show Chart");
         showChartButton.setOnAction(e -> {
             ExchangeRateAPI historyApi = new ExchangeRateAPIClient();
-            Map<LocalDate, Double> history = historyApi.getHistoricalRates(
+            final Map<LocalDate, Double> history = historyApi.getHistoricalRates(
                     FiatCurrency.EUR,
                     FiatCurrency.USD,
                     LocalDate.now().minusDays(5),
@@ -133,9 +140,9 @@ public final class CurrencyConverterViewFX extends Application {
             if (history.isEmpty()) {
                 System.out.println("Offline mode: using mock history");
 
-                Map<LocalDate, Double> mockHistory =
+                final Map<LocalDate, Double> mockHistory =
                         MockExchangeRateAPI.generateMockHistory(
-                                LocalDate.now().minusDays(5),
+                                LocalDate.now().minusDays(DAYS_TO_SUBTRACT),
                                 LocalDate.now()
                         );
 
@@ -145,17 +152,17 @@ public final class CurrencyConverterViewFX extends Application {
                 ) {
                     @Override
                     public Map<LocalDate, Double> getHistoricalRates(
-                            CurrencyUnit base, CurrencyUnit target,
-                            LocalDate from, LocalDate to) {
+                            final CurrencyUnit base, final CurrencyUnit target,
+                            final LocalDate from, final LocalDate to) {
                         return mockHistory;
                     }
                 };
             }
 
             final BasicCurrencyConverter historyConverter =
-                    new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
+                new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
             final CurrencyConverterController historyController =
-                    new CurrencyConverterController(historyApi, historyConverter);
+                new CurrencyConverterController(historyApi, historyConverter);
             CurrencyHistoryChartView.showInNewWindow(historyController);
         });
 
@@ -190,14 +197,14 @@ public final class CurrencyConverterViewFX extends Application {
         stage.setTitle("UniBodget - Currency Dashboard");
 
         // Save window width changes
-        stage.widthProperty().addListener((obs, old, val) -> prefs.setWidth(val.doubleValue()));
+        stage.widthProperty().addListener((obs, old, val) -> PREFS.setWidth(val.doubleValue()));
 
         // Restore window size or maximize
-        if (prefs.isMaximized()) {
+        if (PREFS.isMaximized()) {
             stage.setMaximized(true);
         } else {
-            stage.setWidth(prefs.getWidth());
-            stage.setHeight(prefs.getHeight());
+            stage.setWidth(PREFS.getWidth());
+            stage.setHeight(PREFS.getHeight());
         }
 
         stage.show();

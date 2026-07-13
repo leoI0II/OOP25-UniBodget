@@ -2,9 +2,17 @@ package it.unibo.unibodget.view.currency_converter;
 
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.bank.*;
+import it.unibo.unibodget.model.currency.bank.Bank;
+import it.unibo.unibodget.model.currency.bank.BankConversionResult;
+import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import java.math.BigDecimal;
@@ -20,9 +28,6 @@ import java.math.BigDecimal;
  *     <li>compute the converted amount, commission, and total cost</li>
  *     <li>add new banks dynamically through a dialog</li>
  * </ul>
- * 
- * <p>
- * The widget is designed to be embedded inside larger currency‑conversion views.
  */
 public class BankConverterWidgetFX {
 
@@ -71,7 +76,8 @@ public class BankConverterWidgetFX {
 
         // Validation logic: enable button only when amount + bank are valid
         final Runnable validate = () -> {
-            final boolean emptyAmount = amountField.getText() == null || amountField.getText().trim().isEmpty();
+            final boolean emptyAmount = amountField.getText() == null 
+                || amountField.getText().trim().isEmpty();
             calcBtn.setDisable(emptyAmount || bankBox.getValue() == null);
         };
 
@@ -88,7 +94,11 @@ public class BankConverterWidgetFX {
 
                     // Perform bank‑mediated conversion
                     final BankConversionService service = new BankConversionService(baseConverter);
-                    final BankConversionResult res = service.convert(amount, fromBox.getValue(), toBox.getValue(), bank);
+                    final BankConversionResult res = service.convert(
+                        amount, 
+                        fromBox.getValue(), 
+                        toBox.getValue(), 
+                        bank);
 
                     // Update UI
                     convertedLabel.setText("Converted: " + res.getConvertedAmount().toPlainString() + " " + res.getTargetCurrencyCode());

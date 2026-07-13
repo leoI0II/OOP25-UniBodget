@@ -5,11 +5,16 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 
 /**
  * JavaFX widget that displays and manages the user's currency watchlist.
+ * 
  * <p>
  * Allows saving the currently selected currency pair from the converter,
  * highlighting the active pair, and restoring a saved pair via double‑click.
@@ -28,10 +33,10 @@ public final class WatchlistWidgetFX {
      * @param controller the controller handling add/remove operations on the watchlist
      * @param converter  the converter widget used to read and set the selected currencies
      */
-    public WatchlistWidgetFX(WatchListController controller, ConverterWidgetFX converter) {
+    public WatchlistWidgetFX(final WatchListController controller, final ConverterWidgetFX converter) {
         listView.setItems(items);
         items.addAll(controller.getFavorites());
-        
+
         final Label title = new Label("My Watchlist");
 
         // Refresh highlighting when the converter selection changes
@@ -39,18 +44,18 @@ public final class WatchlistWidgetFX {
         converter.toBox.valueProperty().addListener((obs, old, val) -> listView.refresh());
 
         // Save button: stores the current converter pair into the watchlist
-        Button saveButton = new Button("Save couple in watchlist");
+        final Button saveButton = new Button("Save couple in watchlist");
         saveButton.setOnAction(e -> {
-            String from = converter.fromBox.getValue().getCode();
-            String to = converter.toBox.getValue().getCode();
+            final String from = converter.fromBox.getValue().getCode();
+            final String to = converter.toBox.getValue().getCode();
 
             if (from != null && to != null && !from.equals(to)) {
-                WatchlistPair newPair = new WatchlistPair(from, to);
+                final WatchlistPair newPair = new WatchlistPair(from, to);
 
                 if (controller.addPair(newPair)) {
                     items.add(newPair);
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Watchlist");
                     alert.setHeaderText(null);
                     alert.setContentText("Already saved!");
@@ -63,7 +68,7 @@ public final class WatchlistWidgetFX {
         // Double‑click on a saved pair: load it into the converter
         listView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                WatchlistPair selected = listView.getSelectionModel().getSelectedItem();
+                final WatchlistPair selected = listView.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     converter.setCurrencies(selected.from(), selected.to());
                 }
@@ -73,7 +78,7 @@ public final class WatchlistWidgetFX {
         // Custom cell: highlights the currently active pair
         listView.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(WatchlistPair item, boolean empty) {
+            protected void updateItem(final WatchlistPair item, final boolean empty) {
                 super.updateItem(item, empty);
 
                 if (empty || item == null) {
@@ -84,11 +89,11 @@ public final class WatchlistWidgetFX {
 
                 setText(item.toString());
 
-                CurrencyUnit currentFrom = converter.fromBox.getValue();
-                CurrencyUnit currentTo = converter.toBox.getValue();
+                final CurrencyUnit currentFrom = converter.fromBox.getValue();
+                final CurrencyUnit currentTo = converter.toBox.getValue();
 
                 if (currentFrom != null && currentTo != null && !currentFrom.equals(currentTo)) {
-                    WatchlistPair currentPair =
+                    final WatchlistPair currentPair =
                         new WatchlistPair(currentFrom.getCode(), currentTo.getCode());
 
                     if (item.equals(currentPair)) {

@@ -14,13 +14,14 @@ import java.util.Map;
 public class CurrencyConverterView {
 
     private final CurrencyConverterController controller;
+    private static final String NEWLINE = "\n";
 
     /**
      * Creates a new {@code CurrencyConverterView}.
      *
      * @param controller the controller responsible for handling currency operations
      */
-    public CurrencyConverterView(CurrencyConverterController controller) {
+    public CurrencyConverterView(final CurrencyConverterController controller) {
         this.controller = controller;
     }
 
@@ -32,15 +33,14 @@ public class CurrencyConverterView {
      * @param to     the target currency
      * @return a human-readable string describing the conversion result
      */
-    public String convert(double amount, CurrencyUnit from, CurrencyUnit to) {
-        BigDecimal result = controller.convert(BigDecimal.valueOf(amount), from, to);
+    public String convert(final double amount, final CurrencyUnit from, final CurrencyUnit to) {
+        final BigDecimal result = controller.convert(BigDecimal.valueOf(amount), from, to);
 
         System.out.println("Conversion result: " + result + 
                             " (amount: " + amount + ", from: " 
                             + from.getCode() + ", to: " + to.getCode() + ")");
 
-        return amount + " " + from.getCode() + " = "
-                + result + " " + to.getCode();
+        return amount + " " + from.getCode() + " = " + result + " " + to.getCode();
     }
 
     /**
@@ -52,18 +52,18 @@ public class CurrencyConverterView {
      * @param to     the end date
      * @return a formatted string containing the historical rate series
      */
-    public String getHistoricalRates(CurrencyUnit base, CurrencyUnit target,
-                                     LocalDate from, LocalDate to) {
+    public String getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
+                                    final LocalDate from, final LocalDate to) {
 
-        Map<LocalDate, Double> history =
+        final Map<LocalDate, Double> history =
                 controller.getHistoricalRates(base, target, from, to);
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("Historical rates ").append(base.getCode())
-          .append(" → ").append(target.getCode()).append("\n");
+          .append(" → ").append(target.getCode()).append(NEWLINE);
 
         history.forEach((date, rate) ->
-                sb.append(date).append(": ").append(rate).append("\n"));
+                sb.append(date).append(": ").append(rate).append(NEWLINE));
 
         return sb.toString();
     }
@@ -74,14 +74,14 @@ public class CurrencyConverterView {
      * @param base the base currency
      * @return a formatted string containing the latest rate table
      */
-    public String getLatestRates(CurrencyUnit base) {
-        Map<CurrencyUnit, Double> rates = controller.getLatestRates(base);
+    public String getLatestRates(final CurrencyUnit base) {
+        final Map<CurrencyUnit, Double> rates = controller.getLatestRates(base);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Latest rates (base ").append(base.getCode()).append(")\n");
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Latest rates (base ").append(base.getCode()).append(NEWLINE);
 
         rates.forEach((unit, rate) ->
-                sb.append(unit.getCode()).append(": ").append(rate).append("\n"));
+                sb.append(unit.getCode()).append(": ").append(rate).append(NEWLINE));
 
         return sb.toString();
     }

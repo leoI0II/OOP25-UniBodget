@@ -16,8 +16,21 @@ import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -27,6 +40,7 @@ import java.math.BigDecimal;
 
 /**
  * JavaFX widget representing the main currency converter tool.
+ * 
  * <p>
  * This component allows the user to:
  * <ul>
@@ -35,8 +49,6 @@ import java.math.BigDecimal;
  *     <li>perform a conversion using {@link CurrencyConverterController}</li>
  *     <li>register exchange‑rate alerts via {@link CurrencyAlertService}</li>
  * </ul>
- * <p>
- * The widget is designed as a reusable UI card with theme‑aware styling.
  */
 public class ConverterWidgetFX {
 
@@ -71,17 +83,23 @@ public class ConverterWidgetFX {
         buildUI();
     }
 
-    /** @return the amount input field */
+    /** 
+     * @return the amount input field 
+     */
     public TextField getAmountField() { 
         return amountField; 
     }
 
-    /** @return the ComboBox for the source currency */
+    /** 
+     * @return the ComboBox for the source currency 
+     */
     public ComboBox<CurrencyUnit> getFromBox() { 
         return fromBox; 
     }
 
-    /** @return the ComboBox for the target currency */
+    /** 
+     * @return the ComboBox for the target currency 
+     */
     public ComboBox<CurrencyUnit> getToBox() { 
         return toBox; 
     }
@@ -92,7 +110,7 @@ public class ConverterWidgetFX {
      * @param fromCode the ISO code of the source currency
      * @param toCode the ISO code of the target currency
      */
-    public void setCurrencies(String fromCode, String toCode) {
+    public void setCurrencies(final String fromCode, final String toCode) {
         CurrencyUnit from = Currency.get(fromCode);
         CurrencyUnit to = Currency.get(toCode);
 
@@ -100,8 +118,12 @@ public class ConverterWidgetFX {
         toBox.setValue(to);
     }
 
-    /** @return the root JavaFX node of this widget */
-    public GridPane getView() { return card; }
+    /** 
+     * @return the root JavaFX node of this widget 
+     */
+    public GridPane getView() { 
+        return card; 
+    }
 
     /* =============== UI BUILDING LOGIC ==================== */
 
@@ -164,12 +186,13 @@ public class ConverterWidgetFX {
         configureCurrencyBox(fromBox, font);
         configureCurrencyBox(toBox, font);
 
-        // Default selection
-        //final FiatCurrency[] fiat = FiatCurrency.values();
-        //if (fiat.length >= 2) {
-        //    fromBox.setValue(fiat[0]);
-        //    toBox.setValue(fiat[1]);
-        //}
+        /* Default selection
+        final FiatCurrency[] fiat = FiatCurrency.values();
+        if (fiat.length >= 2) {
+            fromBox.setValue(fiat[0]);
+            toBox.setValue(fiat[1]);
+        }
+        */
 
         /* ---------- LABELS ---------- */
         final Label amountLabel = createMutedLabel("Amount", font, textColor);
@@ -299,8 +322,8 @@ public class ConverterWidgetFX {
      * @param color the text color
      * @return a styled Label instance
     */
-    private Label createMutedLabel(String text, Font font, Color color) {
-        Label l = new Label(text);
+    private Label createMutedLabel(final String text, final Font font, final Color color) {
+        final Label l = new Label(text);
         l.setFont(font);
         l.setTextFill(color);
         l.setOpacity(0.7);
@@ -314,22 +337,32 @@ public class ConverterWidgetFX {
     */
     private void configureCurrencyBox(final ComboBox<CurrencyUnit> box, final Font font) {
         box.setMaxWidth(Double.MAX_VALUE);
-        box.setStyle("-fx-font-size: " + font.getSize() + "px; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8;");
+        box.setStyle("-fx-font-size: " + font.getSize() + 
+            "px; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8;");
 
         box.setConverter(new StringConverter<>() {
-            @Override public String toString(final CurrencyUnit c) { return c == null ? "" : formatCurrency(c); }
-            @Override public CurrencyUnit fromString(final String s) { return null; }
+            @Override 
+            public String toString(final CurrencyUnit c) { 
+                return c == null ? "" : formatCurrency(c); 
+            }
+
+            @Override 
+            public CurrencyUnit fromString(final String s) { 
+                return null; 
+            }
         });
 
         box.setCellFactory(lv -> new ListCell<>() {
-            @Override protected void updateItem(final CurrencyUnit item, final boolean empty) {
+            @Override 
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
             }
         });
 
         box.setButtonCell(new ListCell<>() {
-            @Override protected void updateItem(final CurrencyUnit item, final boolean empty) {
+            @Override 
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
             }
@@ -345,7 +378,7 @@ public class ConverterWidgetFX {
         if (currency instanceof FiatCurrency fiat) {
             return fiat.getSymbol() + " " + fiat.getShortName();
         }
-        if (currency instanceof it.unibo.unibodget.model.currency.Currency c) {
+        if (currency instanceof Currency c) {
             return c.getSymbol() + " " + c.getShortName();
         }
         return currency.getCode();
@@ -362,7 +395,7 @@ public class ConverterWidgetFX {
                 return null;
             }
             return new BigDecimal(text.trim().replace(',', '.'));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return null;
         }
     }
