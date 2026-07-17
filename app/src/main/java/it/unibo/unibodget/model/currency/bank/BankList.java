@@ -11,7 +11,7 @@ public final class BankList {
     private static final String RESOURCE = "/json/currency/bank/Banks.json";
 
     private static boolean initialized = false;
-    private static final List<Bank> loaded = new ArrayList<>();
+    private static final List<Bank> LOADED = new ArrayList<>();
 
     /**
      * Initializes the bank list by loading from the JSON 
@@ -36,7 +36,7 @@ public final class BankList {
      * @return an unmodifiable list of loaded banks; never {@code null}
      */
     public List<Bank> getBanks() {
-        return Collections.unmodifiableList(loaded);
+        return Collections.unmodifiableList(LOADED);
     }
 
     /**
@@ -48,9 +48,9 @@ public final class BankList {
      * @return {@code true} if the bank was added, {@code false} otherwise
      */
     public boolean add(Bank bank) {
-        boolean added = !loaded.contains(bank);
+        boolean added = !LOADED.contains(bank);
         if (added) {
-            loaded.add(bank);
+            LOADED.add(bank);
             save();
         }
         return added;
@@ -67,7 +67,7 @@ public final class BankList {
             ModelFileManager<Bank> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Bank.class);
             mgr.open();
-            mgr.saveList("banks", loaded);
+            mgr.saveList("banks", LOADED);
             mgr.close();
         } catch (Exception e) {
             System.out.println("BankList save failed");
@@ -93,18 +93,18 @@ public final class BankList {
 
             if (list == null || list.isEmpty()) {
                 System.out.println("Banks JSON empty → using mock banks");
-                loaded.clear();
-                loaded.addAll(generateMockBanks());
+                LOADED.clear();
+                LOADED.addAll(generateMockBanks());
             } else {
-                loaded.clear();
-                loaded.addAll(list);
-                System.out.println("Banks loaded → " + loaded.size());
+                LOADED.clear();
+                LOADED.addAll(list);
+                System.out.println("Banks loaded → " + LOADED.size());
             }
             initialized = true;
         } catch (Exception e) {
             System.out.println("Banks load failed → using mock banks");
-            loaded.clear();
-            loaded.addAll(generateMockBanks());
+            LOADED.clear();
+            LOADED.addAll(generateMockBanks());
             initialized = true;
         }
     }
