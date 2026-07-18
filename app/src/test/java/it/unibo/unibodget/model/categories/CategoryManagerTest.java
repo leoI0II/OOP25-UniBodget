@@ -16,7 +16,7 @@ class CategoryManagerTest {
     @BeforeEach
     void hardResetCategoryManager() throws Exception {
         // Reset completo via reflection
-        Field loadedField = CategoryManager.class.getDeclaredField("loaded");
+        Field loadedField = CategoryManager.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         loadedField.set(null, new ArrayList<>()); // svuota completamente
 

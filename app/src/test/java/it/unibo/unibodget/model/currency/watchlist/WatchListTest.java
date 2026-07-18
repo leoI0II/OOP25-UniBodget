@@ -12,7 +12,7 @@ class WatchListTest {
 
     @BeforeEach
     void resetWatchList() throws Exception {
-        Field loadedField = WatchList.class.getDeclaredField("loaded");
+        Field loadedField = WatchList.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         ((Set<?>) loadedField.get(null)).clear();
 

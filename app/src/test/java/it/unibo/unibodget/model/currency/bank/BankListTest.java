@@ -12,7 +12,7 @@ class BankListTest {
 
     @BeforeEach
     void resetBankList() throws Exception {
-        Field loadedField = BankList.class.getDeclaredField("loaded");
+        Field loadedField = BankList.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         List<?> loadedList = (List<?>) loadedField.get(null);
         loadedList.clear();

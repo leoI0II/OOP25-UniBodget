@@ -13,7 +13,7 @@ class CurrencyTest {
     @BeforeEach
     void resetCurrencyManager() throws Exception {
         // 1. Ottieni il campo static final "loaded"
-        Field loadedField = Currency.class.getDeclaredField("loaded");
+        Field loadedField = Currency.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
 
         // 2. Ottieni la mappa esistente (non puoi sostituirla)
