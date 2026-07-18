@@ -30,7 +30,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @param amount   the numerical amount; must not be null
      * @return a new Asset instance
      */
-    public static Asset of(CurrencyUnit currency, BigDecimal amount) {
+    public static Asset of(final CurrencyUnit currency, final BigDecimal amount) {
         return new Asset(currency, amount);
     }
 
@@ -40,17 +40,14 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @param currency the currency unit; must not be null
      * @return a new Asset with amount {@code 0}
      */
-    public static Asset zero(CurrencyUnit currency) {
+    public static Asset zero(final CurrencyUnit currency) {
         return new Asset(currency, BigDecimal.ZERO);
     }
 
-    private void requireSameCurrency(Asset other) {
+    private void requireSameCurrency(final Asset other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException(
-                "Cannot operate on assets with different currencies: " 
-                + this.currency + 
-                " vs " + 
-                other.currency
+                "Cannot operate on assets with different currencies: "  + this.currency +  " vs " + other.currency
             );
         }
     }
@@ -62,7 +59,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @return a new Asset with the combined amount
      * @throws IllegalArgumentException if currencies differ
      */
-    public Asset add(Asset other) {
+    public Asset add(final Asset other) {
         requireSameCurrency(other);
         return new Asset(this.currency, this.amount.add(other.amount));
     }
@@ -74,7 +71,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @return a new Asset with the resulting amount
      * @throws IllegalArgumentException if currencies differ
      */
-    public Asset subtract(Asset other) {
+    public Asset subtract(final Asset other) {
         requireSameCurrency(other);
         return new Asset(this.currency, this.amount.subtract(other.amount));
     }
@@ -95,7 +92,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @return a new Asset with the resulting amount
      * @throws IllegalArgumentException if currencies differ
      */
-    public Asset multiply(Asset other) {
+    public Asset multiply(final Asset other) {
         requireSameCurrency(other);
         return new Asset(this.currency, this.amount.multiply(other.amount));
     }
@@ -106,7 +103,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @param factor the scalar multiplier; must not be null
      * @return a new Asset with the scaled amount
      */
-    public Asset multiply(BigDecimal factor) {
+    public Asset multiply(final BigDecimal factor) {
         Objects.requireNonNull(factor, "factor must not be null");
         return new Asset(this.currency, this.amount.multiply(factor));
     }
@@ -118,7 +115,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      * @return a new Asset with the resulting amount
      * @throws IllegalArgumentException if currencies differ
      */
-    public Asset divide(Asset other) {
+    public Asset divide(final Asset other) {
         requireSameCurrency(other);
         return new Asset(this.currency, this.amount.divide(other.amount));
     }
@@ -159,7 +156,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
      *         is less than, equal to, or greater than {@code other}'s amount
      * @throws IllegalArgumentException if currencies differ
      */
-    public int compareTo(Asset other) {
+    public int compareTo(final Asset other) {
         requireSameCurrency(other);
         return this.amount.compareTo(other.amount);
     }

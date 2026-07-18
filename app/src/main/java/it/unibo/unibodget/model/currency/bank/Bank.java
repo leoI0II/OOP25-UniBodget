@@ -7,6 +7,7 @@ import java.util.Objects;
  * operations. A {@code Bank} defines both a fixed commission and a percentage-based
  * commission, allowing conversion services to compute the total cost of exchanging
  * money through this institution.
+ * 
  * <p>
  * Instances of this class are typically loaded from JSON configuration files
  * (e.g., user-defined bank lists), which is why a no-argument constructor is
@@ -32,7 +33,7 @@ public final class Bank {
      * @param fixedFee      the fixed commission fee applied to each conversion
      * @param percentageFee the percentage commission fee applied to the converted amount
      */
-    public Bank(String name, double fixedFee, double percentageFee) {
+    public Bank(final String name, final double fixedFee, final double percentageFee) {
         this.name = Objects.requireNonNull(name);
         this.fixedFee = fixedFee;
         this.percentageFee = percentageFee;
@@ -87,10 +88,14 @@ public final class Bank {
      * @return {@code true} if the other object represents a bank with the same name
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bank bank = (Bank) o;
+    public boolean equals(final Object o) {
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
+        final Bank bank = (Bank) o;
         return Objects.equals(name, bank.name);
     }
 

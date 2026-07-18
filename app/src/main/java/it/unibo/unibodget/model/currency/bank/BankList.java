@@ -16,6 +16,7 @@ public final class BankList {
     /**
      * Initializes the bank list by loading from the JSON 
      * resource file if it has not already been initialized.
+     * 
      * <p>
      * If the JSON file is empty or cannot be loaded, a set of mock banks will
      * be generated and used instead. 
@@ -29,6 +30,7 @@ public final class BankList {
 
     /**
      * Returns an unmodifiable view of the list of banks currently loaded in memory.
+     * 
      * <p>
      * This method ensures that the internal list cannot be modified externally,
      * preserving the integrity of the bank data.
@@ -41,13 +43,14 @@ public final class BankList {
 
     /**
      * Adds a bank to the internal list if it is not already present.
+     * 
      * <p>
      * If the bank is added, the updated list is saved to the JSON resource file.
      *
      * @param bank the bank to add; must not be {@code null}
      * @return {@code true} if the bank was added, {@code false} otherwise
      */
-    public boolean add(Bank bank) {
+    public boolean add(final Bank bank) {
         boolean added = !LOADED.contains(bank);
         if (added) {
             LOADED.add(bank);
@@ -58,18 +61,19 @@ public final class BankList {
 
     /**
      * Saves the current list of banks to the JSON resource file.
+     * 
      * <p>
      * This method is called whenever a new bank is added to ensure that
      * the persistent storage reflects the current state of the in-memory list.
      */
     private static void save() {
         try {
-            ModelFileManager<Bank> mgr =
+            final ModelFileManager<Bank> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Bank.class);
             mgr.open();
             mgr.saveList("banks", LOADED);
             mgr.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("BankList save failed");
         }
     }
@@ -77,6 +81,7 @@ public final class BankList {
     /**
      * Initializes the bank list by loading from the JSON 
      * resource file if it has not already been initialized.
+     * 
      * <p>
      * If the JSON file is empty or cannot be loaded, a set of mock banks will
      * be generated and used instead. 
@@ -84,11 +89,11 @@ public final class BankList {
      */
     public static void init() {
         try {
-            ModelFileManager<Bank> mgr =
+            final ModelFileManager<Bank> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Bank.class);
             mgr.open();
 
-            var list = mgr.loadList("banks");
+            final var list = mgr.loadList("banks");
             mgr.close();
 
             if (list == null || list.isEmpty()) {
@@ -101,7 +106,7 @@ public final class BankList {
                 System.out.println("Banks loaded → " + LOADED.size());
             }
             initialized = true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("Banks load failed → using mock banks");
             LOADED.clear();
             LOADED.addAll(generateMockBanks());

@@ -11,9 +11,11 @@ import javafx.collections.ObservableList;
 /**
  * Interface to represent a generic currency unit.
  * 
+ * <p>
  * Defines the minimal contract that every currency type
  * (fiat, crypto, stock, or dynamically loaded currencies) must satisfy.
  * 
+ * <p>
  * Implementations provide:
  * - type: the category of the currency (e.g., "fiat", "crypto", "stock")
  * - symbol: the graphical symbol of the currency (e.g., "$", "€", "₿")
@@ -21,6 +23,7 @@ import javafx.collections.ObservableList;
  * - fullName: the full description of the currency (e.g., "US Dollar", "Euro", "Bitcoin")
  * - code: a unique code for the currency (e.g., "USD", "EUR", "BTC")
  * 
+ * <p>
  * Additional fields or methods may be implemented by specific currency types
  * (e.g., crypto API identifiers), but they are not required by this interface.
  */
@@ -28,30 +31,35 @@ public interface CurrencyUnit {
 
     /**
      * Returns the graphical symbol of the currency.
+     * 
      * @return the type of currency
      */
     CurrencyType getType();
 
     /**
      * Returns the graphical symbol of the currency.
+     * 
      * @return the symbol
      */
     String getSymbol();
 
     /**
      * Returns the short identifier of the currency.
+     * 
      * @return the short name
      */
     String getShortName();
 
     /**
      * Returns the full description of the currency.
+     * 
      * @return the full name
      */
     String getFullName();
 
     /**
      * Returns the unique code of the currency.
+     * 
      * @return the currency code
      */
     String getCode();
@@ -63,18 +71,27 @@ public interface CurrencyUnit {
      * @param code the ISO currency code (e.g., "USD", "EUR")
      * @return the corresponding {@link CurrencyUnit}, or {@code null} if not found
      */
-    public static CurrencyUnit getByCode(String code) {
+    static CurrencyUnit getByCode(final String code) {
         // Fiat
-        for (var c : FiatCurrency.values())
-            if (c.getCode().equalsIgnoreCase(code)) return c;
+        for (var c : FiatCurrency.values()){
+            if (c.getCode().equalsIgnoreCase(code)){
+                return c;
+            }
+        }
 
         // Crypto
-        for (var c : CryptoCurrency.values())
-            if (c.getCode().equalsIgnoreCase(code)) return c;
+        for (var c : CryptoCurrency.values()){
+            if (c.getCode().equalsIgnoreCase(code)){
+                return c;
+            }
+        }
 
         // Stock
-        for (var c : StockMarketCurrency.values())
-            if (c.getCode().equalsIgnoreCase(code)) return c;
+        for (var c : StockMarketCurrency.values()){
+            if (c.getCode().equalsIgnoreCase(code)){
+                return c;
+            }
+        }
 
         // Custom from JSON
         return Currency.get(code);
@@ -89,7 +106,7 @@ public interface CurrencyUnit {
      * @return a list of all {@link CurrencyUnit} instances defined in the system
      */
     public static List<CurrencyUnit> allCurrencies() {
-        List<CurrencyUnit> list = new ArrayList<>();
+        final List<CurrencyUnit> list = new ArrayList<>();
         Collections.addAll(list, FiatCurrency.values());
         Collections.addAll(list, CryptoCurrency.values());
         Collections.addAll(list, StockMarketCurrency.values());
@@ -104,8 +121,8 @@ public interface CurrencyUnit {
      * @return a list of basic {@link CurrencyUnit} instances
      */
     public static List<CurrencyUnit> basicCurrencies() {
-        List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
-        ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
+        final List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
+        final ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
             list.stream()
             .filter(c -> c.getType() != CurrencyType.STOCK)
             .filter(c -> c.getType() != CurrencyType.CUSTOM)

@@ -4,11 +4,13 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
  * Represents a threshold-based alert for a specific currency pair.
+ * 
  * <p>
  * A {@code CurrencyAlert} monitors the exchange rate between two currencies
  * and triggers when the current rate crosses a predefined threshold.
  * The direction of the trigger (above or below the threshold) is controlled
  * by the {@code isLowerThan} flag.
+ * 
  * <p>
  * Alerts are strictly pair-specific: the {@link #check(double, CurrencyUnit, CurrencyUnit)}
  * method only evaluates the threshold if the provided currency pair matches
@@ -33,8 +35,8 @@ public final class CurrencyAlert {
      *                         <li>{@code false} → alert triggers when {@code currentRate > threshold}</li>
      *                     </ul>
      */
-    public CurrencyAlert(CurrencyUnit fromCurrency, CurrencyUnit toCurrency,
-                         double threshold, boolean isLowerThan) {
+    public CurrencyAlert(final CurrencyUnit fromCurrency, final CurrencyUnit toCurrency,
+                         final double threshold, final boolean isLowerThan) {
         this.fromCurrency = fromCurrency;
         this.toCurrency = toCurrency;
         this.threshold = threshold;
@@ -43,6 +45,7 @@ public final class CurrencyAlert {
 
     /**
      * Evaluates whether the alert should trigger based on the current exchange rate.
+     * 
      * <p>
      * Behavior:
      * <ul>
@@ -58,7 +61,7 @@ public final class CurrencyAlert {
      * @param to          the target currency of the rate being checked
      * @return {@code true} if the alert conditions are met; {@code false} otherwise
      */
-    public boolean check(double currentRate, CurrencyUnit from, CurrencyUnit to) {
+    public boolean check(final double currentRate, final CurrencyUnit from, final CurrencyUnit to) {
         System.out.println("Confronto: " + this.fromCurrency.getCode() + "==" + from.getCode());
         if (!this.fromCurrency.equals(from) || !this.toCurrency.equals(to)) {
             System.out.println("Currency mismatch");

@@ -18,6 +18,8 @@ import java.util.Map;
  */
 public class BasicCurrencyConverter implements CurrencyConverter {
 
+    private final int SCALE = 20;
+
     private final ExchangeRateAPI api;
     private final CurrencyUnit baseCurrency;
 
@@ -30,15 +32,15 @@ public class BasicCurrencyConverter implements CurrencyConverter {
      * @param api the exchange-rate provider used to obtain conversion data
      * @param baseCurrency the internal base currency used for intermediate conversions
      */
-    public BasicCurrencyConverter(ExchangeRateAPI api, CurrencyUnit baseCurrency) {
+    public BasicCurrencyConverter(final ExchangeRateAPI api, final CurrencyUnit baseCurrency) {
         this.api = api;
         this.baseCurrency = baseCurrency;
     }
 
     @Override
-    public CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to) {
+    public CurrencyConversionResult convert(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to) {
         if (from.getType() == CurrencyType.STOCK || to.getType() == CurrencyType.STOCK) {
-            String errorMsg = "Conversion involving STOCK-type currencies is not supported.";
+            final String errorMsg = "Conversion involving STOCK-type currencies is not supported.";
             System.err.println(errorMsg);
             throw new IllegalArgumentException("Le valute di tipo STOCK non sono supportate per la conversione.");
         }
@@ -47,23 +49,24 @@ public class BasicCurrencyConverter implements CurrencyConverter {
             return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
         }
 
-        Map<CurrencyUnit, Double> rates = api.getLatestRates(baseCurrency);
-        Map<String, Double> normalized = new HashMap<>();
+        final Map<CurrencyUnit, Double> rates = api.getLatestRates(baseCurrency);
+        final Map<String, Double> normalized = new HashMap<>();
         rates.forEach((unit, value) -> normalized.put(unit.getCode(), value));
 
         if (!normalized.containsKey(from.getCode()) || !normalized.containsKey(to.getCode())) {
-            System.out.println("1. Exchange rates not available for the selected currencies: " + from.getCode() + " or " + to.getCode());
+            System.out.println("1. Exchange rates not available for the selected currencies: " 
+                                + from.getCode() + " or " + to.getCode());
             throw new IllegalArgumentException("Tasso di cambio non disponibile per le valute selezionate.");
         }
 
-        BigDecimal fromRate = BigDecimal.valueOf(normalized.get(from.getCode()));
-        BigDecimal toRate   = BigDecimal.valueOf(normalized.get(to.getCode()));
+        final BigDecimal fromRate = BigDecimal.valueOf(normalized.get(from.getCode()));
+        final BigDecimal toRate   = BigDecimal.valueOf(normalized.get(to.getCode()));
 
-        BigDecimal amountInBase = amount.divide(fromRate, 20, RoundingMode.HALF_UP);
-        BigDecimal converted = amountInBase.multiply(toRate)
+        final BigDecimal amountInBase = amount.divide(fromRate, SCALE, RoundingMode.HALF_UP);
+        final BigDecimal converted = amountInBase.multiply(toRate)
             .setScale(10, RoundingMode.HALF_UP);
 
-        BigDecimal appliedRate = toRate.divide(fromRate, 10, RoundingMode.HALF_UP);
+        final BigDecimal appliedRate = toRate.divide(fromRate, 10, RoundingMode.HALF_UP);
 
         return new CurrencyConversionResult(amount, from, to, appliedRate, converted);
     }

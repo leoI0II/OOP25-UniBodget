@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * Represents the result of a bank‑mediated currency conversion.
+ * 
  * <p>
  * A {@code BankConversionResult} contains three financial values:
  * <ul>
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
  *     <li><strong>totalCost</strong> — the full amount paid by the user in the source currency,
  *         including commission</li>
  * </ul>
+ * 
  * <p>
  * Notes:
  * <ul>
@@ -39,11 +41,11 @@ public final class BankConversionResult {
      * @param sourceCurrencyCode  the ISO currency code of the source currency (e.g., "EUR")
      * @param targetCurrencyCode  the ISO currency code of the target currency (e.g., "USD")
      */
-    public BankConversionResult(BigDecimal convertedAmount,
-                                BigDecimal commission,
-                                BigDecimal totalCost,
-                                String sourceCurrencyCode,
-                                String targetCurrencyCode) {
+    public BankConversionResult(final BigDecimal convertedAmount,
+                                final BigDecimal commission,
+                                final BigDecimal totalCost,
+                                final String sourceCurrencyCode,
+                                final String targetCurrencyCode) {
         this.convertedAmount = convertedAmount;
         this.commission = commission;
         this.totalCost = totalCost;

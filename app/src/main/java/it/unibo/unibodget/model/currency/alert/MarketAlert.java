@@ -8,6 +8,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 /**
  * High-level component responsible for checking currency exchange alerts
  * and displaying warning dialogs when threshold conditions are met.
+ * 
  * <p>
  * A {@code MarketAlert} delegates alert evaluation to a
  * {@link CurrencyAlertService} and handles the UI side-effects (JavaFX dialogs)
@@ -24,13 +25,14 @@ public class MarketAlert {
      * @param service the alert service used to evaluate threshold conditions;
      *                must not be {@code null}
      */
-    public MarketAlert(CurrencyAlertService service) {
+    public MarketAlert(final CurrencyAlertService service) {
         this.alertService = service;
     }
 
     /**
      * Checks the current exchange rate against all registered alerts and displays
      * a warning dialog for each triggered alert.
+     * 
      * <p>
      * Behavior:
      * <ul>
@@ -41,6 +43,7 @@ public class MarketAlert {
      *     <li>Contains an optional conditional check (currently hardcoded to {@code rate > 0.5})
      *         that can be used to skip certain alerts.</li>
      * </ul>
+     * 
      * <p>
      * This method produces UI side-effects and should be called from the JavaFX
      * application thread.
@@ -49,10 +52,10 @@ public class MarketAlert {
      * @param from the base currency of the rate being checked
      * @param to   the target currency of the rate being checked
      */
-    public void checkAndShowAlerts(double rate, CurrencyUnit from, CurrencyUnit to) {
-        List<CurrencyAlert> triggered = alertService.checkAlerts(rate, from, to);
+    public void checkAndShowAlerts(final double rate, final CurrencyUnit from, final CurrencyUnit to) {
+        final List<CurrencyAlert> triggered = alertService.checkAlerts(rate, from, to);
 
-        for (CurrencyAlert alert : triggered) {
+        for (final CurrencyAlert alert : triggered) {
 
             // Optional skip condition
             if (rate > 0.5) {
@@ -65,7 +68,7 @@ public class MarketAlert {
                     + alert.getTargetCurrency().getCode()
                     + " at rate: " + rate);
 
-            Alert dialog = new Alert(Alert.AlertType.WARNING);
+            final Alert dialog = new Alert(Alert.AlertType.WARNING);
             dialog.setTitle("Alert currency exchange");
             dialog.setHeaderText("Threshold exceeded for: "
                     + alert.getTargetCurrency().getCode());

@@ -148,10 +148,10 @@ public final class Currency implements CurrencyUnit {
      */
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj){
+        if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Currency)){
+        if (!(obj instanceof Currency)) {
             return false;
         }
         final Currency other = (Currency) obj;

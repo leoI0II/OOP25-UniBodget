@@ -6,10 +6,12 @@ import java.util.Objects;
 /**
  * Represents a single historical exchange‑rate value for a currency pair
  * on a specific date.
+ * 
  * <p>
  * This class is an immutable value object used primarily to feed chart
  * components, statistical views, or any UI element that requires a
  * time‑series representation of currency movements.
+ * 
  * <p>
  * Typical usage:
  * <ul>
@@ -17,6 +19,7 @@ import java.util.Objects;
  *     <li>displaying historical data in tables or timelines</li>
  *     <li>feeding analytics modules that compute averages or volatility</li>
  * </ul>
+ * 
  * <p>
  * Each instance stores:
  * <ul>
@@ -36,7 +39,7 @@ public final class CurrencyHistoryPoint {
      * @param date the date associated with the exchange rate; must not be {@code null}
      * @param rate the exchange rate value on that date (target per base)
      */
-    public CurrencyHistoryPoint(LocalDate date, double rate) {
+    public CurrencyHistoryPoint(final LocalDate date, final double rate) {
         this.date = Objects.requireNonNull(date, "Date cannot be null");
         this.rate = rate;
     }
@@ -65,7 +68,7 @@ public final class CurrencyHistoryPoint {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         return o instanceof CurrencyHistoryPoint other
                 && date.equals(other.date)
                 && Double.compare(rate, other.rate) == 0;

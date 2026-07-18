@@ -9,11 +9,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 /**
  * Custom Jackson serializer for {@link CurrencyUnit}.
  *
- * <p>This serializer ensures that {@link CurrencyUnit} instances are
+ * <p>
+ * This serializer ensures that {@link CurrencyUnit} instances are
  * written to JSON as simple currency codes (e.g., "EUR", "USD", "JPY"),
  * instead of being expanded into full objects.</p>
  *
- * <p>The serialization process delegates the conversion to
+ * <p>
+ * The serialization process delegates the conversion to
  * {@link CurrencyUnit#getCode()}, guaranteeing a compact and stable
  * JSON representation.</p>
  */
@@ -29,10 +31,10 @@ public class CurrencyUnitSerializer extends JsonSerializer<CurrencyUnit> {
      */
     @Override
     public void serialize(
-            CurrencyUnit value,
-            JsonGenerator gen,
-            SerializerProvider serializers) throws IOException {
-
+            final CurrencyUnit value,
+            final JsonGenerator gen,
+            final SerializerProvider serializers) 
+        throws IOException {
         gen.writeString(value.getCode());
     }
 }

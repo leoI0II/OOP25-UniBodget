@@ -7,6 +7,7 @@ import java.math.RoundingMode;
  * Utility class responsible for computing the total commission applied by a bank
  * during a currency conversion. The commission consists of a fixed fee plus a
  * percentage fee applied to the converted amount.
+ * 
  * <p>
  * This class performs no validation on the input values; callers are expected
  * to provide non-negative amounts and valid {@link Bank} instances.
@@ -16,6 +17,7 @@ public final class BankCalculator {
     /**
      * Computes the total commission charged by the given bank for converting
      * the specified amount.
+     * 
      * <p>
      * Formula:
      * <pre>
@@ -28,11 +30,11 @@ public final class BankCalculator {
      * @param bank   the bank providing the fee structure; must not be {@code null}
      * @return the total commission as a {@link BigDecimal}, rounded to two decimals
      */
-    public static BigDecimal calculateCommission(BigDecimal amount, Bank bank) {
-        BigDecimal percentageValue =
+    public static BigDecimal calculateCommission(final BigDecimal amount, final Bank bank) {
+        final BigDecimal percentageValue =
                 amount.multiply(BigDecimal.valueOf(bank.getPercentageFee() / 100.0));
 
-        BigDecimal fixedValue =
+        final BigDecimal fixedValue =
                 BigDecimal.valueOf(bank.getFixedFee());
 
         return percentageValue.add(fixedValue)

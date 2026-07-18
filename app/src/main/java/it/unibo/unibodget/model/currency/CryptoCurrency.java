@@ -42,7 +42,6 @@ public enum CryptoCurrency implements CurrencyUnit {
     /**
      * Constructs a cryptocurrency definition.
      *
-     * @param type      the type of currency (fixed to "Crypto" for this enum)
      * @param symbol    the graphical symbol of the cryptocurrency (e.g., "₿", "Ξ")
      * @param shortName the short identifier or ticker (e.g., "BTC", "ETH")
      * @param fullName  the full descriptive name of the cryptocurrency
@@ -50,7 +49,8 @@ public enum CryptoCurrency implements CurrencyUnit {
      * @param apiId     the identifier used by external APIs or data providers
      * @param isStableCoin whether the cryptocurrency is a stablecoin (e.g., USDT)
      */
-    CryptoCurrency(String symbol, String shortName, String fullName, String code, String apiId, boolean isStableCoin) {
+    CryptoCurrency(final String symbol, final String shortName, final String fullName, 
+                    final String code, final String apiId, final boolean isStableCoin) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -84,10 +84,20 @@ public enum CryptoCurrency implements CurrencyUnit {
         return this.code;
     }
 
+    /**
+     * Get ApiId
+     * 
+     * @return apiId
+     */
     public String getApiId() {
         return this.apiId;
     }
 
+    /** 
+     * Return true if it's stable, false otherwise
+     * 
+     * @return true if stable
+     */
     public boolean isStableCoin() {
         return this.isStableCoin;
     }

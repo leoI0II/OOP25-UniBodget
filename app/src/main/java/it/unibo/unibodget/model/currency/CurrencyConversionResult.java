@@ -24,8 +24,8 @@ public class CurrencyConversionResult {
      * @param from the source currency
      * @param to the target currency
      */
-    public CurrencyConversionResult(BigDecimal amount, CurrencyUnit from, CurrencyUnit to,
-                                    BigDecimal appliedRate, BigDecimal convertedAmount) {
+    public CurrencyConversionResult(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to,
+                                    final BigDecimal appliedRate, final BigDecimal convertedAmount) {
         this.amount = amount;
         this.from = from;
         this.to = to;
@@ -33,27 +33,42 @@ public class CurrencyConversionResult {
         this.convertedAmount = convertedAmount;
     }
 
-    /** @return the original amount */
+    /** 
+     * 
+     * @return the original amount 
+     */
     public BigDecimal getAmount() {
         return new BigDecimal(String.valueOf(amount));
     }
 
-    /** @return the converted amount */
+    /** 
+     * 
+     * @return the converted amount 
+     */
     public BigDecimal getConvertedAmount() {
         return new BigDecimal(String.valueOf(convertedAmount));
     }
 
-    /** @return the applied exchange rate */
+    /** 
+     * 
+     * @return the applied exchange rate
+     */
     public BigDecimal getAppliedRate() {
         return new BigDecimal(String.valueOf(appliedRate));
     }
 
-    /** @return the source currency */
+    /** 
+     * 
+     * @return the source currency 
+     */
     public CurrencyUnit getFrom() {
         return from;
     }
 
-    /** @return the target currency */
+    /** 
+     * 
+     * @return the target currency 
+     */
     public CurrencyUnit getTo() {
         return to;
     }

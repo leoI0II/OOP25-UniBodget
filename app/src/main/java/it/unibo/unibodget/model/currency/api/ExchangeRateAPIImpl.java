@@ -59,6 +59,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /**
      * Returns historical exchange rates for the given currency pair.
      *
+     * <p>
      * Since the external API does not support historical data, this method
      * generates mock values for each date in the requested range.
      *

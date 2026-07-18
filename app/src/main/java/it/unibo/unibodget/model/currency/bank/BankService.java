@@ -5,10 +5,12 @@ import java.util.List;
 /**
  * Service responsible for loading and managing bank definitions used for
  * currency conversion fee calculations.
+ * 
  * <p>
  * A {@code BankService} lazily loads a predefined list of banks from a JSON
  * resource file and keeps them in memory for subsequent access. Additional
  * banks may be added at runtime through {@link #addBankInMemory(Bank)}.
+ * 
  * <p>
  * Notes:
  * <ul>
@@ -30,12 +32,13 @@ public class BankService {
      *
      * @param bank the bank to add; must not be {@code null}
      */
-    public void addBankInMemory(Bank bank) {
+    public void addBankInMemory(final Bank bank) {
         bankList.add(bank);
     }
 
     /**
-     * Returns the list of banks currently loaded in memory.
+     * Returns the list of banks currently loaded.
+     * 
      * <p>
      * If the banks have not yet been loaded, this method triggers the loading
      * process from the JSON resource file.

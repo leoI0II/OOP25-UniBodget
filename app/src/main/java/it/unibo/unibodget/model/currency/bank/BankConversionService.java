@@ -7,12 +7,14 @@ import java.math.BigDecimal;
 
 /**
  * Service responsible for performing a bank‑mediated currency conversion.
+ * 
  * <p>
  * A {@code BankConversionService} combines:
  * <ul>
  *     <li>a base currency conversion performed by {@link BasicCurrencyConverter}</li>
  *     <li>a commission calculation performed by {@link BankCalculator}</li>
  * </ul>
+ * 
  * <p>
  * The result is returned as a {@link BankConversionResult}, containing:
  * <ul>
@@ -31,12 +33,13 @@ public class BankConversionService {
      * @param converter the base currency converter used to compute the raw conversion;
      *                  must not be {@code null}
      */
-    public BankConversionService(BasicCurrencyConverter converter) {
+    public BankConversionService(final BasicCurrencyConverter converter) {
         this.converter = converter;
     }
 
     /**
      * Performs a full bank‑mediated conversion.
+     * 
      * <p>
      * Steps:
      * <ol>
@@ -52,10 +55,11 @@ public class BankConversionService {
      * @param bank   the bank whose fee structure should be applied
      * @return a {@link BankConversionResult} containing converted amount, commission, and total cost
      */
-    public BankConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to, Bank bank) {
-        CurrencyConversionResult baseResult = converter.convert(amount, from, to);
-        BigDecimal commission = BankCalculator.calculateCommission(amount, bank);
-        BigDecimal totalCost = amount.add(commission);
+    public BankConversionResult convert(final BigDecimal amount, final CurrencyUnit from, 
+                                        final CurrencyUnit to, final Bank bank) {
+        final CurrencyConversionResult baseResult = converter.convert(amount, from, to);
+        final BigDecimal commission = BankCalculator.calculateCommission(amount, bank);
+        final BigDecimal totalCost = amount.add(commission);
 
         return new BankConversionResult(
                 baseResult.getConvertedAmount(),

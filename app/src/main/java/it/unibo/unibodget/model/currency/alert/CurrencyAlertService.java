@@ -7,10 +7,12 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
  * Service responsible for managing and evaluating currency threshold alerts.
+ * 
  * <p>
  * A {@code CurrencyAlertService} stores multiple {@link CurrencyAlert} instances
  * and checks them against the latest exchange rate retrieved from an external API.
- * <br>
+ * 
+ * <p>
  * The service does not fetch exchange rates itself; it only evaluates alerts
  * based on the rate and currency pair provided by the caller.
  */
@@ -26,12 +28,13 @@ public final class CurrencyAlertService {
      *
      * @param alert the alert to register; must not be {@code null}
      */
-    public void addAlert(CurrencyAlert alert) {
+    public void addAlert(final CurrencyAlert alert) {
         activeAlerts.add(alert);
     }
 
     /**
      * Evaluates all registered alerts against the given exchange rate and currency pair.
+     * 
      * <p>
      * Behavior:
      * <ul>
@@ -40,6 +43,7 @@ public final class CurrencyAlertService {
      *         determines whether the threshold condition is met.</li>
      *     <li>All triggered alerts are collected and returned.</li>
      * </ul>
+     * 
      * <p>
      * This method does not modify the alert list; it only reports which alerts
      * should trigger based on the provided rate.
@@ -49,14 +53,14 @@ public final class CurrencyAlertService {
      * @param to          the target currency of the rate being checked
      * @return a list containing all alerts that triggered; may be empty
      */
-    public List<CurrencyAlert> checkAlerts(double currentRate, CurrencyUnit from, CurrencyUnit to) {
+    public List<CurrencyAlert> checkAlerts(final double currentRate, final CurrencyUnit from, final CurrencyUnit to) {
         System.out.println("Numb alert registered: " + activeAlerts.size());
         System.out.println("Check alert for: " + from.getCode() + " -> " + to.getCode() + " a tasso " + currentRate + "\n");
 
-        List<CurrencyAlert> triggered = new ArrayList<>();
+        final List<CurrencyAlert> triggered = new ArrayList<>();
 
-        for (CurrencyAlert alert : activeAlerts) {
-            boolean match = alert.check(currentRate, from, to);
+        for (final CurrencyAlert alert : activeAlerts) {
+            final boolean match = alert.check(currentRate, from, to);
             System.out.println("Alert find in list, match: " + match);
             if (match) {
                 triggered.add(alert);

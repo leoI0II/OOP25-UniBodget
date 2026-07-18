@@ -39,7 +39,7 @@ public enum FiatCurrency implements CurrencyUnit {
      * @param fullName  the full descriptive name
      * @param code      the standardized currency code
      */
-    FiatCurrency(String symbol, String shortName, String fullName, String code) {
+    FiatCurrency(final String symbol, final String shortName, final String fullName, final String code) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
