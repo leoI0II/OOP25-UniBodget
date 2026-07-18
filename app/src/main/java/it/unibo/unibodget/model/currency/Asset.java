@@ -9,11 +9,15 @@ import java.util.Objects;
  * - a {@link CurrencyUnit} indicating the type of currency (e.g., USD, EUR, BTC)
  * - a {@link BigDecimal} representing the numerical amount (positive for income, negative for expense)
  * This class is a record, which provides immutability, value-based equality, and a concise syntax.
+ * 
+ * @param currency CurrencyUnit
+ * @param amount BigDecimal
  */
 public record Asset(CurrencyUnit currency, BigDecimal amount) {
 
     /**
      * Constructs an Asset with the given currency and amount.
+     * 
      * @param currency the currency unit of the asset; must not be null
      * @param amount the numerical amount; must not be null
      * @throws NullPointerException if either currency or amount is null

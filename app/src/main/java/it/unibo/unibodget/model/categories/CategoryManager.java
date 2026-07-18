@@ -34,7 +34,7 @@ public final class CategoryManager {
             }
             initialized = true;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             System.out.println("Unable to load categories from file, loading default categories.");
             loaded.clear();
@@ -60,11 +60,11 @@ public final class CategoryManager {
      *
      * @param category the category to add
      */
-    public static void add(Category category) {
+    public static void add(final Category category) {
         if (!initialized) {
             init();
         }
-        boolean alreadyExists = loaded.stream()
+        final boolean alreadyExists = loaded.stream()
                 .anyMatch(c ->
                     c.getName().equalsIgnoreCase(category.getName())
                 );
@@ -83,11 +83,11 @@ public final class CategoryManager {
      * @param category the category to remove
      * @return {@code true} if the category was removed, {@code false} otherwise
      */
-    public static boolean remove(Category category) {
+    public static boolean remove(final Category category) {
         if (!initialized) {
             init();
         }
-        boolean removed = loaded.remove(category);
+        final boolean removed = loaded.remove(category);
         if (removed) {
             saveAll();
         }
@@ -106,7 +106,7 @@ public final class CategoryManager {
             mgr.saveList("categories", loaded);
             mgr.close();
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Unable to save categories", e);
         }
     }
@@ -125,7 +125,7 @@ public final class CategoryManager {
      * @param type the category type
      * @return a list of categories of the specified type
      */
-    public static List<Category> getByType(CategoryType type) {
+    public static List<Category> getByType(final CategoryType type) {
         if (!initialized) {
             init();
         }
@@ -140,7 +140,7 @@ public final class CategoryManager {
      *
      * @param category the category to save
      */
-    public static void save(Category category) {
+    public static void save(final Category category) {
         if (!initialized) {
             init();
         }

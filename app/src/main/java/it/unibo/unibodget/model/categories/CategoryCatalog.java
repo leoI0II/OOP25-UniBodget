@@ -8,6 +8,7 @@ import java.util.Optional;
 /**
  * Shared catalog of categories available across all wallets.
  *
+ * <p>
  * It contains built-in default categories and user-defined custom categories.
  * Custom categories can be archived/reactivated instead of being hard-deleted.
  */
@@ -140,7 +141,7 @@ public final class CategoryCatalog {
      */
     public void reactivateCustomCategory(final String categoryName) {
         //getCustomCategoryByName(categoryName).reactivate();
-        Category category = getCustomCategoryByName(categoryName);
+        final Category category = getCustomCategoryByName(categoryName);
         category.reactivate();
         CategoryManager.saveAll();
     }
@@ -158,5 +159,5 @@ public final class CategoryCatalog {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Custom category not found: " + categoryName));
     }
-    
+
 }

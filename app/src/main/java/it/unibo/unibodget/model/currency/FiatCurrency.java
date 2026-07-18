@@ -3,6 +3,7 @@ package it.unibo.unibodget.model.currency;
 /**
  * Enum to represent fiat currencies.
  * 
+ * <p>
  * Each enum constant defines:
  * - type (fixed to "Fiat")
  * - symbol
@@ -33,7 +34,6 @@ public enum FiatCurrency implements CurrencyUnit {
     /**
      * Constructs a fiat currency definition.
      *
-     * @param type      the type of currency (fixed to "Fiat" for this enum)
      * @param symbol    the graphical symbol of the currency
      * @param shortName the short identifier (ISO-like code)
      * @param fullName  the full descriptive name

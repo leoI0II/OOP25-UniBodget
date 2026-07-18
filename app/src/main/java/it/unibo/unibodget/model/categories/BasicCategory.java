@@ -7,16 +7,19 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 /**
  * Abstract base class for all category types.
  *
+ * <p>
  * Defines the minimal shared structure for representing
  * a transaction category, consisting of:
  * - a readable name
  * - a color expressed as a HEX string
  * - a high-level type (income, expense, loan)
  *
+ * <p>
  * Concrete implementations may represent:
  * - user‑defined categories loaded from JSON (see {@link Category})
  * - predefined categories exposed through an enum (see {@link CategoryPreset})
  *
+ * <p>
  * This class behaves as a value object: equality is based on both name and color.
  */
 public abstract class BasicCategory {
@@ -75,22 +78,20 @@ public abstract class BasicCategory {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (!(o instanceof BasicCategory)) {
             return false;
         }
-        BasicCategory c = (BasicCategory) o;
-        return this.name.equals(c.name) && 
-                this.color.equals(c.color) && 
-                this.type.equals(c.type);
+        final BasicCategory c = (BasicCategory) o;
+        return this.name.equals(c.name) && this.color.equals(c.color) && this.type.equals(c.type);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.name, this.color, this.type);
     }
-    
+
 }
