@@ -128,7 +128,7 @@ public final class CategoryCatalog {
      */
     public void archiveCustomCategory(final String categoryName) {
         //getCustomCategoryByName(categoryName).archive();
-        Category category = getCustomCategoryByName(categoryName);
+        final Category category = getCustomCategoryByName(categoryName);
         category.archive();
         CategoryManager.saveAll();
     }

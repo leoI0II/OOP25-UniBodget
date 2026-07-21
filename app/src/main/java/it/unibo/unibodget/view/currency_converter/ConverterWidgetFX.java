@@ -84,6 +84,7 @@ public class ConverterWidgetFX {
     }
 
     /** 
+     * 
      * @return the amount input field 
      */
     public TextField getAmountField() { 
@@ -91,6 +92,7 @@ public class ConverterWidgetFX {
     }
 
     /** 
+     * 
      * @return the ComboBox for the source currency 
      */
     public ComboBox<CurrencyUnit> getFromBox() { 
@@ -98,6 +100,7 @@ public class ConverterWidgetFX {
     }
 
     /** 
+     * 
      * @return the ComboBox for the target currency 
      */
     public ComboBox<CurrencyUnit> getToBox() { 
@@ -111,14 +114,15 @@ public class ConverterWidgetFX {
      * @param toCode the ISO code of the target currency
      */
     public void setCurrencies(final String fromCode, final String toCode) {
-        CurrencyUnit from = Currency.get(fromCode);
-        CurrencyUnit to = Currency.get(toCode);
+        final CurrencyUnit from = Currency.get(fromCode);
+        final CurrencyUnit to = Currency.get(toCode);
 
         fromBox.setValue(from);
         toBox.setValue(to);
     }
 
     /** 
+     * 
      * @return the root JavaFX node of this widget 
      */
     public GridPane getView() { 
@@ -150,15 +154,26 @@ public class ConverterWidgetFX {
 
         // Glass‑style background
         final Color glassBase = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getPrimaryColor()));
-        final Color glassFill = new Color(glassBase.getRed(), glassBase.getGreen(), glassBase.getBlue(), 0.045);
-        final Color glassBorder = new Color(glassBase.getRed(), glassBase.getGreen(), glassBase.getBlue(), 0.07);
+        final Color glassFill = new Color(glassBase.getRed(), 
+                                        glassBase.getGreen(), 
+                                        glassBase.getBlue(), 
+                                        0.045);
+        final Color glassBorder = new Color(glassBase.getRed(), 
+                                        glassBase.getGreen(), 
+                                        glassBase.getBlue(), 
+                                        0.07);
 
         /* ---------- CARD LAYOUT ---------- */
         card.setHgap(GRID_GAP);
         card.setVgap(GRID_GAP);
         card.setPadding(new Insets(CARD_PADDING));
-        card.setBackground(new Background(new BackgroundFill(glassFill, new CornerRadii(CARD_CORNER_RADIUS), Insets.EMPTY)));
-        card.setBorder(new Border(new BorderStroke(glassBorder, BorderStrokeStyle.SOLID, new CornerRadii(CARD_CORNER_RADIUS), BorderWidths.DEFAULT)));
+        card.setBackground(new Background(new BackgroundFill(glassFill, 
+                                                            new CornerRadii(CARD_CORNER_RADIUS), 
+                                                            Insets.EMPTY)));
+        card.setBorder(new Border(new BorderStroke(glassBorder, 
+                                                    BorderStrokeStyle.SOLID, 
+                                                    new CornerRadii(CARD_CORNER_RADIUS), 
+                                                    BorderWidths.DEFAULT)));
 
         /* ---------- AMOUNT FIELD ---------- */
         amountField.setPromptText("e.g. 10");
@@ -204,10 +219,12 @@ public class ConverterWidgetFX {
         final Button swapButton = new Button("⇅");
         swapButton.setFont(font);
         swapButton.setTextFill(textColor);
-        swapButton.setBackground(new Background(new BackgroundFill(glassFill, new CornerRadii(BUTTON_CORNER_RADIUS), Insets.EMPTY)));
+        swapButton.setBackground(new Background(new BackgroundFill(glassFill, 
+                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
+                                                                    Insets.EMPTY)));
 
         swapButton.setOnAction(e -> {
-            CurrencyUnit temp = fromBox.getValue();
+            final CurrencyUnit temp = fromBox.getValue();
             fromBox.setValue(toBox.getValue());
             toBox.setValue(temp);
         });
@@ -215,7 +232,9 @@ public class ConverterWidgetFX {
         /* ---------- CONVERT BUTTON ---------- */
         final Button convertButton = new Button("Convert");
         convertButton.setFont(font);
-        convertButton.setBackground(new Background(new BackgroundFill(buttonColor, new CornerRadii(BUTTON_CORNER_RADIUS), Insets.EMPTY)));
+        convertButton.setBackground(new Background(new BackgroundFill(buttonColor, 
+                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
+                                                                    Insets.EMPTY)));
         convertButton.setTextFill(buttonTextColor);
         convertButton.setMaxWidth(Double.MAX_VALUE);
         convertButton.setDisable(true);
@@ -226,7 +245,8 @@ public class ConverterWidgetFX {
         thresholdField.setFont(font);
         thresholdField.setStyle(amountField.getStyle());
 
-        final ComboBox<String> directionBox = new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
+        final ComboBox<String> directionBox = 
+            new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
         directionBox.setValue("Above");
 
         final Button addAlertButton = new Button("Set Alert");
@@ -283,7 +303,7 @@ public class ConverterWidgetFX {
                 resultLabel.setText("Converted from " + amount.toPlainString() + " " + from.getCode());
 
                 // Compute rate for alert evaluation
-                double rate = result.divide(amount, 4, java.math.RoundingMode.HALF_UP).doubleValue();
+                final double rate = result.divide(amount, 4, java.math.RoundingMode.HALF_UP).doubleValue();
                 new MarketAlert(this.alertService).checkAndShowAlerts(rate, from, to);
 
             } catch (Exception ex) {

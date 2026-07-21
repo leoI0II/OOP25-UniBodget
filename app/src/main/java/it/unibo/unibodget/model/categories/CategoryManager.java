@@ -6,6 +6,15 @@ import java.util.List;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
 
+/**
+ * Provides static access to all application categories.
+ * 
+ * <p>
+ * CategoryManager handles loading, saving, and managing Category objects
+ * stored in a JSON file. Categories are initialized on first use and kept
+ * in memory for fast access. The class cannot be instantiated.
+ * </p>
+ */
 public final class CategoryManager {
 
     private static final Path PATH = Path.of("data/json/categories/Categories.json");

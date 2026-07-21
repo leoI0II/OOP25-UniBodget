@@ -32,7 +32,7 @@ public abstract class BasicCategory {
      * Creates a new Category with the given name and HEX color.
      *
      * @param name      the descriptive name of the category
-     * @param colorHex  the color associated with the category
+     * @param color     the color associated with the category
      * @param type      the high-level classification of the category
      */
     public BasicCategory(final String name, 
