@@ -43,10 +43,10 @@ public class DefaultInvestmentController implements InvestmentController {
     private final List<CurrencyUnit> displayCurrencies;
 
     public DefaultInvestmentController(
-        InvestmentAccountService investmentAccountService,
-        CashAccountService cashAccountService,
-        ExchangeRateProvider exchangeRateProvider,
-        List<CurrencyUnit> displayCurrencies
+        final InvestmentAccountService investmentAccountService,
+        final CashAccountService cashAccountService,
+        final ExchangeRateProvider exchangeRateProvider,
+        final List<CurrencyUnit> displayCurrencies
     ) {
         this.investmentAccountService = Objects.requireNonNull(investmentAccountService);
         this.cashAccountService = Objects.requireNonNull(cashAccountService);
@@ -154,7 +154,7 @@ public class DefaultInvestmentController implements InvestmentController {
 	}
 
     @Override
-    public Asset getCurrentMarketPrice(CurrencyUnit asset) {
+    public Asset getCurrentMarketPrice(final CurrencyUnit asset) {
         return exchangeRateProvider.convert(
             Asset.of(asset, BigDecimal.ONE), 
             getCurrentAccountOrThrow().getBaseCurrency()
@@ -166,7 +166,7 @@ public class DefaultInvestmentController implements InvestmentController {
         return cashAccountService.getWallets();
     }
 
-    private CurrencyUnit targetCurrencyOf(PaymentSource paymentSource, CurrencyUnit def) {
+    private CurrencyUnit targetCurrencyOf(final PaymentSource paymentSource, final CurrencyUnit def) {
         return switch(paymentSource) {
             case PaymentSource.CashAccountChannel cashSrc -> cashSrc.account().getBaseCurrency();
             case PaymentSource.StableCoinPositionChannel stableCoinSrc -> stableCoinSrc.stableCoin();
@@ -175,11 +175,11 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     private Asset estimateOrderInTargetCurrency(
-        BigDecimal quantity,
-        Asset unitPrice,
-        Asset fee,
-        PaymentSource paymentSource,
-        boolean addFee
+        final BigDecimal quantity,
+        final Asset unitPrice,
+        final Asset fee,
+        final PaymentSource paymentSource,
+        final boolean addFee
     ) {
         var nativeTotalCost = unitPrice.multiply(quantity);
         nativeTotalCost = addFee ? nativeTotalCost.add(fee) : nativeTotalCost.subtract(fee);
@@ -192,12 +192,12 @@ public class DefaultInvestmentController implements InvestmentController {
 
     @Override
     public Asset estimateOrderCost(
-		OrderType orderType, 
-		CurrencyUnit asset, 
-		BigDecimal quantity, 
-		Asset unitPrice,
-        Asset fee, 
-		PaymentSource paymentSource
+		final OrderType orderType, 
+		final CurrencyUnit asset, 
+		final BigDecimal quantity, 
+		final Asset unitPrice,
+        final Asset fee, 
+		final PaymentSource paymentSource
     ) {    
 		return switch (orderType) {
             case BUY -> estimateOrderInTargetCurrency(quantity, unitPrice, fee, paymentSource, true);
@@ -206,7 +206,7 @@ public class DefaultInvestmentController implements InvestmentController {
         };
     }
 
-    private Optional<Asset> availableAsset(PaymentSource paymentSource) {
+    private Optional<Asset> availableAsset(final PaymentSource paymentSource) {
         return switch(paymentSource) {
             case PaymentSource.CashAccountChannel cashSrc -> Optional.of(cashSrc.account().getBalance());
             case PaymentSource.StableCoinPositionChannel stableCoinSrc -> {
@@ -224,12 +224,11 @@ public class DefaultInvestmentController implements InvestmentController {
 
     @Override
     public boolean canBuy(
-		PaymentSource paymentSource, 
-		CurrencyUnit asset, 
-		BigDecimal quantity, 
-		Asset unitPrice,
-        Asset fee) {
-        
+		final PaymentSource paymentSource, 
+		final CurrencyUnit asset, 
+		final BigDecimal quantity, 
+		final Asset unitPrice,
+        final Asset fee) {
 		final var estimatedCost = estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource);
         final var availableOpt = availableAsset(paymentSource);
         if (availableOpt.isEmpty()) {
@@ -240,7 +239,7 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     @Override
-    public boolean canSell(InvestmentAccount src, CurrencyUnit asset, BigDecimal quantity) {
+    public boolean canSell(final InvestmentAccount src, final CurrencyUnit asset, final BigDecimal quantity) {
 		final var position = src.getPositions().stream()
 			.filter(pos -> pos.asset().equals(asset))
 			.findFirst();
@@ -249,7 +248,8 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     @Override
-    public boolean canTransfer(InvestmentAccount src, InvestmentAccount dst, CurrencyUnit asset, BigDecimal quantity) {
+    public boolean canTransfer(final InvestmentAccount src, final InvestmentAccount dst, 
+                                final CurrencyUnit asset, final BigDecimal quantity) {
 		if (src.getId().equals(dst.getId())) {
             return false; // Cannot transfer to the same account
         }
@@ -262,14 +262,14 @@ public class DefaultInvestmentController implements InvestmentController {
 
     @Override
     public OrderResult executeBuyOrder(
-		InvestmentAccount targetAccount, 
-		PaymentSource paymentSource, 
-		CurrencyUnit asset,
-        BigDecimal quantity, 
-		Asset unitPrice, 
-		Asset fee, 
-		LocalDate date, 
-		String notes) {
+		final InvestmentAccount targetAccount, 
+		final PaymentSource paymentSource, 
+		final CurrencyUnit asset,
+        final BigDecimal quantity, 
+		final Asset unitPrice, 
+		final Asset fee, 
+		final LocalDate date, 
+		final String notes) {
 		
 		final var cost = estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource);
 		
@@ -278,7 +278,7 @@ public class DefaultInvestmentController implements InvestmentController {
 			return new OrderResult.InsufficientFunds(cost, available);
 		}
 
-		InvestmentTransaction investmentTransactionIn = InvestmentTransaction.of(
+		final InvestmentTransaction investmentTransactionIn = InvestmentTransaction.of(
             Asset.of(asset, quantity),
             Category.INVESTMENT_BUY,
             date,
@@ -324,14 +324,14 @@ public class DefaultInvestmentController implements InvestmentController {
 
     @Override
     public OrderResult executeSellOrder(
-        InvestmentAccount sourceAccount,
-        PaymentSource cashFlowTarget,
-        CurrencyUnit asset, 
-        BigDecimal quantity,
-        Asset unitPrice, 
-        Asset fee, 
-        LocalDate date, 
-        String notes
+        final InvestmentAccount sourceAccount,
+        final PaymentSource cashFlowTarget,
+        final CurrencyUnit asset, 
+        final BigDecimal quantity,
+        final Asset unitPrice, 
+        final Asset fee, 
+        final LocalDate date, 
+        final String notes
     ) {
         if (!canSell(sourceAccount, asset, quantity)) {
             final var availableQty = sourceAccount.getPositions().stream()
@@ -394,12 +394,12 @@ public class DefaultInvestmentController implements InvestmentController {
 
     @Override
     public OrderResult executeTransferOrder(
-        InvestmentAccount sourceAccount, 
-        InvestmentAccount targetAccount,
-        CurrencyUnit asset, 
-        BigDecimal quantity, 
-        LocalDate date, 
-        String notes
+        final InvestmentAccount sourceAccount, 
+        final InvestmentAccount targetAccount,
+        final CurrencyUnit asset, 
+        final BigDecimal quantity, 
+        final LocalDate date, 
+        final String notes
     ) {
         if (!canTransfer(sourceAccount, targetAccount, asset, quantity)) {
             final var available = sourceAccount.getPositionForAsset(asset)
@@ -437,7 +437,7 @@ public class DefaultInvestmentController implements InvestmentController {
     @Override
     public ExportResult exportCurrentAccountData(final File file) {
         Objects.requireNonNull(file);
-        var account = getCurrentAccountOrThrow();
+        final var account = getCurrentAccountOrThrow();
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder().build();
         try (
             final FileWriter wr = new FileWriter(file);
@@ -477,7 +477,7 @@ public class DefaultInvestmentController implements InvestmentController {
 
             return new ExportResult.Success(file);
             
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new ExportResult.Error(e.getMessage());
         }
     }
