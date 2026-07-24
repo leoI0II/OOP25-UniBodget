@@ -39,6 +39,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
     /**
      * Fetches historical exchange rates for a given currency pair within the
      * specified date range.
+     * 
      * <p>
      * The method constructs a Frankfurter API URL, performs an HTTP request,
      * and parses the JSON response into a sorted map of dates and rates.

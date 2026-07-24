@@ -10,10 +10,12 @@ import java.util.Objects;
 
 /**
  * Represents aggregated financial statistics for a single calendar month.
+ * 
  * <p>
  * Instances of {@code MonthlyStatistics} are produced by the
  * {@code MonthlyStatisticsController} from a historical ledger. This ensures
  * that the view layer never needs to filter, group, or sum transactions itself.
+ * 
  * <br>
  * The class provides:
  * <ul>
@@ -22,6 +24,7 @@ import java.util.Objects;
  *     <li>net balance (income minus expenses)</li>
  *     <li>category-level totals, already grouped and ready for chart rendering</li>
  * </ul>
+ * 
  * <p>
  * All fields are immutable, making the object safe to pass directly to UI components.
  */
@@ -45,8 +48,8 @@ public final class MonthlyStatistics {
      * @param categoryTotals a list of category-level totals already aggregated;
      *                       must not be {@code null}. A defensive copy is created.
      */
-    public MonthlyStatistics(YearMonth month, BigDecimal totalIncome, BigDecimal totalExpense,
-                             BigDecimal netBalance, List<CategoryTotal> categoryTotals) {
+    public MonthlyStatistics(final YearMonth month, final BigDecimal totalIncome, final BigDecimal totalExpense,
+                             final BigDecimal netBalance, final List<CategoryTotal> categoryTotals) {
         this.month = Objects.requireNonNull(month);
         this.totalIncome = totalIncome;
         this.totalExpense = Objects.requireNonNull(totalExpense);
@@ -111,6 +114,7 @@ public final class MonthlyStatistics {
 
     /**
      * Represents the aggregated total for a single category within a month.
+     * 
      * <p>
      * This record is used by chart views to display category-level breakdowns
      * without needing to re-derive category type or perform additional grouping.

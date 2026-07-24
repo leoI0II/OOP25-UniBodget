@@ -51,7 +51,7 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
     private void requireSameCurrency(final Asset other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException(
-                "Cannot operate on assets with different currencies: "  + this.currency +  " vs " + other.currency
+                "Cannot operate on assets with different currencies: " + this.currency + " vs " + other.currency
             );
         }
     }

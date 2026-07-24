@@ -13,9 +13,6 @@ import javafx.scene.paint.Color;
  */
 public record ARGBColor(int alpha, int red, int green, int blue) {
 
-    private static final int MIN = 0;
-    private static final int MAX = 255;
-
     public static final ARGBColor TRANSPARENT = new ARGBColor(0, 0, 0, 0);
     public static final ARGBColor BLACK = new ARGBColor(0xFF, 0, 0, 0);
     public static final ARGBColor WHITE = new ARGBColor(0xFF, 0xFF, 0xFF, 0xFF);
@@ -29,6 +26,19 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     public static final ARGBColor DARK_GRAY = new ARGBColor(0xFF, 0x40, 0x40, 0x40);
     public static final ARGBColor LIGHT_GRAY = new ARGBColor(0xFF, 0xC0, 0xC0, 0xC0);
 
+    private static final int MIN = 0;
+    private static final int MAX = 255;
+
+    private static final int BYTE_MASK = 0xFF;
+    private static final int ALPHA_SHIFT = 24;
+    private static final int RED_SHIFT = 16;
+    private static final int GREEN_SHIFT = 8;
+
+    private static final int RGB_LENGTH = 6;
+    private static final int ARGB_LENGTH = 8;
+
+    private static final int HEX_RADIX = 16;
+    private static final double MAX_COMPONENT = 255.0;
 
     /**
      * Compact constructor that validates all color components upon instantiation.
@@ -40,6 +50,43 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
         checkValue(red, "Red");
         checkValue(green, "Green");
         checkValue(blue, "Blue");
+    }
+
+    /**
+     * Creates a fully opaque color using the specified red, green, and blue components.
+     * The alpha component is automatically set to 255.
+     *
+     * @param red   the red color component (0-255)
+     * @param green the green color component (0-255)
+     * @param blue  the blue color component (0-255)
+     */
+    public ARGBColor(final int red, final int green, final int blue) {
+        this(MAX, red, green, blue);
+    }
+
+    /**
+     * Creates a color from a 32-bit packed integer in ARGB format.
+     *
+     * @param argb the packed integer containing alpha in the highest byte, followed by red, green, and blue
+     */
+    public ARGBColor(final int argb) {
+        this((argb >> ALPHA_SHIFT) & BYTE_MASK, 
+            (argb >> RED_SHIFT) & BYTE_MASK, 
+            (argb >> GREEN_SHIFT) & BYTE_MASK, 
+            argb & BYTE_MASK);
+    }
+
+    /**
+     * Creates a color by parsing a hexadecimal string.
+     * The string can be in either 6-character ({@code #RRGGBB} or {@code RRGGBB})
+     * or 8-character ({@code #AARRGGBB} or {@code AARRGGBB}) format.
+     *
+     * @param hex the hexadecimal string representing the color
+     * @throws IllegalArgumentException if the string format or length is invalid
+     * @throws NumberFormatException    if the string contains non-hexadecimal characters
+     */
+    public ARGBColor(final String hex) {
+        this(parseHexToInt(hex));
     }
 
     /**
@@ -56,40 +103,6 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     }
 
     /**
-     * Creates a fully opaque color using the specified red, green, and blue components.
-     * The alpha component is automatically set to 255.
-     *
-     * @param red   the red color component (0-255)
-     * @param green the green color component (0-255)
-     * @param blue  the blue color component (0-255)
-     */
-    public ARGBColor(int red, int green, int blue) {
-        this(255, red, green, blue);
-    }
-
-    /**
-     * Creates a color from a 32-bit packed integer in ARGB format.
-     *
-     * @param argb the packed integer containing alpha in the highest byte, followed by red, green, and blue
-     */
-    public ARGBColor(int argb) {
-        this((argb >> 24) & 0xFF, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF);
-    }
-
-    /**
-     * Creates a color by parsing a hexadecimal string.
-     * The string can be in either 6-character ({@code #RRGGBB} or {@code RRGGBB})
-     * or 8-character ({@code #AARRGGBB} or {@code AARRGGBB}) format.
-     *
-     * @param hex the hexadecimal string representing the color
-     * @throws IllegalArgumentException if the string format or length is invalid
-     * @throws NumberFormatException    if the string contains non-hexadecimal characters
-     */
-    public ARGBColor(String hex) {
-        this(parseHexToInt(hex));
-    }
-
-    /**
      * Parses a hexadecimal color string into a 32-bit integer.
      * If the string lacks an alpha channel (6 characters), it defaults to fully opaque (FF).
      *
@@ -97,15 +110,23 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
      * @return the parsed 32-bit ARGB integer
      * @throws IllegalArgumentException if the string is not exactly 6 or 8 characters long (excluding the '#')
      */
-    private static int parseHexToInt(String hex) {
-        String clean = hex.replaceFirst("^#", "");
-        if (clean.length() != 6 && clean.length() != 8) {
-            throw new IllegalArgumentException(String.format("Hex color string \"%s\" must be in the format #RRGGBB or #AARRGGBB.", hex));
+    private static int parseHexToInt(final String hex) {
+        final String clean = hex.replaceFirst("^#", "");
+        final String normalized;
+        if (clean.length() != RGB_LENGTH && clean.length() != ARGB_LENGTH) {
+             throw new IllegalArgumentException(
+                String.format(
+                    "Hex color string \"%s\" must be in the format #RRGGBB or #AARRGGBB.",
+                    hex
+                )
+            );
         }
-        if (clean.length() == 6) {
-            clean = "FF" + clean;
+        if (clean.length() == RGB_LENGTH) {
+            normalized = "FF" + clean;
+        } else {
+            normalized = clean;
         }
-        return Integer.parseUnsignedInt(clean, 16);
+        return Integer.parseUnsignedInt(normalized, HEX_RADIX);
     }
 
     /**
@@ -127,7 +148,7 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
             this.red,
             this.green,
             this.blue,
-            this.alpha / 255.0
+            this.alpha / MAX_COMPONENT
         );
     }
 

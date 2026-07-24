@@ -10,5 +10,5 @@ public enum CurrencyType {
     FIAT,
     CRYPTO,
     STOCK,
-    CUSTOM;
+    CUSTOM
 }

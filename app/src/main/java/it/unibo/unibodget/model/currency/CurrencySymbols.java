@@ -1,7 +1,7 @@
 package it.unibo.unibodget.model.currency;
 
 /**
- * Class to define static currency symbols
+ * Class to define static currency symbols.
  */
 public final class CurrencySymbols {
 
@@ -10,5 +10,5 @@ public final class CurrencySymbols {
 
     }
 
-    public static final String DOLLAR = "$";
+    public final static String DOLLAR = "$";
 }

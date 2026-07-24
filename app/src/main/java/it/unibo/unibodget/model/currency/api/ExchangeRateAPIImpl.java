@@ -118,12 +118,12 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
         final Map<CurrencyUnit, Double> result = new HashMap<>();
 
         final int ratesStart = json.indexOf("\"rates\":");
-        if (ratesStart == -1){
+        if (ratesStart == -1) {
             return result;
         }
 
         final int braceOpen = json.indexOf("{", ratesStart);
-        if (braceOpen == -1){ 
+        if (braceOpen == -1) { 
             return result;
         }
 
@@ -133,10 +133,10 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
 
         for (int i = braceOpen; i < json.length(); i++) {
             char c = json.charAt(i);
-            if (c == '{'){
+            if (c == '{') {
                 depth++;
             }
-            if (c == '}'){
+            if (c == '}') {
                 depth--;
             }
             if (depth == 0) {
@@ -145,7 +145,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             }
         }
 
-        if (braceClose == -1){
+        if (braceClose == -1) {
             return result;
         }
 

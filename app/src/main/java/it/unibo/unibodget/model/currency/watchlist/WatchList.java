@@ -34,7 +34,7 @@ public final class WatchList {
      */
     public boolean add(final WatchlistPair pair) {
         final boolean added = LOADED.add(pair);
-        if (added){
+        if (added) {
             save();
         }
         return added;
@@ -46,7 +46,7 @@ public final class WatchList {
      */
     public boolean remove(final WatchlistPair pair) {
         final boolean removed = LOADED.remove(pair);
-        if (removed){
+        if (removed) {
             save();
         }
         return removed;

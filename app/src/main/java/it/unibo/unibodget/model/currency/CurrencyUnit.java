@@ -73,22 +73,22 @@ public interface CurrencyUnit {
      */
     static CurrencyUnit getByCode(final String code) {
         // Fiat
-        for (var c : FiatCurrency.values()){
-            if (c.getCode().equalsIgnoreCase(code)){
+        for (final var c : FiatCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
                 return c;
             }
         }
 
         // Crypto
-        for (var c : CryptoCurrency.values()){
-            if (c.getCode().equalsIgnoreCase(code)){
+        for (final var c : CryptoCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
                 return c;
             }
         }
 
         // Stock
-        for (var c : StockMarketCurrency.values()){
-            if (c.getCode().equalsIgnoreCase(code)){
+        for (final var c : StockMarketCurrency.values()) {
+            if (c.getCode().equalsIgnoreCase(code)) {
                 return c;
             }
         }
@@ -100,12 +100,13 @@ public interface CurrencyUnit {
     /**
      * Returns a list containing all available currency units in the system.
      * 
+     * <p>
      * This method aggregates all enum-based currency types implemented in the
      * application
      *
      * @return a list of all {@link CurrencyUnit} instances defined in the system
      */
-    public static List<CurrencyUnit> allCurrencies() {
+    static List<CurrencyUnit> allCurrencies() {
         final List<CurrencyUnit> list = new ArrayList<>();
         Collections.addAll(list, FiatCurrency.values());
         Collections.addAll(list, CryptoCurrency.values());

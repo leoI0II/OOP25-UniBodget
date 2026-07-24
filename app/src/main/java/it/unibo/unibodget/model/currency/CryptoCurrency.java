@@ -3,6 +3,7 @@ package it.unibo.unibodget.model.currency;
 /**
  * Enum to represent cryptocurrencies.
  * 
+ * <p>
  * Each enum constant defines:
  * - type (fixed to "Crypto")
  * - symbol

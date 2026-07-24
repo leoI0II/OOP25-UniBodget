@@ -21,6 +21,7 @@ public final class Bank {
 
     /**
      * Empty constructor required for JSON deserialization (e.g., Jackson).
+     * 
      * <p>
      * Fields are expected to be populated via reflection after instantiation.
      */
@@ -79,6 +80,7 @@ public final class Bank {
 
     /**
      * Compares this bank with another object for equality.
+     * 
      * <p>
      * Two banks are considered equal if they share the same name. Fee values
      * are not considered in equality checks, allowing banks to be uniquely
@@ -89,10 +91,10 @@ public final class Bank {
      */
     @Override
     public boolean equals(final Object o) {
-        if (this == o){
+        if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()){
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         final Bank bank = (Bank) o;
@@ -101,6 +103,7 @@ public final class Bank {
 
     /**
      * Computes the hash code for this bank.
+     * 
      * <p>
      * The hash code is based solely on the bank name, consistent with
      * {@link #equals(Object)}.
