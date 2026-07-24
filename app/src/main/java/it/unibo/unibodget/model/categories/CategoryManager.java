@@ -20,7 +20,7 @@ public final class CategoryManager {
     private static final Path PATH = Path.of("data/json/categories/Categories.json");
     private static final String RESOURCE = "/json/categories/Categories.json";
 
-    private static List<Category> loaded = new ArrayList<>();
+    private static List<Category> LOADED = new ArrayList<>();
     private static boolean initialized = false;
 
     private CategoryManager() {
@@ -34,11 +34,11 @@ public final class CategoryManager {
             final ModelFileManager<Category> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Category.class);
             mgr.open();
-            loaded = new ArrayList<>(mgr.loadList("categories"));
+            LOADED = new ArrayList<>(mgr.loadList("categories"));
             mgr.close();
-            if (loaded.isEmpty()) {
+            if (LOADED.isEmpty()) {
                 System.out.println("No categories found in file, loading default categories.");
-                loaded.addAll(Category.getDefaultCategories());
+                LOADED.addAll(Category.getDefaultCategories());
                 saveAll();
             }
             initialized = true;
@@ -46,8 +46,8 @@ public final class CategoryManager {
         } catch (final Exception e) {
             e.printStackTrace();
             System.out.println("Unable to load categories from file, loading default categories.");
-            loaded.clear();
-            loaded.addAll(Category.getDefaultCategories());
+            LOADED.clear();
+            LOADED.addAll(Category.getDefaultCategories());
             initialized = true;
         }
     }
@@ -61,7 +61,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        return new ArrayList<>(loaded);
+        return new ArrayList<>(LOADED);
     }
 
     /**
@@ -73,7 +73,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        final boolean alreadyExists = loaded.stream()
+        final boolean alreadyExists = LOADED.stream()
                 .anyMatch(c ->
                     c.getName().equalsIgnoreCase(category.getName())
                 );
@@ -82,7 +82,7 @@ public final class CategoryManager {
                 "Category already exists: " + category.getName()
             );
         }
-        loaded.add(category);
+        LOADED.add(category);
         saveAll();
     }
 
@@ -96,7 +96,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        final boolean removed = loaded.remove(category);
+        final boolean removed = LOADED.remove(category);
         if (removed) {
             saveAll();
         }
@@ -112,7 +112,7 @@ public final class CategoryManager {
                 new ModelFileManager<>(PATH, RESOURCE, Category.class);
 
             mgr.open();
-            mgr.saveList("categories", loaded);
+            mgr.saveList("categories", LOADED);
             mgr.close();
 
         } catch (final Exception e) {
@@ -139,7 +139,7 @@ public final class CategoryManager {
             init();
         }
 
-        return loaded.stream()
+        return LOADED.stream()
                 .filter(c -> c.getType() == type)
                 .toList();
     }

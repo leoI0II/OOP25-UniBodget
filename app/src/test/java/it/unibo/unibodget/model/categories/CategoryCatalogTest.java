@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import it.unibo.unibodget.model.utils.ARGBColor;
 
@@ -51,11 +52,16 @@ class CategoryCatalogTest {
     @Test
     void shouldAddCustomCategory() {
         CategoryCatalog catalog = new CategoryCatalog(List.of());
-        Category c = new Category("NewCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final String name = "NewCat-" + UUID.randomUUID();
+        Category c = new Category(
+            name,
+            new ARGBColor("#00FF00"),
+            CategoryType.EXPENSE
+        );
 
         catalog.addCustomCategory(c);
 
-        assertTrue(catalog.existsByName("NewCat"));
+        assertTrue(catalog.existsByName(name));
     }
 
     @Test
