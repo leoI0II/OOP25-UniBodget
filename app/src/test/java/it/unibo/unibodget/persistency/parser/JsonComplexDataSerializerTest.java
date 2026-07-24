@@ -14,7 +14,7 @@ class JsonComplexDataSerializerTest {
         JsonComplexDataSerializer<TestDto> serializer =
                 new JsonComplexDataSerializer<>();
 
-        TestDto dto = new TestDto("Arianna", 42);
+        TestDto dto = new TestDto("Prova", 42);
 
         String json = serializer.serialize(dto);
 
@@ -38,5 +38,5 @@ class JsonComplexDataSerializerTest {
         assertThrows(DataSerializerException.class,
                 () -> serializer.serialize(unserializable));
     }
-    
+
 }

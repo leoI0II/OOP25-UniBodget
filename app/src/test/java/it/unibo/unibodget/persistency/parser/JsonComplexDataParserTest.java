@@ -23,7 +23,7 @@ class JsonComplexDataParserTest {
 
         TestDto dto = parser.parse(json);
 
-        assertEquals("Arianna", dto.name);
+        assertEquals("Prova", dto.name);
         assertEquals(42, dto.value);
     }
 
