@@ -43,22 +43,22 @@ public final class CashAccountManager {
      */
     public List<CashAccount> loadAll() {
         try {
-            ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
+            final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
 
-            SimpleModule module = new SimpleModule();
+            final SimpleModule module = new SimpleModule();
             module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
             mapper.registerModule(module);
 
             manager.open();
-            JsonNode root = manager.loadJson();
-            JsonNode arr = root.get(KEY);
+            final JsonNode root = manager.loadJson();
+            final JsonNode arr = root.get(KEY);
 
             return mapper.convertValue(
                 arr,
                 mapper.getTypeFactory().constructCollectionType(List.class, CashAccount.class)
             );
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -76,7 +76,7 @@ public final class CashAccountManager {
         try {
             manager.open();
             manager.saveList(KEY, accounts);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }

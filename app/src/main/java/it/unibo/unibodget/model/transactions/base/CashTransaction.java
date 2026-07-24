@@ -27,14 +27,14 @@ public final class CashTransaction extends Transaction {
     /**
      * Creates a new standard cash transaction with no friend-loan metadata.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be null
-     * @param category the category describing the nature of the transaction;
-     * must not be null
-     * @param date the date on which the transaction occurred; must not be null
-     * @param description a short human-readable description of the transaction;
-     * may be null
-     * @param notes optional additional notes or comments; may be null
+     * @param asset         the monetary value associated with the transaction; must not
+     *                      be null
+     * @param category      the category describing the nature of the transaction;
+     *                      must not be null
+     * @param date          the date on which the transaction occurred; must not be null
+     * @param description   a short human-readable description of the transaction;
+     *                      may be null
+     * @param notes         optional additional notes or comments; may be null
      */
     public CashTransaction(
         final Asset asset,
@@ -58,20 +58,20 @@ public final class CashTransaction extends Transaction {
     /**
      * Creates a new cash transaction, optionally linked to a friend loan.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be null
-     * @param category the category describing the nature of the transaction;
-     * must not be null
-     * @param date the date on which the transaction occurred; must not be null
-     * @param description a short human-readable description of the transaction;
-     * may be null
-     * @param notes optional additional notes or comments; may be null
-     * @param friendLoanId the identifier of the linked friend loan; may be null
-     * @param friendName the name of the related friend; may be null
-     * @throws IllegalArgumentException if friend-loan metadata is provided for
-     * a transaction whose category type is not
-     * {@link CategoryType#FRIEND_LOAN}, or if only one of the two friend-loan
-     * fields is provided
+     * @param asset         the monetary value associated with the transaction; must not
+     *                      be null
+     * @param category      the category describing the nature of the transaction;
+     *                      must not be null
+     * @param date          the date on which the transaction occurred; must not be null
+     * @param description   a short human-readable description of the transaction;
+     *                      may be null
+     * @param notes         optional additional notes or comments; may be null
+     * @param friendLoanId  the identifier of the linked friend loan; may be null
+     * @param friendName    the name of the related friend; may be null
+     * @throws              IllegalArgumentException if friend-loan metadata is provided for
+     *                      a transaction whose category type is not
+     *                      {@link CategoryType#FRIEND_LOAN}, or if only one of the 
+     *                      two friend-loan fields is provided
      */
     @JsonCreator
     public CashTransaction(

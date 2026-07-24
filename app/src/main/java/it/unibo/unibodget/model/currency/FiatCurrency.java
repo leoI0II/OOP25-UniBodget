@@ -14,15 +14,15 @@ package it.unibo.unibodget.model.currency;
 public enum FiatCurrency implements CurrencyUnit {
 
     EUR("€", "EUR", "Euro", "EUR"),
-    USD("$", "USD", "United States Dollar", "USD"),
+    USD(CurrencySymbols.DOLLAR, "USD", "United States Dollar", "USD"),
     GBP("£", "GBP", "Pound Sterling", "GBP"),
     RUB("₽", "RUB", "Russian Ruble", "RUB"),
     JPY("¥", "JPY", "Japanese Yen", "JPY"),
-    AUD("$", "AUD", "Australian Dollar", "AUD"),
-    CAD("$", "CAD", "Canadian Dollar", "CAD"),
+    AUD(CurrencySymbols.DOLLAR, "AUD", "Australian Dollar", "AUD"),
+    CAD(CurrencySymbols.DOLLAR, "CAD", "Canadian Dollar", "CAD"),
     CHF("₣", "CHF", "Swiss Franc", "CHF"),
     CNY("¥", "CNY", "Chinese Yuan", "CNY"),
-    HKD("$", "HKD", "Hong Kong Dollar", "HKD"),
+    HKD(CurrencySymbols.DOLLAR, "HKD", "Hong Kong Dollar", "HKD"),
     INR("₹", "INR", "Indian Rupee", "INR");
 
     private final CurrencyType type = CurrencyType.FIAT;
@@ -52,7 +52,7 @@ public enum FiatCurrency implements CurrencyUnit {
     }
 
     @Override
-    public String getSymbol() { 
+    public String getSymbol() {
         return this.symbol; 
     }
 

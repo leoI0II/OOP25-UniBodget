@@ -11,6 +11,7 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 /**
  * Concrete category used by the application.
  *
+ * <p>
  * A category extends the shared base category with application-level metadata:
  * - origin (default or custom)
  * - active flag for archive/reactivate behavior
@@ -40,6 +41,16 @@ public final class Category extends BasicCategory {
     private final CategoryOrigin origin;
     private boolean active;
 
+    /**
+     * Creates a new category with the specified properties.
+     *
+     * @param name the category name; must not be null
+     * @param color the color associated with the category; must not be null
+     * @param type the category type; must not be null
+     * @param origin the origin of the category (default or custom); must not be null
+     * @param active whether the category is active
+     * @throws IllegalArgumentException if a default category is created as inactive
+     */
     @JsonCreator
     public Category(
             @JsonProperty("name") final String name,

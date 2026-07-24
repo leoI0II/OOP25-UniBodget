@@ -18,11 +18,13 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
 /**
  * Abstract base class representing a financial wallet that holds a ledger of transactions.
  *
- * <p>A wallet is parameterized on the transaction type it accepts, enforcing at compile time
+ * <p>
+ * A wallet is parameterized on the transaction type it accepts, enforcing at compile time
  * that only compatible transactions can be added (e.g. a {@code CashAccount} only accepts
  * {@code CashTransaction} instances).
  *
- * <p>The balance is never stored as a field: subclasses must compute it dynamically from
+ * <p>
+ * The balance is never stored as a field: subclasses must compute it dynamically from
  * the transaction history by implementing {@link #getBalance()}.
  *
  * @param <T> the type of {@link Transaction} this wallet accepts
@@ -65,11 +67,11 @@ public abstract class Wallet<T extends Transaction> {
      */
     @JsonCreator
     protected Wallet(
-            @JsonProperty("id") UUID id,
-            @JsonProperty("name") String name,
-            @JsonProperty("baseCurrency") CurrencyUnit baseCurrency,
-            @JsonProperty("history") Historical<T> history,
-            String typePrefix) {
+            @JsonProperty("id") final UUID id,
+            @JsonProperty("name") final String name,
+            @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
+            @JsonProperty("history") final Historical<T> history,
+            final  String typePrefix) {
         this.id = id != null ? id : UUID.randomUUID();
         this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
         this.baseCurrency = baseCurrency;

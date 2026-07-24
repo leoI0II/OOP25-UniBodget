@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 /**
  * Represents a basic financial transaction recorded by the system.
  *
+ * <p>
  * Each transaction contains:
  * - an {@link Asset} describing the monetary value and currency
  * - a {@link Category} classifying the type of movement
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * - an optional textual description
  * - optional notes for additional context
  *
+ * <p>
  * This class is immutable: all fields are final and set at construction time.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
@@ -110,6 +112,17 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
         return notes; 
     }
 
+    /**
+     * Compares this transaction with another object for equality.
+     *
+     * <p>
+     * Subclasses overriding this method must invoke {@code super.equals(Object)}
+     * and include all additional state introduced by the subclass in the comparison,
+     * preserving the general contract of {@link Object#equals(Object)}.
+     *
+     * @param o the object to compare with
+     * @return {@code true} if the two objects are equal; {@code false} otherwise
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -126,6 +139,16 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
             && Objects.equals(notes, other.notes);
     }
 
+    /**
+     * Returns the hash code for this transaction.
+     *
+     * <p>
+     * Subclasses overriding this method must invoke {@code super.hashCode()}
+     * and include all additional state introduced by the subclass, preserving the
+     * contract between {@link #equals(Object)} and {@link #hashCode()}.
+     *
+     * @return the hash code of this transaction
+     */
     @Override
     public int hashCode() {
         return Objects.hash(asset, category, date, description, notes);

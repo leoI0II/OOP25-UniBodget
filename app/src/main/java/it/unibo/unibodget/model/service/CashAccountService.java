@@ -8,7 +8,8 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 /**
  * A concrete {@link DefaultWalletService} specialized for {@link CashAccount} wallets.
  *
- * <p>Locks the generic type parameters to {@code <CashTransaction, CashAccount>},
+ * <p>
+ * Locks the generic type parameters to {@code <CashTransaction, CashAccount>},
  * so callers do not need to specify them explicitly.
  */
 public final class CashAccountService extends DefaultWalletService<CashTransaction, CashAccount> {

@@ -53,7 +53,8 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param baseCurrency the currency used to express the balance
      * @param priceProvider provider used to fetch live market prices
      */
-    public InvestmentAccount(String name, CurrencyUnit baseCurrency, PriceProvider priceProvider) {
+    public InvestmentAccount(final String name, 
+                            final CurrencyUnit baseCurrency, final PriceProvider priceProvider) {
         this(name, baseCurrency, new Historical<>(), priceProvider);
     }
 
@@ -124,7 +125,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param asset the asset to search for
      * @return an {@link Optional} containing the position, or empty if none exists
      */
-    public Optional<Position> getPositionForAsset(CurrencyUnit asset) {
+    public Optional<Position> getPositionForAsset(final CurrencyUnit asset) {
         return getPositions().stream()
                 .filter(p -> p.asset().equals(asset))
                 .findFirst();
@@ -138,21 +139,22 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param transactions all transactions for the asset
      * @return the resulting {@link Position}
      */
-    private Position computePosition(CurrencyUnit asset, List<InvestmentTransaction> transactions) {
+    private Position computePosition(final CurrencyUnit asset, 
+                                    final List<InvestmentTransaction> transactions) {
         var totalCost = BigDecimal.ZERO;
         var totalQty = BigDecimal.ZERO;
 
-        for (var transaction : sortedByDate(transactions)) {
-            var qty = transaction.getAsset().amount();
-            var unitPrice = transaction.getUnitPrice().amount();
-            var fee = transaction.getFee() != null ? transaction.getFee().amount() : BigDecimal.ZERO;
+        for (final var transaction : sortedByDate(transactions)) {
+            final var qty = transaction.getAsset().amount();
+            final var unitPrice = transaction.getUnitPrice().amount();
+            final var fee = transaction.getFee() != null ? transaction.getFee().amount() : BigDecimal.ZERO;
 
             if (qty.signum() > 0) { // Buy
                 totalQty = totalQty.add(qty);
                 totalCost = totalCost.add(qty.multiply(unitPrice)).add(fee);
             } else { // Sell
-                var soldQty = qty.abs();
-                var avgCostBeforeSale = totalQty.signum() == 0
+                final var soldQty = qty.abs();
+                final var avgCostBeforeSale = totalQty.signum() == 0
                         ? BigDecimal.ZERO
                         : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
                 totalCost = totalCost.subtract(avgCostBeforeSale.multiply(soldQty));
@@ -160,12 +162,12 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
             }
         }
 
-        var avgCost = totalQty.signum() == 0
+        final var avgCost = totalQty.signum() == 0
                 ? BigDecimal.ZERO
                 : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
 
-        Asset currentPrice = priceProvider.getCurrentPrice(asset, getBaseCurrency());
-        Asset currentMarketValue = currentPrice.multiply(totalQty);
+        final Asset currentPrice = priceProvider.getCurrentPrice(asset, getBaseCurrency());
+        final Asset currentMarketValue = currentPrice.multiply(totalQty);
 
         return new Position(
             asset,
@@ -181,7 +183,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param transactions the list to sort
      * @return a new sorted list
      */
-    private List<InvestmentTransaction> sortedByDate(List<InvestmentTransaction> transactions) {
+    private List<InvestmentTransaction> sortedByDate(final List<InvestmentTransaction> transactions) {
         return transactions.stream()
                 .sorted(Comparator.comparing(InvestmentTransaction::getDate))
                 .toList();
@@ -230,7 +232,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      */
     @JsonIgnore
     public BigDecimal getTotalProfitLossPercentage() {
-        var totalCostBasis = getPositions().stream()
+        final var totalCostBasis = getPositions().stream()
             .map(Position::getTotalCost)
             .reduce(Asset.zero(getBaseCurrency()), Asset::add);
 
@@ -266,21 +268,21 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
         var totalQty = BigDecimal.ZERO;
         var totalCost = BigDecimal.ZERO;
 
-        for (var transaction : sortedByDate(transactions)) {
-            var qty = transaction.getAsset().amount();
-            var unitPrice = transaction.getUnitPrice().amount();
-            var fee = transaction.getFee() != null ? transaction.getFee().amount() : BigDecimal.ZERO;
+        for (final var transaction : sortedByDate(transactions)) {
+            final var qty = transaction.getAsset().amount();
+            final var unitPrice = transaction.getUnitPrice().amount();
+            final var fee = transaction.getFee() != null ? transaction.getFee().amount() : BigDecimal.ZERO;
 
             if (qty.signum() > 0) { // Buy
                 totalCost = totalCost.add(qty.multiply(unitPrice)).add(fee);
                 totalQty = totalQty.add(qty);
             } else { // Sell
-                var soldQty = qty.abs();
-                var avgCostBeforeSale = totalQty.signum() == 0
+                final var soldQty = qty.abs();
+                final var avgCostBeforeSale = totalQty.signum() == 0
                         ? BigDecimal.ZERO
                         : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
 
-                var pricePL = unitPrice.subtract(avgCostBeforeSale)
+                final var pricePL = unitPrice.subtract(avgCostBeforeSale)
                         .multiply(soldQty)
                         .subtract(fee);
 
@@ -301,7 +303,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @return true if the quantity can be sold
      * @throws IllegalArgumentException if {@code qtyToSell} is not positive
      */
-    public boolean canSell(CurrencyUnit asset, BigDecimal qtyToSell) {
+    public boolean canSell(final CurrencyUnit asset, final BigDecimal qtyToSell) {
         if (qtyToSell.signum() <= 0) {
             throw new IllegalArgumentException("Quantity to sell must be positive.");
         }
@@ -317,7 +319,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param provider the price provider to attach
      * @return a new {@link InvestmentAccount} with the same data and the new provider
      */
-    public InvestmentAccount withProvider(PriceProvider provider) {
+    public InvestmentAccount withProvider(final PriceProvider provider) {
         return new InvestmentAccount(
             getName(),
             getBaseCurrency(),

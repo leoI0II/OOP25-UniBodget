@@ -13,9 +13,11 @@ import it.unibo.unibodget.model.wallet.Wallet;
 /**
  * Default implementation of {@link WalletService}.
  *
- * <p>This service stores the wallets available to the user, keeps track of the
+ * <p>
+ * This service stores the wallets available to the user, keeps track of the
  * currently selected wallet, and delegates transaction updates to the history
- * owned by that wallet.</p>
+ * owned by that wallet.
+ * </p>
  */
 public class DefaultWalletService<T extends Transaction, W extends Wallet<T>> implements WalletService<T, W> {
 

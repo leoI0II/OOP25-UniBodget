@@ -72,9 +72,13 @@ public abstract class BasicCategory {
 
     @Override
     public String toString() {
-        return "Category{name='" + this.name + 
-                "', color='" + this.color.toHexString() + 
-                "', type='" + this.type + "'}";
+        return "Category{name='" 
+                + this.name 
+                + "', color='" 
+                + this.color.toHexString() 
+                + "', type='" 
+                + this.type 
+                + "'}";
     }
 
     @Override

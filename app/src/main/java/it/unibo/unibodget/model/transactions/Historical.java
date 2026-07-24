@@ -12,13 +12,14 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
 /**
  * Represents an ordered collection of transactions.
  *
+ * <p>
  * Acts as a historical ledger, storing a chronological list
  * of {@link Transaction} objects (or subclasses such as InvestmentTransaction).
  * It provides basic operations for:
  * - adding a new transaction
  * - retrieving the full immutable history
  */
-public class Historical<T extends Transaction> {
+public final class Historical<T extends Transaction> {
 
     @JsonProperty("transactions")
     private final List<T> history;
@@ -36,7 +37,7 @@ public class Historical<T extends Transaction> {
      *
      * @param transaction the transaction to add; must not be null
      */
-    public void addTransaction(T transaction) {
+    public void addTransaction(final T transaction) {
         history.add(Objects.requireNonNull(transaction));
     }
 
@@ -56,7 +57,7 @@ public class Historical<T extends Transaction> {
      *
      * @param transaction the transaction to remove
      */
-    public boolean removeTransaction(T transaction) {
+    public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
@@ -68,10 +69,10 @@ public class Historical<T extends Transaction> {
      * @param oldTransaction the transaction to replace; must not be null
      * @param newTransaction the replacement transaction; must not be null
      */
-    public boolean replaceTransaction(T oldTransaction, T newTransaction) {
+    public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
         Objects.requireNonNull(oldTransaction);
         Objects.requireNonNull(newTransaction);
-        int index = history.indexOf(oldTransaction);
+        final int index = history.indexOf(oldTransaction);
         if (index == -1) {
             return false;
         }
@@ -105,13 +106,14 @@ public class Historical<T extends Transaction> {
 
     /**
      * Returns all transactions that occurred within the given calendar month.
+     * 
      * @param month the month to filter by
      * @return an unmodifiable list of transactions that occurred in the specified month
      */
-    public List<T> filterByMonth(YearMonth month) {
+    public List<T> filterByMonth(final YearMonth month) {
         Objects.requireNonNull(month, "month must not be null");
-        List<T> filtered = new ArrayList<>();
-        for (T transaction : history) {
+        final List<T> filtered = new ArrayList<>();
+        for (final T transaction : history) {
             if (YearMonth.from(transaction.getDate()).equals(month)) {
                 filtered.add(transaction);
             }

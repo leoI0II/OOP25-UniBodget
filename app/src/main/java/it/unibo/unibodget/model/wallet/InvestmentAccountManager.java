@@ -58,22 +58,22 @@ public final class InvestmentAccountManager {
      */
     public List<InvestmentAccount> loadAll() {
         try {
-            ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
+            final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
 
-            SimpleModule module = new SimpleModule();
+            final SimpleModule module = new SimpleModule();
             module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
             mapper.registerModule(module);
 
             manager.open();
-            JsonNode root = manager.loadJson();
-            JsonNode arr = root.get(KEY);
+            final JsonNode root = manager.loadJson();
+            final JsonNode arr = root.get(KEY);
 
-            List<InvestmentAccount> loaded = mapper.convertValue(
+            final List<InvestmentAccount> LOADED = mapper.convertValue(
                 arr,
                 mapper.getTypeFactory().constructCollectionType(List.class, InvestmentAccount.class)
             );
 
-            return loaded.stream()
+            return LOADED.stream()
                     .map(a -> a.withProvider(provider))
                     .toList();
 
@@ -98,7 +98,7 @@ public final class InvestmentAccountManager {
                     KEY,
                     accounts
             );
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
