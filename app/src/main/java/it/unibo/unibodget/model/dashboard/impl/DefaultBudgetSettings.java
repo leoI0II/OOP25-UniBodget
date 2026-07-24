@@ -12,7 +12,8 @@ import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
  *
  * <p>
  * This class stores the budget configuration chosen by the user and validates
- * the provided values at construction time.</p>
+ * the provided values at construction time.
+ * </p>
  */
 public final class DefaultBudgetSettings implements BudgetSettings {
 

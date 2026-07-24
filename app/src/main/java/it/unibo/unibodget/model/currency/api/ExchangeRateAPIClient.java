@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class ExchangeRateAPIClient implements ExchangeRateAPI {
 
-    private final static int OK_CODE = 200;
+    private static final int OK_CODE = 200;
 
     /**
      * Fetches historical exchange rates for a given currency pair within the
@@ -87,6 +87,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      *     "2026-06-06": {"USD": 1.06}
      *   }
      * }
+     * </pre>
      * </p>
      * 
      * <p>
@@ -137,7 +138,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
                     .GET()
                     .build();
 
-            HttpResponse<String> response =
+            final HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != OK_CODE) {

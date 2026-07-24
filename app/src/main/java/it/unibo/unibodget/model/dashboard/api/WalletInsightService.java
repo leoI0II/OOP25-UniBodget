@@ -9,9 +9,11 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
  * Service responsible for computing high-level wallet insights
  * from a list of cash transactions.
  *
- * <p>Insights are intended for dashboard presentation and provide
+ * <p>
+ * Insights are intended for dashboard presentation and provide
  * user-facing messages about monthly spending, income, and savings
- * trends.</p>
+ * trends.
+ * </p>
  */
 public interface WalletInsightService {
 

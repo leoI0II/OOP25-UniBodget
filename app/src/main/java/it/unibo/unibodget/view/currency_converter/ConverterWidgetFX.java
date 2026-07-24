@@ -279,10 +279,8 @@ public class ConverterWidgetFX {
         /* ---------- VALIDATION ---------- */
         final Runnable validate = () -> {
             final BigDecimal parsed = parseDecimal(amountField.getText());
-            convertButton.setDisable(parsed == null ||
-                    parsed.compareTo(BigDecimal.ZERO) <= 0 ||
-                    fromBox.getValue() == null ||
-                    toBox.getValue() == null);
+            convertButton.setDisable(parsed == null || parsed.compareTo(BigDecimal.ZERO) <= 0 || 
+                fromBox.getValue() == null || toBox.getValue() == null);
         };
 
         amountField.textProperty().addListener((obs, old, val) -> validate.run());
@@ -306,7 +304,7 @@ public class ConverterWidgetFX {
                 final double rate = result.divide(amount, 4, java.math.RoundingMode.HALF_UP).doubleValue();
                 new MarketAlert(this.alertService).checkAndShowAlerts(rate, from, to);
 
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 output.setFont(font);
                 output.setText("Error: " + ex.getMessage());
             }

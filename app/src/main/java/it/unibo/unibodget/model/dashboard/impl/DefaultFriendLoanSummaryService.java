@@ -16,8 +16,10 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link FriendLoanSummaryService}.
  *
- * <p>This implementation derives friend-loan summaries directly from the
- * cash transactions currently stored in the wallet.</p>
+ * <p>
+ * This implementation derives friend-loan summaries directly from the
+ * cash transactions currently stored in the wallet.
+ * </p>
  */
 public final class DefaultFriendLoanSummaryService implements FriendLoanSummaryService {
 

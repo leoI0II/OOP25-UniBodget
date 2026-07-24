@@ -24,7 +24,8 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  * <p>
  * This class coordinates the services involved in the dashboard subsystem and
  * exposes a single method that returns a consistent snapshot of the current
- * dashboard state for the selected cash wallet.</p>
+ * dashboard state for the selected cash wallet.
+ * </p>
  */
 public final class DefaultDashboardFacade implements DashboardFacade {
 
@@ -37,13 +38,13 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     /**
      * Creates a new dashboard facade with the required collaborating services.
      *
-     * @param walletService the service exposing cash wallets and the current
-     * wallet history
-     * @param categoryService the service exposing aggregated values by category
-     * @param budgetMonitor the component evaluating the current budget status
-     * @param friendLoanSummaryService the service computing friend-loan
-     * summaries
-     * @param walletInsightService the service computing dashboard insights
+     * @param walletService             the service exposing cash wallets and the current
+     *                                  wallet history
+     * @param categoryService           the service exposing aggregated values by category
+     * @param budgetMonitor             the component evaluating the current budget status
+     * @param friendLoanSummaryService  the service computing friend-loan
+     *                                  summaries
+     * @param walletInsightService      the service computing dashboard insights
      */
     public DefaultDashboardFacade(
             final CashAccountService walletService,
@@ -104,7 +105,8 @@ public final class DefaultDashboardFacade implements DashboardFacade {
      * Only transactions in the current month and current year whose category
      * type is {@link CategoryType#EXPENSE} or {@link CategoryType#FRIEND_LOAN}
      * are counted. Each matching transaction contributes its absolute
-     * amount.</p>
+     * amount.
+     * </p>
      *
      * @param transactions the transactions to inspect
      * @return the total amount contributing to the current monthly budget

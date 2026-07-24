@@ -132,7 +132,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
         int braceClose = -1;
 
         for (int i = braceOpen; i < json.length(); i++) {
-            char c = json.charAt(i);
+            final char c = json.charAt(i);
             if (c == '{') {
                 depth++;
             }
@@ -154,7 +154,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
 
         for (final String entry : entries) {
             final String[] parts = entry.split(":");
-            if (parts.length != 2){
+            if (parts.length != 2) {
                 continue;
             }
 

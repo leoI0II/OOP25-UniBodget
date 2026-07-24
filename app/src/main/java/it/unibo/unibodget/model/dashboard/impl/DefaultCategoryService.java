@@ -13,8 +13,10 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link CategoryService}.
  *
- * <p>This implementation supports both manually supplied category summaries
- * and summaries derived from a list of {@link CashTransaction}s.</p>
+ * <p>
+ * This implementation supports both manually supplied category summaries
+ * and summaries derived from a list of {@link CashTransaction}s.
+ * </p>
  */
 public final class DefaultCategoryService implements CategoryService {
 
@@ -63,8 +65,10 @@ public final class DefaultCategoryService implements CategoryService {
     /**
      * Recomputes the category summaries from the given cash transactions.
      *
-     * <p>Each transaction contributes its absolute monetary amount to the
-     * corresponding category total.</p>
+     * <p>
+     * Each transaction contributes its absolute monetary amount to the
+     * corresponding category total.
+     * </p>
      *
      * @param transactions
      *            the transactions to aggregate

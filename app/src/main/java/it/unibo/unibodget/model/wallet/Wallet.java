@@ -32,7 +32,7 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
 public abstract class Wallet<T extends Transaction> {
 
     private static final Map<String, AtomicInteger> nameCounters = new ConcurrentHashMap<>();
-    
+
     private final UUID id;
     private String name;
     private final Historical<T> history;
@@ -71,7 +71,7 @@ public abstract class Wallet<T extends Transaction> {
             @JsonProperty("name") final String name,
             @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
             @JsonProperty("history") final Historical<T> history,
-            final  String typePrefix) {
+            final String typePrefix) {
         this.id = id != null ? id : UUID.randomUUID();
         this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
         this.baseCurrency = baseCurrency;

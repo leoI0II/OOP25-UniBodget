@@ -14,7 +14,7 @@ import java.math.RoundingMode;
  */
 public final class BankCalculator {
 
-    /**
+     /**
      * Computes the total commission charged by the given bank for converting
      * the specified amount.
      * 

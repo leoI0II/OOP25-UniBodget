@@ -13,10 +13,13 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link WalletInsightService}.
  *
- * <p>This service computes dashboard insights by comparing the
- * current month against the previous month.</p>
+ * <p>
+ * This service computes dashboard insights by comparing the
+ * current month against the previous month.
+ * </p>
  *
- * <p>The current implementation produces three insights:
+ * <p>
+ * The current implementation produces three insights:
  * <ul>
  *   <li>spending change,</li>
  *   <li>savings change,</li>
@@ -62,9 +65,11 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes the total expenses for the specified month.
      *
-     * <p>Transactions of type {@link CategoryType#EXPENSE} and
+     * <p>
+     * Transactions of type {@link CategoryType#EXPENSE} and
      * {@link CategoryType#FRIEND_LOAN} are both counted as spending
-     * and contribute their absolute amount.</p>
+     * and contribute their absolute amount.
+     * </p>
      *
      * @param transactions
      *            the transactions to inspect
@@ -91,8 +96,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes the total income for the specified month.
      *
-     * <p>Only transactions of type {@link CategoryType#INCOME} are counted,
-     * and each contributes its absolute amount.</p>
+     * <p>
+     * Only transactions of type {@link CategoryType#INCOME} are counted,
+     * and each contributes its absolute amount.
+     * </p>
      *
      * @param transactions
      *            the transactions to inspect
@@ -195,7 +202,9 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Builds the savings insight by comparing current and previous savings.
      *
-     * <p>Savings are computed as income minus expenses for the month.</p>
+     * <p>
+     * Savings are computed as income minus expenses for the month.
+     * </p>
      *
      * @param current
      *            the current-month savings
@@ -303,8 +312,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes a percentage change using the provided base and delta.
      *
-     * <p>The returned value is expressed as a percentage in the range
-     * expected for dashboard display, for example {@code 20.00} for 20%.</p>
+     * <p>
+     * The returned value is expressed as a percentage in the range
+     * expected for dashboard display, for example {@code 20.00} for 20%.
+     * </p>
      *
      * @param base
      *            the reference amount against which the change is measured

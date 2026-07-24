@@ -140,7 +140,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @return the resulting {@link Position}
      */
     private Position computePosition(final CurrencyUnit asset, 
-                                    final List<InvestmentTransaction> transactions) {
+                                     final List<InvestmentTransaction> transactions) {
         var totalCost = BigDecimal.ZERO;
         var totalQty = BigDecimal.ZERO;
 
@@ -263,7 +263,7 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param transactions all transactions for the asset
      * @return realized P/L as an {@link Asset}
      */
-    private Asset computeRealizedProfitLoss(List<InvestmentTransaction> transactions) {
+    private Asset computeRealizedProfitLoss(final List<InvestmentTransaction> transactions) {
         var realizedPL = BigDecimal.ZERO;
         var totalQty = BigDecimal.ZERO;
         var totalCost = BigDecimal.ZERO;

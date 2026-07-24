@@ -77,7 +77,7 @@ public final class InvestmentAccountManager {
                     .map(a -> a.withProvider(provider))
                     .toList();
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
         }

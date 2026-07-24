@@ -53,7 +53,7 @@ public final class BankList {
      * @return {@code true} if the bank was added, {@code false} otherwise
      */
     public boolean add(final Bank bank) {
-        boolean added = !LOADED.contains(bank);
+        final boolean added = !LOADED.contains(bank);
         if (added) {
             LOADED.add(bank);
             save();

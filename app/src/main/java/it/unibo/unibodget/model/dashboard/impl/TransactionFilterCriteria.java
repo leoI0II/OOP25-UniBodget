@@ -9,9 +9,11 @@ import it.unibo.unibodget.model.categories.CategoryType;
 /**
  * Immutable criteria object used to filter and sort transaction history.
  *
- * <p>All filter fields are optional. Missing values mean that the corresponding
+ * <p>
+ * All filter fields are optional. Missing values mean that the corresponding
  * filtering condition is not applied. Sorting always has a value and defaults
- * to {@link TransactionSortOrder#NEWEST_FIRST}.</p>
+ * to {@link TransactionSortOrder#NEWEST_FIRST}.
+ * </p>
  */
 public final class TransactionFilterCriteria {
 

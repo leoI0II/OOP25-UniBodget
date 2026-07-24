@@ -85,7 +85,7 @@ public final class WatchList {
                 new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
             mgr.open();
             // load from json
-            var list = mgr.loadList("watchlist");
+            final var list = mgr.loadList("watchlist");
             mgr.close();
             if (list == null || list.isEmpty()) {
                 System.out.println("WatchList JSON empty → using empty list");

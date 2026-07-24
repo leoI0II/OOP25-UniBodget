@@ -9,8 +9,10 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link TransactionHistoryFilterService}.
  *
- * <p>This implementation applies all active filters cumulatively and then
- * sorts the resulting list according to the specified sort order.</p>
+ * <p>
+ * This implementation applies all active filters cumulatively and then
+ * sorts the resulting list according to the specified sort order.
+ * </p>
  */
 public final class DefaultTransactionHistoryFilterService {
 

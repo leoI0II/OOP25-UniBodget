@@ -6,9 +6,11 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 /**
  * Converts a cash balance into a target currency.
  *
- * <p>This abstraction allows the cash dashboard model to depend on a currency
+ * <p>
+ * This abstraction allows the cash dashboard model to depend on a currency
  * conversion contract without knowing the concrete implementation provided
- * by the currency-converter subsystem.</p>
+ * by the currency-converter subsystem.
+ * </p>
  */
 public interface CashBalanceConverter {
 
