@@ -1,6 +1,6 @@
 package it.unibo.unibodget.model.currency.bank;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 
@@ -10,7 +10,7 @@ class BankConversionResultTest {
 
     @Test
     void shouldStoreFieldsCorrectly() {
-        BankConversionResult r = new BankConversionResult(
+        final BankConversionResult r = new BankConversionResult(
                 new BigDecimal("120"),
                 new BigDecimal("5"),
                 new BigDecimal("105"),

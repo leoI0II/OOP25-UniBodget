@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,30 +17,30 @@ class JsonDataParserTest {
 
     @Test
     void testParsesSimpleObject() throws DataParserException {
-        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+        final JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
 
-        String json = """
-            { "name": "Arianna", "value": 10 }
+        final String json = """
+            { "name": "Prova", "value": 10 }
         """;
 
-        TestDto dto = parser.parse(json);
+        final TestDto dto = parser.parse(json);
 
-        assertEquals("Arianna", dto.name);
+        assertEquals("Prova", dto.name);
         assertEquals(10, dto.value);
     }
 
     @Test
     void testParsesList() throws DataParserException {
-        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+        final JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
 
-        String json = """
+        final String json = """
             [
                 { "name": "A", "value": 1 },
                 { "name": "B", "value": 2 }
             ]
         """;
 
-        List<TestDto> list = parser.parseList(json);
+        final List<TestDto> list = parser.parseList(json);
 
         assertEquals(2, list.size());
         assertEquals("A", list.get(0).name);
@@ -48,7 +49,7 @@ class JsonDataParserTest {
 
     @Test
     void testParseListFromFile() throws DataParserException, IOException {
-        Path temp = Files.createTempFile("json", ".txt");
+        final Path temp = Files.createTempFile("json", ".txt");
         Files.writeString(temp, """
             {
                 "items": [
@@ -58,9 +59,9 @@ class JsonDataParserTest {
             }
         """);
 
-        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+        final JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
 
-        List<TestDto> list = parser.parseListFromFile(temp, "items");
+        final List<TestDto> list = parser.parseListFromFile(temp, "items");
 
         assertEquals(2, list.size());
         assertEquals("B", list.get(1).name);
@@ -68,7 +69,7 @@ class JsonDataParserTest {
 
     @Test
     void testMalformedJsonThrows() {
-        JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
+        final JsonDataParser<TestDto> parser = new JsonDataParser<>(TestDto.class);
 
         assertThrows(DataParserException.class,
             () -> parser.parse("{ \"value\": notANumber }"));

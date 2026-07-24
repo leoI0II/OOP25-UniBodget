@@ -1,6 +1,6 @@
 package it.unibo.unibodget.model.currency.engin;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,9 +17,9 @@ class CurrencyConverterTest {
 
     @Test
     void shouldConvertCorrectly() {
-        ExchangeRateAPI api = new ExchangeRateAPI() {
+        final ExchangeRateAPI api = new ExchangeRateAPI() {
             @Override
-            public Map<CurrencyUnit, Double> getLatestRates(CurrencyUnit base) {
+            public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
                 return Map.of(
                     FiatCurrency.EUR, 1.0,
                     FiatCurrency.USD, 1.2
@@ -28,16 +28,16 @@ class CurrencyConverterTest {
 
             @Override
             public Map<LocalDate, Double> getHistoricalRates(
-                    CurrencyUnit base, CurrencyUnit target,
-                    LocalDate from, LocalDate to) {
+                    final CurrencyUnit base, final CurrencyUnit target,
+                    final LocalDate from, final LocalDate to) {
                 return Map.of();
             }
         };
 
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(api, FiatCurrency.EUR);
 
-        CurrencyConversionResult result =
+        final CurrencyConversionResult result =
                 converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
 
         assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());

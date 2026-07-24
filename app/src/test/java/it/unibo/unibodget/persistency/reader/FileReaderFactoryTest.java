@@ -1,6 +1,8 @@
 package it.unibo.unibodget.persistency.reader;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -74,7 +76,7 @@ class FileReaderFactoryTest {
      */
     @Test
     void testCreateJsonReader() {
-        FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
+        final FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
         assertTrue(reader instanceof JsonReader);
     }
 
@@ -84,9 +86,9 @@ class FileReaderFactoryTest {
      */
     @Test
     void testUnsupportedExtensionThrowsException() {
-        String fakePath = "file.unsupported";
+        final String fakePath = "file.unsupported";
 
-        IllegalArgumentException ex = assertThrows(
+        final IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> FileReaderFactory.create(fakePath)
         );
@@ -100,9 +102,9 @@ class FileReaderFactoryTest {
      */
     @Test
     void testMissingExtensionThrowsException() {
-        String noExtPath = "file";
+        final String noExtPath = "file";
 
-        IllegalArgumentException ex = assertThrows(
+        final IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> FileReaderFactory.create(noExtPath)
         );
@@ -116,8 +118,8 @@ class FileReaderFactoryTest {
      */
     @Test
     void testReaderReadsFileCorrectly() throws IOException {
-        FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
-        Object content = reader.readFile();
+        final FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
+        final Object content = reader.readFile();
 
         assertNotNull(content);
         assertTrue(content.toString().contains("key"));

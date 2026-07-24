@@ -1,6 +1,9 @@
 package it.unibo.unibodget.persistency.filemanager.creator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,8 +24,8 @@ class JsonFileCreatorTest {
 
     @Test
     void testCreatesJsonFileWithEmptyObject() throws IOException {
-        Path tempDir = Files.createTempDirectory("jsonCreatorTest");
-        Path jsonFile = tempDir.resolve("new.json");
+        final Path tempDir = Files.createTempDirectory("jsonCreatorTest");
+        final Path jsonFile = tempDir.resolve("new.json");
 
         assertFalse(Files.exists(jsonFile));
 
@@ -34,7 +37,7 @@ class JsonFileCreatorTest {
 
     @Test
     void testDoesNotOverwriteExistingJsonFile() throws IOException {
-        Path tempFile = Files.createTempFile("existingJson", ".json");
+        final Path tempFile = Files.createTempFile("existingJson", ".json");
         Files.writeString(tempFile, "{\"a\":1}");
 
         creator.open(tempFile);

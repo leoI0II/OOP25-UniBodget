@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,12 +12,12 @@ class JsonComplexDataSerializerTest {
 
     @Test
     void testSerializesValidObject() throws DataSerializerException {
-        JsonComplexDataSerializer<TestDto> serializer =
+        final JsonComplexDataSerializer<TestDto> serializer =
                 new JsonComplexDataSerializer<>();
 
-        TestDto dto = new TestDto("Prova", 42);
+        final TestDto dto = new TestDto("Prova", 42);
 
-        String json = serializer.serialize(dto);
+        final String json = serializer.serialize(dto);
 
         assertTrue(json.contains("\"name\""));
         assertTrue(json.contains("\"Prova\""));
@@ -27,10 +28,10 @@ class JsonComplexDataSerializerTest {
     @Test
     @SuppressWarnings("unused")
     void testThrowsOnUnserializableObject() {
-        JsonComplexDataSerializer<Object> serializer =
+        final JsonComplexDataSerializer<Object> serializer =
                 new JsonComplexDataSerializer<>();
 
-        Object unserializable = new Object() {
+        final Object unserializable = new Object() {
             // unused field in test - suppressed
             private final Object circular = this;
         };

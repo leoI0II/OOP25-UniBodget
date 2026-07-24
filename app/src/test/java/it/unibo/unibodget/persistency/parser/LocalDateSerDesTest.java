@@ -1,6 +1,6 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 
@@ -16,16 +16,16 @@ class LocalDateSerDesTest {
 
     @Test
     void testSerialize() throws Exception {
-        LocalDate date = LocalDate.of(2024, 5, 17);
+        final LocalDate date = LocalDate.of(2024, 5, 17);
 
-        String json = mapper.writeValueAsString(date);
+        final String json = mapper.writeValueAsString(date);
 
         assertEquals("\"2024-05-17\"", json);
     }
 
     @Test
     void testDeserialize() throws Exception {
-        LocalDate date = mapper.readValue("\"2024-05-17\"", LocalDate.class);
+        final LocalDate date = mapper.readValue("\"2024-05-17\"", LocalDate.class);
 
         assertEquals(LocalDate.of(2024, 5, 17), date);
     }

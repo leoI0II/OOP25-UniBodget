@@ -17,11 +17,12 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link JsonDataSerializer}.
@@ -42,10 +43,10 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize Asset")
     void testSerializeAsset() throws DataSerializerException {
-        Asset asset = Asset.of(FiatCurrency.EUR, new BigDecimal("123.45"));
-        DataSerializer<Asset> serializer = new JsonDataSerializer<>(Asset.class);
+        final Asset asset = Asset.of(FiatCurrency.EUR, new BigDecimal("123.45"));
+        final DataSerializer<Asset> serializer = new JsonDataSerializer<>(Asset.class);
 
-        String json = serializer.serialize(asset);
+        final String json = serializer.serialize(asset);
 
         assertTrue(json.contains("\"currency\":\"EUR\""));
         assertTrue(json.contains("\"amount\":123.45"));
@@ -60,10 +61,10 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize zero Asset")
     void testSerializeZeroAsset() throws DataSerializerException {
-        Asset asset = Asset.zero(FiatCurrency.USD);
-        DataSerializer<Asset> serializer = new JsonDataSerializer<>(Asset.class);
+        final Asset asset = Asset.zero(FiatCurrency.USD);
+        final DataSerializer<Asset> serializer = new JsonDataSerializer<>(Asset.class);
 
-        String json = serializer.serialize(asset);
+        final String json = serializer.serialize(asset);
 
         assertTrue(json.contains("\"currency\":\"USD\""));
         assertTrue(json.contains("\"amount\":0"));
@@ -80,13 +81,13 @@ public final class JsonDataSerializerTest {
     @SuppressWarnings("rawtypes")
     @DisplayName("Serialize List<Asset>")
     void testSerializeAssetList() throws DataSerializerException {
-        List<Asset> list = List.of(
+        final List<Asset> list = List.of(
                 Asset.of(FiatCurrency.USD, BigDecimal.TEN),
                 Asset.of(FiatCurrency.EUR, new BigDecimal("20"))
         );
 
-        DataSerializer<List> serializer = new JsonDataSerializer<>(List.class);
-        String json = serializer.serialize(list);
+        final DataSerializer<List> serializer = new JsonDataSerializer<>(List.class);
+        final String json = serializer.serialize(list);
 
         assertTrue(json.contains("\"currency\":\"USD\""));
         assertTrue(json.contains("\"currency\":\"EUR\""));
@@ -107,16 +108,15 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize CashTransaction")
     void testSerializeCashTransaction() throws DataSerializerException {
+        final Asset asset = Asset.of(FiatCurrency.USD, new BigDecimal("50"));
 
-        Asset asset = Asset.of(FiatCurrency.USD, new BigDecimal("50"));
-
-        Category category = new Category(
+        final Category category = new Category(
                 "Food",
                 new ARGBColor(0xFFFF0000),
                 CategoryType.EXPENSE
         );
 
-        CashTransaction tx = new CashTransaction(
+        final CashTransaction tx = new CashTransaction(
                 asset,
                 category,
                 LocalDate.of(2024, 1, 1),
@@ -124,8 +124,9 @@ public final class JsonDataSerializerTest {
                 "Paid in cash"
         );
 
-        DataSerializer<CashTransaction> serializer = new JsonDataSerializer<>(CashTransaction.class);
-        String json = serializer.serialize(tx);
+        final DataSerializer<CashTransaction> serializer = 
+            new JsonDataSerializer<>(CashTransaction.class);
+        final String json = serializer.serialize(tx);
 
         assertTrue(json.contains("\"description\":\"Lunch\""));
         assertTrue(json.contains("\"notes\":\"Paid in cash\""));
@@ -144,7 +145,7 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize primitive int")
     void testSerializePrimitiveInt() throws DataSerializerException {
-        DataSerializer<Integer> serializer = new JsonDataSerializer<>(Integer.class);
+        final DataSerializer<Integer> serializer = new JsonDataSerializer<>(Integer.class);
         assertEquals("42", serializer.serialize(42));
     }
 
@@ -157,7 +158,7 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize String with escaping")
     void testSerializeString() throws DataSerializerException {
-        DataSerializer<String> serializer = new JsonDataSerializer<>(String.class);
+        final DataSerializer<String> serializer = new JsonDataSerializer<>(String.class);
         assertEquals("\"Hello \\\"World\\\"\"", serializer.serialize("Hello \"World\""));
     }
 
@@ -170,7 +171,7 @@ public final class JsonDataSerializerTest {
     @Test
     @DisplayName("Serialize null")
     void testSerializeNull() throws DataSerializerException {
-        DataSerializer<Object> serializer = new JsonDataSerializer<>(Object.class);
+        final DataSerializer<Object> serializer = new JsonDataSerializer<>(Object.class);
         assertEquals("null", serializer.serialize(null));
     }
 }

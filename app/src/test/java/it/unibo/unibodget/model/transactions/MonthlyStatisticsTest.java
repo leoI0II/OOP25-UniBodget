@@ -1,6 +1,6 @@
 package it.unibo.unibodget.model.transactions;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -14,10 +14,12 @@ class MonthlyStatisticsTest {
 
     @Test
     void shouldStoreFieldsCorrectly() {
-        MonthlyStatistics.CategoryTotal ct =
-                new MonthlyStatistics.CategoryTotal("Food", CategoryType.EXPENSE, new BigDecimal("50"));
+        final MonthlyStatistics.CategoryTotal ct =
+                new MonthlyStatistics.CategoryTotal("Food", 
+                                                    CategoryType.EXPENSE, 
+                                                    new BigDecimal("50"));
 
-        MonthlyStatistics stats = new MonthlyStatistics(
+        final MonthlyStatistics stats = new MonthlyStatistics(
                 YearMonth.of(2024, 1),
                 new BigDecimal("100"),
                 new BigDecimal("50"),

@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.wallet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +19,7 @@ class CashAccountTest {
 
     @Test
     void shouldComputeBalanceCorrectly() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
         acc.addTransaction(new CashTransaction(
                 new Asset(FiatCurrency.EUR, new BigDecimal("10")),
@@ -40,7 +42,7 @@ class CashAccountTest {
 
     @Test
     void shouldUseDefaultBudgetSettingsWhenNull() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
         // DefaultBudgetSettings(BigDecimal.ZERO)
         assertEquals(BigDecimal.ZERO, acc.getBudgetSettings().getLimitValue());
@@ -49,9 +51,9 @@ class CashAccountTest {
 
     @Test
     void shouldSetBudgetSettings() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        DefaultBudgetSettings newSettings = new DefaultBudgetSettings(new BigDecimal("500"));
+        final DefaultBudgetSettings newSettings = new DefaultBudgetSettings(new BigDecimal("500"));
         acc.setBudgetSettings(newSettings);
 
         assertEquals(new BigDecimal("500"), acc.getBudgetSettings().getLimitValue());
@@ -60,9 +62,9 @@ class CashAccountTest {
 
     @Test
     void shouldRejectZeroAmountTransaction() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        CashTransaction zeroTx = new CashTransaction(
+        final CashTransaction zeroTx = new CashTransaction(
                 new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
                 Category.FOOD,
                 LocalDate.now(),
@@ -75,7 +77,7 @@ class CashAccountTest {
 
     @Test
     void shouldGenerateDefaultName() {
-        CashAccount acc = new CashAccount("", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("", FiatCurrency.EUR);
 
         assertTrue(acc.getName().startsWith("Cash Account"));
     }

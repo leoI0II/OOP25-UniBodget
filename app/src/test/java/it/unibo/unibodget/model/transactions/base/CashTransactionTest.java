@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.transactions.base;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,7 +18,7 @@ class CashTransactionTest {
 
     @Test
     void shouldCreateStandardTransaction() {
-        CashTransaction t = new CashTransaction(
+        final CashTransaction t = new CashTransaction(
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                 Category.FOOD,                      // categoria reale
                 LocalDate.of(2024, 1, 1),
@@ -30,9 +33,9 @@ class CashTransactionTest {
 
     @Test
     void shouldCreateFriendLoanTransaction() {
-        UUID id = UUID.randomUUID();
+        final UUID id = UUID.randomUUID();
 
-        CashTransaction t = new CashTransaction(
+        final CashTransaction t = new CashTransaction(
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                 Category.FRIEND_LOAN,               // categoria reale
                 LocalDate.of(2024, 1, 1),

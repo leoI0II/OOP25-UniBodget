@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.wallet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,9 +19,9 @@ class WalletTest {
 
     @Test
     void shouldAddTransaction() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        CashTransaction tx = new CashTransaction(
+        final CashTransaction tx = new CashTransaction(
                 new Asset(FiatCurrency.EUR, new java.math.BigDecimal("10")),
                 Category.FOOD,
                 LocalDate.now(),
@@ -33,9 +36,9 @@ class WalletTest {
 
     @Test
     void shouldRejectZeroAmountTransaction() {
-        CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        CashTransaction zeroTx = new CashTransaction(
+        final CashTransaction zeroTx = new CashTransaction(
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.ZERO),
                 Category.FOOD,
                 LocalDate.now(),
@@ -48,21 +51,21 @@ class WalletTest {
 
     @Test
     void shouldGenerateDefaultName() {
-        CashAccount acc = new CashAccount("", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount("", FiatCurrency.EUR);
 
         assertTrue(acc.getName().startsWith("Cash Account"));
     }
 
     @Test
     void shouldSaveAndReloadCashAccounts() {
-        CashAccountManager manager = new CashAccountManager();
-        CashAccount account =
+        final CashAccountManager manager = new CashAccountManager();
+        final CashAccount account =
                 new CashAccount(
                         "Wallet",
                         FiatCurrency.EUR
                 );
         manager.saveAll(List.of(account));
-        List<CashAccount> reloaded =
+        final List<CashAccount> reloaded =
                 manager.loadAll();
         assertFalse(reloaded.isEmpty());
         assertEquals(

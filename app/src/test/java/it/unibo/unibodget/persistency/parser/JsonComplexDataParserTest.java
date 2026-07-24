@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,17 +12,17 @@ class JsonComplexDataParserTest {
 
     @Test
     void testParsesValidJson() throws DataParserException {
-        JsonComplexDataParser<TestDto> parser =
+        final JsonComplexDataParser<TestDto> parser =
                 new JsonComplexDataParser<>(TestDto.class);
 
-        String json = """
+        final String json = """
             {
                 "name": "Prova",
                 "value": 42
             }
             """;
 
-        TestDto dto = parser.parse(json);
+        final TestDto dto = parser.parse(json);
 
         assertEquals("Prova", dto.name);
         assertEquals(42, dto.value);
@@ -29,20 +30,20 @@ class JsonComplexDataParserTest {
 
     @Test
     void testThrowsOnMalformedJson() {
-        JsonComplexDataParser<TestDto> parser =
+        final JsonComplexDataParser<TestDto> parser =
                 new JsonComplexDataParser<>(TestDto.class);
 
-        String malformed = "{ invalid json }";
+        final String malformed = "{ invalid json }";
 
         assertThrows(DataParserException.class, () -> parser.parse(malformed));
     }
 
     @Test
     void testThrowsOnTypeMismatch() {
-        JsonComplexDataParser<TestDto> parser =
+        final JsonComplexDataParser<TestDto> parser =
                 new JsonComplexDataParser<>(TestDto.class);
 
-        String wrongTypeJson = """
+        final String wrongTypeJson = """
             {
                 "name": "Prova",
                 "value": "string"

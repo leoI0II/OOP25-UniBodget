@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.filemanager.creator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ class FileCreatorFactoryTest {
 
     @Test
     void testCreatesJsonFileCreator() {
-        FileCreator creator = FileCreatorFactory.create("file.json");
+        final FileCreator creator = FileCreatorFactory.create("file.json");
         assertTrue(creator instanceof JsonFileCreator);
     }
 

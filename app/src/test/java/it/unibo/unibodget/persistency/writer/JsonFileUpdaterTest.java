@@ -1,9 +1,13 @@
 package it.unibo.unibodget.persistency.writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
-import java.nio.file.*;
-import org.junit.jupiter.api.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.persistency.writer.impl.JsonFileUpdater;
 
@@ -17,10 +21,10 @@ class JsonFileUpdaterTest {
      */
     @Test
     void testUpdate() throws IOException {
-        Path temp = Files.createTempFile("update", ".json");
+        final Path temp = Files.createTempFile("update", ".json");
         Files.writeString(temp, "{ \"a\": 1 }");
 
-        JsonFileUpdater updater = new JsonFileUpdater();
+        final JsonFileUpdater updater = new JsonFileUpdater();
         updater.update(temp, old -> old.replace("1", "2"));
 
         assertEquals("{ \"a\": 2 }", Files.readString(temp));
@@ -31,9 +35,9 @@ class JsonFileUpdaterTest {
      */
     @Test
     void testUpdateFailsIfMissing() {
-        Path temp = Path.of("missing-file.json");
+        final Path temp = Path.of("missing-file.json");
 
-        JsonFileUpdater updater = new JsonFileUpdater();
+        final JsonFileUpdater updater = new JsonFileUpdater();
 
         assertThrows(IOException.class, () ->
             updater.update(temp, old -> "X")

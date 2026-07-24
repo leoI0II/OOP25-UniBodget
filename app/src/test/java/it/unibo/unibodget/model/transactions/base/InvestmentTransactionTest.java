@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.transactions.base;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 
@@ -14,11 +15,11 @@ class InvestmentTransactionTest {
 
     @Test
     void shouldCreateInvestmentTransaction() {
-        Asset asset = new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN);
-        Asset unitPrice = new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE);
-        Asset fee = new Asset(FiatCurrency.EUR, new java.math.BigDecimal("0.5"));
+        final Asset asset = new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN);
+        final Asset unitPrice = new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE);
+        final Asset fee = new Asset(FiatCurrency.EUR, new java.math.BigDecimal("0.5"));
 
-        InvestmentTransaction t = new InvestmentTransaction(
+        final InvestmentTransaction t = new InvestmentTransaction(
                 asset,
                 Category.INVESTMENT_BUY,
                 LocalDate.of(2024, 1, 1),

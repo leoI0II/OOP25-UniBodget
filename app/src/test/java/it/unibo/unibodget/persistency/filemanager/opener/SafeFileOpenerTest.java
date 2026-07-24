@@ -1,6 +1,9 @@
 package it.unibo.unibodget.persistency.filemanager.opener;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,13 +24,13 @@ class SafeFileOpenerTest {
 
     @Test
     void testCreatesMissingDirectoryAndFile() throws IOException {
-        Path tempDir = Files.createTempDirectory("safeOpenerTest");
-        Path file = tempDir.resolve("subdir").resolve("test.txt");
+        final Path tempDir = Files.createTempDirectory("safeOpenerTest");
+        final Path file = tempDir.resolve("subdir").resolve("test.txt");
 
         assertFalse(Files.exists(file));
         assertFalse(Files.exists(file.getParent()));
 
-        Path returned = opener.open(file);
+        final Path returned = opener.open(file);
 
         assertEquals(file, returned);
         assertTrue(Files.exists(file.getParent()));
@@ -36,18 +39,18 @@ class SafeFileOpenerTest {
 
     @Test
     void testReturnsExistingFile() throws IOException {
-        Path tempFile = Files.createTempFile("existingSafe", ".txt");
+        final Path tempFile = Files.createTempFile("existingSafe", ".txt");
 
         assertTrue(Files.exists(tempFile));
 
-        Path returned = opener.open(tempFile);
+        final Path returned = opener.open(tempFile);
 
         assertEquals(tempFile, returned);
     }
 
     @Test
     void testThrowsIfFileNotReadable() throws IOException {
-        Path tempFile = Files.createTempFile("notReadable", ".txt");
+        final Path tempFile = Files.createTempFile("notReadable", ".txt");
 
         // remove read permission
         tempFile.toFile().setReadable(false);
@@ -57,7 +60,7 @@ class SafeFileOpenerTest {
 
     @Test
     void testThrowsIfFileNotWritable() throws IOException {
-        Path tempFile = Files.createTempFile("notWritable", ".txt");
+        final Path tempFile = Files.createTempFile("notWritable", ".txt");
 
         // remove write permission
         tempFile.toFile().setWritable(false);

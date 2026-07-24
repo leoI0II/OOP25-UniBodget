@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -8,8 +9,8 @@ class SettingsManagerTest {
 
     @Test
     void shouldLoadDefaultSettingsIfFileMissing() {
-        SettingsManager mgr = new SettingsManager();
-        Settings s = mgr.getCurrent();
+        final SettingsManager mgr = new SettingsManager();
+        final Settings s = mgr.getCurrent();
 
         assertNotNull(s);
         assertNotNull(s.getTheme());
@@ -18,22 +19,22 @@ class SettingsManagerTest {
 
     @Test
     void shouldSaveAndReloadSettings() {
-        SettingsManager mgr = new SettingsManager();
-        Settings s = new Settings();
+        final SettingsManager mgr = new SettingsManager();
+        final Settings s = new Settings();
 
         s.setBaseCurrency("USD");
         mgr.saveCurrent(s);
 
-        SettingsManager mgr2 = new SettingsManager();
+        final SettingsManager mgr2 = new SettingsManager();
         assertEquals("USD", mgr2.getCurrent().getBaseCurrency());
     }
 
     @Test
     void shouldAppendSnapshotToHistory() {
-        SettingsManager mgr = new SettingsManager();
-        Settings s = new Settings();
+        final SettingsManager mgr = new SettingsManager();
+        final Settings s = new Settings();
 
-        int before = s.getPreferenceHistory().size();
+        final int before = s.getPreferenceHistory().size();
         mgr.appendToHistory(s);
 
         assertEquals(before + 1, s.getPreferenceHistory().size());

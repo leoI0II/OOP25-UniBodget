@@ -12,15 +12,15 @@ import javafx.stage.Stage;
 public final class TestSettingsMainFX extends Application {
 
     @Override
-    public void start(Stage stage) {
+    public void start(final Stage stage) {
 
-        SettingsController controller = new SettingsController();
-        WindowPreferences savedPrefs = controller.getSettings().getWindowPrefs();
+        final SettingsController controller = new SettingsController();
+        final WindowPreferences savedPrefs = controller.getSettings().getWindowPrefs();
 
-        TabPane pane = new TabPane();
+        final TabPane pane = new TabPane();
         pane.getTabs().add(new SettingsTabFX(controller).create(stage));
 
-        Scene scene = new Scene(pane, savedPrefs.getWidth(), savedPrefs.getHeight());
+        final Scene scene = new Scene(pane, savedPrefs.getWidth(), savedPrefs.getHeight());
         stage.setScene(scene);
         stage.setTitle("Settings Manager");
         stage.setMaximized(savedPrefs.isMaximized());
@@ -54,7 +54,7 @@ public final class TestSettingsMainFX extends Application {
         });
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         launch(args);
     }
 }

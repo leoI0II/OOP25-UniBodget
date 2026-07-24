@@ -1,6 +1,6 @@
 package it.unibo.unibodget.model.currency;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 
@@ -10,7 +10,7 @@ class CurrencyConversionResultTest {
 
     @Test
     void shouldStoreFieldsCorrectly() {
-        CurrencyConversionResult r = new CurrencyConversionResult(
+        final CurrencyConversionResult r = new CurrencyConversionResult(
                 new BigDecimal("10"),
                 FiatCurrency.EUR,
                 FiatCurrency.USD,

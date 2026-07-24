@@ -1,6 +1,6 @@
 package it.unibo.unibodget.model.currency.bank;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 
@@ -10,9 +10,9 @@ class BankCalculatorTest {
 
     @Test
     void shouldCalculateCommissionCorrectly() {
-        Bank bank = new Bank("TestBank", 5.0, 10.0);
+        final Bank bank = new Bank("TestBank", 5.0, 10.0);
 
-        BigDecimal commission =
+        final BigDecimal commission =
                 BankCalculator.calculateCommission(new BigDecimal("100"), bank);
 
         // fixed 5 + 10% of 100 = 10 → total = 15
@@ -21,9 +21,9 @@ class BankCalculatorTest {
 
     @Test
     void shouldRoundCommissionToTwoDecimals() {
-        Bank bank = new Bank("TestBank", 1.0, 3.333);
+        final Bank bank = new Bank("TestBank", 1.0, 3.333);
 
-        BigDecimal commission =
+        final BigDecimal commission =
                 BankCalculator.calculateCommission(new BigDecimal("50"), bank);
 
         assertEquals(2, commission.scale());

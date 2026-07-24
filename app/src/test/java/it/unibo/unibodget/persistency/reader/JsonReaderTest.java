@@ -47,8 +47,8 @@ class JsonReaderTest {
      */
     @Test
     void testReadFileReturnsCorrectContent() throws IOException {
-        JsonReader reader = new JsonReader(tempJsonFile.toString());
-        String content = reader.readFile();
+        final JsonReader reader = new JsonReader(tempJsonFile.toString());
+        final String content = reader.readFile();
 
         assertNotNull(content);
         assertTrue(content.contains("Prova"));
@@ -61,7 +61,7 @@ class JsonReaderTest {
      */
     @Test
     void testConstructorThrowsIfFileDoesNotExist() {
-        String invalidPath = "non_existing_file.json";
+        final String invalidPath = "non_existing_file.json";
 
         assertThrows(IllegalArgumentException.class, () -> new JsonReader(invalidPath));
     }
@@ -81,38 +81,10 @@ class JsonReaderTest {
      */
     @Test
     void testConstructorThrowsIfPathIsDirectory() throws IOException {
-        Path directory = Files.createTempDirectory("json_reader_test_dir");
+        final Path directory = Files.createTempDirectory("json_reader_test_dir");
 
         assertThrows(IllegalArgumentException.class, () -> new JsonReader(directory.toString()));
     }
-
-    /**
-     * Verifies that JsonReader throws an IllegalArgumentException
-     * when the file exists but is not readable
-     * 
-     * This test is implemented in a portable way: instead of manipulating
-     * filesystem permissions (which is unreliable on Windows), override
-     * the {@code validatePath()} method to simulate a validation failure
-     */
-    /*
-    @Test
-    void testConstructorThrowsIfFileNotReadable_Portable() {
-        class UnreadableJsonReader extends JsonReader {
-            UnreadableJsonReader(String path) {
-            super(path);
-        }
-
-            @Override
-            protected void validatePath() {
-                throw new IllegalArgumentException("File not readable");
-            }
-        }
-
-        assertThrows(IllegalArgumentException.class,
-            () -> new UnreadableJsonReader(tempJsonFile.toString())
-        );
-    }
-    */
 
     /**
      * Verifies that JsonReader throws an IllegalArgumentException on UNIX systems
@@ -150,7 +122,7 @@ class JsonReaderTest {
     void testConstructorThrowsIfFileNotReadable_Windows() {
 
         class UnreadableJsonReader extends JsonReader {
-            UnreadableJsonReader(String path) {
+            UnreadableJsonReader(final String path) {
                 super(path);
             }
 

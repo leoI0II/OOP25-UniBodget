@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ class WindowPreferencesTest {
 
     @Test
     void shouldStoreValues() {
-        WindowPreferences prefs = new WindowPreferences(800, 600, true);
+        final WindowPreferences prefs = new WindowPreferences(800, 600, true);
 
         assertEquals(800, prefs.getWidth());
         assertEquals(600, prefs.getHeight());
@@ -17,7 +18,7 @@ class WindowPreferencesTest {
 
     @Test
     void shouldUpdateValues() {
-        WindowPreferences prefs = new WindowPreferences();
+        final WindowPreferences prefs = new WindowPreferences();
 
         prefs.setWidth(1000);
         prefs.setHeight(700);

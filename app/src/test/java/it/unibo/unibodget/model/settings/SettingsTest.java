@@ -12,21 +12,21 @@ class SettingsTest {
 
     @Test
     void shouldSaveAndReloadSettings() throws Exception {
-        Settings settings = new Settings();
+        final Settings settings = new Settings();
         settings.setTheme(
             Theme.DEFAULT
         );
-        SettingsManager manager = new SettingsManager();
+        final SettingsManager manager = new SettingsManager();
         manager.saveCurrent(settings);
-        Settings loaded = manager.getCurrent();
+        final Settings loaded = manager.getCurrent();
         assertEquals(settings, loaded);
     }
 
     @Test
     public void testSettingsPersistence() {
-        SettingsManager mgr = new SettingsManager();
+        final SettingsManager mgr = new SettingsManager();
 
-        Settings s = mgr.getCurrent();
+        final Settings s = mgr.getCurrent();
         s.setTheme(
             new Theme(
                 "Test",
@@ -43,17 +43,17 @@ class SettingsTest {
         mgr.saveCurrent(s);
         mgr.appendToHistory(s.copy());
 
-        SettingsManager mgr2 = new SettingsManager();
+        final SettingsManager mgr2 = new SettingsManager();
         assertEquals("Test", mgr2.getCurrent().getTheme().getName());
     }
 
     @Test
     void shouldPersistBaseCurrency() {
-        SettingsManager mgr = new SettingsManager();
-        Settings settings = mgr.getCurrent();
+        final SettingsManager mgr = new SettingsManager();
+        final Settings settings = mgr.getCurrent();
         settings.setBaseCurrency(FiatCurrency.USD.getShortName());
         mgr.saveCurrent(settings);
-        SettingsManager mgr2 = new SettingsManager();
+        final SettingsManager mgr2 = new SettingsManager();
         assertEquals(
             FiatCurrency.USD.getShortName(),
             mgr2.getCurrent().getBaseCurrency()
@@ -62,9 +62,9 @@ class SettingsTest {
 
     @Test
     void shouldAddEntryToHistoryWhenThemeChanges() {
-        Settings settings = new Settings();
+        final Settings settings = new Settings();
 
-        int initialSize = settings.getPreferenceHistory().size();
+        final int initialSize = settings.getPreferenceHistory().size();
 
         settings.setTheme(
                 new Theme(
@@ -82,9 +82,8 @@ class SettingsTest {
 
     @Test
     void shouldCreateIndependentCopy() {
-
-        Settings original = new Settings();
-        Settings copy = original.copy();
+        final Settings original = new Settings();
+        final Settings copy = original.copy();
 
         copy.setTheme(
                 new Theme(
@@ -103,8 +102,7 @@ class SettingsTest {
 
     @Test
     void shouldStoreWindowPreferences() {
-
-        Settings settings = new Settings();
+        final Settings settings = new Settings();
         settings.setWindowPrefs(
                 new it.unibo.unibodget.model.settings.WindowPreferences(
                         1920,
@@ -129,8 +127,8 @@ class SettingsTest {
 
     @Test
     void shouldPersistHistory() {
-        SettingsManager mgr = new SettingsManager();
-        Settings snapshot = new Settings();
+        final SettingsManager mgr = new SettingsManager();
+        final Settings snapshot = new Settings();
         mgr.appendToHistory(snapshot);
         assertFalse(
                 snapshot.getPreferenceHistory().isEmpty()

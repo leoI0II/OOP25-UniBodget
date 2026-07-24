@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.currency;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -13,25 +15,25 @@ class CurrencyTest {
     @BeforeEach
     void resetCurrencyManager() throws Exception {
         // 1. Ottieni il campo static final "loaded"
-        Field loadedField = Currency.class.getDeclaredField("LOADED");
+        final Field loadedField = Currency.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
 
         // 2. Ottieni la mappa esistente (non puoi sostituirla)
         @SuppressWarnings("unchecked")
-        Map<String, Currency> loadedMap = (Map<String, Currency>) loadedField.get(null);
+        final Map<String, Currency> loadedMap = (Map<String, Currency>) loadedField.get(null);
 
         // 3. Svuota la mappa
         loadedMap.clear();
 
         // 4. Reset "initialized"
-        Field initField = Currency.class.getDeclaredField("initialized");
+        final Field initField = Currency.class.getDeclaredField("initialized");
         initField.setAccessible(true);
         initField.set(null, false);
     }
 
     @Test
     void shouldLoadMockCurrenciesIfJsonMissing() {
-        var all = Currency.all();
+        final var all = Currency.all();
 
         assertFalse(all.isEmpty());
         assertNotNull(Currency.get("EUR"));
@@ -40,7 +42,7 @@ class CurrencyTest {
 
     @Test
     void shouldCreateDynamicCurrency() {
-        Currency c = new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+        final Currency c = new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
 
         assertEquals("EUR", c.getCode());
         assertEquals("Euro", c.getFullName());
@@ -49,8 +51,10 @@ class CurrencyTest {
 
     @Test
     void shouldCompareCurrenciesByCode() {
-        Currency c1 = new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
-        Currency c2 = new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+        final Currency c1 = 
+            new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+        final Currency c2 = 
+            new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());

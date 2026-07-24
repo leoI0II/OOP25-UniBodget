@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.currency.engin;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ class BasicCurrencyConverterTest {
 
     static class MockAPI implements ExchangeRateAPI {
         @Override
-        public Map<CurrencyUnit, Double> getLatestRates(CurrencyUnit base) {
+        public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
             return Map.of(
                 FiatCurrency.EUR, 1.0,
                 FiatCurrency.USD, 1.2,
@@ -28,18 +29,18 @@ class BasicCurrencyConverterTest {
         }
 
         @Override
-        public Map<LocalDate, Double> getHistoricalRates(CurrencyUnit base, CurrencyUnit target,
-                                                         LocalDate from, LocalDate to) {
+        public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
+                                                         final LocalDate from, final LocalDate to) {
             return Map.of();
         }
     }
 
     @Test
     void shouldConvertCorrectly() {
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
-        CurrencyConversionResult result =
+        final CurrencyConversionResult result =
                 converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
 
         assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());
@@ -48,10 +49,10 @@ class BasicCurrencyConverterTest {
 
     @Test
     void shouldReturnSameAmountWhenCurrenciesMatch() {
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
-        CurrencyConversionResult result =
+        final CurrencyConversionResult result =
                 converter.convert(new BigDecimal("50"), FiatCurrency.EUR, FiatCurrency.EUR);
 
         assertEquals(new BigDecimal("50"), result.getConvertedAmount());
@@ -60,7 +61,7 @@ class BasicCurrencyConverterTest {
 
     @Test
     void shouldFailOnStockCurrency() {
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -70,7 +71,7 @@ class BasicCurrencyConverterTest {
 
     @Test
     void shouldFailWhenRateMissing() {
-        BasicCurrencyConverter converter =
+        final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
         CurrencyUnit fake = new CurrencyUnit() {

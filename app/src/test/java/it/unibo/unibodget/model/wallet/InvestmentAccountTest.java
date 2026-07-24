@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.wallet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,14 +22,14 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 class InvestmentAccountTest {
 
     // PriceProvider finto: prezzo corrente = 2 EUR
-    PriceProvider provider = new PriceProvider() {
+    final PriceProvider provider = new PriceProvider() {
         @Override
-        public Asset getCurrentPrice(CurrencyUnit asset, CurrencyUnit base) {
+        public Asset getCurrentPrice(final CurrencyUnit asset, final CurrencyUnit base) {
             return new Asset(base, new BigDecimal("2"));
         }
     };
 
-    private InvestmentTransaction buy(CurrencyUnit asset, String qty, String price) {
+    private InvestmentTransaction buy(final CurrencyUnit asset, final String qty, final String price) {
         return new InvestmentTransaction(
                 new Asset(asset, new BigDecimal(qty)),
                 Category.INVESTMENT_BUY,
@@ -38,7 +41,7 @@ class InvestmentAccountTest {
         );
     }
 
-    private InvestmentTransaction sell(CurrencyUnit asset, String qty, String price) {
+    private InvestmentTransaction sell(final CurrencyUnit asset, final String qty, final String price) {
         return new InvestmentTransaction(
                 new Asset(asset, new BigDecimal(qty).negate()),
                 Category.INVESTMENT_BUY,
@@ -52,16 +55,16 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputePositionsCorrectly() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
         acc.addTransaction(buy(FiatCurrency.USD, "5", "2"));
         acc.addTransaction(sell(FiatCurrency.USD, "3", "3"));
 
-        List<Position> positions = acc.getPositions();
+        final List<Position> positions = acc.getPositions();
         assertEquals(1, positions.size());
 
-        Position p = positions.get(0);
+        final Position p = positions.get(0);
 
         // 10 + 5 - 3 = 12
         assertEquals(new BigDecimal("12"), p.quantity());
@@ -69,7 +72,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeBalanceFromMarketValue() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
 
@@ -81,7 +84,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeUnrealizedProfitLoss() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
 
@@ -93,7 +96,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeRealizedProfitLoss() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1")); // cost = 10
         acc.addTransaction(sell(FiatCurrency.USD, "5", "3")); // realized = (3 - 1) * 5 = 10
@@ -105,7 +108,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeTotalProfitLoss() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1")); // unrealized = 10
         acc.addTransaction(sell(FiatCurrency.USD, "5", "3")); // realized = 10
@@ -120,7 +123,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldCheckCanSell() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
 
@@ -130,7 +133,7 @@ class InvestmentAccountTest {
 
     @Test
     void shouldRejectInvalidSellQuantity() {
-        InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
 
         assertThrows(IllegalArgumentException.class, () ->
                 acc.canSell(FiatCurrency.USD, new BigDecimal("-1"))

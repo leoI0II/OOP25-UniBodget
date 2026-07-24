@@ -6,7 +6,7 @@ public class TestDto {
 
     public TestDto() { }
 
-    public TestDto(String name, int value) {
+    public TestDto(final String name, final int value) {
         this.name = name;
         this.value = value;
     }

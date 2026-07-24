@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -8,10 +9,10 @@ class SettingsSnapshotTest {
 
     @Test
     void shouldCreateSnapshotFromSettings() {
-        Settings s = new Settings();
+        final Settings s = new Settings();
         s.setBaseCurrency("USD");
 
-        SettingsSnapshot snap = SettingsSnapshot.of(s);
+        final SettingsSnapshot snap = SettingsSnapshot.of(s);
 
         assertEquals("USD", snap.getBaseCurrency());
         assertNotNull(snap.getSavedAt());
@@ -19,10 +20,10 @@ class SettingsSnapshotTest {
 
     @Test
     void shouldStoreAllFields() {
-        WindowPreferences prefs = new WindowPreferences(100, 200, true);
-        Theme theme = Theme.DEFAULT;
+        final WindowPreferences prefs = new WindowPreferences(100, 200, true);
+        final Theme theme = Theme.DEFAULT;
 
-        SettingsSnapshot snap = new SettingsSnapshot(
+        final SettingsSnapshot snap = new SettingsSnapshot(
                 theme,
                 "EUR",
                 prefs,

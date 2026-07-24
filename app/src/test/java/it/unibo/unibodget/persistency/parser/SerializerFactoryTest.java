@@ -1,6 +1,8 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +28,7 @@ public class SerializerFactoryTest {
      */
     @Test
     void testJsonSerializerCreation() throws DataSerializerException {
-        DataSerializer<Category> serializer =
+        final DataSerializer<Category> serializer =
             SerializerFactory.create("categories.json", Category.class);
 
         assertNotNull(serializer);

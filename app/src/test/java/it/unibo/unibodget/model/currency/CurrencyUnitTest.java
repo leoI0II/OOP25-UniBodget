@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.currency;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +22,7 @@ class CurrencyUnitTest {
 
     @Test
     void shouldFilterBasicCurrencies() {
-        var list = CurrencyUnit.basicCurrencies();
+        final var list = CurrencyUnit.basicCurrencies();
 
         assertFalse(list.isEmpty());
         assertTrue(list.stream().allMatch(c ->

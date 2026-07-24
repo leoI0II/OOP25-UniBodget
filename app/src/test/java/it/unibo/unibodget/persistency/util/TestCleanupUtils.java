@@ -1,7 +1,8 @@
 package it.unibo.unibodget.persistency.util;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 
 /**
@@ -33,7 +34,7 @@ public final class TestCleanupUtils {
      * 
      * @param path the file or directory to delete; may be null
      */
-    public static void deleteRecursively(Path path) {
+    public static void deleteRecursively(final Path path) {
         if (path == null || !Files.exists(path)) {
             return;
         }

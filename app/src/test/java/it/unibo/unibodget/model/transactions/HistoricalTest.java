@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.transactions;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -14,7 +16,7 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 
 class HistoricalTest {
 
-    private CashTransaction tx(LocalDate date, String desc) {
+    private CashTransaction tx(final LocalDate date, final String desc) {
         return new CashTransaction(
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE),
                 Category.FOOD,
@@ -26,14 +28,14 @@ class HistoricalTest {
 
     @Test
     void shouldRemoveTransaction() {
-        Historical<CashTransaction> h = new Historical<>();
+        final Historical<CashTransaction> h = new Historical<>();
 
-        CashTransaction t = tx(LocalDate.of(2024, 1, 10), "A");
+        final CashTransaction t = tx(LocalDate.of(2024, 1, 10), "A");
 
         h.addTransaction(t);
         assertTrue(h.getTransactions().contains(t));
 
-        boolean removed = h.removeTransaction(t);
+        final boolean removed = h.removeTransaction(t);
 
         assertTrue(removed);
         assertFalse(h.getTransactions().contains(t));
@@ -41,14 +43,14 @@ class HistoricalTest {
 
     @Test
     void shouldReplaceTransaction() {
-        Historical<CashTransaction> h = new Historical<>();
+        final Historical<CashTransaction> h = new Historical<>();
 
-        CashTransaction oldTx = tx(LocalDate.of(2024, 1, 10), "Old");
-        CashTransaction newTx = tx(LocalDate.of(2024, 1, 10), "New");
+        final CashTransaction oldTx = tx(LocalDate.of(2024, 1, 10), "Old");
+        final CashTransaction newTx = tx(LocalDate.of(2024, 1, 10), "New");
 
         h.addTransaction(oldTx);
 
-        boolean replaced = h.replaceTransaction(oldTx, newTx);
+        final boolean replaced = h.replaceTransaction(oldTx, newTx);
 
         assertTrue(replaced);
         assertTrue(h.getTransactions().contains(newTx));
@@ -57,15 +59,15 @@ class HistoricalTest {
 
     @Test
     void shouldFilterByMonth() {
-        Historical<CashTransaction> h = new Historical<>();
+        final Historical<CashTransaction> h = new Historical<>();
 
-        CashTransaction janTx = tx(LocalDate.of(2024, 1, 10), "Jan");
-        CashTransaction febTx = tx(LocalDate.of(2024, 2, 10), "Feb");
+        final CashTransaction janTx = tx(LocalDate.of(2024, 1, 10), "Jan");
+        final CashTransaction febTx = tx(LocalDate.of(2024, 2, 10), "Feb");
 
         h.addTransaction(janTx);
         h.addTransaction(febTx);
 
-        var januaryList = h.filterByMonth(YearMonth.of(2024, 1));
+        final var januaryList = h.filterByMonth(YearMonth.of(2024, 1));
 
         assertEquals(1, januaryList.size());
         assertTrue(januaryList.contains(janTx));

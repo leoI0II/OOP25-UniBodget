@@ -17,21 +17,21 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
  */
 public final class TestWallet {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
-        PriceProvider provider = new MockPriceProvider();
-        CashAccount cash1 =
+        final PriceProvider provider = new MockPriceProvider();
+        final CashAccount cash1 =
                 new CashAccount(
                         "Main Wallet",
                         FiatCurrency.EUR
                 );
-        CashAccount cash2 =
+        final CashAccount cash2 =
                 new CashAccount(
                         "Travel Wallet",
                         FiatCurrency.EUR
                 );
 
-        CashTransaction salary =
+        final CashTransaction salary =
                 CashTransaction.of(
                         Asset.of(
                                 FiatCurrency.EUR,
@@ -42,7 +42,7 @@ public final class TestWallet {
                         "Salary",
                         null
                 );
-        CashTransaction food =
+        final CashTransaction food =
                 CashTransaction.of(
                         Asset.of(
                                 FiatCurrency.EUR,
@@ -53,7 +53,7 @@ public final class TestWallet {
                         "Dinner",
                         null
                 );
-        CashTransaction transport =
+        final CashTransaction transport =
                 CashTransaction.of(
                         Asset.of(
                                 FiatCurrency.EUR,
@@ -64,7 +64,7 @@ public final class TestWallet {
                         "Bus",
                         null
                 );
-        CashTransaction trip =
+        final CashTransaction trip =
                 CashTransaction.of(
                         Asset.of(
                                 FiatCurrency.EUR,
@@ -113,20 +113,20 @@ public final class TestWallet {
                 + cash1.getId()
         );
 
-        InvestmentAccount investments1 =
+        final InvestmentAccount investments1 =
                 new InvestmentAccount(
                         "Stocks Portfolio",
                         FiatCurrency.EUR,
                         provider
                 );
-        InvestmentAccount investments2 =
+        final InvestmentAccount investments2 =
                 new InvestmentAccount(
                         "Crypto Portfolio",
                         FiatCurrency.EUR,
                         provider
                 );
 
-        InvestmentTransaction buyApple =
+        final InvestmentTransaction buyApple =
                 InvestmentTransaction.of(
                         Asset.of(
                                 FiatCurrency.USD,
@@ -145,7 +145,7 @@ public final class TestWallet {
                                 BigDecimal.valueOf(2)
                         )
                 );
-        InvestmentTransaction sellApple =
+        final InvestmentTransaction sellApple =
                 InvestmentTransaction.of(
                         Asset.of(
                                 FiatCurrency.USD,
@@ -161,7 +161,7 @@ public final class TestWallet {
                         ),
                         null
                 );
-        InvestmentTransaction buyCrypto =
+        final InvestmentTransaction buyCrypto =
                 InvestmentTransaction.of(
                         Asset.of(
                                 FiatCurrency.USD,
@@ -239,14 +239,14 @@ public final class TestWallet {
                         BigDecimal.valueOf(2)
                 )
         );
-        InvestmentAccount copy =
+        final InvestmentAccount copy =
                 investments1.withProvider(provider);
         System.out.println(
                 "Copy provider null? "
                 + (copy.getPriceProvider()==null)
         );
         
-        CashAccountManager cashManager =
+        final CashAccountManager cashManager =
                 new CashAccountManager();
         cashManager.saveAll(
                 List.of(
@@ -254,7 +254,7 @@ public final class TestWallet {
                         cash2
                 )
         );
-        InvestmentAccountManager investmentManager =
+        final InvestmentAccountManager investmentManager =
                 new InvestmentAccountManager(provider);
         investmentManager.saveAll(
                 List.of(

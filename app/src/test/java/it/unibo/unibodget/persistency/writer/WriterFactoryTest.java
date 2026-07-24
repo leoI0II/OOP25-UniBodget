@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonAppender() {
-        FileAppender appender = WriterFactory.createAppender("json");
+        final FileAppender appender = WriterFactory.createAppender("json");
         assertTrue(appender instanceof JsonFileAppender);
     }
 
@@ -37,7 +38,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonOverwriter() {
-        FileOverwriter overwriter = WriterFactory.createOverwriter("json");
+        final FileOverwriter overwriter = WriterFactory.createOverwriter("json");
         assertTrue(overwriter instanceof JsonFileOverwriter);
     }
 
@@ -46,7 +47,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonSaver() {
-        FileSaver saver = WriterFactory.createSaver("json");
+        final FileSaver saver = WriterFactory.createSaver("json");
         assertTrue(saver instanceof JsonFileSaver);
     }
 
@@ -55,7 +56,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonUpdater() {
-        FileUpdater updater = WriterFactory.createUpdater("json");
+        final FileUpdater updater = WriterFactory.createUpdater("json");
         assertTrue(updater instanceof JsonFileUpdater);
     }
 

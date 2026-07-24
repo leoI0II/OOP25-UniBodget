@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -14,35 +15,35 @@ class JsonParserDispatcherTest {
 
     @Test
     void testSimpleParse() throws DataParserException {
-        String json = """
-            { "name": "Arianna", "value": 10 }
+        final String json = """
+            { "name": "Prova", "value": 10 }
         """;
 
-        TestDto dto = JsonParserDispatcher.parse(json, TestDto.class);
+        final TestDto dto = JsonParserDispatcher.parse(json, TestDto.class);
 
-        assertEquals("Arianna", dto.name);
+        assertEquals("Prova", dto.name);
     }
 
     @Test
     void testSimpleSerialize() throws DataSerializerException {
-        TestDto dto = new TestDto("Arianna", 10);
+        final TestDto dto = new TestDto("Prova", 10);
 
-        String json = JsonParserDispatcher.serialize(dto);
+        final String json = JsonParserDispatcher.serialize(dto);
 
-        assertTrue(json.contains("\"Arianna\""));
+        assertTrue(json.contains("\"Prova\""));
     }
 
     @Test
     void testComplexParser() throws DataParserException {
-        String json = """
+        final String json = """
             [
                 {"name": "a", "value": 1},
                 {"name": "b", "value": 2}
             ]
         """;
 
-        TestDto[] array = JsonParserDispatcher.parse(json, TestDto[].class);
-        List<TestDto> list = List.of(array);
+        final TestDto[] array = JsonParserDispatcher.parse(json, TestDto[].class);
+        final List<TestDto> list = List.of(array);
 
         assertEquals(2, list.size());
         assertEquals("a", list.get(0).name);
