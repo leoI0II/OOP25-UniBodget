@@ -27,6 +27,7 @@ import java.util.List;
 /**
  * Unit tests for {@link JsonDataSerializer}.
  * 
+ * <p>
  * These tests verify that the serializer correctly converts domain model
  * objects into JSON strings. The goal is to ensure that primitive values,
  * records, POJOs, lists, and nested structures are serialized in a format
@@ -37,6 +38,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a simple {@link Asset} instance.
      * 
+     * <p>
      * Verifies that both the currency (enum) and the amount (BigDecimal)
      * are correctly represented in the resulting JSON string.
      */
@@ -55,6 +57,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of an {@link Asset} with zero amount.
      * 
+     * <p>
      * Ensures that numeric values equal to zero are serialized without
      * quotes and without losing precision.
      */
@@ -73,6 +76,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a list of {@link Asset} objects.
      * 
+     * <p>
      * Verifies that lists are serialized as JSON arrays and that each
      * element is serialized consistently with the rules applied to single
      * Asset instances.
@@ -96,12 +100,14 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a complete {@link CashTransaction}.
      * 
+     * <p>
      * This test checks correct serialization of nested objects:
      * - {@link Asset}
      * - {@link Category}
      * - {@link LocalDate}
      * - String fields (description, notes)
      * 
+     * <p>
      * It ensures that the serializer handles composition and inheritance
      * without producing circular references or invalid JSON.
      */
@@ -139,6 +145,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a primitive integer.
      * 
+     * <p>
      * Ensures that primitive values are serialized without quotes and
      * without additional formatting.
      */
@@ -152,6 +159,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a string containing quotes.
      * 
+     * <p>
      * Verifies that the serializer correctly escapes special characters
      * according to JSON rules.
      */
@@ -165,6 +173,7 @@ public final class JsonDataSerializerTest {
     /**
      * Tests serialization of a {@code null} reference.
      * 
+     * <p>
      * Ensures that null values are serialized as the JSON literal
      * {@code null}
      */

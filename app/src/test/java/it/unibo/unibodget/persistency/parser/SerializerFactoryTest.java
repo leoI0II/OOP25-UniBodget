@@ -16,6 +16,7 @@ import it.unibo.unibodget.model.categories.Category;
 /**
  * Unit tests for {@link SerializerFactory}.
  *
+ * <p>
  * These tests verify that:
  * - JSON serializers are created correctly for .json files
  * - unsupported file extensions trigger a {@link DataSerializerException}

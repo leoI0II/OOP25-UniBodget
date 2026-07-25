@@ -37,7 +37,7 @@ import it.unibo.unibodget.model.wallet.InvestmentAccount;
  * Fixed rates used (MockExchangeRateProvider / MockPriceProvider):
  *   AAPL = $150, BTC = $50 000, ETH = $4 000, USD→EUR = 0.91
  */
-public class DefaultInvestmentControllerTest {
+public final class DefaultInvestmentControllerTest {
 
     private static final LocalDate TODAY = LocalDate.now();
 
@@ -117,7 +117,7 @@ public class DefaultInvestmentControllerTest {
     void testGetAggregatedBalancesContainsBothCurrencies() {
         // 10 AAPL -> USD balance $1500, EUR balance 1500 * 0.91 = $1365
         buyAapl(BigDecimal.TEN, new BigDecimal("150"));
-        var balances = controller.getAggregatedBalances();
+        final var balances = controller.getAggregatedBalances();
         assertEquals(2, balances.size());
         assertEquals(
             new BigDecimal("1500").stripTrailingZeros(),
@@ -419,7 +419,7 @@ public class DefaultInvestmentControllerTest {
     //  Helpers                                                            //
     // ------------------------------------------------------------------ //
 
-    private void buyAapl(BigDecimal quantity, BigDecimal pricePerShare) {
+    private void buyAapl(final BigDecimal quantity, final BigDecimal pricePerShare) {
         account.addTransaction(InvestmentTransaction.of(
             Asset.of(StockMarketCurrency.AAPL, quantity),
             Category.INVESTMENT_BUY, TODAY, "", "",
@@ -428,7 +428,7 @@ public class DefaultInvestmentControllerTest {
         ));
     }
 
-    private void buyBtc(BigDecimal quantity) {
+    private void buyBtc(final BigDecimal quantity) {
         account.addTransaction(InvestmentTransaction.of(
             Asset.of(CryptoCurrency.BTC, quantity),
             Category.INVESTMENT_BUY, TODAY, "", "",

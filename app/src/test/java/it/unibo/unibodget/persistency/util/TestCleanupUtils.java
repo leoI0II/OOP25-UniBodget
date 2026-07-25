@@ -47,14 +47,14 @@ public final class TestCleanupUtils {
                      .forEach(p -> {
                          try {
                              Files.deleteIfExists(p);
-                         } catch (IOException ignored) {
+                         } catch (final IOException ignored) {
                             // Clean up errors intentionally ignored to avoid test failures
                          }
                      });
             } else {
                 Files.deleteIfExists(path); // Delete single file
             }
-        } catch (IOException ignored) {
+        } catch (final IOException ignored) {
             // Intentionally ignore cleanup errors
         }
     }

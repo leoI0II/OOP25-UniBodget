@@ -16,6 +16,7 @@ import it.unibo.unibodget.model.categories.Category;
 /**
  * Unit tests for {@link ParserFactory}.
  *
+ * <p>
  * These tests verify that:
  * - JSON files produce a {@link JsonDataParser}
  * - unsupported file extensions trigger a {@link DataParserException}

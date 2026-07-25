@@ -25,8 +25,8 @@ class JsonDataParserTest {
 
         final TestDto dto = parser.parse(json);
 
-        assertEquals("Prova", dto.name);
-        assertEquals(10, dto.value);
+        assertEquals("Prova", dto.getName());
+        assertEquals(10, dto.getValue());
     }
 
     @Test
@@ -43,8 +43,8 @@ class JsonDataParserTest {
         final List<TestDto> list = parser.parseList(json);
 
         assertEquals(2, list.size());
-        assertEquals("A", list.get(0).name);
-        assertEquals(2, list.get(1).value);
+        assertEquals("A", list.get(0).getName());
+        assertEquals(2, list.get(1).getValue());
     }
 
     @Test
@@ -64,7 +64,7 @@ class JsonDataParserTest {
         final List<TestDto> list = parser.parseListFromFile(temp, "items");
 
         assertEquals(2, list.size());
-        assertEquals("B", list.get(1).name);
+        assertEquals("B", list.get(1).getName());
     }
 
     @Test

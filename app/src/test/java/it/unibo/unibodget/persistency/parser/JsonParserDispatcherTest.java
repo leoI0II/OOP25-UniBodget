@@ -21,7 +21,7 @@ class JsonParserDispatcherTest {
 
         final TestDto dto = JsonParserDispatcher.parse(json, TestDto.class);
 
-        assertEquals("Prova", dto.name);
+        assertEquals("Prova", dto.getName());
     }
 
     @Test
@@ -46,8 +46,8 @@ class JsonParserDispatcherTest {
         final List<TestDto> list = List.of(array);
 
         assertEquals(2, list.size());
-        assertEquals("a", list.get(0).name);
-        assertEquals("b", list.get(1).name);
+        assertEquals("a", list.get(0).getName());
+        assertEquals("b", list.get(1).getName());
     }
 
 }
