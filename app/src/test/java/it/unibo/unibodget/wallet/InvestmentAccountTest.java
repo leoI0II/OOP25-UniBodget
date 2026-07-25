@@ -18,20 +18,30 @@ import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 
-public class InvestmentAccountTest {
-    
-    public static final BigDecimal BTC_BUY_PRICE = new BigDecimal("50000.00");
-    public static final BigDecimal BTC_BUY_PRICE_2 = new BigDecimal("55000.00");
+/**
+ * Unit tests for {@link InvestmentAccount}.
+ * 
+ * <p>
+ * This class verifies the correct behavior of investment transactions,
+ * including buys, sells, position updates, balance calculations, and
+ * profit/loss evaluation. All tests rely on a mock {@link PriceProvider}
+ * to ensure deterministic results.
+ * </p>
+ */
+public final class InvestmentAccountTest {
+
+    private static final BigDecimal BTC_BUY_PRICE = new BigDecimal("50000.00");
+    private static final BigDecimal BTC_BUY_PRICE_2 = new BigDecimal("55000.00");
     private static final BigDecimal ETH_BUY_4K = new BigDecimal("4000.0");
     private static final BigDecimal AAPL_BUY_150 = new BigDecimal("150.0");
     private static final BigDecimal AAPL_BUY_100 = new BigDecimal("100.00");
     private static final BigDecimal AAPL_BUY_200 = new BigDecimal("200.00");
-    public static final BigDecimal MINUS_FIVE = BigDecimal.valueOf(-5);
-    public static final BigDecimal PROFIT_500 = new BigDecimal("500.00");
+    private static final BigDecimal MINUS_FIVE = BigDecimal.valueOf(-5);
+    private static final BigDecimal PROFIT_500 = new BigDecimal("500.00");
 
-    public static final String NOTES = "notes";
-    public static final String EMPTY_NOTES = "";
-    public static final String NOTES_APPL = "test buy aapl";
+    private static final String NOTES = "notes";
+    private static final String EMPTY_NOTES = "";
+    private static final String NOTES_APPL = "test buy aapl";
 
     private InvestmentAccount account;
     private PriceProvider mockPriceProvider;

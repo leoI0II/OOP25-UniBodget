@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.categories;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +20,8 @@ class CategoryTest {
 
     @Test
     void customCategoryShouldBeActiveByDefault() {
-        Category c = new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         assertTrue(c.isActive());
         assertTrue(c.isCustom());
         assertFalse(c.isDefault());
@@ -25,14 +29,16 @@ class CategoryTest {
 
     @Test
     void shouldArchiveCustomCategory() {
-        Category c = new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         c.archive();
         assertFalse(c.isActive());
     }
 
     @Test
     void shouldReactivateCustomCategory() {
-        Category c = new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         c.archive();
         c.reactivate();
         assertTrue(c.isActive());
@@ -55,8 +61,10 @@ class CategoryTest {
 
     @Test
     void shouldImplementEqualsAndHashCode() {
-        Category c1 = new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
-        Category c2 = new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
+        final Category c1 = 
+            new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
+        final Category c2 = 
+            new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());

@@ -10,7 +10,7 @@ class CryptoCurrencyTest {
 
     @Test
     void shouldExposeFieldsCorrectly() {
-        CryptoCurrency c = CryptoCurrency.BTC;
+        final CryptoCurrency c = CryptoCurrency.BTC;
 
         assertEquals(CurrencyType.CRYPTO, c.getType());
         assertEquals("₿", c.getSymbol());

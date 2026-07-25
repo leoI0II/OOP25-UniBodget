@@ -23,10 +23,19 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
  * </ul>
  * and then launches {@link CurrencyConverterViewFX}.
  */
-public class TestCurrencyConverterApp {
+public final class TestCurrencyConverterApp {
+
+    /**
+     * Utility class containing only a static entry point.
+     * The constructor is private to prevent instantiation.
+     */
+    private TestCurrencyConverterApp() {
+        // prevents instantiation
+    }
 
     /**
      * Entry point for launching the standalone Currency Converter dashboard.
+     * 
      * <p>
      * This method:
      * <ol>
@@ -43,7 +52,7 @@ public class TestCurrencyConverterApp {
 
         // 1. API for exchange rates (historical + latest)
         ExchangeRateAPI api = new ExchangeRateAPIImpl();
-        
+
         // 2. Base currency for conversion engine
         final var baseCurrency = FiatCurrency.EUR;
 

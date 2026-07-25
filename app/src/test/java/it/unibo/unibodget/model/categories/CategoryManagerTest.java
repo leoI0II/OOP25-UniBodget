@@ -1,9 +1,12 @@
 package it.unibo.unibodget.model.categories;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -16,16 +19,16 @@ class CategoryManagerTest {
     @BeforeEach
     void hardResetCategoryManager() throws Exception {
         // Reset completo via reflection
-        Field loadedField = CategoryManager.class.getDeclaredField("LOADED");
+        final Field loadedField = CategoryManager.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         loadedField.set(null, new ArrayList<>()); // svuota completamente
 
-        Field initField = CategoryManager.class.getDeclaredField("initialized");
+        final Field initField = CategoryManager.class.getDeclaredField("initialized");
         initField.setAccessible(true);
         initField.set(null, true); // impedisce init()
 
         // Popola SOLO le default categories
-        List<Category> defaults = Category.getDefaultCategories();
+        final List<Category> defaults = Category.getDefaultCategories();
         loadedField.set(null, new ArrayList<>(defaults));
     }
 
@@ -37,7 +40,8 @@ class CategoryManagerTest {
 
     @Test
     void shouldAddCategory() {
-        Category c = new Category("NewCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("NewCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertTrue(CategoryManager.getAll().stream()
@@ -46,7 +50,8 @@ class CategoryManagerTest {
 
     @Test
     void shouldNotAddDuplicateCategory() {
-        Category c = new Category("Duplicate", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("Duplicate", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -56,7 +61,8 @@ class CategoryManagerTest {
 
     @Test
     void shouldRemoveCategory() {
-        Category c = new Category("Removable", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final Category c = 
+            new Category("Removable", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertTrue(CategoryManager.remove(c));
@@ -65,7 +71,7 @@ class CategoryManagerTest {
 
     @Test
     void shouldGetByType() {
-        var expenses = CategoryManager.getByType(CategoryType.EXPENSE);
+        final var expenses = CategoryManager.getByType(CategoryType.EXPENSE);
 
         assertFalse(expenses.isEmpty());
         assertTrue(expenses.stream().allMatch(cat -> cat.getType() == CategoryType.EXPENSE));

@@ -74,12 +74,31 @@ class BasicCurrencyConverterTest {
         final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
-        CurrencyUnit fake = new CurrencyUnit() {
-            @Override public CurrencyType getType() { return CurrencyType.FIAT; }
-            @Override public String getSymbol() { return "?"; }
-            @Override public String getShortName() { return "FAKE"; }
-            @Override public String getFullName() { return "Fake"; }
-            @Override public String getCode() { return "FAKE"; }
+        final CurrencyUnit fake = new CurrencyUnit() {
+            @Override 
+            public CurrencyType getType() { 
+                return CurrencyType.FIAT; 
+            }
+
+            @Override 
+            public String getSymbol() { 
+                return "?"; 
+            }
+
+            @Override 
+            public String getShortName() { 
+                return "FAKE"; 
+            }
+
+            @Override 
+            public String getFullName() { 
+                return "Fake"; 
+            }
+
+            @Override 
+            public String getCode() { 
+                return "FAKE"; 
+            }
         };
 
         assertThrows(IllegalArgumentException.class, () ->

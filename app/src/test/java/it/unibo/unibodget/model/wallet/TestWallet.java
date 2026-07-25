@@ -13,9 +13,16 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 
 /**
- * Class for test - used as main
+ * Class for test - used as main.
  */
 public final class TestWallet {
+
+        /**
+         * To prevent instantiation
+         */
+        private TestWallet(){
+                
+        }
 
     public static void main(final String[] args) {
 
@@ -243,7 +250,7 @@ public final class TestWallet {
                 investments1.withProvider(provider);
         System.out.println(
                 "Copy provider null? "
-                + (copy.getPriceProvider()==null)
+                + (copy.getPriceProvider() == null)
         );
         
         final CashAccountManager cashManager =

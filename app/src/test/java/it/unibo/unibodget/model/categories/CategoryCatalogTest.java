@@ -1,8 +1,11 @@
 package it.unibo.unibodget.model.categories;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,8 +16,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldLoadDefaultAndCustomCategories() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         assertFalse(catalog.getDefaultCategories().isEmpty());
         assertEquals(1, catalog.getCustomCategories().size());
@@ -22,8 +26,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldReturnAllCategories() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         assertEquals(
                 catalog.getDefaultCategories().size() + 1,
@@ -33,8 +38,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldFindCategoryByName() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         assertTrue(catalog.findByName("Custom1").isPresent());
         assertFalse(catalog.findByName("Unknown").isPresent());
@@ -42,8 +48,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldCheckExistenceByName() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         assertTrue(catalog.existsByName("Custom1"));
         assertFalse(catalog.existsByName("Unknown"));
@@ -51,9 +58,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldAddCustomCategory() {
-        CategoryCatalog catalog = new CategoryCatalog(List.of());
+        final CategoryCatalog catalog = new CategoryCatalog(List.of());
         final String name = "NewCat-" + UUID.randomUUID();
-        Category c = new Category(
+        final Category c = new Category(
             name,
             new ARGBColor("#00FF00"),
             CategoryType.EXPENSE
@@ -66,8 +73,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldNotAddDuplicateCategory() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         assertThrows(IllegalArgumentException.class, () ->
                 catalog.addCustomCategory(new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE))
@@ -76,8 +84,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldArchiveCustomCategory() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         catalog.archiveCustomCategory("Custom1");
 
@@ -86,8 +95,9 @@ class CategoryCatalogTest {
 
     @Test
     void shouldReactivateCustomCategory() {
-        Category custom = new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
-        CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
+        final Category custom = 
+            new Category("Custom1", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+        final CategoryCatalog catalog = new CategoryCatalog(List.of(custom));
 
         catalog.archiveCustomCategory("Custom1");
         catalog.reactivateCustomCategory("Custom1");
@@ -97,7 +107,7 @@ class CategoryCatalogTest {
 
     @Test
     void shouldThrowIfCustomCategoryNotFound() {
-        CategoryCatalog catalog = new CategoryCatalog(List.of());
+        final CategoryCatalog catalog = new CategoryCatalog(List.of());
 
         assertThrows(IllegalArgumentException.class, () ->
                 catalog.archiveCustomCategory("Unknown")

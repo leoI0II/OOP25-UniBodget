@@ -9,6 +9,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
+/**
+ * Standalone JavaFX launcher for testing the Settings dashboard outside
+ * of the full UniBodget application.
+ *
+ * <p>
+ * This utility class initializes the {@link SettingsController},
+ * loads saved {@link WindowPreferences}, applies the current theme via
+ * {@link ThemeManager}, and displays the settings UI using
+ * {@link SettingsTabFX}.
+ * </p>
+ */
 public final class TestSettingsMainFX extends Application {
 
     @Override
@@ -25,7 +36,7 @@ public final class TestSettingsMainFX extends Application {
         stage.setTitle("Settings Manager");
         stage.setMaximized(savedPrefs.isMaximized());
         ThemeManager.applyThemeToScene(scene);
-        
+
         stage.show();
 
         // Auto-update WindowPreferences

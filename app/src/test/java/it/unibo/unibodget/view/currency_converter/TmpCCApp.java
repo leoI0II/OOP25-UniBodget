@@ -16,7 +16,15 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
  * </ul>
  * and then launches {@link CurrencyConverterViewFX}.
  */
-public class TmpCCApp {
+public final class TmpCCApp {
+
+    /**
+     * Utility class containing only a static entry point.
+     * The constructor is private to prevent instantiation.
+     */
+    private TmpCCApp() {
+        // prevents instantiation
+    }
 
     /**
      * Entry point for launching the standalone Currency Converter dashboard.
