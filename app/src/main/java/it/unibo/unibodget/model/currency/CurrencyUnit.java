@@ -63,7 +63,7 @@ public interface CurrencyUnit {
      * @return the currency code
      */
     String getCode();
-    
+
     /**
      * Retrieves a {@link CurrencyUnit} instance from its ISO code.
      * This method searches only in the known enum-based currencies.

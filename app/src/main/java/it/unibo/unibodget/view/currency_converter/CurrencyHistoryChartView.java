@@ -110,7 +110,7 @@ public final class CurrencyHistoryChartView extends VBox {
         stage.setTitle("Currency History - Live Data");
         stage.setScene(new Scene(view, SCENE_WIDTH, SCENE_HEIGHT));
         stage.show();
-        return stage;   
+        return stage;
     }
 
     /* =============== UI CONFIGURATION ===================== */

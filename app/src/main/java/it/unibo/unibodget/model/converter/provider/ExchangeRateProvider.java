@@ -7,7 +7,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
  * 
  */
 public interface ExchangeRateProvider {
-    
+
     /**
      * 
      * @param src
@@ -15,5 +15,5 @@ public interface ExchangeRateProvider {
      * @return
      */
     Asset convert(Asset src, CurrencyUnit target);
-    
+
 }

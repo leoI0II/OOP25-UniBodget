@@ -27,7 +27,7 @@ public record Position(
     Asset averageBasisCost,
     Asset currentMarketValue
 ) {
-    
+
     /**
      * @throws NullPointerException if any parameter is null
      */

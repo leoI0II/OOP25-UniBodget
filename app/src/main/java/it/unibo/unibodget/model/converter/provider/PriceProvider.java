@@ -7,7 +7,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
  * 
  */
 public interface PriceProvider {
-    
+
     /**
      * Gets the current price of the given asset in the target currency.
      * 

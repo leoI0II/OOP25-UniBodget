@@ -22,8 +22,12 @@ public final class ThemeManager {
      */
     private static Theme currentTheme = Theme.DEFAULT;
 
-    /** Private constructor to prevent instantiation. */
-    private ThemeManager() { }
+    /** 
+     * Private constructor to prevent instantiation.
+     */
+    private ThemeManager() { 
+
+    }
 
     /**
      * Returns the currently active theme.
@@ -59,10 +63,10 @@ public final class ThemeManager {
      *
      * @param scene the scene to style
      */
-    public static void applyThemeToScene(Scene scene) {
+    public static void applyThemeToScene(final Scene scene) {
         // Retrieve active theme
-        Theme t = getTheme();
-        String style = ""
+        final Theme t = getTheme();
+        final String style = ""
             + "-fx-font-family: '" + t.getFontFamily() + "';"
             + "-fx-font-size: " + t.getFontSize() + "px;"
             + (t.isBoldText() ? "-fx-font-weight: bold;" : "-fx-font-weight: normal;")

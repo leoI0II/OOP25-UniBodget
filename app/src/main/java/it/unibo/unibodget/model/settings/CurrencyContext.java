@@ -11,7 +11,9 @@ public final class CurrencyContext {
 
     private static String base = FiatCurrency.EUR.getShortName();
 
-    private CurrencyContext() {}
+    private CurrencyContext() {
+        
+    }
 
     /**
      * Returns the current base currency used for all calculations.
@@ -27,7 +29,7 @@ public final class CurrencyContext {
      *
      * @param newBase the new base currency to set
      */
-    public static void setBase(String newBase) {
+    public static void setBase(final String newBase) {
         base = newBase;
     }
 }

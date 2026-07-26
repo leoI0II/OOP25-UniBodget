@@ -23,7 +23,7 @@ public final class Historical<T extends Transaction> {
 
     @JsonProperty("transactions")
     private final List<T> history;
-    
+
     public Historical() {
         this.history = new ArrayList<>();
     }

@@ -102,7 +102,7 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
     public String getDescription() { 
         return description; 
     }
-    
+
     /**
      * Returns additional notes or comments associated with the transaction.
      *
@@ -156,12 +156,12 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
 
     @Override
     public String toString() {
-        return "Transaction{asset=" + asset +
-               ", category=" + category +
-               ", date=" + date +
-               ", description='" + description + '\'' +
-               ", notes='" + notes + '\'' +
-               '}';
+        return "Transaction{asset=" + asset
+               + ", category=" + category
+               + ", date=" + date
+               + ", description='" + description + '\''
+               + ", notes='" + notes + '\''
+               + '}';
     }
-    
+
 }

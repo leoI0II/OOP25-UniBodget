@@ -10,7 +10,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 /**
  * Represents a visual theme used by the application's user interface.
  *
- * <p>A {@code Theme} defines the core visual identity of the UI, including:</p>
+ * <p>
+ * A {@code Theme} defines the core visual identity of the UI, including:</p>
  * <ul>
  *     <li>a human-readable name</li>
  *     <li>primary background color</li>
@@ -20,7 +21,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  *     <li>whether text is bold</li>
  * </ul>
  *
- * <p>This class is part of the model layer and contains only theme data.
+ * <p>
+ * This class is part of the model layer and contains only theme data.
  * It does not depend on JavaFX or other UI-specific APIs.</p>
  */
 public final class Theme {
@@ -60,13 +62,13 @@ public final class Theme {
      */
     @JsonCreator
     public Theme(
-        @JsonProperty("name") String name,
-        @JsonProperty("primaryColor") ARGBColor primaryColor,
-        @JsonProperty("buttonColor") ARGBColor buttonColor,
-        @JsonProperty("textColor") ARGBColor textColor,
-        @JsonProperty("fontFamily") String fontFamily,
-        @JsonProperty("fontSize") int fontSize,
-        @JsonProperty("boldText") boolean boldText) {
+        @JsonProperty("name") final String name,
+        @JsonProperty("primaryColor") final ARGBColor primaryColor,
+        @JsonProperty("buttonColor") final ARGBColor buttonColor,
+        @JsonProperty("textColor") final ARGBColor textColor,
+        @JsonProperty("fontFamily") final String fontFamily,
+        @JsonProperty("fontSize") final int fontSize,
+        @JsonProperty("boldText") final boolean boldText) {
 
         this.name = Objects.requireNonNull(name);
         this.primaryColor = Objects.requireNonNull(primaryColor);
@@ -119,7 +121,8 @@ public final class Theme {
     }
 
     /** 
-     * Return theme name
+     * Return theme name.
+     * 
      * @return the theme name 
      */
     public String getName() { 
@@ -127,7 +130,8 @@ public final class Theme {
     }
 
     /** 
-     * Return primary background color
+     * Return primary background color.
+     * 
      * @return the primary background color
      */
     public ARGBColor getPrimaryColor() { 
@@ -135,7 +139,8 @@ public final class Theme {
     }
 
     /** 
-     * Return button color
+     * Return button color.
+     * 
      * @return the button color 
      */
     public ARGBColor getButtonColor() { 
@@ -143,7 +148,8 @@ public final class Theme {
     }
 
     /** 
-     * Return text color
+     * Return text color.
+     * 
      * @return the text color 
      */
     public ARGBColor getTextColor() { 
@@ -151,7 +157,8 @@ public final class Theme {
     }
 
     /** 
-     * Return font family
+     * Return font family.
+     * 
      * @return the font family 
      */
     public String getFontFamily() { 
@@ -159,7 +166,8 @@ public final class Theme {
     }
 
     /** 
-     * Return font size
+     * Return font size.
+     * 
      * @return the font size 
      */
     public int getFontSize() { 
@@ -167,7 +175,8 @@ public final class Theme {
     }
 
     /** 
-     * Return if the text is bold
+     * Return if the text is bold.
+     * 
      * @return true if bold text is enabled 
      */
     public boolean isBoldText() { 
@@ -205,8 +214,12 @@ public final class Theme {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Theme)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Theme)) {
+            return false;
+        }
         final Theme theme = (Theme) o;
         return fontSize == theme.fontSize
                 && boldText == theme.boldText
@@ -229,5 +242,5 @@ public final class Theme {
                 boldText
         );
     }
-    
+
 }

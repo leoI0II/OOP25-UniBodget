@@ -26,7 +26,7 @@ public final class ThemeList {
     private static boolean initialized = false;
 
     /** Cached list of loaded themes. */
-    private static final List<Theme> loaded = new ArrayList<>();
+    private static final List<Theme> LOADED = new ArrayList<>();
 
     /**
      * Creates a ThemeList and initializes the theme list if needed.
@@ -43,7 +43,7 @@ public final class ThemeList {
      * @return unmodifiable list of themes
      */
     public List<Theme> getThemes() {
-        return Collections.unmodifiableList(loaded);
+        return Collections.unmodifiableList(LOADED);
     }
 
     /**
@@ -55,30 +55,30 @@ public final class ThemeList {
     private static void init() {
         try {
             // Load Theme.json
-            ModelFileManager<Theme> mgr =
+            final ModelFileManager<Theme> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Theme.class);
             mgr.open();
 
-            var list = mgr.loadList("themes");
+            final var list = mgr.loadList("themes");
             mgr.close();
 
             // If no themes found → fallback to default
             if (list == null || list.isEmpty()) {
-                loaded.clear();
-                loaded.add(Theme.DEFAULT);
+                LOADED.clear();
+                LOADED.add(Theme.DEFAULT);
             } else {
-                loaded.clear();
-                loaded.addAll(list);
+                LOADED.clear();
+                LOADED.addAll(list);
             }
 
             initialized = true;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // On any error → fallback to default theme
-            loaded.clear();
-            loaded.add(Theme.DEFAULT);
+            LOADED.clear();
+            LOADED.add(Theme.DEFAULT);
             initialized = true;
         }
     }
-    
+
 }

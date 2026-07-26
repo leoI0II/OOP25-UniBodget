@@ -26,7 +26,9 @@ public final class SettingsManager {
      * Creates a SettingsManager and initializes the settings if needed.
      */
     public SettingsManager() {
-        if (!initialized) init();
+        if (!initialized) {
+            init();
+        }
     }
 
     /**
@@ -43,15 +45,15 @@ public final class SettingsManager {
      *
      * @param s the settings to persist
      */
-    public void saveCurrent(Settings s) {
-        try (ModelFileManager<Settings> mgr =
+    public void saveCurrent(final Settings s) {
+        try (final ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
             mgr.open();
             mgr.saveObject(s);
             current = s; // Update in‑memory reference
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println("Settings save failed: " + e);
         }
     }
@@ -61,7 +63,7 @@ public final class SettingsManager {
      *
      * @param s the settings to update and persist
      */
-    public void appendToHistory(Settings s) {
+    public void appendToHistory(final Settings s) {
         s.addSnapshotToHistory();
         saveCurrent(s);
     }
@@ -73,7 +75,7 @@ public final class SettingsManager {
      * {@link SettingsManager}.</p>
      */
     private static void init() {
-        try (ModelFileManager<Settings> mgr =
+        try (final ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
             mgr.open();
@@ -86,11 +88,11 @@ public final class SettingsManager {
 
             initialized = true;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Fallback to default settings on any error
             current = new Settings();
             initialized = true;
         }
     }
-    
+
 }

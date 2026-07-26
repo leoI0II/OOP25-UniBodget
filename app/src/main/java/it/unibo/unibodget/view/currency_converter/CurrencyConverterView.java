@@ -36,8 +36,8 @@ public class CurrencyConverterView {
     public String convert(final double amount, final CurrencyUnit from, final CurrencyUnit to) {
         final BigDecimal result = controller.convert(BigDecimal.valueOf(amount), from, to);
 
-        System.out.println("Conversion result: " + result + 
-                            " (amount: " + amount + ", from: " 
+        System.out.println("Conversion result: " + result
+                            + " (amount: " + amount + ", from: " 
                             + from.getCode() + ", to: " + to.getCode() + ")");
 
         return amount + " " + from.getCode() + " = " + result + " " + to.getCode();

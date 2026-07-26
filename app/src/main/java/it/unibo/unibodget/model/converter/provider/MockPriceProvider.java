@@ -21,11 +21,11 @@ public class MockPriceProvider implements PriceProvider {
             return Asset.of(targetCurrency, new BigDecimal("1.1")); // Mock EUR to USD rate
         } else if (asset.equals(FiatCurrency.USD) && targetCurrency.equals(FiatCurrency.EUR)) {
             return Asset.of(targetCurrency, new BigDecimal("0.9")); // Mock USD to EUR rate
-        } else if (asset.equals(CryptoCurrency.BTC) && 
-            (targetCurrency.equals(CryptoCurrency.USDT) || targetCurrency.equals(FiatCurrency.USD))) {
+        } else if (asset.equals(CryptoCurrency.BTC) 
+            && (targetCurrency.equals(CryptoCurrency.USDT) || targetCurrency.equals(FiatCurrency.USD))) {
             return Asset.of(targetCurrency, new BigDecimal("50000.0")); // Mock BTC to USDT rate
-        } else if (asset.equals(CryptoCurrency.ETH) && 
-            (targetCurrency.equals(CryptoCurrency.USDT) || targetCurrency.equals(FiatCurrency.USD))) {
+        } else if (asset.equals(CryptoCurrency.ETH) 
+            && (targetCurrency.equals(CryptoCurrency.USDT) || targetCurrency.equals(FiatCurrency.USD))) {
             return Asset.of(targetCurrency, new BigDecimal("4000.0")); // Mock ETH to USDT rate
         } else if (asset.equals(StockMarketCurrency.AAPL) && targetCurrency.equals(FiatCurrency.USD)) {
             return Asset.of(targetCurrency, new BigDecimal("150.0")); // Mock AAPL to USD price
@@ -33,5 +33,5 @@ public class MockPriceProvider implements PriceProvider {
             return Asset.of(targetCurrency, new BigDecimal("100.0")); // Default mock price for other assets
         }
     }
-    
+
 }

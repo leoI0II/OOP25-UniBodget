@@ -157,7 +157,7 @@ public final class Currency implements CurrencyUnit {
         final Currency other = (Currency) obj;
         return Objects.equals(this.code, other.code);
     }
-    
+
     /**
      * Initializes the currency manager by loading all currency definitions
      * from the JSON configuration file.

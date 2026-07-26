@@ -18,7 +18,7 @@ public final class WindowPreferences {
      * @param height     the window height in pixels
      * @param maximized  true if the window was maximized, false otherwise
      */
-    public WindowPreferences(double width, double height, boolean maximized) {
+    public WindowPreferences(final double width, final double height, final boolean maximized) {
         this.width = width;
         this.height = height;
         this.maximized = maximized;
@@ -47,7 +47,7 @@ public final class WindowPreferences {
      *
      * @param width the new width in pixels
      */
-    public void setWidth(double width) { 
+    public void setWidth(final double width) { 
         this.width = width; 
     }
 
@@ -65,7 +65,7 @@ public final class WindowPreferences {
      *
      * @param height the new height in pixels
      */
-    public void setHeight(double height) { 
+    public void setHeight(final double height) { 
         this.height = height; 
     }
 
@@ -83,8 +83,8 @@ public final class WindowPreferences {
      *
      * @param maximized true if the window is maximized, false otherwise
      */
-    public void setMaximized(boolean maximized) { 
+    public void setMaximized(final boolean maximized) { 
         this.maximized = maximized; 
     }
-    
+
 }

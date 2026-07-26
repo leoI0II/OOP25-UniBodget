@@ -101,8 +101,10 @@ public class BankConverterWidgetFX {
                         bank);
 
                     // Update UI
-                    convertedLabel.setText("Converted: " + res.getConvertedAmount().toPlainString() + " " + res.getTargetCurrencyCode());
-                    resultLabel.setText("Total cost: " + res.getTotalCost().toPlainString() + " " + res.getSourceCurrencyCode());
+                    convertedLabel.setText("Converted: "
+                        + res.getConvertedAmount().toPlainString() + " " + res.getTargetCurrencyCode());
+                    resultLabel.setText("Total cost: "
+                        + res.getTotalCost().toPlainString() + " " + res.getSourceCurrencyCode());
                     detailsLabel.setText("Fees: " + res.getCommission().toPlainString());
 
                 } else {

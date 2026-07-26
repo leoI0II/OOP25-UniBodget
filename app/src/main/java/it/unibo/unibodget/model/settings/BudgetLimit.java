@@ -6,11 +6,13 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
  * Represents a single global budget limit chosen by the user.
+ *
+ * <p>
  * It contains only an amount and a currency.
  * UNUSED AT THE MOMENT
  */
 public class BudgetLimit {
-    
+
     private double amount;
     private CurrencyUnit currency;
 
@@ -20,7 +22,7 @@ public class BudgetLimit {
      * @param amount   the numeric limit (must be >= 0)
      * @param currency the currency of the limit (not null)
      */
-    public BudgetLimit(double amount, CurrencyUnit currency) {
+    public BudgetLimit(final double amount, final CurrencyUnit currency) {
         if (amount < 0) {
             throw new IllegalArgumentException("Budget limit cannot be negative");
         }
@@ -42,7 +44,7 @@ public class BudgetLimit {
      *
      * @param amount the new limit amount (must be >= 0)
      */
-    public void setAmount(double amount) {
+    public void setAmount(final double amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("Budget limit cannot be negative");
         }
@@ -63,20 +65,24 @@ public class BudgetLimit {
      *
      * @param currency the new CurrencyUnit (not null)
      */
-    public void setCurrency(CurrencyUnit currency) {
+    public void setCurrency(final CurrencyUnit currency) {
         this.currency = Objects.requireNonNull(currency);
     }
 
     @Override
     public String toString() {
         return "BudgetLimit{amount=" + amount + ", currency=" + currency + "}";
-    }  
+    }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BudgetLimit)) return false;
-        BudgetLimit b = (BudgetLimit) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BudgetLimit)) {
+            return false;
+        }
+        final BudgetLimit b = (BudgetLimit) o;
         return Double.compare(b.amount, amount) == 0
                 && Objects.equals(currency, b.currency);
     }

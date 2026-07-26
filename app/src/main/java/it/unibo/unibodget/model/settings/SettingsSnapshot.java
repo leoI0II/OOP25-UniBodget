@@ -37,10 +37,10 @@ public final class SettingsSnapshot {
      */
     @JsonCreator
     public SettingsSnapshot(
-            @JsonProperty("theme") Theme theme,
-            @JsonProperty("baseCurrency") String baseCurrency,
-            @JsonProperty("windowPrefs") WindowPreferences windowPrefs,
-            @JsonProperty("savedAt") String savedAt) {
+            @JsonProperty("theme") final Theme theme,
+            @JsonProperty("baseCurrency") final String baseCurrency,
+            @JsonProperty("windowPrefs") final WindowPreferences windowPrefs,
+            @JsonProperty("savedAt") final String savedAt) {
 
         this.theme = Objects.requireNonNull(theme);
         this.baseCurrency = Objects.requireNonNull(baseCurrency);
@@ -57,7 +57,7 @@ public final class SettingsSnapshot {
      * @param s the settings to snapshot
      * @return a new immutable snapshot
      */
-    public static SettingsSnapshot of(Settings s) {
+    public static SettingsSnapshot of(final Settings s) {
         return new SettingsSnapshot(
                 s.getTheme(),
                 s.getBaseCurrency(),

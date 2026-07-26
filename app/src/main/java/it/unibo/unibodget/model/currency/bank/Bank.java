@@ -25,7 +25,9 @@ public final class Bank {
      * <p>
      * Fields are expected to be populated via reflection after instantiation.
      */
-    public Bank() {}
+    public Bank() {
+        
+    }
 
     /**
      * Creates a new {@code Bank} with the specified fee structure.

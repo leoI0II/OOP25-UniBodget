@@ -53,7 +53,7 @@ public class DefaultInvestmentController implements InvestmentController {
         this.exchangeRateProvider = Objects.requireNonNull(exchangeRateProvider);
         this.displayCurrencies = Objects.requireNonNull(displayCurrencies);
     }
-    
+
     @Override
     public List<InvestmentAccount> getAllInvestmentAccounts() {
         return investmentAccountService.getWallets();
@@ -70,7 +70,8 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     /**
-     * Helper method to retrieve the currently selected investment account or throw an exception if none is selected.
+     * Helper method to retrieve the currently selected investment account or 
+     * throw an exception if none is selected.
      * 
      * @return the currently selected InvestmentAccount
      * @throws IllegalStateException if no investment account is currently selected
@@ -170,7 +171,8 @@ public class DefaultInvestmentController implements InvestmentController {
         return switch(paymentSource) {
             case PaymentSource.CashAccountChannel cashSrc -> cashSrc.account().getBaseCurrency();
             case PaymentSource.StableCoinPositionChannel stableCoinSrc -> stableCoinSrc.stableCoin();
-            case PaymentSource.NoPaymentChannel noSrc -> def; // If no payment source specified, default to the asset's currency for cost estimation
+            case PaymentSource.NoPaymentChannel noSrc -> def;
+                // If no payment source specified, default to the asset's currency for cost estimation
         };
     }
 
@@ -198,7 +200,7 @@ public class DefaultInvestmentController implements InvestmentController {
 		final Asset unitPrice,
         final Asset fee, 
 		final PaymentSource paymentSource
-    ) {    
+    ) {
 		return switch (orderType) {
             case BUY -> estimateOrderInTargetCurrency(quantity, unitPrice, fee, paymentSource, true);
             case SELL -> estimateOrderInTargetCurrency(quantity, unitPrice, fee, paymentSource, false);
@@ -218,7 +220,8 @@ public class DefaultInvestmentController implements InvestmentController {
                     .orElse(Asset.zero(stableCoinSrc.stableCoin()))
                 );
             }
-            case PaymentSource.NoPaymentChannel noSrc -> Optional.empty(); // If no payment source specified, available amount is considered zero for the purpose of cost comparison
+            case PaymentSource.NoPaymentChannel noSrc -> Optional.empty(); 
+                // If no payment source specified, available amount is considered zero for the purpose of cost comparison
         };
     }
 
@@ -270,9 +273,9 @@ public class DefaultInvestmentController implements InvestmentController {
 		final Asset fee, 
 		final LocalDate date, 
 		final String notes) {
-		
+
 		final var cost = estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource);
-		
+
 		if (!canBuy(paymentSource, asset, quantity, unitPrice, fee)) {
 			final var available = availableAsset(paymentSource).orElse(Asset.zero(cost.currency()));
 			return new OrderResult.InsufficientFunds(cost, available);
@@ -309,7 +312,9 @@ public class DefaultInvestmentController implements InvestmentController {
 					date,
 					"Use " + cost + " from stablecoin position to buy " + quantity + " " + asset,
 					notes,
-					Asset.of(stableCoinSrc.stableCoin(), exchangeRateProvider.convert(cost, stableCoinSrc.stableCoin()).amount()), // Unit price in terms of the stablecoin
+					Asset.of(stableCoinSrc.stableCoin(), 
+                        exchangeRateProvider.convert(cost, 
+                            stableCoinSrc.stableCoin()).amount()), // Unit price in terms of the stablecoin
 					fee
 				);
 				// Execute the stablecoin transaction on the source investment account
@@ -374,13 +379,17 @@ public class DefaultInvestmentController implements InvestmentController {
             }
             case PaymentSource.StableCoinPositionChannel stableCoinDst -> {
                 final var stableCoinBuyTransaction = InvestmentTransaction.of(
-                    Asset.of(stableCoinDst.stableCoin(), exchangeRateProvider.convert(proceeds, stableCoinDst.stableCoin()).amount()), // Stablecoin inflow
+                    Asset.of(stableCoinDst.stableCoin(), 
+                        exchangeRateProvider.convert(proceeds, 
+                            stableCoinDst.stableCoin()).amount()), // Stablecoin inflow
                     Category.INVESTMENT_BUY,
                     date,
                     "Convert proceeds to " + stableCoinDst.stableCoin(),
                     notes,
                     Asset.of(stableCoinDst.stableCoin(), BigDecimal.ONE),   // 1:1 currently
-                    Asset.zero(stableCoinDst.stableCoin()) // No fee for the conversion transaction itself, fee is accounted in the sell transaction
+                    Asset.zero(
+                        stableCoinDst.stableCoin()) 
+                        // No fee for the conversion transaction itself, fee is accounted in the sell transaction
                 );
                 stableCoinDst.account().addTransaction(stableCoinBuyTransaction);
                 yield new OrderResult.SellWithStablesSuccess(sellTransaction, stableCoinBuyTransaction);
@@ -450,7 +459,8 @@ public class DefaultInvestmentController implements InvestmentController {
             pr.printRecord("Total cost basis", account.getTotalCostBasis());
 
             pr.println();
-            pr.printRecord("Asset", "Quantity", "Avg Cost", "Market Value", "Unrealized P/L", "Unrealized P/L %");
+            pr.printRecord(
+                "Asset", "Quantity", "Avg Cost", "Market Value", "Unrealized P/L", "Unrealized P/L %");
             for (final var position : account.getPositions()) {
                 pr.printRecord(
                     position.asset(),
@@ -476,10 +486,10 @@ public class DefaultInvestmentController implements InvestmentController {
             }
 
             return new ExportResult.Success(file);
-            
+
         } catch (final IOException e) {
             return new ExportResult.Error(e.getMessage());
         }
     }
-    
+
 }

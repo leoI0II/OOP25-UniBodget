@@ -16,7 +16,8 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 /**
  * Represents the global user preferences for the application.
  *
- * <p>This includes:</p>
+ * <p>
+ * This includes:
  * <ul>
  *     <li>the current UI theme</li>
  *     <li>the base currency used across all views</li>
@@ -24,8 +25,9 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
  *     <li>window size and layout preferences</li>
  * </ul>
  *
- * <p>The class is fully serializable via Jackson and supports
- * snapshot‑based persistence for undo/restore operations.</p>
+ * <p>
+ * The class is fully serializable via Jackson and supports
+ * snapshot‑based persistence for undo/restore operations.
  */
 public final class Settings {
 
@@ -33,7 +35,7 @@ public final class Settings {
     private String baseCurrency;
 
     @JsonProperty("preferenceHistory")
-    private List<SettingsSnapshot> preferenceHistory;
+    private final List<SettingsSnapshot> preferenceHistory;
 
     private WindowPreferences windowPrefs;
 
@@ -42,6 +44,8 @@ public final class Settings {
 
     /**
      * Creates a Settings instance with default values:
+     * 
+     * <p>
      * <ul>
      *     <li>Theme: {@link Theme#DEFAULT}</li>
      *     <li>Base currency: EUR</li>
@@ -66,10 +70,10 @@ public final class Settings {
      */
     @JsonCreator
     public Settings(
-        @JsonProperty("theme") Theme theme,
-        @JsonProperty("baseCurrency") String baseCurrency,
-        @JsonProperty("preferenceHistory") List<SettingsSnapshot> preferenceHistory,
-        @JsonProperty("windowPrefs") WindowPreferences windowPrefs
+        @JsonProperty("theme") final Theme theme,
+        @JsonProperty("baseCurrency") final String baseCurrency,
+        @JsonProperty("preferenceHistory") final List<SettingsSnapshot> preferenceHistory,
+        @JsonProperty("windowPrefs") final WindowPreferences windowPrefs
     ) {
         this.theme = Objects.requireNonNull(theme);
         this.baseCurrency = Objects.requireNonNull(baseCurrency);
@@ -77,8 +81,14 @@ public final class Settings {
         this.windowPrefs = Objects.requireNonNull(windowPrefs);
     }
 
-    /** Returns the current theme. */
-    public Theme getTheme() { return theme; }
+    /** 
+     * Returns the current theme. 
+     * 
+     * @return theme
+     */
+    public Theme getTheme() { 
+        return theme; 
+    }
 
     /**
      * Sets the theme and records a snapshot if the theme actually changed.
@@ -86,7 +96,7 @@ public final class Settings {
      * <p>This ensures that the history only grows when meaningful
      * changes occur.</p>
      */
-    public void setTheme(Theme theme) { 
+    public void setTheme(final Theme theme) { 
         if (!theme.equals(this.theme)) {
             addSnapshotToHistory();   // Save previous configuration
         }
@@ -96,12 +106,16 @@ public final class Settings {
     /** 
      * Returns the base currency code (e.g. "EUR"). 
      */
-    public String getBaseCurrency() { return baseCurrency; }
+    public String getBaseCurrency() { 
+        return baseCurrency; 
+    }
 
     /** 
      * Sets the base currency code. 
      */
-    public void setBaseCurrency(String currency) { this.baseCurrency = currency; }
+    public void setBaseCurrency(final String currency) { 
+        this.baseCurrency = currency; 
+    }
 
     /**
      * Returns an immutable view of the preference history.
@@ -113,13 +127,16 @@ public final class Settings {
     /**
      * Replaces the entire preference history.
      */
-    public void setPreferenceHistory(List<SettingsSnapshot> list) {
+    public void setPreferenceHistory(final List<SettingsSnapshot> list) {
         this.preferenceHistory.clear();
-        if (list != null) this.preferenceHistory.addAll(list);
+        if (list != null) {
+            this.preferenceHistory.addAll(list);
+        }
     }
 
     /**
      * Get LocalDate last modified
+     * 
      * @return LocalDate last modified
      */
     public LocalDate getLastModified() {
@@ -128,9 +145,10 @@ public final class Settings {
 
     /**
      * Set LocalDate last modified
+     * 
      * @param date LocalDate last modified
      */
-    public void setLastModified(LocalDate date) {
+    public void setLastModified(final LocalDate date) {
         this.lastModified = date;
     }
 
@@ -145,7 +163,7 @@ public final class Settings {
      * Creates a new Settings instance from a snapshot.
      * The history is intentionally reset.
      */
-    public static Settings fromSnapshot(SettingsSnapshot snap) {
+    public static Settings fromSnapshot(final SettingsSnapshot snap) {
         return new Settings(
             snap.getTheme(), 
             snap.getBaseCurrency(), 
@@ -172,7 +190,7 @@ public final class Settings {
     }
 
     /** Sets the window layout preferences. */
-    public void setWindowPrefs(WindowPreferences prefs) { 
+    public void setWindowPrefs(final WindowPreferences prefs) { 
         this.windowPrefs = prefs; 
     }
 

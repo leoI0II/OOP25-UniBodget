@@ -165,5 +165,5 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
                 this.green(),
                 this.blue());
     }
-    
+
 }
