@@ -140,6 +140,7 @@ public final class Currency implements CurrencyUnit {
 
     /**
      * Compares this currency with another object for equality.
+     *
      * <p>
      * Two currencies are considered equal if they share the same code.
      *
@@ -162,7 +163,8 @@ public final class Currency implements CurrencyUnit {
      * Initializes the currency manager by loading all currency definitions
      * from the JSON configuration file.
      *
-     * <p>The method parses the "currencies" array, stores each entry in an
+     * <p>
+     * The method parses the "currencies" array, stores each entry in an
      * internal map keyed by its ISO code (upper‑case), and marks the manager
      * as initialized. If loading fails, a RuntimeException is thrown.
      */

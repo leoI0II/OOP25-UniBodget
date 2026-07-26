@@ -31,14 +31,14 @@ import java.math.BigDecimal;
  */
 public class BankConverterWidgetFX {
 
-    /** Root container of the widget. */
-    private final VBox view = new VBox(15);
-
-    /** Constants */
+    /** Constants. */
     private static final double PERC = 50.0;
 
     /** Dropdown containing available banks. */
     private final ComboBox<Bank> bankBox = new ComboBox<>();
+
+    /** Root container of the widget. */
+    private final VBox view = new VBox(15);
 
     /** UI labels showing conversion results. */
     private final Label resultLabel = new Label("To be calculated...");

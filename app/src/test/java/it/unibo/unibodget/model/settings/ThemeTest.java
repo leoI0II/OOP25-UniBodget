@@ -8,10 +8,15 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class ThemeTest {
 
+    private static final String WHITE = "#FFFFFF";
+    private static final String BLACK = "#000000";
+    private static final String TEST = "Test";
+    private static final String TEST_A = "A";
+
     @Test
     void shouldComputeReadableTextColor() {
-        final ARGBColor bright = new ARGBColor("#FFFFFF");
-        final ARGBColor dark = new ARGBColor("#000000");
+        final ARGBColor bright = new ARGBColor(WHITE);
+        final ARGBColor dark = new ARGBColor(BLACK);
 
         assertEquals(ARGBColor.BLACK, Theme.getReadableTextColor(bright));
         assertEquals(ARGBColor.WHITE, Theme.getReadableTextColor(dark));
@@ -26,17 +31,17 @@ class ThemeTest {
 
     @Test
     void shouldStoreAllFields() {
-        final Theme t = new Theme("Test", "#FFFFFF", "#000000");
+        final Theme t = new Theme(TEST, WHITE, BLACK);
 
-        assertEquals("Test", t.getName());
+        assertEquals(TEST, t.getName());
         assertEquals("Arial", t.getFontFamily());
         assertEquals(14, t.getFontSize());
     }
 
     @Test
     void shouldCompareThemesCorrectly() {
-        final Theme t1 = new Theme("A", "#FFFFFF", "#000000");
-        final Theme t2 = new Theme("A", "#FFFFFF", "#000000");
+        final Theme t1 = new Theme(TEST_A, WHITE, BLACK);
+        final Theme t2 = new Theme(TEST_A, WHITE, BLACK);
 
         assertEquals(t1, t2);
         assertEquals(t1.hashCode(), t2.hashCode());

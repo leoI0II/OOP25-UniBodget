@@ -12,7 +12,7 @@ public final class CurrencyContext {
     private static String base = FiatCurrency.EUR.getShortName();
 
     private CurrencyContext() {
-        
+
     }
 
     /**

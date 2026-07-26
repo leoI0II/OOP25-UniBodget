@@ -36,6 +36,7 @@ import javafx.stage.Modality;
  */
 public final class SettingsPopupFX {
 
+    private static final int ROW_INDEX_5 = 5;
     private final SettingsController controller;
 
     /**
@@ -119,7 +120,7 @@ public final class SettingsPopupFX {
         grid.addRow(2, new Label("Font:"), fontBox);
         grid.addRow(3, new Label("Size:"), fontSize);
         grid.addRow(4, boldCheck);
-        grid.addRow(5, new Label("Base currency:"), currencyBox);
+        grid.addRow(ROW_INDEX_5, new Label("Base currency:"), currencyBox);
 
         // Buttons
         final ButtonType saveButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);

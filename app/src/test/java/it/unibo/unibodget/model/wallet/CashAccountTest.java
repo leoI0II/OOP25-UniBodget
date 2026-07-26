@@ -17,9 +17,9 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 
 class CashAccountTest {
 
-    private final static String CASH_CUST = "MyCash";
-    private final static String DESC = "desc";
-    private final static String NOTES = "notes";
+    private static final String CASH_CUST = "MyCash";
+    private static final String DESC = "desc";
+    private static final String NOTES = "notes";
 
     @Test
     void shouldComputeBalanceCorrectly() {

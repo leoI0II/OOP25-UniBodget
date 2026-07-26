@@ -95,6 +95,7 @@ public final class MonthlyStatistics {
 
     /**
      * Returns an immutable list of category-level totals.
+     * 
      * <p>
      * Each element contains:
      * <ul>
@@ -102,6 +103,7 @@ public final class MonthlyStatistics {
      *     <li>the category type (income or expense)</li>
      *     <li>the aggregated total for that category</li>
      * </ul>
+     * 
      * <p>
      * The list is already sorted/grouped by the controller, so the view layer
      * can directly use it for chart rendering.

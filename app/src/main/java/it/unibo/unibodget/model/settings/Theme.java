@@ -27,6 +27,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 public final class Theme {
 
+    private static final String FONT_ARIAL = "Arial";
+
     /**
      * The default theme used when no user preference is available.
      */
@@ -36,7 +38,7 @@ public final class Theme {
                     ARGBColor.WHITE,
                     ARGBColor.LIGHT_GRAY,
                     getReadableTextColor(ARGBColor.WHITE),
-                    "Arial",
+                    FONT_ARIAL,
                     14,
                     false
             );
@@ -114,7 +116,7 @@ public final class Theme {
                 new ARGBColor(hexColor),
                 new ARGBColor(buttonHexColor),
                 getReadableTextColor(new ARGBColor(hexColor)),
-                "Arial",
+                FONT_ARIAL,
                 14,
                 false
         );

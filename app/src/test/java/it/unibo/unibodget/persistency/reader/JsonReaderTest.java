@@ -100,7 +100,7 @@ class JsonReaderTest {
      */
     @Test
     @EnabledOnOs({OS.LINUX, OS.MAC})
-    void testConstructorThrowsIfFileNotReadable_Unix() throws IOException {
+    void testConstructorThrowsIfFileNotReadableUnix() throws IOException {
         Files.setPosixFilePermissions(tempJsonFile,
             PosixFilePermissions.fromString("---------"));
 
@@ -124,7 +124,7 @@ class JsonReaderTest {
      */
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testConstructorThrowsIfFileNotReadable_Windows() {
+    void testConstructorThrowsIfFileNotReadableWindows() {
 
         class UnreadableJsonReader extends JsonReader {
             UnreadableJsonReader(final String path) {

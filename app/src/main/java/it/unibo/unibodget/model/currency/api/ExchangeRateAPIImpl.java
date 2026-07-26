@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class ExchangeRateAPIImpl implements ExchangeRateAPI {
 
+    private static final int SECONDS_5 = 5;
+
     /** Duration for which fetched exchange rates remain valid in cache. */
     private static final Duration CACHE_DURATION = Duration.ofHours(1);
 
@@ -89,7 +91,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
 
             final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .timeout(Duration.ofSeconds(5))
+                    .timeout(Duration.ofSeconds(SECONDS_5))
                     .GET()
                     .build();
 

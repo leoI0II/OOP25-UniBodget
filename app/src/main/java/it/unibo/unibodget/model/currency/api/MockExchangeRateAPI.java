@@ -15,10 +15,10 @@ import java.util.TreeMap;
  */
 public class MockExchangeRateAPI implements ExchangeRateAPI {
 
-    private final Map<CurrencyUnit, Double> mockRates = new HashMap<>();
-
-    private final static double MEDIUM_VALUE = 1.14;
+    private static final double MEDIUM_VALUE = 1.14;
     private static final double DAILY_VAR = 0.2;
+
+    private final Map<CurrencyUnit, Double> mockRates = new HashMap<>();
 
     /**
      * Creates a new mock API with predefined exchange rates.

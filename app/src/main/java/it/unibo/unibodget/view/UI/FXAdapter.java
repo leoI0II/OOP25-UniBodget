@@ -12,6 +12,8 @@ import javafx.scene.text.FontWeight;
  */
 public final class FXAdapter {
 
+    private static final double FULL = 255.0;
+
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
@@ -26,7 +28,7 @@ public final class FXAdapter {
      * @return the corresponding JavaFX Color
      */
     public static Color toFXColor(final ARGBColor c) {
-        return Color.rgb(c.red(), c.green(), c.blue(), c.alpha() / 255.0);
+        return Color.rgb(c.red(), c.green(), c.blue(), c.alpha() / FULL);
     }
 
     /**

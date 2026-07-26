@@ -20,6 +20,7 @@ import it.unibo.unibodget.persistency.util.TestCleanupUtils;
 /**
  * Unit test class for {@link FileReaderFactory}.
  *
+ * <p>
  * This test suite verifies that:
  * - unsupported extensions trigger an {@link IllegalArgumentException}
  * - missing extensions also trigger an {@link IllegalArgumentException}
@@ -40,19 +41,6 @@ class FileReaderFactoryTest {
         createJsonFile();
         createTxtFile();
     }
-
-    /**
-     * This test is useful for debugging purposes, to verify that the temporary files are created correctly
-     * and contain the expected content. It can be commented out or removed in production.
-     * /
-    @Test
-    void debugPrintTempFiles() throws IOException {
-        System.out.println("JSON file created at: " + tempJsonFile.toAbsolutePath());
-        System.out.println("JSON file content: " + Files.readString(tempJsonFile));
-        System.out.println("TXT file created at: " + tempTxtFile.toAbsolutePath());
-        System.out.println("TXT file content: " + Files.readString(tempTxtFile));
-    }
-    */
 
     /**
      * Creates a temporary JSON file for testing.
@@ -129,6 +117,7 @@ class FileReaderFactoryTest {
     /**
      * Cleans up all temporary files created during the test execution.
      *
+     * <p>
      * This method is executed after each test and ensures that no temporary
      * resources remain on the filesystem. It uses {@link TestCleanupUtils}
      * to safely delete files or directories

@@ -74,8 +74,8 @@ public class ConverterWidgetFX {
 
     /* -------------------- INPUT FIELDS -------------------- */
     private final TextField amountField = new TextField();
-    public final ComboBox<CurrencyUnit> fromBox = new ComboBox<>();
-    public final ComboBox<CurrencyUnit> toBox = new ComboBox<>();
+    private final ComboBox<CurrencyUnit> fromBox = new ComboBox<>();
+    private final ComboBox<CurrencyUnit> toBox = new ComboBox<>();
 
     /**
      * Creates a new converter widget.

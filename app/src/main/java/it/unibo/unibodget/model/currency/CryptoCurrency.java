@@ -86,7 +86,7 @@ public enum CryptoCurrency implements CurrencyUnit {
     }
 
     /**
-     * Get ApiId
+     * Get ApiId.
      * 
      * @return apiId
      */
@@ -95,7 +95,7 @@ public enum CryptoCurrency implements CurrencyUnit {
     }
 
     /** 
-     * Return true if it's stable, false otherwise
+     * Return true if it's stable, false otherwise.
      * 
      * @return true if stable
      */

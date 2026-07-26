@@ -22,6 +22,7 @@ public final class CurrencyAlertService {
 
     /**
      * Registers a new alert to be monitored.
+     * 
      * <p>
      * Alerts are stored in insertion order. No duplicate prevention is performed,
      * so callers should ensure they do not add redundant alerts.

@@ -30,7 +30,9 @@ public final class WatchList {
 
     /**
      * Adds a currency to the user's watchlist.
-     * @param pair the watchlist pair to add.
+     * 
+     * @param   pair the watchlist pair to add.
+     * @return  added pair.
      */
     public boolean add(final WatchlistPair pair) {
         final boolean added = LOADED.add(pair);
@@ -42,7 +44,9 @@ public final class WatchList {
 
     /**
      * Removes a currency from the user's watchlist.
-     * @param pair the watchlist pair to remove.
+     * 
+     * @param   pair the watchlist pair to remove.
+     * @return  removed pair.
      */
     public boolean remove(final WatchlistPair pair) {
         final boolean removed = LOADED.remove(pair);

@@ -5,10 +5,11 @@ package it.unibo.unibodget.model.currency;
  */
 public final class CurrencySymbols {
 
+    public static final String DOLLAR = "$";
+
     // Not to instantiate
     private CurrencySymbols() { 
 
     }
 
-    public final static String DOLLAR = "$";
 }

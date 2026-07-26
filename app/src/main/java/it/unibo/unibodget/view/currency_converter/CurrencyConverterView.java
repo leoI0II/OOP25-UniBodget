@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public class CurrencyConverterView {
 
-    private final CurrencyConverterController controller;
     private static final String NEWLINE = "\n";
+    private final CurrencyConverterController controller;
 
     /**
      * Creates a new {@code CurrencyConverterView}.

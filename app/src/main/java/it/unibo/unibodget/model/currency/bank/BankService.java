@@ -26,6 +26,7 @@ public class BankService {
 
     /**
      * Adds a bank to the in‑memory list without affecting the JSON source.
+     * 
      * <p>
      * This method is useful for dynamically adding user‑defined banks during
      * runtime (e.g., custom fee structures).

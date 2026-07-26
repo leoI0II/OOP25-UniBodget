@@ -15,7 +15,7 @@ import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
 
 class OptionalUUIDSerDesTest {
 
-    private final static String BACKSLASH = "\"";
+    private static final String BACKSLASH = "\"";
     private final ObjectMapper mapper = PersistenceJacksonConfig.mapper();
 
     @Test

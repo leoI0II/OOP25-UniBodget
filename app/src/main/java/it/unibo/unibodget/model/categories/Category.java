@@ -116,8 +116,6 @@ public final class Category extends BasicCategory {
 
     /**
      * Sets the active status of the category.
-     *
-     * @param active the new active status
      */
     public boolean isDefault() {
         return origin == CategoryOrigin.DEFAULT;
