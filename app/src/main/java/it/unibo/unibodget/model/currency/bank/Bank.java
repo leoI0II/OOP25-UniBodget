@@ -26,7 +26,7 @@ public final class Bank {
      * Fields are expected to be populated via reflection after instantiation.
      */
     public Bank() {
-        
+
     }
 
     /**

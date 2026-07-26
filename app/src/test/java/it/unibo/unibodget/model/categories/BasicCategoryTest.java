@@ -10,12 +10,6 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class BasicCategoryTest {
 
-    static class TestCategory extends BasicCategory {
-        TestCategory(final String name, final ARGBColor color, final CategoryType type) {
-            super(name, color, type);
-        }
-    }
-
     @Test
     void shouldStoreFieldsCorrectly() {
         final TestCategory c = 
@@ -28,7 +22,7 @@ class BasicCategoryTest {
 
     @Test
     void shouldImplementEqualsAndHashCode() {
-        final TestCategory c1 = 
+        final TestCategory c1 =
             new TestCategory("Food", new ARGBColor("#FF0000"), CategoryType.EXPENSE);
         final TestCategory c2 = 
             new TestCategory("Food", new ARGBColor("#FF0000"), CategoryType.EXPENSE);
@@ -41,9 +35,15 @@ class BasicCategoryTest {
     void shouldPrintReadableToString() {
         final TestCategory c = 
             new TestCategory("Food", new ARGBColor("#986868"), CategoryType.EXPENSE);
-            
+
         assertTrue(c.toString().contains("Food"));
         assertFalse(c.toString().contains("#FF0000"));
+    }
+
+    static class TestCategory extends BasicCategory {
+        TestCategory(final String name, final ARGBColor color, final CategoryType type) {
+            super(name, color, type);
+        }
     }
 
 }

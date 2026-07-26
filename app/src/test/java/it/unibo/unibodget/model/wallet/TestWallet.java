@@ -18,10 +18,10 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 public final class TestWallet {
 
         /**
-         * To prevent instantiation
+         * To prevent instantiation.
          */
-        private TestWallet(){
-                
+        private TestWallet() {
+
         }
 
     public static void main(final String[] args) {
@@ -252,7 +252,7 @@ public final class TestWallet {
                 "Copy provider null? "
                 + (copy.getPriceProvider() == null)
         );
-        
+
         final CashAccountManager cashManager =
                 new CashAccountManager();
         cashManager.saveAll(

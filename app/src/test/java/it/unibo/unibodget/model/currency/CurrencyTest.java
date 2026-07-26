@@ -12,6 +12,11 @@ import org.junit.jupiter.api.Test;
 
 class CurrencyTest {
 
+    private static final String CURR_EUR = "EUR";
+    private static final String CURR_TEXT_EUR = "Euro";
+    private static final String SYMB_EUR = "€";
+    private static final String CURR_USD = "USD";
+
     @BeforeEach
     void resetCurrencyManager() throws Exception {
         // 1. Ottieni il campo static final "loaded"
@@ -36,25 +41,25 @@ class CurrencyTest {
         final var all = Currency.all();
 
         assertFalse(all.isEmpty());
-        assertNotNull(Currency.get("EUR"));
-        assertNotNull(Currency.get("USD"));
+        assertNotNull(Currency.get(CURR_EUR));
+        assertNotNull(Currency.get(CURR_USD));
     }
 
     @Test
     void shouldCreateDynamicCurrency() {
-        final Currency c = new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+        final Currency c = new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
 
-        assertEquals("EUR", c.getCode());
-        assertEquals("Euro", c.getFullName());
-        assertEquals("€", c.getSymbol());
+        assertEquals(CURR_EUR, c.getCode());
+        assertEquals(CURR_TEXT_EUR, c.getFullName());
+        assertEquals(SYMB_EUR, c.getSymbol());
     }
 
     @Test
     void shouldCompareCurrenciesByCode() {
         final Currency c1 = 
-            new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+            new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
         final Currency c2 = 
-            new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR");
+            new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());

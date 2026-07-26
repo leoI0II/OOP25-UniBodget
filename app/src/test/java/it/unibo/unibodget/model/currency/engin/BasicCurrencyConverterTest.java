@@ -18,34 +18,7 @@ import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 
 class BasicCurrencyConverterTest {
 
-    static class MockAPI implements ExchangeRateAPI {
-        @Override
-        public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
-            return Map.of(
-                FiatCurrency.EUR, 1.0,
-                FiatCurrency.USD, 1.2,
-                FiatCurrency.GBP, 0.8
-            );
-        }
-
-        @Override
-        public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
-                                                         final LocalDate from, final LocalDate to) {
-            return Map.of();
-        }
-    }
-
-    @Test
-    void shouldConvertCorrectly() {
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
-
-        final CurrencyConversionResult result =
-                converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
-
-        assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());
-        assertEquals(new BigDecimal("1.2000000000"), result.getAppliedRate());
-    }
+    private static final String FAKE = "FAKE";
 
     @Test
     void shouldReturnSameAmountWhenCurrenciesMatch() {
@@ -87,7 +60,7 @@ class BasicCurrencyConverterTest {
 
             @Override 
             public String getShortName() { 
-                return "FAKE"; 
+                return FAKE; 
             }
 
             @Override 
@@ -97,13 +70,42 @@ class BasicCurrencyConverterTest {
 
             @Override 
             public String getCode() { 
-                return "FAKE"; 
+                return FAKE; 
             }
         };
 
         assertThrows(IllegalArgumentException.class, () ->
                 converter.convert(new BigDecimal("10"), fake, FiatCurrency.EUR)
         );
+    }
+
+    @Test
+    void shouldConvertCorrectly() {
+        final BasicCurrencyConverter converter =
+                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
+
+        final CurrencyConversionResult result =
+                converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
+
+        assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());
+        assertEquals(new BigDecimal("1.2000000000"), result.getAppliedRate());
+    }
+
+    static class MockAPI implements ExchangeRateAPI {
+        @Override
+        public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
+            return Map.of(
+                FiatCurrency.EUR, 1.0,
+                FiatCurrency.USD, 1.2,
+                FiatCurrency.GBP, 0.8
+            );
+        }
+
+        @Override
+        public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
+                                                         final LocalDate from, final LocalDate to) {
+            return Map.of();
+        }
     }
 
 }

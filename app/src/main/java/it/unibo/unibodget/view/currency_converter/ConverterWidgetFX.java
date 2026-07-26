@@ -63,7 +63,7 @@ public class ConverterWidgetFX {
     private static final int COL_INDEX_0 = 0;
     private static final int ROW_INDEX_5 = 5;
     private static final int ROW_INDEX_6 = 6;
-    private static final int ROW_INDEX_7 = 7;    
+    private static final int ROW_INDEX_7 = 7;
 
     /* -------------------- CONTROLLERS -------------------- */
     private final CurrencyConverterController controller;

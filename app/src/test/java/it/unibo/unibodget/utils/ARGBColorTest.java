@@ -21,7 +21,7 @@ class ARGBColorTest {
         final ARGBColor black = new ARGBColor(255, 0, 0, 0);
         assertEquals(255, black.alpha());
         assertEquals(0, black.red());
-        
+
         final ARGBColor white = new ARGBColor(255, 255, 255, 255);
         assertEquals(255, white.blue());
     }
@@ -62,7 +62,7 @@ class ARGBColorTest {
         final ARGBColor color = new ARGBColor(10, 0, 255, 15);
         // 10 = 0A, 0 = 00, 255 = FF, 15 = 0F
         assertEquals("#0A00FF0F", color.toHexString());
-        
+
         final ARGBColor red = new ARGBColor(255, 255, 0, 0);
         assertEquals("#FFFF0000", red.toHexString());
     }
