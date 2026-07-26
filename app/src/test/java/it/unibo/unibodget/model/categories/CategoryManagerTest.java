@@ -16,6 +16,10 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class CategoryManagerTest {
 
+    private static final String GREEN = "#00FF00";
+    private static final String NEW_CAT = "NewCat";
+    private static final String DUPLICATE = "Duplicate";
+
     @BeforeEach
     void hardResetCategoryManager() throws Exception {
         // Reset completo via reflection
@@ -41,28 +45,28 @@ class CategoryManagerTest {
     @Test
     void shouldAddCategory() {
         final Category c = 
-            new Category("NewCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category(NEW_CAT, new ARGBColor(GREEN), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertTrue(CategoryManager.getAll().stream()
-                .anyMatch(cat -> cat.getName().equals("NewCat")));
+                .anyMatch(cat -> cat.getName().equals(NEW_CAT)));
     }
 
     @Test
     void shouldNotAddDuplicateCategory() {
         final Category c = 
-            new Category("Duplicate", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category(DUPLICATE, new ARGBColor(GREEN), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertThrows(IllegalArgumentException.class, () ->
-                CategoryManager.add(new Category("Duplicate", new ARGBColor("#00FF00"), CategoryType.EXPENSE))
+                CategoryManager.add(new Category(DUPLICATE, new ARGBColor(GREEN), CategoryType.EXPENSE))
         );
     }
 
     @Test
     void shouldRemoveCategory() {
         final Category c = 
-            new Category("Removable", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category("Removable", new ARGBColor(GREEN), CategoryType.EXPENSE);
         CategoryManager.add(c);
 
         assertTrue(CategoryManager.remove(c));

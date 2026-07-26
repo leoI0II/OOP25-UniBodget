@@ -15,6 +15,8 @@ import it.unibo.unibodget.persistency.filemanager.impl.opener.SafeFileOpener;
 
 class SafeFileOpenerTest {
 
+    private static final String SUFF_TXT = ".txt";
+
     private final SafeFileOpener opener = new SafeFileOpener();
 
     @Test
@@ -39,7 +41,7 @@ class SafeFileOpenerTest {
 
     @Test
     void testReturnsExistingFile() throws IOException {
-        final Path tempFile = Files.createTempFile("existingSafe", ".txt");
+        final Path tempFile = Files.createTempFile("existingSafe", SUFF_TXT);
 
         assertTrue(Files.exists(tempFile));
 
@@ -50,7 +52,7 @@ class SafeFileOpenerTest {
 
     @Test
     void testThrowsIfFileNotReadable() throws IOException {
-        final Path tempFile = Files.createTempFile("notReadable", ".txt");
+        final Path tempFile = Files.createTempFile("notReadable", SUFF_TXT);
 
         // remove read permission
         tempFile.toFile().setReadable(false);
@@ -60,7 +62,7 @@ class SafeFileOpenerTest {
 
     @Test
     void testThrowsIfFileNotWritable() throws IOException {
-        final Path tempFile = Files.createTempFile("notWritable", ".txt");
+        final Path tempFile = Files.createTempFile("notWritable", SUFF_TXT);
 
         // remove write permission
         tempFile.toFile().setWritable(false);

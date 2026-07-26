@@ -13,6 +13,11 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 
 class InvestmentTransactionTest {
 
+        private static final String DESC = "desc";
+        private static final String SHORT_DESCR = "d";
+        private static final String NOTES = "notes";
+        private static final String SHORT_NOTES = "n";
+
     @Test
     void shouldCreateInvestmentTransaction() {
         final Asset asset = new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN);
@@ -23,8 +28,8 @@ class InvestmentTransactionTest {
                 asset,
                 Category.INVESTMENT_BUY,
                 LocalDate.of(2024, 1, 1),
-                "desc",
-                "notes",
+                DESC,
+                NOTES,
                 unitPrice,
                 fee
         );
@@ -40,8 +45,8 @@ class InvestmentTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.INVESTMENT_BUY,
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         null,
                         null
                 )
@@ -55,8 +60,8 @@ class InvestmentTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.INVESTMENT_BUY,
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         new Asset(FiatCurrency.EUR, new java.math.BigDecimal("-1")),
                         null
                 )
@@ -70,8 +75,8 @@ class InvestmentTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.INVESTMENT_BUY,
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE),
                         new Asset(FiatCurrency.EUR, new java.math.BigDecimal("-1"))
                 )

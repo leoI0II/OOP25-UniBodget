@@ -16,14 +16,19 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 
 class CashTransactionTest {
 
+        private static final String DESC = "desc";
+        private static final String SHORT_DESCR = "d";
+        private static final String NOTES = "notes";
+        private static final String SHORT_NOTES = "n";
+
     @Test
     void shouldCreateStandardTransaction() {
         final CashTransaction t = new CashTransaction(
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                 Category.FOOD,                      // categoria reale
                 LocalDate.of(2024, 1, 1),
-                "desc",
-                "notes"
+                DESC,
+                NOTES
         );
 
         assertFalse(t.isFriendLoanTransaction());
@@ -39,8 +44,8 @@ class CashTransactionTest {
                 new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                 Category.FRIEND_LOAN,               // categoria reale
                 LocalDate.of(2024, 1, 1),
-                "desc",
-                "notes",
+                DESC,
+                NOTES,
                 id,
                 "Alice"
         );
@@ -57,8 +62,8 @@ class CashTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.FRIEND_LOAN,
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         UUID.randomUUID(),
                         null
                 )
@@ -72,8 +77,8 @@ class CashTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.FRIEND_LOAN,
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         null,
                         null
                 )
@@ -87,8 +92,8 @@ class CashTransactionTest {
                         new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
                         Category.FOOD,                 // NON FRIEND_LOAN
                         LocalDate.now(),
-                        "d",
-                        "n",
+                        SHORT_DESCR,
+                        SHORT_NOTES,
                         UUID.randomUUID(),
                         "Bob"
                 )

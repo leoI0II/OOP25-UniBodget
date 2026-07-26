@@ -17,24 +17,28 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 
 class CashAccountTest {
 
+    private final static String CASH_CUST = "MyCash";
+    private final static String DESC = "desc";
+    private final static String NOTES = "notes";
+
     @Test
     void shouldComputeBalanceCorrectly() {
-        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
         acc.addTransaction(new CashTransaction(
                 new Asset(FiatCurrency.EUR, new BigDecimal("10")),
                 Category.FOOD,
                 LocalDate.now(),
-                "desc",
-                "notes"
+                DESC,
+                NOTES
         ));
 
         acc.addTransaction(new CashTransaction(
                 new Asset(FiatCurrency.EUR, new BigDecimal("5")),
                 Category.FOOD,
                 LocalDate.now(),
-                "desc",
-                "notes"
+                DESC,
+                NOTES
         ));
 
         assertEquals(new BigDecimal("15"), acc.getBalance().amount());
@@ -42,7 +46,7 @@ class CashAccountTest {
 
     @Test
     void shouldUseDefaultBudgetSettingsWhenNull() {
-        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
         // DefaultBudgetSettings(BigDecimal.ZERO)
         assertEquals(BigDecimal.ZERO, acc.getBudgetSettings().getLimitValue());
@@ -51,7 +55,7 @@ class CashAccountTest {
 
     @Test
     void shouldSetBudgetSettings() {
-        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
         final DefaultBudgetSettings newSettings = new DefaultBudgetSettings(new BigDecimal("500"));
         acc.setBudgetSettings(newSettings);
@@ -62,14 +66,14 @@ class CashAccountTest {
 
     @Test
     void shouldRejectZeroAmountTransaction() {
-        final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
+        final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
         final CashTransaction zeroTx = new CashTransaction(
                 new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
                 Category.FOOD,
                 LocalDate.now(),
-                "desc",
-                "notes"
+                DESC,
+                NOTES
         );
 
         assertThrows(IllegalArgumentException.class, () -> acc.addTransaction(zeroTx));

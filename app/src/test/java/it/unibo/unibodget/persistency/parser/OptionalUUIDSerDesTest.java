@@ -15,6 +15,7 @@ import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
 
 class OptionalUUIDSerDesTest {
 
+    private final static String BACKSLASH = "\"";
     private final ObjectMapper mapper = PersistenceJacksonConfig.mapper();
 
     @Test
@@ -27,7 +28,7 @@ class OptionalUUIDSerDesTest {
     void testSerializeUUID() throws Exception {
         final UUID id = UUID.randomUUID();
         final String json = mapper.writeValueAsString(Optional.of(id));
-        assertEquals("\"" + id.toString() + "\"", json);
+        assertEquals(BACKSLASH + id.toString() + BACKSLASH, json);
     }
 
     @Test
@@ -45,7 +46,7 @@ class OptionalUUIDSerDesTest {
     void testDeserializeUUID() throws Exception {
         final UUID id = UUID.randomUUID();
         final Optional<UUID> opt = mapper.readValue(
-            "\"" + id + "\"",
+            BACKSLASH + id + BACKSLASH,
             new TypeReference<Optional<UUID>>() {
 
             }

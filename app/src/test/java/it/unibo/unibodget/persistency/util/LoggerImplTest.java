@@ -15,12 +15,14 @@ import it.unibo.unibodget.persistency.util.impl.LoggerImpl;
 /**
  * Unit test class for {@link LoggerImpl}.
  * 
+ * <p>
  * This test suite verifies that:
  * - informational messages are correctly printed to System.out
  * - warning messages are correctly printed to System.out
  * - error messages are printed to System.out
  * - throwable stack traces are printed to System.err
  * 
+ * <p>
  * The tests temporarily redirect System.out and System.err to
  * ByteArrayOutputStreams to capture and inspect the logger output.
  */
@@ -94,7 +96,9 @@ class LoggerImplTest {
     }
 
     /**
-     * Verifies that error messages with a throwable cause:
+     * Verifies that error messages with a throwable cause.
+     * 
+     * <p>
      * - print the error message to System.out
      * - print the stack trace to System.err
      */

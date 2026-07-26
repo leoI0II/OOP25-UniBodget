@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.zone.ZoneRules;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,22 +17,43 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class ARGBColorTest {
 
+    private static final int ALPHA_FULL = 255;
+    private static final int ZERO = 0;
+
+    private static final int RGB_100 = 100;
+    private static final int RGB_150 = 150;
+    private static final int RGB_200 = 200;
+
+    private static final int ALPHA_10 = 10;
+    private static final int ALPHA_128 = 128;
+
+    private static final int BLUE_255 = 255;
+    private static final int BLUE_200 = 200;
+    private static final int BLUE_30 = 30;
+
+    private static final int GREEN_255 = 255;
+    private static final int GREEN_20 = 20;
+    private static final int GREEN_150 = 150;
+    private static final int RED_255 = 255;
+    private static final int RED_10 = 10;
+    private static final int RED_100 = 100;
+
     // 1. Test valid ARGB values (0-255) and ensure they are stored correctly
     @Test
     void testValidComponents() {
-        final ARGBColor black = new ARGBColor(255, 0, 0, 0);
-        assertEquals(255, black.alpha());
+        final ARGBColor black = new ARGBColor(ALPHA_FULL, ZERO, ZERO, ZERO);
+        assertEquals(ALPHA_FULL, black.alpha());
         assertEquals(0, black.red());
 
-        final ARGBColor white = new ARGBColor(255, 255, 255, 255);
-        assertEquals(255, white.blue());
+        final ARGBColor white = new ARGBColor(ALPHA_FULL, RED_255, GREEN_255, BLUE_255);
+        assertEquals(ALPHA_FULL, white.blue());
     }
 
     // 2. Test constructor with RGB values and ensure alpha defaults to 255
     @Test
     void testRgbConstructorAddsFullAlpha() {
-        final ARGBColor color = new ARGBColor(100, 150, 200);
-        assertEquals(255, color.alpha(), "Alpha should be 255 by default for RGB constructor");
+        final ARGBColor color = new ARGBColor(RGB_100, RGB_150, RGB_200);
+        assertEquals(ALPHA_FULL, color.alpha(), "Alpha should be 255 by default for RGB constructor");
         assertEquals(100, color.red());
     }
 
@@ -50,8 +73,8 @@ class ARGBColorTest {
     @ValueSource(strings = {"#FF0000", "FF0000", "#FFFF0000", "FFFF0000"})
     void testValidHexParsing(final String hex) {
         final ARGBColor color = new ARGBColor(hex);
-        assertEquals(255, color.alpha());
-        assertEquals(255, color.red());
+        assertEquals(ALPHA_FULL, color.alpha());
+        assertEquals(ALPHA_FULL, color.red());
         assertEquals(0, color.green());
         assertEquals(0, color.blue());
     }
@@ -59,11 +82,11 @@ class ARGBColorTest {
     // 5. Test hex string output to ensure it matches the expected format and values
     @Test
     void testToHexString() {
-        final ARGBColor color = new ARGBColor(10, 0, 255, 15);
+        final ARGBColor color = new ARGBColor(ALPHA_10, ZERO, 255, 15);
         // 10 = 0A, 0 = 00, 255 = FF, 15 = 0F
         assertEquals("#0A00FF0F", color.toHexString());
 
-        final ARGBColor red = new ARGBColor(255, 255, 0, 0);
+        final ARGBColor red = new ARGBColor(ALPHA_FULL, 255, ZERO, ZERO);
         assertEquals("#FFFF0000", red.toHexString());
     }
 
@@ -111,9 +134,9 @@ class ARGBColorTest {
     // 9. Test equals auto-generated method
     @Test
     void testEquals() {
-        final ARGBColor color1 = new ARGBColor(255, 100, 150, 200);
-        final ARGBColor color2 = new ARGBColor(255, 100, 150, 200);
-        final ARGBColor colorDifferent = new ARGBColor(128, 100, 150, 200);
+        final ARGBColor color1 = new ARGBColor(ALPHA_FULL, RED_100, GREEN_150, BLUE_200);
+        final ARGBColor color2 = new ARGBColor(ALPHA_FULL, RED_100, GREEN_150, BLUE_200);
+        final ARGBColor colorDifferent = new ARGBColor(ALPHA_128, RED_100, GREEN_150, BLUE_200);
 
         assertEquals(color1, color1);
         assertEquals(color1, color2);
@@ -126,9 +149,9 @@ class ARGBColorTest {
     // 10. Test hashCode auto-generated method
     @Test
     void testHashCode() {
-        final ARGBColor color1 = new ARGBColor(255, 100, 150, 200);
-        final ARGBColor color2 = new ARGBColor(255, 100, 150, 200);
-        final ARGBColor colorDifferent = new ARGBColor(128, 100, 150, 200);
+        final ARGBColor color1 = new ARGBColor(ALPHA_FULL, RED_100, GREEN_150, BLUE_200);
+        final ARGBColor color2 = new ARGBColor(ALPHA_FULL, RED_100, GREEN_150, BLUE_200);
+        final ARGBColor colorDifferent = new ARGBColor(ALPHA_128, RED_100, GREEN_150, BLUE_200);
 
         assertEquals(color1.hashCode(), color2.hashCode());
         assertNotEquals(color1.hashCode(), colorDifferent.hashCode());
@@ -137,7 +160,7 @@ class ARGBColorTest {
     // 11. Test toString auto-generated method
     @Test
     void testToString() {
-        final ARGBColor color = new ARGBColor(128, 10, 20, 30);
+        final ARGBColor color = new ARGBColor(ALPHA_128, RED_10, GREEN_20, BLUE_30);
         final String str = color.toString();
 
         assertTrue(str.startsWith("ARGBColor["));

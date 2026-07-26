@@ -21,6 +21,7 @@ import it.unibo.unibodget.persistency.util.TestCleanupUtils;
 /**
  * Unit test class for {@link JsonReader}.
  *
+ * <p>
  * This test suite verifies that:
  * - JsonReader correctly reads the content of a valid JSON file
  * - JsonReader throws exceptions when the file does not exist
@@ -88,13 +89,15 @@ class JsonReaderTest {
 
     /**
      * Verifies that JsonReader throws an IllegalArgumentException on UNIX systems
-    * when the file exists but is not readable.
-    *
-    * On POSIX-compliant systems (Linux, macOS), file permissions can be
-    * reliably manipulated using {@code setPosixFilePermissions}.
-    * 
-    * This test is enabled only on UNIX systems.
-    */
+     * when the file exists but is not readable.
+     *
+     * <p>
+     * On POSIX-compliant systems (Linux, macOS), file permissions can be
+     * reliably manipulated using {@code setPosixFilePermissions}.
+     * 
+     * <p>
+     * This test is enabled only on UNIX systems.
+     */
     @Test
     @EnabledOnOs({OS.LINUX, OS.MAC})
     void testConstructorThrowsIfFileNotReadable_Unix() throws IOException {
@@ -110,11 +113,13 @@ class JsonReaderTest {
      * Verifies that JsonReader throws an IllegalArgumentException on Windows
      * when the file exists but is not readable.
      *
+     * <p>
      * Windows does not reliably support POSIX-style permission changes,
      * meaning that {@code setReadable(false)} or POSIX permission manipulation
      * may silently fail. To ensure consistent behavior, this test simulates
      * a validation failure by overriding {@code validatePath()} in a local subclass
      *
+     * <p>
      * This avoids false negatives caused by OS-specific permission handling.
      */
     @Test
@@ -140,6 +145,7 @@ class JsonReaderTest {
     /**
      * Cleans up all temporary files created during the test execution.
      *
+     * <p>
      * This method is executed after each test and ensures that no temporary
      * resources remain on the filesystem. It uses {@link TestCleanupUtils}
      * to safely delete files or directories

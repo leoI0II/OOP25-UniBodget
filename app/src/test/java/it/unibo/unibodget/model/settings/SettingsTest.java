@@ -10,6 +10,11 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class SettingsTest {
 
+    private static final String WHITE = "#FFFFFF";
+    private static final String GREY = "#DDDDDD";
+    private static final String BLACK = "#000000";
+    private static final String TEST = "Test";
+
     @Test
     void shouldSaveAndReloadSettings() throws Exception {
         final Settings settings = new Settings();
@@ -29,10 +34,10 @@ class SettingsTest {
         final Settings s = mgr.getCurrent();
         s.setTheme(
             new Theme(
-                "Test",
-                new ARGBColor("#FFFFFF"),
-                new ARGBColor("#DDDDDD"),
-                new ARGBColor("#000000"),
+                TEST,
+                new ARGBColor(WHITE),
+                new ARGBColor(GREY),
+                new ARGBColor(BLACK),
                 "Arial",
                 16,
                 true
@@ -44,7 +49,7 @@ class SettingsTest {
         mgr.appendToHistory(s.copy());
 
         final SettingsManager mgr2 = new SettingsManager();
-        assertEquals("Test", mgr2.getCurrent().getTheme().getName());
+        assertEquals(TEST, mgr2.getCurrent().getTheme().getName());
     }
 
     @Test
@@ -69,9 +74,9 @@ class SettingsTest {
         settings.setTheme(
                 new Theme(
                         "Dark",
-                        new ARGBColor("#000000"),
+                        new ARGBColor(BLACK),
                         new ARGBColor("#222222"),
-                        new ARGBColor("#FFFFFF")
+                        new ARGBColor(WHITE)
                 )
         );
         assertEquals(
@@ -88,9 +93,9 @@ class SettingsTest {
         copy.setTheme(
                 new Theme(
                         "Modified",
-                        new ARGBColor("#FFFFFF"),
-                        new ARGBColor("#DDDDDD"),
-                        new ARGBColor("#000000")
+                        new ARGBColor(WHITE),
+                        new ARGBColor(GREY),
+                        new ARGBColor(BLACK)
                 )
         );
 

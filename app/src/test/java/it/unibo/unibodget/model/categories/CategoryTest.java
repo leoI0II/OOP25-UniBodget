@@ -11,6 +11,11 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class CategoryTest {
 
+    private static final String CAT_NAME = "MyCat";
+    private static final String CAT_NAME_X = "X";
+    private static final String DARK_BLUE = "#123456";
+    private static final String GREEN = "#00FF00";
+
     @Test
     void defaultCategoriesShouldBeAlwaysActive() {
         assertTrue(Category.FOOD.isActive());
@@ -21,7 +26,7 @@ class CategoryTest {
     @Test
     void customCategoryShouldBeActiveByDefault() {
         final Category c = 
-            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
         assertTrue(c.isActive());
         assertTrue(c.isCustom());
         assertFalse(c.isDefault());
@@ -30,7 +35,7 @@ class CategoryTest {
     @Test
     void shouldArchiveCustomCategory() {
         final Category c = 
-            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
         c.archive();
         assertFalse(c.isActive());
     }
@@ -38,7 +43,7 @@ class CategoryTest {
     @Test
     void shouldReactivateCustomCategory() {
         final Category c = 
-            new Category("MyCat", new ARGBColor("#00FF00"), CategoryType.EXPENSE);
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
         c.archive();
         c.reactivate();
         assertTrue(c.isActive());
@@ -62,9 +67,9 @@ class CategoryTest {
     @Test
     void shouldImplementEqualsAndHashCode() {
         final Category c1 = 
-            new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
+            new Category(CAT_NAME_X, new ARGBColor(DARK_BLUE), CategoryType.EXPENSE);
         final Category c2 = 
-            new Category("X", new ARGBColor("#123456"), CategoryType.EXPENSE);
+            new Category(CAT_NAME_X, new ARGBColor(DARK_BLUE), CategoryType.EXPENSE);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());

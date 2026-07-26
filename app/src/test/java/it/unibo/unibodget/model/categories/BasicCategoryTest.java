@@ -10,22 +10,27 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 
 class BasicCategoryTest {
 
+    private static final String FOOD = "Food";
+    private static final String RED = "#FF0000";
+    private static final String BROWN = "#FF862D2D";
+    private static final String LIGHT_BROWN = "#986868";
+
     @Test
     void shouldStoreFieldsCorrectly() {
         final TestCategory c = 
-            new TestCategory("Food", new ARGBColor("#FF862D2D"), CategoryType.EXPENSE);
+            new TestCategory(FOOD, new ARGBColor(BROWN), CategoryType.EXPENSE);
 
-        assertEquals("Food", c.getName());
-        assertEquals("#FF862D2D", c.getColorHex().toHexString());
+        assertEquals(FOOD, c.getName());
+        assertEquals(BROWN, c.getColorHex().toHexString());
         assertEquals(CategoryType.EXPENSE, c.getType());
     }
 
     @Test
     void shouldImplementEqualsAndHashCode() {
         final TestCategory c1 =
-            new TestCategory("Food", new ARGBColor("#FF0000"), CategoryType.EXPENSE);
+            new TestCategory(FOOD, new ARGBColor(RED), CategoryType.EXPENSE);
         final TestCategory c2 = 
-            new TestCategory("Food", new ARGBColor("#FF0000"), CategoryType.EXPENSE);
+            new TestCategory(FOOD, new ARGBColor(RED), CategoryType.EXPENSE);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());
@@ -34,10 +39,10 @@ class BasicCategoryTest {
     @Test
     void shouldPrintReadableToString() {
         final TestCategory c = 
-            new TestCategory("Food", new ARGBColor("#986868"), CategoryType.EXPENSE);
+            new TestCategory(FOOD, new ARGBColor(LIGHT_BROWN), CategoryType.EXPENSE);
 
-        assertTrue(c.toString().contains("Food"));
-        assertFalse(c.toString().contains("#FF0000"));
+        assertTrue(c.toString().contains(FOOD));
+        assertFalse(c.toString().contains(RED));
     }
 
     static class TestCategory extends BasicCategory {

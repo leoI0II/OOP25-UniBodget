@@ -10,6 +10,7 @@ import java.util.Comparator;
  * and directories created during test execution. Useful in test suites 
  * that generate multiple temporary resources
  * 
+ * <p>
  * Features:
  * - Deletes files safely without throwing exceptions
  * - Deletes directories recursively, including nested content
@@ -28,6 +29,7 @@ public final class TestCleanupUtils {
     /**
      * Deletes a file or directory recursively if it exists.
      *
+     * <p>
      * If the path refers to:
      * - a file      → it is deleted directly
      * - a directory → all its contents are deleted first, then the directory itself
