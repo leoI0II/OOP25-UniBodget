@@ -34,6 +34,7 @@ public class CurrencyConversionResult {
     }
 
     /** 
+     * Get the amount.
      * 
      * @return the original amount 
      */
@@ -42,6 +43,7 @@ public class CurrencyConversionResult {
     }
 
     /** 
+     * Get the converted amount.
      * 
      * @return the converted amount 
      */
@@ -50,6 +52,7 @@ public class CurrencyConversionResult {
     }
 
     /** 
+     * Get the applied exchange rate. 
      * 
      * @return the applied exchange rate
      */
@@ -58,6 +61,7 @@ public class CurrencyConversionResult {
     }
 
     /** 
+     * Get the source currency unit.
      * 
      * @return the source currency 
      */
@@ -66,6 +70,7 @@ public class CurrencyConversionResult {
     }
 
     /** 
+     * Get the target currency unit. 
      * 
      * @return the target currency 
      */

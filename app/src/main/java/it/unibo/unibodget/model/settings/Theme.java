@@ -27,6 +27,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 public final class Theme {
 
+    private static final int HALF = 128;
+    private static final int FONT_14 = 14;
     private static final String FONT_ARIAL = "Arial";
 
     /**
@@ -39,7 +41,7 @@ public final class Theme {
                     ARGBColor.LIGHT_GRAY,
                     getReadableTextColor(ARGBColor.WHITE),
                     FONT_ARIAL,
-                    14,
+                    FONT_14,
                     false
             );
 
@@ -99,7 +101,7 @@ public final class Theme {
             final ARGBColor buttonColor,
             final ARGBColor textColor
     ) {
-        this(name, primaryColor, buttonColor, textColor, "Arial", 14, false);
+        this(name, primaryColor, buttonColor, textColor, FONT_ARIAL, FONT_14, false);
     }
 
     /**
@@ -117,7 +119,7 @@ public final class Theme {
                 new ARGBColor(buttonHexColor),
                 getReadableTextColor(new ARGBColor(hexColor)),
                 FONT_ARIAL,
-                14,
+                FONT_14,
                 false
         );
     }
@@ -198,7 +200,7 @@ public final class Theme {
                 + 0.587 * color.green()
                 + 0.114 * color.blue();
 
-        return luminance > 128 ? ARGBColor.BLACK : ARGBColor.WHITE;
+        return luminance > HALF ? ARGBColor.BLACK : ARGBColor.WHITE;
     }
 
     @Override

@@ -7,6 +7,8 @@ package it.unibo.unibodget.model.settings;
  */
 public final class WindowPreferences {
 
+    private static final int WIDTH_1280 = 1280;
+    private static final int HEIGHT_720 = 720;
     private double width;
     private double height;
     private boolean maximized;
@@ -30,7 +32,7 @@ public final class WindowPreferences {
      * Defaults to a 1280×720 window, not maximized.
      */
     public WindowPreferences() {
-        this(1280, 720, false);
+        this(WIDTH_1280, HEIGHT_720, false);
     }
 
     /**

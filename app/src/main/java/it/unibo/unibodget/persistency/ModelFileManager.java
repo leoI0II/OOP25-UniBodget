@@ -54,7 +54,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param resourcePath fallback resource used if the file is missing or invalid
      * @param type         the model class to serialize/deserialize
      */
-    public ModelFileManager(Path path, String resourcePath, Class<T> type) {
+    public ModelFileManager(final Path path, final String resourcePath, final Class<T> type) {
         this(path, resourcePath, type, defaultKey(type), null);
     }
 
@@ -66,7 +66,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param type         the model class
      * @param objectKey    the JSON key used to store the object
      */
-    public ModelFileManager(Path path, String resourcePath, Class<T> type, String objectKey) {
+    public ModelFileManager(final Path path, final String resourcePath, 
+                            final Class<T> type, final String objectKey) {
         this(path, resourcePath, type, objectKey, null);
     }
 
@@ -79,7 +80,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param objectKey    JSON key for the object
      * @param listKey      JSON key for a list of objects
      */
-    public ModelFileManager(Path path, String resourcePath, Class<T> type, String objectKey, String listKey) {
+    public ModelFileManager(final Path path, final String resourcePath, final Class<T> type, 
+                            final String objectKey, final String listKey) {
         this.path = path;
         this.resourcePath = resourcePath;
         this.type = type;
@@ -157,9 +159,9 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @return the list of deserialized objects
      * @throws IOException if the key is missing or invalid
      */
-    public List<T> loadList(String key) throws IOException {
-        JsonNode root = loadJson();
-        JsonNode arr = root.get(key);
+    public List<T> loadList(final String key) throws IOException {
+        final JsonNode root = loadJson();
+        final JsonNode arr = root.get(key);
 
         if (arr == null || !arr.isArray()) {
             throw new IOException("Key '" + key + "' not found or not an array");
@@ -195,12 +197,12 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param list the list to save
      * @throws IOException if writing fails
      */
-    public void saveList(String key, List<T> list) throws IOException {
+    public void saveList(final String key, final List<T> list) throws IOException {
         requireOpen();
 
         JsonNode rootNode;
         if (Files.exists(path)) {
-            String raw = Files.readString(path);
+            final String raw = Files.readString(path);
             rootNode = raw == null || raw.trim().isEmpty()
                     ? mapper.createObjectNode()
                     : mapper.readTree(raw);
@@ -208,11 +210,11 @@ public final class ModelFileManager<T> implements AutoCloseable {
             rootNode = mapper.createObjectNode();
         }
 
-        ObjectNode root = (ObjectNode) rootNode;
-        ArrayNode array = mapper.valueToTree(list);
+        final ObjectNode root = (ObjectNode) rootNode;
+        final ArrayNode array = mapper.valueToTree(list);
         root.set(key, array);
 
-        String updated = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+        final String updated = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
         Files.writeString(path, updated);
     }
     /**
@@ -221,9 +223,9 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param obj the object to save
      * @throws IOException if writing fails
      */
-    public void saveObject(T obj) throws IOException {
+    public void saveObject(final T obj) throws IOException {
         requireOpen();
-        ObjectNode root = readCurrentRootOrEmpty();
+        final ObjectNode root = readCurrentRootOrEmpty();
         root.set(objectKey, mapper.valueToTree(obj));
         mapper.writerWithDefaultPrettyPrinter()
             .writeValue(path.toFile(), root);
@@ -236,8 +238,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
      */
     public T loadObject() throws IOException {
         requireOpen();
-        JsonNode root = mapper.readTree(path.toFile());
-        JsonNode node = root.get(objectKey);
+        final JsonNode root = mapper.readTree(path.toFile());
+        final JsonNode node = root.get(objectKey);
         if (node == null || node.isNull()) {
             return null;
         }
@@ -253,11 +255,11 @@ public final class ModelFileManager<T> implements AutoCloseable {
         if (!Files.exists(path)) {
             return mapper.createObjectNode();
         }
-        String raw = Files.readString(path);
+        final String raw = Files.readString(path);
         if (raw.trim().isEmpty()) {
             return mapper.createObjectNode();
         }
-        JsonNode node = mapper.readTree(raw);
+        final JsonNode node = mapper.readTree(raw);
         return node instanceof ObjectNode ? (ObjectNode) node : mapper.createObjectNode();
     }
 
@@ -280,7 +282,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @throws IOException if writing fails
      * @throws IllegalStateException if no list key was configured for this manager
      */
-    public void saveList(List<T> list) throws IOException {
+    public void saveList(final List<T> list) throws IOException {
         requireListKey();
         saveList(listKey, list);
     }

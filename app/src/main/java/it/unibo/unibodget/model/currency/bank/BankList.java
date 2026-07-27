@@ -9,6 +9,13 @@ import java.util.List;
 
 public final class BankList {
 
+    private static final double FIXED_FEE_1 = 1.0;
+    private static final double FIXED_FEE_2 = 2.0;
+    private static final double FIXED_FEE_3 = 3.0;
+    private static final double PERC_FEE_0_5 = 0.5;
+    private static final double PERC_FEE_1 = 1.0;
+    private static final double PERC_FEE_1_5 = 1.5;
+
     private static final Path PATH = Path.of("data/json/currency/bank/Banks.json");
     private static final String RESOURCE = "/json/currency/bank/Banks.json";
 
@@ -124,9 +131,9 @@ public final class BankList {
      */
     private static List<Bank> generateMockBanks() {
         return List.of(
-                new Bank("Intesa San Paolo", 1.0, 0.5),
-                new Bank("BPER", 2.0, 1.0),
-                new Bank("Banca di Romagna", 3.0, 1.5)
+                new Bank("Intesa San Paolo", FIXED_FEE_1, PERC_FEE_0_5),
+                new Bank("BPER", FIXED_FEE_2, PERC_FEE_1),
+                new Bank("Banca di Romagna", FIXED_FEE_3, PERC_FEE_1_5)
         );
     }
 }
