@@ -3,10 +3,14 @@ package it.unibo.unibodget.persistency.parser.impl;
 import it.unibo.unibodget.persistency.parser.api.DataSerializer;
 import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JSON serializer implementation used by UniBodget to convert domain model

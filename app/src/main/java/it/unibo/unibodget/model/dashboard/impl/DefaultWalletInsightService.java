@@ -31,6 +31,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final int PERCENT_SCALE = 2;
+    private static final String INCOME = "Income";
+    private static final String SAVINGS = "Savings";
+    private static final String SPENT = "You spent ";
+    private static final String SPENDING = "Spending";
 
     /**
      * {@inheritDoc}
@@ -152,7 +156,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0 && current.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Spending",
+                    SPENDING,
                     "No spending recorded this month or last month.",
                     InsightTrend.NEUTRAL,
                     BigDecimal.ZERO,
@@ -162,8 +166,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + current + " this month; no spending was recorded last month.",
+                    SPENDING,
+                    SPENT + current + " this month; no spending was recorded last month.",
                     InsightTrend.NEUTRAL,
                     current,
                     null
@@ -172,8 +176,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + percentage + "% less than last month (" + absoluteDelta + " less).",
+                    SPENDING,
+                    SPENT + percentage + "% less than last month (" + absoluteDelta + " less).",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
                     percentage
@@ -182,8 +186,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + percentage + "% more than last month (" + absoluteDelta + " more).",
+                    SPENDING,
+                    SPENT + percentage + "% more than last month (" + absoluteDelta + " more).",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
                     percentage
@@ -191,7 +195,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Spending",
+                SPENDING,
                 "Your spending is in line with last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,
@@ -219,7 +223,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Savings",
+                    SAVINGS,
                     "You saved " + absoluteDelta + " more than last month.",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
@@ -229,7 +233,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Savings",
+                    SAVINGS,
                     "You saved " + absoluteDelta + " less than last month.",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
@@ -238,7 +242,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Savings",
+                SAVINGS,
                 "Your savings match last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,
@@ -262,7 +266,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0 && current.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "No income recorded this month or last month.",
                     InsightTrend.NEUTRAL,
                     BigDecimal.ZERO,
@@ -272,7 +276,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "You recorded " + current + " income this month; no income was recorded last month.",
                     InsightTrend.POSITIVE,
                     current,
@@ -282,7 +286,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "Your income increased by " + percentage + "% compared to last month.",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
@@ -292,7 +296,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "Your income decreased by " + percentage + "% compared to last month.",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
@@ -301,7 +305,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Income",
+                INCOME,
                 "Your income matches last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,

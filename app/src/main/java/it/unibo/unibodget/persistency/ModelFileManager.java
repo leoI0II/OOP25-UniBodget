@@ -14,8 +14,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import it.unibo.unibodget.persistency.ModelFileManager;
-
 /**
  * Manages the lifecycle of reading and writing a single model type {@code T}
  * to a JSON file. This class abstracts file creation, loading, saving,
