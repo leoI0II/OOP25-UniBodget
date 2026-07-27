@@ -36,6 +36,11 @@ class ARGBColorTest {
     private static final int RED_10 = 10;
     private static final int RED_100 = 100;
 
+    private static final int VAL_170 = 170;
+    private static final int VAL_187 = 187;
+    private static final int VAL_204 = 204;
+    private static final int VAL_221 = 221;
+
     // 1. Test valid ARGB values (0-255) and ensure they are stored correctly
     @Test
     void testValidComponents() {
@@ -60,10 +65,10 @@ class ARGBColorTest {
     void testIntConstructor() {
         // 0xAA (170), 0xBB (187), 0xCC (204), 0xDD (221)
         final ARGBColor color = new ARGBColor(0xAABBCCDD);
-        assertEquals(170, color.alpha());
-        assertEquals(187, color.red());
-        assertEquals(204, color.green());
-        assertEquals(221, color.blue());
+        assertEquals(VAL_170, color.alpha());
+        assertEquals(VAL_187, color.red());
+        assertEquals(VAL_204, color.green());
+        assertEquals(VAL_221, color.blue());
     }
 
     // 4. Test hex string constructor with various valid formats and ensure correct parsing
@@ -105,7 +110,8 @@ class ARGBColorTest {
         assertTrue(thrown.getMessage().contains("must be between 0 and 255"));
     }
 
-    // 7. check if the hex string constructor fails when the string is not in the correct format (not 6 or 8 characters after removing #)
+    // 7. check if the hex string constructor fails 
+    // when the string is not in the correct format (not 6 or 8 characters after removing #)
     @ParameterizedTest
     @ValueSource(strings = {"#12345", "1234567", "#FF", "", "#123456789"})
     void testInvalidHexLength(final String invalidHex) {
@@ -116,7 +122,8 @@ class ARGBColorTest {
         assertTrue(thrown.getMessage().contains("must be in the format #RRGGBB or #AARRGGBB"));
     }
 
-    // 8. check if the hex string constructor fails when the string contains invalid hexadecimal characters and throws the correct exception
+    // 8. check if the hex string constructor fails 
+    // when the string contains invalid hexadecimal characters and throws the correct exception
     @Test
     void testInvalidHexCharacters() {
         assertThrows(

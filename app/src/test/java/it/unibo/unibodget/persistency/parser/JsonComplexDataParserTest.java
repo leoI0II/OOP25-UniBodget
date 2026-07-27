@@ -10,6 +10,9 @@ import it.unibo.unibodget.persistency.parser.impl.JsonComplexDataParser;
 
 class JsonComplexDataParserTest {
 
+    private static final int NUMB_42 = 42;
+    private static final String PROVA = "Prova";
+
     @Test
     void testParsesValidJson() throws DataParserException {
         final JsonComplexDataParser<TestDto> parser =
@@ -24,8 +27,8 @@ class JsonComplexDataParserTest {
 
         final TestDto dto = parser.parse(json);
 
-        assertEquals("Prova", dto.getName());
-        assertEquals(42, dto.getValue());
+        assertEquals(PROVA, dto.getName());
+        assertEquals(NUMB_42, dto.getValue());
     }
 
     @Test

@@ -14,6 +14,8 @@ class SettingsTest {
     private static final String GREY = "#DDDDDD";
     private static final String BLACK = "#000000";
     private static final String TEST = "Test";
+    private static final int EXP_1080 = 1080;
+    private static final int EXP_1920 = 1920;
 
     @Test
     void shouldSaveAndReloadSettings() throws Exception {
@@ -110,18 +112,18 @@ class SettingsTest {
         final Settings settings = new Settings();
         settings.setWindowPrefs(
                 new it.unibo.unibodget.model.settings.WindowPreferences(
-                        1920,
-                        1080,
+                        EXP_1920,
+                        EXP_1080,
                         true
                 )
         );
 
         assertEquals(
-                1920,
+                EXP_1920,
                 settings.getWindowPrefs().getWidth()
         );
         assertEquals(
-                1080,
+                EXP_1080,
                 settings.getWindowPrefs().getHeight()
         );
         assertEquals(

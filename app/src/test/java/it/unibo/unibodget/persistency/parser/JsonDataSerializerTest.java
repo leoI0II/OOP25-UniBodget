@@ -35,6 +35,9 @@ import java.util.List;
  */
 public final class JsonDataSerializerTest {
 
+    private static final int NUMB_42 = 42;
+    private static final String TEXT_42 = "42";
+
     /**
      * Tests serialization of a simple {@link Asset} instance.
      * 
@@ -153,7 +156,7 @@ public final class JsonDataSerializerTest {
     @DisplayName("Serialize primitive int")
     void testSerializePrimitiveInt() throws DataSerializerException {
         final DataSerializer<Integer> serializer = new JsonDataSerializer<>(Integer.class);
-        assertEquals("42", serializer.serialize(42));
+        assertEquals(TEXT_42, serializer.serialize(NUMB_42));
     }
 
     /**

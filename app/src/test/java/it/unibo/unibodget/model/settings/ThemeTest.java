@@ -12,6 +12,8 @@ class ThemeTest {
     private static final String BLACK = "#000000";
     private static final String TEST = "Test";
     private static final String TEST_A = "A";
+    private static final String FONT_ARIAL = "Arial";
+    private static final int FONT_14 = 14;
 
     @Test
     void shouldComputeReadableTextColor() {
@@ -25,7 +27,7 @@ class ThemeTest {
     @Test
     void shouldFallbackToDefaultFontSize() {
         final Theme t = 
-            new Theme("X", ARGBColor.WHITE, ARGBColor.BLACK, ARGBColor.BLACK, "Arial", -5, false);
+            new Theme("X", ARGBColor.WHITE, ARGBColor.BLACK, ARGBColor.BLACK, FONT_ARIAL, -5, false);
         assertEquals(Theme.DEFAULT.getFontSize(), t.getFontSize());
     }
 
@@ -34,8 +36,8 @@ class ThemeTest {
         final Theme t = new Theme(TEST, WHITE, BLACK);
 
         assertEquals(TEST, t.getName());
-        assertEquals("Arial", t.getFontFamily());
-        assertEquals(14, t.getFontSize());
+        assertEquals(FONT_ARIAL, t.getFontFamily());
+        assertEquals(FONT_14, t.getFontSize());
     }
 
     @Test
