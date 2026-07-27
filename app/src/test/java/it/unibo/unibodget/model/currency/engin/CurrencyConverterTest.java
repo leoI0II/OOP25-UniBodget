@@ -15,14 +15,17 @@ import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 
 class CurrencyConverterTest {
 
+    private static final double VAL_1_0 = 1.0;
+    private static final double VAL_1_2 = 1.2;
+
     @Test
     void shouldConvertCorrectly() {
         final ExchangeRateAPI api = new ExchangeRateAPI() {
             @Override
             public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
                 return Map.of(
-                    FiatCurrency.EUR, 1.0,
-                    FiatCurrency.USD, 1.2
+                    FiatCurrency.EUR, VAL_1_0,
+                    FiatCurrency.USD, VAL_1_2
                 );
             }
 

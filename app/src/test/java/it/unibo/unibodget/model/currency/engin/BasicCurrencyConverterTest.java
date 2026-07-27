@@ -18,6 +18,11 @@ import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 
 class BasicCurrencyConverterTest {
 
+    private static final double RATE_1_0 = 1.0;
+    private static final double RATE_1_2 = 1.2;
+    private static final double RATE_0_8 = 0.8;
+    private static final int VAL_50 = 50;
+
     private static final String FAKE = "FAKE";
 
     @Test
@@ -26,9 +31,9 @@ class BasicCurrencyConverterTest {
                 new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
 
         final CurrencyConversionResult result =
-                converter.convert(new BigDecimal("50"), FiatCurrency.EUR, FiatCurrency.EUR);
+                converter.convert(new BigDecimal(VAL_50), FiatCurrency.EUR, FiatCurrency.EUR);
 
-        assertEquals(new BigDecimal("50"), result.getConvertedAmount());
+        assertEquals(new BigDecimal(VAL_50), result.getConvertedAmount());
         assertEquals(BigDecimal.ONE, result.getAppliedRate());
     }
 
@@ -95,9 +100,9 @@ class BasicCurrencyConverterTest {
         @Override
         public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
             return Map.of(
-                FiatCurrency.EUR, 1.0,
-                FiatCurrency.USD, 1.2,
-                FiatCurrency.GBP, 0.8
+                FiatCurrency.EUR, RATE_1_0,
+                FiatCurrency.USD, RATE_1_2,
+                FiatCurrency.GBP, RATE_0_8
             );
         }
 

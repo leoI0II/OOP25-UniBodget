@@ -65,7 +65,7 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     @Override
-    public boolean selectWallet(UUID walletId) {
+    public boolean selectWallet(final UUID walletId) {
         return investmentAccountService.selectWallet(walletId);
     }
 

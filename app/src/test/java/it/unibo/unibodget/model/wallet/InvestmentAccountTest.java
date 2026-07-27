@@ -21,11 +21,21 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 
 class InvestmentAccountTest {
 
-    // PriceProvider finto: prezzo corrente = 2 EUR
-    final PriceProvider provider = new PriceProvider() {
+    private static final String VAL_1 = "1";
+    private static final String VAL_2 = "2";
+    private static final String VAL_3 = "3";
+    private static final String VAL_5 = "5";
+    private static final String VAL_10 = "10";
+    private static final String INVEST = "Invest";
+    private static final String QTY_3 = "3";
+    private static final String QTY_5 = "5";
+    private static final String QTY_10 = "10";
+
+    // PriceProvider fake: current price = 2 EUR
+    private final PriceProvider provider = new PriceProvider() {
         @Override
         public Asset getCurrentPrice(final CurrencyUnit asset, final CurrencyUnit base) {
-            return new Asset(base, new BigDecimal("2"));
+            return new Asset(base, new BigDecimal(VAL_2));
         }
     };
 
@@ -55,11 +65,11 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputePositionsCorrectly() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
-        acc.addTransaction(buy(FiatCurrency.USD, "5", "2"));
-        acc.addTransaction(sell(FiatCurrency.USD, "3", "3"));
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1));
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_5, VAL_2));
+        acc.addTransaction(sell(FiatCurrency.USD, QTY_3, VAL_3));
 
         final List<Position> positions = acc.getPositions();
         assertEquals(1, positions.size());
@@ -72,9 +82,9 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeBalanceFromMarketValue() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1));
 
         // prezzo corrente = 2 → valore = 10 * 2 = 20
         assertEquals(0,
@@ -84,34 +94,34 @@ class InvestmentAccountTest {
 
     @Test
     void shouldComputeUnrealizedProfitLoss() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1));
 
         // cost = 10, market = 20 → P/L = 10
         assertEquals(0,
-            acc.getUnrealizedProfitLoss().amount().compareTo(new BigDecimal("10"))
+            acc.getUnrealizedProfitLoss().amount().compareTo(new BigDecimal(VAL_10))
         );
     }
 
     @Test
     void shouldComputeRealizedProfitLoss() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1")); // cost = 10
-        acc.addTransaction(sell(FiatCurrency.USD, "5", "3")); // realized = (3 - 1) * 5 = 10
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1)); // cost = 10
+        acc.addTransaction(sell(FiatCurrency.USD, QTY_5, VAL_3)); // realized = (3 - 1) * 5 = 10
 
         assertEquals(0,
-            acc.getRealizedProfitLoss().amount().compareTo(new BigDecimal("10"))
+            acc.getRealizedProfitLoss().amount().compareTo(new BigDecimal(VAL_10))
         );
     }
 
     @Test
     void shouldComputeTotalProfitLoss() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1")); // unrealized = 10
-        acc.addTransaction(sell(FiatCurrency.USD, "5", "3")); // realized = 10
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1)); // unrealized = 10
+        acc.addTransaction(sell(FiatCurrency.USD, QTY_5, VAL_3)); // realized = 10
 
         // unrealized dopo la vendita = 5 * (2 - 1) = 5
         // realized = 10
@@ -123,17 +133,17 @@ class InvestmentAccountTest {
 
     @Test
     void shouldCheckCanSell() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
-        acc.addTransaction(buy(FiatCurrency.USD, "10", "1"));
+        acc.addTransaction(buy(FiatCurrency.USD, QTY_10, VAL_1));
 
-        assertTrue(acc.canSell(FiatCurrency.USD, new BigDecimal("5")));
+        assertTrue(acc.canSell(FiatCurrency.USD, new BigDecimal(VAL_5)));
         assertFalse(acc.canSell(FiatCurrency.USD, new BigDecimal("20")));
     }
 
     @Test
     void shouldRejectInvalidSellQuantity() {
-        final InvestmentAccount acc = new InvestmentAccount("Invest", FiatCurrency.EUR, provider);
+        final InvestmentAccount acc = new InvestmentAccount(INVEST, FiatCurrency.EUR, provider);
 
         assertThrows(IllegalArgumentException.class, () ->
                 acc.canSell(FiatCurrency.USD, new BigDecimal("-1"))
