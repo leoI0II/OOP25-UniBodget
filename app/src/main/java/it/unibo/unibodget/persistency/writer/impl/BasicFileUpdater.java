@@ -14,12 +14,12 @@ import it.unibo.unibodget.persistency.writer.api.FileUpdater;
 public class BasicFileUpdater implements FileUpdater {
 
     @Override
-    public void update(Path path, UnaryOperator<String> updateFunction) throws IOException {
+    public void update(final Path path, final UnaryOperator<String> updateFunction) throws IOException {
         if (!Files.exists(path)) {
             throw new IOException("Cannot update non-existing file: " + path);
         }
-        String oldContent = Files.readString(path);
-        String newContent = updateFunction.apply(oldContent);
+        final String oldContent = Files.readString(path);
+        final String newContent = updateFunction.apply(oldContent);
         Files.writeString(path, newContent);
     }
 }

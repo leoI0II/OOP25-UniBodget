@@ -7,6 +7,7 @@ import it.unibo.unibodget.persistency.util.FilesUtils;
  * A factory class responsible for creating the appropriate {@link FileReader}
  * implementation based on the file extension of the provided path.
  * 
+ * <p>
  * Currently supports JSON files, but can be easily extended to support other formats.
  * This class is declared final because it is not intended to be extended,
  * and it has a private constructor because it only provides static factory methods.

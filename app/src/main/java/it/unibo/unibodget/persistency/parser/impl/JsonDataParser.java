@@ -26,7 +26,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
      *
      * @param targetClass the class that JSON objects will be mapped to
      */
-    public JsonDataParser(Class<T> targetClass) {
+    public JsonDataParser(final Class<T> targetClass) {
         this.targetClass = targetClass;
     }
 
@@ -39,11 +39,11 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @throws DataParserException  if the JSON is malformed or cannot be mapped
      */
     @Override
-    public T parse(String json) throws DataParserException {
+    public T parse(final String json) throws DataParserException {
         try {
-            Map<String, Object> map = parseJsonObject(json);
+            final Map<String, Object> map = parseJsonObject(json);
             return createObjectFromMap(map, targetClass);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DataParserException("Error parsing JSON object: " + e.getMessage(), e);
         }
     }
@@ -56,20 +56,20 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @return     a map containing the parsed key-value pairs
      */
     private Map<String, Object> parseJsonObject(String json) {
-        Map<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
 
         // Removes surrounding braces and trims whitespace
         json = json.trim();
         if (json.startsWith("{")) json = json.substring(1);
         if (json.endsWith("}")) json = json.substring(0, json.length() - 1);
         // Splits the object into individual key-value entries
-        String[] entries = json.split(",");
+        final String[] entries = json.split(",");
         // Processes each entry and extracts the key and value
-        for (String entry : entries) {
-            String[] kv = entry.split(":", 2);
+        for (final String entry : entries) {
+            final String[] kv = entry.split(":", 2);
             if (kv.length != 2) continue;
-            String key = kv[0].trim().replace("\"", "");
-            String value = kv[1].trim().replace("\"", "");
+            final String key = kv[0].trim().replace("\"", "");
+            final String value = kv[1].trim().replace("\"", "");
             map.put(key, value);
         }
         return map;
@@ -84,17 +84,17 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @return              a populated instance of the target class
      * @throws Exception    if reflection fails or a field cannot be assigned
      */
-    private T createObjectFromMap(Map<String, Object> map, Class<T> clazz)
+    private T createObjectFromMap(final Map<String, Object> map, final Class<T> clazz)
             throws Exception {
         // Creates a new instance using the default constructor
-        T instance = clazz.getDeclaredConstructor().newInstance();
+        final T instance = clazz.getDeclaredConstructor().newInstance();
         // Iterates over all declared fields and assigns matching values
-        for (Field field : clazz.getDeclaredFields()) {
+        for (final Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
-            Object rawValue = map.get(field.getName());
+            final Object rawValue = map.get(field.getName());
             if (rawValue == null) continue;
             // Converts the raw string value into the correct Java type
-            Object value = convertValue(rawValue, field.getType());
+            final Object value = convertValue(rawValue, field.getType());
             field.set(instance, value);
         }
         return instance;
@@ -109,13 +109,21 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @return          the converted value, or null if the type is unsupported
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Object convertValue(Object raw, Class<?> type) {
-        String value = raw.toString();
+    private Object convertValue(final Object raw, final Class<?> type) {
+        final String value = raw.toString();
         // Basic type conversions
-        if (type == String.class) return value;
-        if (type == int.class || type == Integer.class) return Integer.parseInt(value);
-        if (type == double.class || type == Double.class) return Double.parseDouble(value);
-        if (type == boolean.class || type == Boolean.class) return Boolean.parseBoolean(value);
+        if (type == String.class) {
+            return value;
+        }
+        if (type == int.class || type == Integer.class) {
+            return Integer.parseInt(value);
+        }
+        if (type == double.class || type == Double.class) {
+            return Double.parseDouble(value);
+        }
+        if (type == boolean.class || type == Boolean.class) {
+            return Boolean.parseBoolean(value);
+        }
         // Enum conversion
         if (type.isEnum()) {
             return Enum.valueOf((Class<? extends Enum>) type, value);
@@ -134,7 +142,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
      */
     public List<T> parseList(String jsonArray) throws DataParserException {
         try {
-            List<T> result = new ArrayList<>();
+            final List<T> result = new ArrayList<>();
             jsonArray = jsonArray.trim();
             // Ensures the string is a valid JSON array
             if (!jsonArray.startsWith("[") || !jsonArray.endsWith("]")) {
@@ -146,16 +154,20 @@ public final class JsonDataParser<T> implements DataParser<T> {
                 return result; // empty array
             }
             // Splits the array into individual JSON objects
-            String[] objects = jsonArray.split("\\},\\s*\\{");
+            final String[] objects = jsonArray.split("\\},\\s*\\{");
             // Parses each object separately
-            for (String obj : objects) {
+            for (final String obj : objects) {
                 String jsonObject = obj.trim();
-                if (!jsonObject.startsWith("{")) jsonObject = "{" + jsonObject;
-                if (!jsonObject.endsWith("}")) jsonObject = jsonObject + "}";
+                if (!jsonObject.startsWith("{")) {
+                    jsonObject = "{" + jsonObject;
+                }
+                if (!jsonObject.endsWith("}")) {
+                    jsonObject = jsonObject + "}";
+                }
                 result.add(parse(jsonObject));
             }
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DataParserException("Error parsing JSON array: " + e.getMessage(), e);
         }
     }
@@ -170,23 +182,25 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @throws DataParserException  if the file cannot be read, the key is missing,
      *                              or the array is malformed
      */
-    public List<T> parseListFromFile(Path file, String arrayKey) throws DataParserException {
+    public List<T> parseListFromFile(final Path file, final String arrayKey) throws DataParserException {
         try {
             // Reads the entire file content as a string
             String json = Files.readString(file).trim();
             // Locates the key associated with the array and extracts the array content
-            int keyIndex = json.indexOf("\"" + arrayKey + "\"");
-            if (keyIndex == -1) throw new DataParserException("Key '" + arrayKey + "' not found");
+            final int keyIndex = json.indexOf("\"" + arrayKey + "\"");
+            if (keyIndex == -1) {
+                throw new DataParserException("Key '" + arrayKey + "' not found");
+            }
             // Extracts the array boundaries
-            int start = json.indexOf("[", keyIndex);
-            int end = json.indexOf("]", start);
+            final int start = json.indexOf("[", keyIndex);
+            final int end = json.indexOf("]", start);
             if (start == -1 || end == -1){
                 throw new DataParserException("Array '" + arrayKey + "' malformed");
             }
-            String arrayContent = json.substring(start, end + 1);
+            final String arrayContent = json.substring(start, end + 1);
             // Parses the extracted array
             return parseList(arrayContent);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new DataParserException("Cannot read file: " + e.getMessage(), e);
         }
     }
@@ -202,14 +216,14 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @throws DataParserException  if the file cannot be read or the JSON content is invalid
      * @throws IOException          if an I/O error occurs while reading the file
      */
-    public List<T> loadListFromFile(Path file) {
+    public List<T> loadListFromFile(final Path file) {
         try {
-            String json = Files.readString(file);
+            final String json = Files.readString(file);
             return parseList(json);
-        } catch (DataParserException e) {
+        } catch (final DataParserException e) {
             System.err.println("Error parsing JSON from file: " + e.getMessage());
             return new ArrayList<>();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             System.err.println("Cannot read file: " + e.getMessage());
             return new ArrayList<>();
         }

@@ -30,7 +30,7 @@ public abstract class BasicReader<T> implements FileReader<T> {
     }
 
     /** 
-     * Returns the validated path of the file associated with this reader
+     * Returns the validated path of the file associated with this reader.
      *
      * @return the path of the file
      */
@@ -39,9 +39,10 @@ public abstract class BasicReader<T> implements FileReader<T> {
     }
 
     /**
-     * Validates the provided file path
+     * Validates the provided file path.
      * Checks if the file exists, is a regular file, and is readable.
      * 
+     * <p>
      * If any of these conditions are not met, an {@link IllegalArgumentException} 
      * is thrown with an appropriate message
      * 

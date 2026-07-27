@@ -9,10 +9,12 @@ import it.unibo.unibodget.persistency.writer.api.FileSaver;
 /**
  * JSON-specific implementation of {@link FileSaver}.
  *
- * <p>This class saves JSON content to a new file. If the file already exists,
+ * <p>
+ * This class saves JSON content to a new file. If the file already exists,
  * the operation fails.</p>
  *
- * <p>No JSON validation is performed. The caller is responsible for providing
+ * <p>
+ * No JSON validation is performed. The caller is responsible for providing
  * valid JSON content.</p>
  */
 public class JsonFileSaver extends BasicFileSaver {
@@ -25,7 +27,7 @@ public class JsonFileSaver extends BasicFileSaver {
      * @throws IOException if the file already exists or cannot be written
      */
     @Override
-    public void save(Path path, String content) throws IOException {
+    public void save(final Path path, final String content) throws IOException {
         if (Files.exists(path)) {
             throw new IOException("File already exists: " + path);
         }

@@ -13,7 +13,7 @@ import it.unibo.unibodget.persistency.writer.api.FileSaver;
 public class BasicFileSaver implements FileSaver {
 
     @Override
-    public void save(Path path, String content) throws IOException {
+    public void save(final Path path, final String content) throws IOException {
         if (Files.exists(path)) {
             throw new IOException("File already exists: " + path);
         }

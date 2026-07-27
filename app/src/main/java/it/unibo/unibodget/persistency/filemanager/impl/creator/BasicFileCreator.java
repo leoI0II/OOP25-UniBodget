@@ -29,7 +29,7 @@ public class BasicFileCreator<T> implements FileCreator {
      * @throws IOException if the file or its parent directories cannot be created
      */
     @Override
-    public Path open(Path path) throws IOException {
+    public Path open(final Path path) throws IOException {
         if (path == null) {
             throw new IllegalArgumentException("Path cannot be null");
         }

@@ -3,11 +3,13 @@ package it.unibo.unibodget.persistency.writer.impl;
 /**
  * Utility class providing minimal JSON support
  *
+ * <p>
  * This class is intentionally lightweight and designed specifically for the
  * simple JSON structures used in UniBodget's persistence layer. It does not
  * implement a full JSON parser and should not be used for complex or malformed
  * JSON inputs.
  *
+ * <p>
  * Supported formatting:
  * - Arrays of flat JSON objects (e.g. {@code [{...}, {...}]})
  * - Objects containing nested arrays (e.g. a wallet with a {@code history} list)
@@ -29,21 +31,27 @@ public final class JsonUtils {
         json = json.trim();
         if (json.equals("[]")) return "[\n]";
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("[\n");
 
-        String body = json.substring(1, json.length() - 1).trim();
-        String[] elements = body.split("},\\s*\\{");
+        final String body = json.substring(1, json.length() - 1).trim();
+        final String[] elements = body.split("},\\s*\\{");
 
         for (int i = 0; i < elements.length; i++) {
             String e = elements[i];
 
-            if (!e.startsWith("{")) e = "{" + e;
-            if (!e.endsWith("}")) e = e + "}";
+            if (!e.startsWith("{")) {
+                e = "{" + e;
+            }
+            if (!e.endsWith("}")) {
+                e = e + "}";
+            }
 
             sb.append("    ").append(e);
 
-            if (i < elements.length - 1) sb.append(",");
+            if (i < elements.length - 1) {
+                sb.append(",");
+            }
             sb.append("\n");
         }
 
@@ -61,12 +69,12 @@ public final class JsonUtils {
      */
     public static String prettyPrint(String json) {
         json = json.trim();
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         int indent = 0;
         boolean inString = false;
 
         for (int i = 0; i < json.length(); i++) {
-            char c = json.charAt(i);
+            final char c = json.charAt(i);
 
             if (c == '"' && (i == 0 || json.charAt(i - 1) != '\\')) {
                 inString = !inString;
@@ -113,7 +121,7 @@ public final class JsonUtils {
      * @param sb the builder to append to
      * @param indent the indentation level (each level = 4 spaces)
      */
-    private static void appendIndent(StringBuilder sb, int indent) {
+    private static void appendIndent(final StringBuilder sb, final int indent) {
         sb.append("    ".repeat(Math.max(0, indent)));
     }
 }

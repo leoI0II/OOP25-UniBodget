@@ -7,7 +7,7 @@ import it.unibo.unibodget.persistency.util.FilesUtils;
  * Factory class responsible for creating the appropriate {@link FileCreator}
  * implementation based on the file extension of the provided path.
  */
-public class FileCreatorFactory{
+public final class FileCreatorFactory{
 
     /**
      * Private constructor to prevent instantiation.

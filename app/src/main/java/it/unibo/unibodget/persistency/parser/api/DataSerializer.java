@@ -8,13 +8,13 @@ public interface DataSerializer<T> {
 
     /**
      * Serializes the given object into its textual representation
-     * returning a {@code String} 
+     * returning a {@code String}.
      * The returned string should contain a complete and valid
-     * representation of the object 
+     * representation of the object.
      *
      * @param data the object to serialize
      * @return the textual representation of the object
      * @throws DataSerializerException if the object cannot be serialized
      */
-    String serialize(T data) throws DataSerializerException;
+    String serialize(final T data) throws DataSerializerException;
 }

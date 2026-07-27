@@ -26,7 +26,7 @@ public class FilesUtils {
      * @return the lowercase file extension
      * @throws IllegalArgumentException if the path has no valid extension
      */
-    public static String getFileExtension(String path) {
+    public static String getFileExtension(final String path) {
         final int lastDotIndex = path.lastIndexOf('.');
         if (lastDotIndex == -1 || lastDotIndex == path.length() - 1) {
             throw new IllegalArgumentException("File path must have an extension: " + path);
@@ -41,9 +41,9 @@ public class FilesUtils {
      * @param fileName the name of the file to search for
      * @return the path to the file, or null if not found
      */
-    public static Path findFileByName(String fileName) {
+    public static Path findFileByName(final String fileName) {
         // Defines the root directory where the search begins
-        Path root = PROJECT_ROOT.resolve("src/main/resources");
+        final Path root = PROJECT_ROOT.resolve("src/main/resources");
 
         try {
             // Walks the directory tree and returns the first file whose name matches the requested
@@ -51,7 +51,7 @@ public class FilesUtils {
                     .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName))
                     .findFirst()
                     .orElse(null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.err.println("Error searching for file: " + e.getMessage());
             // Returns null if an I/O error occurs or the directory cannot be scanned
             return null;

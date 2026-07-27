@@ -7,6 +7,7 @@ import java.nio.file.Path;
 /**
  * Appender for JSON files containing an array of objects.
  *
+ * <p>
  * This implementation allows appending a new JSON object to the end of an
  * existing array stored in the file. If the file is empty, a valid empty array
  * is created automatically.
@@ -18,6 +19,7 @@ public class JsonObjectAppender extends BasicFileAppender {
     /**
      * Appends a new JSON object to the end of the array contained in the file.
      *
+     * <p>
      * If the file is empty, it is initialized as an empty array
      * ({@code []}). If the file does not contain a valid JSON array,
      * an exception is thrown.
@@ -27,7 +29,7 @@ public class JsonObjectAppender extends BasicFileAppender {
      * @throws IOException if the file does not contain a JSON array or cannot be written
      */
     @Override
-    public void append(Path path, String content) throws IOException {
+    public void append(final Path path, final String content) throws IOException {
         ensureFileExists(path);
 
         String json = Files.readString(path).trim();
@@ -41,14 +43,14 @@ public class JsonObjectAppender extends BasicFileAppender {
         }
 
         if (json.equals("[]")) {
-            String result = "[\n" + indent(content) + "\n]";
+            final String result = "[\n" + indent(content) + "\n]";
             Files.writeString(path, JsonUtils.prettyPrint(result));
             return;
         }
 
-        String body = json.substring(1, json.length() - 1).trim();
+        final String body = json.substring(1, json.length() - 1).trim();
 
-        String result =
+        final String result =
             "[\n" +
             body +
             ",\n" +
@@ -64,7 +66,7 @@ public class JsonObjectAppender extends BasicFileAppender {
      * @param s the string to indent
      * @return the indented string
      */
-    private String indent(String s) {
+    private String indent(final String s) {
         return "    " + s.replace("\n", "\n    ");
     }
 }

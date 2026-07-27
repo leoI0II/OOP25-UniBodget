@@ -5,6 +5,7 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 
 /**
  * Serializer for complex JSON objects using Jackson.
+ * 
  * <p>
  * This implementation delegates all serialization work to the
  * shared ObjectMapper configured in {@link PersistenceJacksonConfig}.
@@ -13,11 +14,11 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 public final class JsonComplexDataSerializer<T> implements DataSerializer<T> {
 
     @Override
-    public String serialize(T value) throws DataSerializerException {
+    public String serialize(final T value) throws DataSerializerException {
         try {
             // Serialize using the globally configured ObjectMapper
             return PersistenceJacksonConfig.mapper().writeValueAsString(value);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Wrap any Jackson exception into a domain-specific serializer exception
             throw new DataSerializerException("Jackson serialization failed", e);
         }

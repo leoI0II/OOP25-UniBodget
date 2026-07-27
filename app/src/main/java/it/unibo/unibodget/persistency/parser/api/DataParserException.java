@@ -15,33 +15,33 @@ public class DataParserException extends Throwable {
     }
 
     /**
-     * Constructs a new {@code DataParserException} with the specified detail message
+     * Constructs a new {@code DataParserException} with the specified detail message.
      *
      * @param message the detail message
      */
 
-    public DataParserException(String message) {
+    public DataParserException(final String message) {
         super(message);
     }
 
     /**
-     * Constructs a new {@code DataParserException} with the specified cause
+     * Constructs a new {@code DataParserException} with the specified cause.
      *
      * @param cause the cause
      *              {@link Throwable#getCause()} method)
      */
-    public DataParserException(Throwable cause) {
+    public DataParserException(final Throwable cause) {
         super(cause);
     }
 
     /**
-     * Constructs a new {@code DataParserException} with the specified detail message and cause
+     * Constructs a new {@code DataParserException} with the specified detail message and cause.
      *
      * @param message the detail message
      * @param cause   the cause
      *                {@link Throwable#getCause()} method)
      */
-    public DataParserException(String message, Throwable cause) {
+    public DataParserException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

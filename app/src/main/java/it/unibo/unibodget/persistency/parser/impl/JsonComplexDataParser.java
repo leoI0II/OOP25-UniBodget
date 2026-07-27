@@ -5,6 +5,7 @@ import it.unibo.unibodget.persistency.parser.api.DataParserException;
 
 /**
  * Parser for complex JSON objects using Jackson.
+ * 
  * <p>
  * This parser supports:
  * <ul>
@@ -26,16 +27,16 @@ public final class JsonComplexDataParser<T> implements DataParser<T> {
      *
      * @param targetClass the class representing the JSON root object
      */
-    public JsonComplexDataParser(Class<T> targetClass) {
+    public JsonComplexDataParser(final Class<T> targetClass) {
         this.targetClass = targetClass;
     }
 
     @Override
-    public T parse(String json) throws DataParserException {
+    public T parse(final String json) throws DataParserException {
         try {
             // Deserialize using the globally configured ObjectMapper
             return PersistenceJacksonConfig.mapper().readValue(json, targetClass);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Wrap Jackson exceptions into a domain-specific parser exception
             throw new DataParserException("Jackson complex parsing failed: " + e.getMessage(), e);
         }

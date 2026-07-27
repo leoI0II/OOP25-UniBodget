@@ -4,6 +4,7 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 
 /**
  * Base class providing common utility methods for serializer implementations.
+ * 
  * <p>
  * This class is intended to be extended by concrete serializers that convert
  * Java objects into a serialized representation
@@ -21,7 +22,7 @@ public class BasicDataSerializer<T> {
      * @param message the error message used if validation fails
      * @throws DataSerializerException if {@code condition} is {@code false}
      */
-    protected void ensure(boolean condition, String message) throws DataSerializerException {
+    protected void ensure(final boolean condition, final String message) throws DataSerializerException {
         if (!condition) {
             throw new DataSerializerException(message);
         }
@@ -33,7 +34,7 @@ public class BasicDataSerializer<T> {
      * @param s the string to quote
      * @return the quoted string, e.g. {@code "value"}
      */
-    protected String quote(String s) {
+    protected String quote(final String s) {
         return "\"" + s + "\"";
     }
 

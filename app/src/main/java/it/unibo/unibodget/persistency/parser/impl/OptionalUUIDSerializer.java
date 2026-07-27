@@ -11,12 +11,14 @@ import java.util.UUID;
 /**
  * Custom Jackson serializer for {@link Optional Optional&lt;UUID&gt;}.
  *
- * <p>This serializer writes the UUID contained in an {@code Optional<UUID>}
+ * <p>
+ * This serializer writes the UUID contained in an {@code Optional<UUID>}
  * as a JSON string. If the optional is empty or null, the output is JSON
  * {@code null}. This ensures consistent and predictable persistence of
  * optional UUID fields.</p>
  *
- * <p>The output format matches the canonical representation produced by
+ * <p>
+ * The output format matches the canonical representation produced by
  * {@link UUID#toString()}, guaranteeing compatibility with the corresponding
  * {@code OptionalUUIDDeserializer}.</p>
  */
@@ -31,7 +33,8 @@ public final class OptionalUUIDSerializer extends JsonSerializer<Optional<UUID>>
      * @throws IOException if the output cannot be written
      */
     @Override
-    public void serialize(Optional<UUID> value, JsonGenerator gen, SerializerProvider serializers)
+    public void serialize(final Optional<UUID> value, 
+                        final JsonGenerator gen, final SerializerProvider serializers)
             throws IOException {
 
         if (value == null || value.isEmpty()) {

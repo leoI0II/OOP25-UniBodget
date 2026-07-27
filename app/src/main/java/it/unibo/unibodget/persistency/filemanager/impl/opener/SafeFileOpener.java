@@ -39,13 +39,13 @@ public class SafeFileOpener implements FileOpener {
      * @throws IOException if the file cannot be created or is not accessible
      */
     @Override
-    public Path open(Path path) throws IOException {
+    public Path open(final Path path) throws IOException {
         if (path == null) {
             throw new IllegalArgumentException("Il path fornito non può essere nullo.");
         }
 
         // Ensure parent directory exists
-        Path parentDir = path.getParent();
+        final Path parentDir = path.getParent();
         if (parentDir != null && Files.notExists(parentDir)) {
             Files.createDirectories(parentDir);
         }

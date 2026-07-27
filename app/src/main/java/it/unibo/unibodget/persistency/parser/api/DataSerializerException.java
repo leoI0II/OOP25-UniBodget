@@ -5,6 +5,7 @@ package it.unibo.unibodget.persistency.parser.api;
  * an invalid object state or an unexpected structure that cannot
  * be converted into a file representation.
  * 
+ * <p>
  * This exception class extends {@link Throwable}
  */
 public class DataSerializerException extends Throwable {
@@ -21,7 +22,7 @@ public class DataSerializerException extends Throwable {
      *
      * @param message the detail message
      */
-    public DataSerializerException(String message) {
+    public DataSerializerException(final String message) {
         super(message);
     }
 
@@ -30,7 +31,7 @@ public class DataSerializerException extends Throwable {
      *
      * @param cause the cause
      */
-    public DataSerializerException(Throwable cause) {
+    public DataSerializerException(final Throwable cause) {
         super(cause);
     }
 
@@ -40,7 +41,7 @@ public class DataSerializerException extends Throwable {
      * @param message the detail message
      * @param cause the cause
      */
-    public DataSerializerException(String message, Throwable cause) {
+    public DataSerializerException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

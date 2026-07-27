@@ -13,7 +13,7 @@ import it.unibo.unibodget.persistency.writer.api.FileOverwriter;
 public class BasicFileOverwriter implements FileOverwriter {
 
     @Override
-    public void overwrite(Path path, String content) throws IOException {
+    public void overwrite(final Path path, final String content) throws IOException {
         Files.createDirectories(path.getParent());
         Files.writeString(path, content);
     }

@@ -11,12 +11,14 @@ import java.util.UUID;
 /**
  * Custom Jackson deserializer for {@link Optional Optional&lt;UUID&gt;}.
  *
- * <p>This deserializer converts a JSON string representing a UUID into an
+ * <p>
+ * This deserializer converts a JSON string representing a UUID into an
  * {@code Optional<UUID>}. Empty or blank values are mapped to
  * {@code Optional.empty()}, ensuring safe handling of optional fields in the
  * persistence layer.</p>
  *
- * <p>The expected input format is the canonical UUID string representation
+ * <p>
+ * The expected input format is the canonical UUID string representation
  * produced by {@link UUID#toString()}.</p>
  */
 public final class OptionalUUIDDeserializer extends JsonDeserializer<Optional<UUID>> {
@@ -31,10 +33,10 @@ public final class OptionalUUIDDeserializer extends JsonDeserializer<Optional<UU
      * @throws IOException if the input cannot be read or parsed
      */
     @Override
-    public Optional<UUID> deserialize(JsonParser parser, DeserializationContext ctxt)
+    public Optional<UUID> deserialize(final JsonParser parser, final DeserializationContext ctxt)
             throws IOException {
 
-        String raw = parser.getValueAsString();
+        final String raw = parser.getValueAsString();
         if (raw == null || raw.isBlank()) {
             return Optional.empty();
         }
@@ -48,7 +50,7 @@ public final class OptionalUUIDDeserializer extends JsonDeserializer<Optional<UU
      * instead of {@code Optional.empty()}.
      */
     @Override
-    public Optional<UUID> getNullValue(DeserializationContext ctxt) {
+    public Optional<UUID> getNullValue(final DeserializationContext ctxt) {
         return Optional.empty();
     }
 

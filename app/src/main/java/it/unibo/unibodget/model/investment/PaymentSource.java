@@ -28,8 +28,8 @@ public sealed interface PaymentSource
      * @param account
      * @param stableCoin
      */
-    record StableCoinPositionChannel
-        (InvestmentAccount account, CurrencyUnit stableCoin) implements PaymentSource {
+    record StableCoinPositionChannel (
+        InvestmentAccount account, CurrencyUnit stableCoin) implements PaymentSource {
 
         }
 

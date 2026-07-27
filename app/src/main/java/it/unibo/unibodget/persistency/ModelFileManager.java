@@ -43,6 +43,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     private final String listKey;
 
     private enum State { OPEN, CLOSED }
+ 
     private State state = State.CLOSED;
 
     private final ObjectMapper mapper = PersistenceJacksonConfig.mapper();
@@ -88,6 +89,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         this.objectKey = objectKey;
         this.listKey = listKey;
     }
+
     /**
      * Opens the manager and ensures the file exists and contains valid JSON.
      *
@@ -97,6 +99,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         ensureFileExistsOrRestore();
         state = State.OPEN;
     }
+
     /**
      * Ensures the JSON file exists and contains valid JSON.
      * If the file is missing, empty, or invalid, it is restored
@@ -109,7 +112,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         }
 
         try {
-            String raw = Files.readString(path).trim();
+            final String raw = Files.readString(path).trim();
             if (raw.isEmpty()) {
                 restoreFromResources();
                 return;
@@ -119,14 +122,16 @@ public final class ModelFileManager<T> implements AutoCloseable {
             restoreFromResources();
         }
     }
+
     /**
      * Generates a default JSON key based on the class name.
      * Example: Settings → "settings".
      */
-    private static String defaultKey(Class<?> type) {
-        String simple = type.getSimpleName();
+    private static String defaultKey(final Class<?> type) {
+        final String simple = type.getSimpleName();
         return Character.toLowerCase(simple.charAt(0)) + simple.substring(1);
     }
+
     /**
      * Restores the JSON file from the bundled resource.
      *
@@ -141,6 +146,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         Files.createDirectories(path.getParent());
         Files.writeString(path, new String(is.readAllBytes()));
     }
+
     /**
      * Loads the entire JSON file as a {@link JsonNode}.
      *
@@ -152,6 +158,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         String raw = Files.readString(path);
         return new ObjectMapper().readTree(raw);
     }
+
     /**
      * Loads a list of objects stored under the given JSON key.
      *
@@ -172,6 +179,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
             mapper.getTypeFactory().constructCollectionType(List.class, type)
         );
     }
+
     /**
      * Ensures the manager is in OPEN state.
      *
@@ -182,6 +190,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
             throw new IllegalStateException("File manager is not open.");
         }
     }
+
     /**
      * Closes the manager and prevents further operations.
      */
@@ -189,6 +198,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     public void close() {
         state = State.CLOSED;
     }
+
     /**
      * Saves a list of objects under the given JSON key.
      * The rest of the JSON file is preserved.
@@ -200,7 +210,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     public void saveList(final String key, final List<T> list) throws IOException {
         requireOpen();
 
-        JsonNode rootNode;
+        final JsonNode rootNode;
         if (Files.exists(path)) {
             final String raw = Files.readString(path);
             rootNode = raw == null || raw.trim().isEmpty()
@@ -217,6 +227,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         final String updated = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
         Files.writeString(path, updated);
     }
+
     /**
      * Saves a single object under the configured JSON key.
      *
@@ -230,6 +241,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         mapper.writerWithDefaultPrettyPrinter()
             .writeValue(path.toFile(), root);
     }
+
     /**
      * Loads a single object from the configured JSON key.
      *
@@ -245,6 +257,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         }
         return mapper.treeToValue(node, type);
     }
+
     /**
      * Reads the current JSON root or returns an empty object node.
      *

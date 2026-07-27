@@ -6,6 +6,7 @@ import java.io.IOException;
  * An interface for reading the content of a file and converting it
  * into an object of type {@code T}.
  *
+ * <p>
  * This abstraction allows different file formats (JSON, CSV, TXT, ...)
  * to be handled by providing specific implementations of this interface.
  * The caller only needs to specify the path of the file

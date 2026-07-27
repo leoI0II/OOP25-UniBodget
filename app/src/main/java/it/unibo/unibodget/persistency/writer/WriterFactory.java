@@ -15,6 +15,7 @@ import it.unibo.unibodget.persistency.writer.impl.JsonFileUpdater;
  * persist data into files. This class centralizes the instantiation logic for
  * all writer types (appenders, overwriters, savers, updaters).
  * 
+ * <p>
  * Attempting to request a writer for an unsupported type will result 
  * in an {@link IllegalArgumentException}.
  */
@@ -32,7 +33,7 @@ public final class WriterFactory {
      * @return a {@link FileAppender} implementation suitable for the given type
      * @throws IllegalArgumentException if the type is unsupported
      */
-    public static FileAppender createAppender(String type) {
+    public static FileAppender createAppender(final String type) {
         return switch (type.toLowerCase()) {
             case "json" -> new JsonFileAppender();
             default -> throw new IllegalArgumentException("Unsupported appender type: " + type);
@@ -47,7 +48,7 @@ public final class WriterFactory {
      * @return a {@link FileOverwriter} implementation suitable for the given type
      * @throws IllegalArgumentException if the type is unsupported
      */
-    public static FileOverwriter createOverwriter(String type) {
+    public static FileOverwriter createOverwriter(final String type) {
         return switch (type.toLowerCase()) {
             case "json" -> new JsonFileOverwriter();
             default -> throw new IllegalArgumentException("Unsupported overwriter type: " + type);
@@ -62,7 +63,7 @@ public final class WriterFactory {
      * @return a {@link FileSaver} implementation suitable for the given type
      * @throws IllegalArgumentException if the type is unsupported
      */
-    public static FileSaver createSaver(String type) {
+    public static FileSaver createSaver(final String type) {
         return switch (type.toLowerCase()) {
             case "json" -> new JsonFileSaver();
             default -> throw new IllegalArgumentException("Unsupported saver type: " + type);
@@ -78,7 +79,7 @@ public final class WriterFactory {
      * @return a {@link FileUpdater} implementation suitable for the given type
      * @throws IllegalArgumentException if the type is unsupported
      */
-    public static FileUpdater createUpdater(String type) {
+    public static FileUpdater createUpdater(final String type) {
         return switch (type.toLowerCase()) {
             case "json" -> new JsonFileUpdater();
             default -> throw new IllegalArgumentException("Unsupported updater type: " + type);

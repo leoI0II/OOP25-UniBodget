@@ -7,6 +7,7 @@ import it.unibo.unibodget.persistency.util.FilesUtils;
 /**
  * Factory responsible for creating {@link DataSerializer} instances
  * based on the file extension of the target output file.
+ * 
  * <p>
  * Supports JSON serialization and throws an exception for unsupported formats.
  * </p>
@@ -24,8 +25,9 @@ public final class SerializerFactory {
      * @param type the class of the object to serialize
      * @return a DataSerializer for the given type and file format
      */
-    public static <T> DataSerializer<T> create(String filePath, Class<T> type) throws DataSerializerException {
-        String ext = FilesUtils.getFileExtension(filePath);
+    public static <T> DataSerializer<T> create(final String filePath, final Class<T> type) 
+        throws DataSerializerException {
+        final String ext = FilesUtils.getFileExtension(filePath);
 
         switch (ext) {
             case "json":

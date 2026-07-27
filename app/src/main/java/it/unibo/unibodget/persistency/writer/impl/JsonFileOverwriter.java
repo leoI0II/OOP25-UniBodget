@@ -9,10 +9,12 @@ import it.unibo.unibodget.persistency.writer.api.FileOverwriter;
 /**
  * JSON-specific implementation of {@link FileOverwriter}.
  *
- * <p>This class overwrites the entire content of a JSON file. If the file or
+ * <p>
+ * This class overwrites the entire content of a JSON file. If the file or
  * its parent directories do not exist, they are created automatically.</p>
  *
- * <p>No JSON validation is performed. The caller is responsible for providing
+ * <p>
+ * No JSON validation is performed. The caller is responsible for providing
  * valid JSON content.</p>
  */
 public class JsonFileOverwriter extends BasicFileOverwriter {
@@ -25,7 +27,7 @@ public class JsonFileOverwriter extends BasicFileOverwriter {
      * @throws IOException if the file cannot be created or written
      */
     @Override
-    public void overwrite(Path path, String content) throws IOException {
+    public void overwrite(final Path path, final String content) throws IOException {
         Files.createDirectories(path.getParent());
         Files.writeString(path, content);
     }

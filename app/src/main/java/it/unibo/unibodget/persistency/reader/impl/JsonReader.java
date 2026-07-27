@@ -7,6 +7,7 @@ import java.nio.file.Path;
 /**
  * A FileReader implementation for reading JSON files.
  * 
+ * <p>
  * This class extends {@link BasicReader} and provides a simple mechanism
  * to read the raw content of a JSON file as a {@code String}.
  * Implicit implements FileReader<String>
