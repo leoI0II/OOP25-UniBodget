@@ -15,6 +15,7 @@ import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 /**
  * Class for test - used as main.
  */
+
 public final class TestWallet {
 
         /**
@@ -24,7 +25,12 @@ public final class TestWallet {
 
         }
 
-    public static void main(final String[] args) {
+        /**
+         * Main to test creation of wallet also with persistency. 
+         * 
+         * @param args unused
+         */
+        public static void main(final String[] args) {
 
         final PriceProvider provider = new MockPriceProvider();
         final CashAccount cash1 =

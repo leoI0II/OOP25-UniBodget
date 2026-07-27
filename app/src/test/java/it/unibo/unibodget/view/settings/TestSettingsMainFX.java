@@ -65,6 +65,11 @@ public final class TestSettingsMainFX extends Application {
         });
     }
 
+    /**
+     * Main to test the settings functionalities.
+     * 
+     * @param args to launch program.
+     */
     public static void main(final String[] args) {
         launch(args);
     }
