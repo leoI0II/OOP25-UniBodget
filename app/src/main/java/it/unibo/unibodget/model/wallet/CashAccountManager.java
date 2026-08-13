@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.wallet;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public final class CashAccountManager {
                 mapper.getTypeFactory().constructCollectionType(List.class, CashAccount.class)
             );
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -76,7 +77,7 @@ public final class CashAccountManager {
         try {
             manager.open();
             manager.saveList(KEY, accounts);
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }

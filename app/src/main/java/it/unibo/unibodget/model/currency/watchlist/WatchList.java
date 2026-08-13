@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.watchlist;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,9 +20,12 @@ public final class WatchList {
     private static final Path PATH = Path.of("data/json/currency/watchlist/Watchlist.json");
     private static final String RESOURCE = "/json/currency/watchlist/Watchlist.json";
 
-    private static boolean initialized = false;
+    private static boolean initialized;
     private static final Set<WatchlistPair> LOADED = new HashSet<>();
 
+    /**
+     * Creates a WatchList instance and initializes the watchlist if needed.
+     */
     public WatchList() {
         if (!initialized) {
             init();
@@ -75,7 +79,7 @@ public final class WatchList {
             mgr.open();
             mgr.saveList("watchlist", new ArrayList<>(LOADED));
             mgr.close();
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("WatchList save failed");
         }
     }
@@ -84,6 +88,7 @@ public final class WatchList {
      * Initializes the watchlist by loading data from the JSON file.
      */
     public static void init() {
+        initialized = false;
         try {
             final ModelFileManager<WatchlistPair> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
@@ -101,7 +106,7 @@ public final class WatchList {
                 System.out.println("WatchList loaded from JSON → " + LOADED.size() + " items");
             }
             initialized = true;
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("WatchList load failed → using empty list");
             LOADED.clear();
             LOADED.addAll(generateMockWatchlist());

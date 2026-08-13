@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -67,7 +69,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
             final String json = fetchJson(urlString);
             System.out.println("DEBUG JSON: " + json);
             return parseFrankfurterJson(json, target.getCode());
-        } catch (final Exception e) {
+        } catch (final IllegalStateException e) {
             //e.printStackTrace();
             System.out.println("Historical API failed, switching to offline.");
             return new TreeMap<>();
@@ -146,7 +148,7 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
                 return "";
             }
             return response.body();
-        } catch (final Exception e) {
+        } catch (final InterruptedException | IOException e) {
             // offline, DNS error, connect error, timeout, ecc.
             return "";
         }

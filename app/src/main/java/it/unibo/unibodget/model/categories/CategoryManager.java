@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.categories;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,12 @@ public final class CategoryManager {
     private static final Path PATH = Path.of("data/json/categories/Categories.json");
     private static final String RESOURCE = "/json/categories/Categories.json";
 
-    private static List<Category> LOADED = new ArrayList<>();
-    private static boolean initialized = false;
+    private static List<Category> loaded = new ArrayList<>();
+    private static boolean initialized;
 
+    /*
+     * Prevents instantiation of the CategoryManager class.
+     */
     private CategoryManager() {
     }
 
@@ -30,24 +34,25 @@ public final class CategoryManager {
      * Initializes the category manager by loading categories from the JSON file.
      */
     public static void init() {
+        initialized = false;
         try {
             final ModelFileManager<Category> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Category.class);
             mgr.open();
-            LOADED = new ArrayList<>(mgr.loadList("categories"));
+            loaded = new ArrayList<>(mgr.loadList("categories"));
             mgr.close();
-            if (LOADED.isEmpty()) {
+            if (loaded.isEmpty()) {
                 System.out.println("No categories found in file, loading default categories.");
-                LOADED.addAll(Category.getDefaultCategories());
+                loaded.addAll(Category.getDefaultCategories());
                 saveAll();
             }
             initialized = true;
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             System.out.println("Unable to load categories from file, loading default categories.");
-            LOADED.clear();
-            LOADED.addAll(Category.getDefaultCategories());
+            loaded.clear();
+            loaded.addAll(Category.getDefaultCategories());
             initialized = true;
         }
     }
@@ -61,7 +66,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        return new ArrayList<>(LOADED);
+        return new ArrayList<>(loaded);
     }
 
     /**
@@ -73,7 +78,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        final boolean alreadyExists = LOADED.stream()
+        final boolean alreadyExists = loaded.stream()
                 .anyMatch(c ->
                     c.getName().equalsIgnoreCase(category.getName())
                 );
@@ -82,7 +87,7 @@ public final class CategoryManager {
                 "Category already exists: " + category.getName()
             );
         }
-        LOADED.add(category);
+        loaded.add(category);
         saveAll();
     }
 
@@ -96,7 +101,7 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        final boolean removed = LOADED.remove(category);
+        final boolean removed = loaded.remove(category);
         if (removed) {
             saveAll();
         }
@@ -112,10 +117,10 @@ public final class CategoryManager {
                 new ModelFileManager<>(PATH, RESOURCE, Category.class);
 
             mgr.open();
-            mgr.saveList("categories", LOADED);
+            mgr.saveList("categories", loaded);
             mgr.close();
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Unable to save categories", e);
         }
     }
@@ -139,7 +144,7 @@ public final class CategoryManager {
             init();
         }
 
-        return LOADED.stream()
+        return loaded.stream()
                 .filter(c -> c.getType() == type)
                 .toList();
     }

@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -101,7 +102,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             body = response.body();
             System.out.println("API response: " + body);
 
-        } catch (final Exception e) {
+        } catch (final InterruptedException | IOException e) {
             System.out.println("HTTP error: " + e.getMessage());
         }
 
@@ -168,7 +169,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
                 try {
                     final double value = Double.parseDouble(valueStr);
                     result.put(unit, value);
-                } catch (final Exception ignored) {
+                } catch (final NumberFormatException ignored) {
                     System.out.println("Parse error in ExchangedRateAPIImpl: " + ignored.getMessage());
                 }
             }

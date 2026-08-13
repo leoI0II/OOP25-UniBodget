@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.wallet;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,16 +69,16 @@ public final class InvestmentAccountManager {
             final JsonNode root = manager.loadJson();
             final JsonNode arr = root.get(KEY);
 
-            final List<InvestmentAccount> LOADED = mapper.convertValue(
+            final List<InvestmentAccount> loaded = mapper.convertValue(
                 arr,
                 mapper.getTypeFactory().constructCollectionType(List.class, InvestmentAccount.class)
             );
 
-            return LOADED.stream()
+            return loaded.stream()
                     .map(a -> a.withProvider(provider))
                     .toList();
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -98,7 +99,7 @@ public final class InvestmentAccountManager {
                     KEY,
                     accounts
             );
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
