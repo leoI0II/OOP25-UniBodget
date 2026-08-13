@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.currency.bank;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +83,7 @@ public final class BankList {
             mgr.open();
             mgr.saveList("banks", LOADED);
             mgr.close();
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("BankList save failed");
         }
     }
@@ -115,7 +116,7 @@ public final class BankList {
                 System.out.println("Banks loaded → " + LOADED.size());
             }
             initialized = true;
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("Banks load failed → using mock banks");
             LOADED.clear();
             LOADED.addAll(generateMockBanks());

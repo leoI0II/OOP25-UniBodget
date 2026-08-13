@@ -63,14 +63,20 @@ public final class JsonDataParser<T> implements DataParser<T> {
 
         // Removes surrounding braces and trims whitespace
         json = json.trim();
-        if (json.startsWith("{")) json = json.substring(1);
-        if (json.endsWith("}")) json = json.substring(0, json.length() - 1);
+        if (json.startsWith("{")) {
+            json = json.substring(1);
+        }
+        if (json.endsWith("}")) {
+            json = json.substring(0, json.length() - 1);
+        }
         // Splits the object into individual key-value entries
         final String[] entries = json.split(",");
         // Processes each entry and extracts the key and value
         for (final String entry : entries) {
             final String[] kv = entry.split(":", 2);
-            if (kv.length != 2) continue;
+            if (kv.length != 2) {
+                continue; // skip malformed entries
+            }
             final String key = kv[0].trim().replace("\"", "");
             final String value = kv[1].trim().replace("\"", "");
             map.put(key, value);
@@ -95,7 +101,9 @@ public final class JsonDataParser<T> implements DataParser<T> {
         for (final Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             final Object rawValue = map.get(field.getName());
-            if (rawValue == null) continue;
+            if (rawValue == null) {
+                continue; // skip fields not present in the JSON
+            }
             // Converts the raw string value into the correct Java type
             final Object value = convertValue(rawValue, field.getType());
             field.set(instance, value);
@@ -197,7 +205,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
             // Extracts the array boundaries
             final int start = json.indexOf("[", keyIndex);
             final int end = json.indexOf("]", start);
-            if (start == -1 || end == -1){
+            if (start == -1 || end == -1) {
                 throw new DataParserException("Array '" + arrayKey + "' malformed");
             }
             final String arrayContent = json.substring(start, end + 1);

@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.settings;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,7 @@ public final class ThemeList {
     private static final Path PATH = Path.of("data/json/settings/Theme.json");
     private static final String RESOURCE = "/json/settings/Theme.json";
 
-    private static boolean initialized = false;
+    private static boolean initialized;
 
     /** Cached list of loaded themes. */
     private static final List<Theme> LOADED = new ArrayList<>();
@@ -53,6 +54,7 @@ public final class ThemeList {
      * with a single default theme.</p>
      */
     private static void init() {
+        initialized = false;
         try {
             // Load Theme.json
             final ModelFileManager<Theme> mgr =
@@ -73,7 +75,7 @@ public final class ThemeList {
 
             initialized = true;
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             // On any error → fallback to default theme
             LOADED.clear();
             LOADED.add(Theme.DEFAULT);

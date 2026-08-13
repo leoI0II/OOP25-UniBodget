@@ -1,5 +1,6 @@
 package it.unibo.unibodget.persistency.util;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -51,7 +52,7 @@ public class FilesUtils {
                     .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName))
                     .findFirst()
                     .orElse(null);
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.err.println("Error searching for file: " + e.getMessage());
             // Returns null if an I/O error occurs or the directory cannot be scanned
             return null;

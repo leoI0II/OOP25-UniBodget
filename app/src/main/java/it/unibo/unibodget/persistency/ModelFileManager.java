@@ -116,7 +116,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
                 return;
             }
             new ObjectMapper().readTree(raw); // validate JSON
-        } catch (Exception e) {
+        } catch (final IOException e) {
             restoreFromResources();
         }
     }
@@ -136,7 +136,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @throws IOException if the resource cannot be read
      */
     private void restoreFromResources() throws IOException {
-        InputStream is = getClass().getResourceAsStream(resourcePath);
+        final InputStream is = getClass().getResourceAsStream(resourcePath);
         if (is == null) {
             throw new IOException("Resource not found: " + resourcePath);
         }
@@ -153,7 +153,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      */
     public JsonNode loadJson() throws IOException {
         requireOpen();
-        String raw = Files.readString(path);
+        final String raw = Files.readString(path);
         return new ObjectMapper().readTree(raw);
     }
 

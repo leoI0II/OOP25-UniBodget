@@ -51,13 +51,13 @@ public final class PersistenceJacksonConfig {
      * @return a fully configured {@link ObjectMapper} instance
      */
     private static ObjectMapper create() {
-        ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = new ObjectMapper();
 
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        SimpleModule module = new SimpleModule();
+        final SimpleModule module = new SimpleModule();
 
         // Currency
         module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());

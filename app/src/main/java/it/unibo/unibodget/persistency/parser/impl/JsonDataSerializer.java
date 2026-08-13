@@ -124,7 +124,9 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
         boolean first = true;
 
         for (final Object elem : list) {
-            if (!first) sb.append(",");
+            if (!first) {
+                sb.append(",");
+            }
             sb.append(serializeValue(elem, visited));
             first = false;
         }
@@ -145,7 +147,9 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
         boolean first = true;
 
         for (final var entry : map.entrySet()) {
-            if (!first) sb.append(",");
+            if (!first) {
+                sb.append(",");
+            }
             sb.append("\"").append(escape(entry.getKey().toString())).append("\":");
             sb.append(serializeValue(entry.getValue(), visited));
             first = false;
@@ -172,7 +176,9 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
         boolean first = true;
 
         for (final RecordComponent comp : record.getClass().getRecordComponents()) {
-            if (!first) sb.append(",");
+            if (!first) {
+                sb.append(",");
+            }
             sb.append("\"").append(comp.getName()).append("\":");
 
             final Object fieldValue = comp.getAccessor().invoke(record);
@@ -214,7 +220,9 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
 
                 field.setAccessible(true);
 
-                if (!first) sb.append(",");
+                if (!first) {
+                    sb.append(",");
+                }
                 sb.append("\"").append(field.getName()).append("\":");
 
                 final Object fieldValue = field.get(obj);

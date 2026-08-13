@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.settings;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -20,7 +21,7 @@ public final class SettingsManager {
     private static final String RESOURCE = "/json/settings/Settings.json";
 
     private static Settings current;
-    private static boolean initialized = false;
+    private static boolean initialized;
 
     /**
      * Creates a SettingsManager and initializes the settings if needed.
@@ -53,7 +54,7 @@ public final class SettingsManager {
             mgr.saveObject(s);
             current = s; // Update in‑memory reference
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("Settings save failed: " + e);
         }
     }
@@ -75,6 +76,7 @@ public final class SettingsManager {
      * {@link SettingsManager}.</p>
      */
     private static void init() {
+        initialized = false;
         try (final ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
@@ -88,7 +90,7 @@ public final class SettingsManager {
 
             initialized = true;
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             // Fallback to default settings on any error
             current = new Settings();
             initialized = true;

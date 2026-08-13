@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import it.unibo.unibodget.persistency.ModelFileManager;
  */
 public final class Currency implements CurrencyUnit {
     private static final Map<String, Currency> LOADED = new HashMap<>();
-    private static boolean initialized = false;
+    private static boolean initialized;
 
     private static final Path PATH = Path.of("data/json/currency/Currencies.json");
     private static final String RESOURCE = "/json/currency/Currencies.json"; 
@@ -169,6 +170,7 @@ public final class Currency implements CurrencyUnit {
      * as initialized. If loading fails, a RuntimeException is thrown.
      */
     public static void init() {
+        initialized = false;
         try {
             final ModelFileManager<Currency> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Currency.class);
@@ -183,7 +185,7 @@ public final class Currency implements CurrencyUnit {
             list.forEach(c -> LOADED.put(c.getCode().toUpperCase(), c));
             list.replaceAll(c -> LOADED.getOrDefault(c.getCode().toUpperCase(), c));
             initialized = true;
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             System.out.println("Currency JSON load failed → using mock currencies");
             LOADED.clear();
             generateMockCurrencies().forEach(
