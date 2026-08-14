@@ -1,7 +1,7 @@
 package it.unibo.unibodget.persistency.parser.api;
 
 /**
- * Defines the contract for parsing data into a specific type
+ * Defines the contract for parsing data into a specific type.
  * 
  * @param <T> the type of the parsed data
  */
@@ -19,5 +19,5 @@ public interface DataSerializer<T> {
      * @return the textual representation of the object
      * @throws DataSerializerException if the object cannot be serialized
      */
-    String serialize(final T data) throws DataSerializerException;
+    String serialize(T data) throws DataSerializerException;
 }

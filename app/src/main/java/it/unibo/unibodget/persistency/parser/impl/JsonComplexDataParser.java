@@ -1,5 +1,9 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
 
@@ -36,7 +40,7 @@ public final class JsonComplexDataParser<T> implements DataParser<T> {
         try {
             // Deserialize using the globally configured ObjectMapper
             return PersistenceJacksonConfig.mapper().readValue(json, targetClass);
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             // Wrap Jackson exceptions into a domain-specific parser exception
             throw new DataParserException("Jackson complex parsing failed: " + e.getMessage(), e);
         }

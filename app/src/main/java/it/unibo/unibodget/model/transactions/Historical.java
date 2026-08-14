@@ -18,6 +18,8 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  * It provides basic operations for:
  * - adding a new transaction
  * - retrieving the full immutable history
+ * 
+ * @param <T> the type of transaction stored in this historical ledger
  */
 public final class Historical<T extends Transaction> {
 
@@ -99,6 +101,12 @@ public final class Historical<T extends Transaction> {
         history.clear();
     }
 
+    /**
+     * Compares this historical ledger with another object for equality.
+     *
+     * @param o the object to compare with
+     * @return {@code true} if the two ledgers contain the same transactions; {@code false} otherwise
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -111,6 +119,11 @@ public final class Historical<T extends Transaction> {
         return Objects.equals(history, other.history);
     }
 
+    /**
+     * Returns the hash code for this historical ledger.
+     *
+     * @return the hash code computed from the transaction history
+     */
     @Override
     public int hashCode() {
         return Objects.hash(history);

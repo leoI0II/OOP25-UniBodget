@@ -14,7 +14,7 @@ import java.nio.file.Path;
  * The appended content must be a valid JSON object. No advanced syntax
  * validation is performed.
  */
-public class JsonSubObjectAppender extends BasicFileAppender {
+public class JsonSubObjectAppender extends AbstractFileAppender {
 
     private static final String SLASH_N = "\n";
     private final String listKey;
@@ -74,9 +74,8 @@ public class JsonSubObjectAppender extends BasicFileAppender {
         }
 
         final String result =
-            json.substring(0, arrayStart + 1) +
-            SLASH_N + newArray + SLASH_N +
-            json.substring(arrayEnd);
+            json.substring(0, arrayStart + 1) + SLASH_N 
+            + newArray + SLASH_N + json.substring(arrayEnd);
 
         Files.writeString(path, result);
     }

@@ -21,9 +21,11 @@ public final class SerializerFactory {
     /**
      * Creates a serializer based on the file extension.
      *
+     * @param <T> the type handled by the serializer
      * @param filePath the path of the file to serialize into
      * @param type the class of the object to serialize
      * @return a DataSerializer for the given type and file format
+     * @throws DataSerializerException if the file extension is unsupported
      */
     public static <T> DataSerializer<T> create(final String filePath, final Class<T> type) 
         throws DataSerializerException {

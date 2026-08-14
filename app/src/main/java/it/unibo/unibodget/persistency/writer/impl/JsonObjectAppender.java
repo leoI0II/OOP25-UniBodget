@@ -14,7 +14,7 @@ import java.nio.file.Path;
  * The appended content must be a valid JSON object, although no advanced
  * validation is performed.
  */
-public class JsonObjectAppender extends BasicFileAppender {
+public class JsonObjectAppender extends AbstractFileAppender {
 
     /**
      * Appends a new JSON object to the end of the array contained in the file.
@@ -42,7 +42,7 @@ public class JsonObjectAppender extends BasicFileAppender {
             throw new IOException("The JSON file does not contain an array");
         }
 
-        if (json.equals("[]")) {
+        if ("[]".equals(json)) {
             final String result = "[\n" + indent(content) + "\n]";
             Files.writeString(path, JsonUtils.prettyPrint(result));
             return;
@@ -51,11 +51,11 @@ public class JsonObjectAppender extends BasicFileAppender {
         final String body = json.substring(1, json.length() - 1).trim();
 
         final String result =
-            "[\n" +
-            body +
-            ",\n" +
-            indent(content) +
-            "\n]";
+            "[\n"
+            + body
+            + ",\n"
+            + indent(content)
+            + "\n]";
 
         Files.writeString(path, JsonUtils.prettyPrint(result));
     }

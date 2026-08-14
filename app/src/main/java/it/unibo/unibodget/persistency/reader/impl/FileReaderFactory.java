@@ -35,5 +35,5 @@ public final class FileReaderFactory {
             default -> throw new IllegalArgumentException("Unsupported file type: " + FilesUtils.getFileExtension(path));
         };
     }
-    
+
 }

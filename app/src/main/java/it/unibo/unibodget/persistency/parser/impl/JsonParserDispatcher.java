@@ -12,12 +12,17 @@ import java.util.Map;
  * Automatically selects the appropriate parser implementation
  * based on the complexity of the target type.
  *
- * <p>Simple types (primitives, strings, enums) are handled by
+ * <p>
+ * Simple types (primitives, strings, enums) are handled by
  * {@link JsonDataParser}, while complex types (collections, maps,
  * records, or objects with nested fields) are delegated to
  * {@link JsonComplexDataParser} and {@link JsonComplexDataSerializer}.
  */
 public final class JsonParserDispatcher {
+
+    private JsonParserDispatcher() {
+        // utility class
+    }
 
     /**
      * Parses a JSON string into an instance of the specified type.

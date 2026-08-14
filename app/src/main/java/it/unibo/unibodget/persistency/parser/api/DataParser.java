@@ -20,5 +20,6 @@ public interface DataParser<T> {
      * @return the parsed object of type {@code T}
      * @throws DataParserException if the content is malformed
      */
-    T parse(final String data) throws DataParserException;
+    T parse(String data) throws DataParserException;
+
 }

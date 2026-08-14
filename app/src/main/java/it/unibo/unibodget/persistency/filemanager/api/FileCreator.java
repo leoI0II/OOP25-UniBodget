@@ -6,6 +6,7 @@ import java.nio.file.Path;
 /**
  * An interface for creating new files in a controlled and safe manner.
  *
+ * <p>
  * Allows different creation strategies, such as creating empty files, 
  * initializing them with default content, or
  * generating structured templates (example JSON).

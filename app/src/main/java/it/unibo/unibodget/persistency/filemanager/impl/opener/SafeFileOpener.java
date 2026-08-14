@@ -8,6 +8,7 @@ import java.nio.file.Path;
 /**
  * Safe implementation of {@link FileOpener} that guarantees the availability
  * and accessibility of the target file before returning its {@link Path}.
+ * 
  * <p>
  * This opener ensures:
  * <ul>
@@ -15,6 +16,7 @@ import java.nio.file.Path;
  *     <li>the file exists (and creates it if missing)</li>
  *     <li>the file is both readable and writable</li>
  * </ul>
+ * 
  * <p>
  * It is intended for components that require a guaranteed, ready-to-use file
  * without having to manually check or create filesystem structures.
@@ -23,6 +25,7 @@ public class SafeFileOpener implements FileOpener {
 
     /**
      * Ensures that the file at the given path exists and is accessible.
+     * 
      * <p>
      * Behavior:
      * <ul>

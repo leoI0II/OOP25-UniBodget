@@ -8,7 +8,7 @@ import java.nio.file.Path;
  * A utility class providing common file‑related helper methods used across the
  * persistency module.
  */
-public class FilesUtils {
+public final class FilesUtils {
 
     private static final Path PROJECT_ROOT = Path.of("").toAbsolutePath();
     // private static final Path APP_ROOT = PROJECT_ROOT.resolve("app");
@@ -23,7 +23,7 @@ public class FilesUtils {
     /**
      * Extracts the file extension from a file path.
      * 
-     * @param path
+     * @param path the file path
      * @return the lowercase file extension
      * @throws IllegalArgumentException if the path has no valid extension
      */

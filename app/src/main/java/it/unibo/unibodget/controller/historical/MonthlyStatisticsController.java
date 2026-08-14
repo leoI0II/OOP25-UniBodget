@@ -96,7 +96,7 @@ public final class MonthlyStatisticsController {
 
         // Build category totals list
         final List<CategoryTotal> categoryTotals = new ArrayList<>();
-        for (Map.Entry<String, BigDecimal> entry : sumsByCategory.entrySet()) {
+        for (final Map.Entry<String, BigDecimal> entry : sumsByCategory.entrySet()) {
             final String name = entry.getKey();
             categoryTotals.add(new CategoryTotal(name, typeByCategory.get(name), entry.getValue()));
         }

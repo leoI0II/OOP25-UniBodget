@@ -8,6 +8,7 @@ import java.nio.file.Path;
  * and ensuring that it exists
  * and is accessible before any read or write operation is performed.
  *
+ * <p>
  * Allows different strategies for file validation,
  * such as creation, overwrite existing corrupted/invalid files
  */

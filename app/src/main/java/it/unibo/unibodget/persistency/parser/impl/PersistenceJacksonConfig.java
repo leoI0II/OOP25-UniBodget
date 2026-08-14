@@ -16,6 +16,7 @@ import java.util.UUID;
 
 /**
  * Centralized Jackson configuration for the persistency module.
+ * 
  * <p>
  * Provides a preconfigured {@link ObjectMapper} with custom serializers
  * and deserializers for application-specific types such as
@@ -28,7 +29,9 @@ public final class PersistenceJacksonConfig {
 
     private static final ObjectMapper MAPPER = create();
 
-    private PersistenceJacksonConfig() { }
+    private PersistenceJacksonConfig() { 
+
+    }
 
     /**
      * Returns the shared, preconfigured {@link ObjectMapper} instance.
@@ -39,9 +42,9 @@ public final class PersistenceJacksonConfig {
         return MAPPER;
     }
 
-    @SuppressWarnings("unchecked")
     /**
      * Builds and configures the {@link ObjectMapper} used for persistence.
+     * 
      * <p>
      * The mapper is initialized with custom serializers and deserializers
      * for application-specific types (e.g., {@link CurrencyUnit}, {@link LocalDate},
@@ -50,6 +53,7 @@ public final class PersistenceJacksonConfig {
      *
      * @return a fully configured {@link ObjectMapper} instance
      */
+    @SuppressWarnings("unchecked")
     private static ObjectMapper create() {
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -71,7 +75,7 @@ public final class PersistenceJacksonConfig {
             (Class<Optional<UUID>>) (Class<?>) Optional.class,
             new OptionalUUIDSerializer()
         );
-        module.addDeserializer(Optional.class,new OptionalUUIDDeserializer());
+        module.addDeserializer(Optional.class, new OptionalUUIDDeserializer());
 
         mapper.registerModule(module);
         //mapper.registerModule(new Jdk8Module());

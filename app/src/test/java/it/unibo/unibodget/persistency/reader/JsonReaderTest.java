@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import it.unibo.unibodget.persistency.reader.impl.BasicReader;
 import it.unibo.unibodget.persistency.reader.impl.JsonReader;
 import it.unibo.unibodget.persistency.util.TestCleanupUtils;
 

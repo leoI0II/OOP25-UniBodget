@@ -7,11 +7,12 @@ import java.nio.file.Path;
 /**
  * A {@link BasicFileCreator} specialization for JSON files.
  * 
+ * <p>
  * This creator ensures that the file exists and, if newly created,
  * initializes it with an empty JSON object {}.
  */
 public class JsonFileCreator extends BasicFileCreator<String> {
-    
+
     /**
      * Creates a new JsonFileCreator.
      * No additional state is required.

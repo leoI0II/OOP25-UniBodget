@@ -20,10 +20,18 @@ import it.unibo.unibodget.persistency.writer.api.FileOverwriter;
 public class JsonFileOverwriter extends BasicFileOverwriter {
 
     /**
-     * Overwrites the specified JSON file with the given content.
+     * Overwrites the content of the specified file.
      *
-     * @param path    the JSON file to overwrite
-     * @param content the new JSON content
+     * <p>
+     * Subclasses overriding this method should either call
+     * {@code super.overwrite(path, content)} to preserve the default behavior,
+     * or explicitly document why the overwrite semantics are being changed.
+     * Any override must maintain the contract of throwing an {@link IOException}
+     * when the file cannot be written.
+     * </p>
+     *
+     * @param path    the file to overwrite
+     * @param content the new content to write
      * @throws IOException if the file cannot be created or written
      */
     @Override

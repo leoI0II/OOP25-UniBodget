@@ -15,7 +15,7 @@ import it.unibo.unibodget.persistency.writer.api.FileAppender;
  * content to it using {@link StandardOpenOption#APPEND}. No JSON validation is
  * performed because of the caller
  */
-public class JsonFileAppender extends BasicFileAppender {
+public class JsonFileAppender extends AbstractFileAppender {
 
     /**
      * Appends the given content to the specified JSON file.

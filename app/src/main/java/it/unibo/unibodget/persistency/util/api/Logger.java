@@ -5,7 +5,7 @@ package it.unibo.unibodget.persistency.util.api;
  * or diagnostic information within the persistence layer.
  */
 public interface Logger {
-    
+
     /**
      * Logs an informational message.
      *
@@ -29,4 +29,5 @@ public interface Logger {
      * @param cause the throwable cause
      */
     void error(String message, Throwable cause);
+
 }

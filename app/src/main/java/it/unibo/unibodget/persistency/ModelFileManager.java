@@ -41,7 +41,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     private final String listKey;
 
     private enum State { OPEN, CLOSED }
- 
+
     private State state = State.CLOSED;
 
     private final ObjectMapper mapper = PersistenceJacksonConfig.mapper();
@@ -65,7 +65,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param type         the model class
      * @param objectKey    the JSON key used to store the object
      */
-    public ModelFileManager(final Path path, final String resourcePath, 
+    public ModelFileManager(final Path path, final String resourcePath,
                             final Class<T> type, final String objectKey) {
         this(path, resourcePath, type, objectKey, null);
     }
@@ -79,7 +79,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @param objectKey    JSON key for the object
      * @param listKey      JSON key for a list of objects
      */
-    public ModelFileManager(final Path path, final String resourcePath, final Class<T> type, 
+    public ModelFileManager(final Path path, final String resourcePath, final Class<T> type,
                             final String objectKey, final String listKey) {
         this.path = path;
         this.resourcePath = resourcePath;
@@ -102,6 +102,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * Ensures the JSON file exists and contains valid JSON.
      * If the file is missing, empty, or invalid, it is restored
      * from the bundled resource.
+     *
+     * @throws IOException if the file cannot be created or restored
      */
     private void ensureFileExistsOrRestore() throws IOException {
         if (!Files.exists(path)) {
@@ -123,7 +125,10 @@ public final class ModelFileManager<T> implements AutoCloseable {
 
     /**
      * Generates a default JSON key based on the class name.
-     * Example: Settings → "settings".
+     * Example: Settings → {@code "settings"}.
+     *
+     * @param type the model class used to derive the key
+     * @return the default JSON key derived from the simple class name
      */
     private static String defaultKey(final Class<?> type) {
         final String simple = type.getSimpleName();
@@ -179,6 +184,18 @@ public final class ModelFileManager<T> implements AutoCloseable {
     }
 
     /**
+     * Loads the list of objects stored under the configured list key.
+     *
+     * @return the list of deserialized objects
+     * @throws IOException if the configured list key is missing or invalid
+     * @throws IllegalStateException if no list key was configured for this manager
+     */
+    public List<T> loadList() throws IOException {
+        requireListKey();
+        return loadList(listKey);
+    }
+
+    /**
      * Ensures the manager is in OPEN state.
      *
      * @throws IllegalStateException if called after close()
@@ -227,6 +244,18 @@ public final class ModelFileManager<T> implements AutoCloseable {
     }
 
     /**
+     * Saves a list of objects under the configured list key.
+     *
+     * @param list the list to save
+     * @throws IOException if writing fails
+     * @throws IllegalStateException if no list key was configured for this manager
+     */
+    public void saveList(final List<T> list) throws IOException {
+        requireListKey();
+        saveList(listKey, list);
+    }
+
+    /**
      * Saves a single object under the configured JSON key.
      *
      * @param obj the object to save
@@ -243,7 +272,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     /**
      * Loads a single object from the configured JSON key.
      *
-     * @return the deserialized object, or null if missing
+     * @return the deserialized object, or {@code null} if missing
      * @throws IOException if reading fails
      */
     public T loadObject() throws IOException {
@@ -275,35 +304,15 @@ public final class ModelFileManager<T> implements AutoCloseable {
     }
 
     /**
-     * Loads the list of objects stored under the configured list key.
+     * Ensures that a list key has been configured for this manager.
      *
-     * @return the list of deserialized objects
-     * @throws IOException if the configured list key is missing/invalid
-     * @throws IllegalStateException if no list key was configured for this manager
+     * @throws IllegalStateException if no list key was configured
      */
-    public List<T> loadList() throws IOException {
-        requireListKey();
-        return loadList(listKey);
-    }
-
-    /**
-     * Saves a list of objects under the configured list key.
-     *
-     * @param list the list to save
-     * @throws IOException if writing fails
-     * @throws IllegalStateException if no list key was configured for this manager
-     */
-    public void saveList(final List<T> list) throws IOException {
-        requireListKey();
-        saveList(listKey, list);
-    }
-
     private void requireListKey() {
         if (listKey == null) {
             throw new IllegalStateException(
                 "No list key configured for this ModelFileManager. "
-                + "Use the 4-arg constructor to set or call saveList(key, list)/loadList(key) ");
+                + "Use the 4-arg constructor to set or call saveList(key, list)/loadList(key).");
         }
     }
-
 }

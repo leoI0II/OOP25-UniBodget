@@ -14,7 +14,7 @@ import it.unibo.unibodget.persistency.writer.api.FileAppender;
  * that the file and its parent directories are created if missing, so that
  * concrete appenders can focus only on writing
  */
-public abstract class BasicFileAppender implements FileAppender {
+public abstract class AbstractFileAppender implements FileAppender {
 
     /**
      * Ensures that the target file exists before performing an append operation.

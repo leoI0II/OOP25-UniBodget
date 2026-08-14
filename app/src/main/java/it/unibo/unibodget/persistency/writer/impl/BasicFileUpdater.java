@@ -13,6 +13,21 @@ import it.unibo.unibodget.persistency.writer.api.FileUpdater;
  */
 public class BasicFileUpdater implements FileUpdater {
 
+    /**
+     * Updates the content of the specified file by applying a transformation function.
+     *
+     * <p>
+     * Subclasses overriding this method should either call
+     * {@code super.update(path, updateFunction)} to preserve the default behavior,
+     * or explicitly document why the update semantics are being changed.
+     * Any override must maintain the contract of throwing an {@link IOException}
+     * when the file cannot be written.
+     * </p>
+     *
+     * @param path the file to update
+     * @param updateFunction the transformation to apply to the file content
+     * @throws IOException if the file does not exist or cannot be written
+     */
     @Override
     public void update(final Path path, final UnaryOperator<String> updateFunction) throws IOException {
         if (!Files.exists(path)) {

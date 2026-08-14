@@ -38,6 +38,7 @@ import java.util.Map;
  * @param <T> the type of the root object to serialize
  */
 public final class JsonDataSerializer<T> implements DataSerializer<T> {
+    private final String quote = "\"";
 
     public JsonDataSerializer() {
         // No initialization needed
@@ -83,7 +84,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
             return "null";
         }
         if (value instanceof String s) {
-            return "\"" + escape(s) + "\"";
+            return quote + escape(s) + quote;
         }
         if (value instanceof Number n) {
             return n.toString();
@@ -92,10 +93,10 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
             return b.toString();
         }
         if (value instanceof Enum<?> e) {
-            return "\"" + e.name() + "\"";
+            return quote + e.name() + quote;
         }
         if (value instanceof LocalDate d) {
-            return "\"" + d.toString() + "\"";
+            return quote + d.toString() + quote;
         }
         if (value instanceof BigDecimal bd) {
             return bd.toPlainString();
@@ -142,7 +143,8 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited circular reference tracker
      * @return JSON object string
      */
-    private String serializeMap(final Map<?, ?> map, final Map<Object, Boolean> visited) throws Exception {
+    private String serializeMap(final Map<?, ?> map, final Map<Object, Boolean> visited) 
+        throws Exception {
         final StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
@@ -150,8 +152,10 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
             if (!first) {
                 sb.append(",");
             }
-            sb.append("\"").append(escape(entry.getKey().toString())).append("\":");
-            sb.append(serializeValue(entry.getValue(), visited));
+            sb.append(quote)
+                .append(escape(entry.getKey().toString()))
+                .append("\":")
+                .append(serializeValue(entry.getValue(), visited));
             first = false;
         }
 
@@ -167,19 +171,19 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @return JSON object string
      */
     private String serializeRecord(final Object record, final Map<Object, Boolean> visited) throws Exception {
+        final StringBuilder sb = new StringBuilder("{");
         if (visited.containsKey(record)) {
             return "\"<circular>\"";
         }
         visited.put(record, true);
 
-        final StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
         for (final RecordComponent comp : record.getClass().getRecordComponents()) {
             if (!first) {
                 sb.append(",");
             }
-            sb.append("\"").append(comp.getName()).append("\":");
+            sb.append(quote).append(comp.getName()).append("\":");
 
             final Object fieldValue = comp.getAccessor().invoke(record);
             sb.append(serializeValue(fieldValue, visited));
@@ -200,12 +204,12 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @return JSON object string
      */
     private String serializeObject(final Object obj, final Map<Object, Boolean> visited) throws Exception {
+        final StringBuilder sb = new StringBuilder("{");
         if (visited.containsKey(obj)) {
             return "\"<circular>\"";
         }
         visited.put(obj, true);
 
-        final StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
         Class<?> cls = obj.getClass();
@@ -245,6 +249,6 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @return the escaped string
      */
     private String escape(final String s) {
-        return s.replace("\"", "\\\"");
+        return s.replace(quote, "\\\"");
     }
 }

@@ -11,7 +11,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
  * It contains only an amount and a currency.
  * UNUSED AT THE MOMENT
  */
-public class BudgetLimit {
+public final class BudgetLimit {
 
     private double amount;
     private CurrencyUnit currency;

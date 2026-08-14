@@ -28,8 +28,8 @@ public sealed interface OrderResult
      * @param cashTransaction
      * @param investmentTransaction
      */
-    record BuyWithCashSuccess (
-        CashTransaction cashTransaction, InvestmentTransaction investmentTransaction) 
+    record BuyWithCashSuccess(CashTransaction cashTransaction, 
+                            InvestmentTransaction investmentTransaction) 
         implements OrderResult {
 
         }
@@ -40,8 +40,8 @@ public sealed interface OrderResult
      * @param stablesAccount
      * @param targetInvestmentAccount
      */
-    record BuyWithStablesSuccess (
-        InvestmentTransaction stablesAccount, InvestmentTransaction targetInvestmentAccount) 
+    record BuyWithStablesSuccess(InvestmentTransaction stablesAccount, 
+                                InvestmentTransaction targetInvestmentAccount) 
         implements OrderResult {
 
         }
@@ -51,7 +51,7 @@ public sealed interface OrderResult
      *
      * @param investmentTransaction
      */
-    record BuyNoPaymentSuccess (InvestmentTransaction investmentTransaction) 
+    record BuyNoPaymentSuccess(InvestmentTransaction investmentTransaction) 
         implements OrderResult {
 
         }
@@ -62,8 +62,8 @@ public sealed interface OrderResult
      * @param srcInvestmentTransaction
      * @param dstInvestmentTransaction
      */
-    record TransferSuccess (
-        InvestmentTransaction srcInvestmentTransaction, InvestmentTransaction dstInvestmentTransaction) 
+    record TransferSuccess(InvestmentTransaction srcInvestmentTransaction, 
+                            InvestmentTransaction dstInvestmentTransaction) 
         implements OrderResult {
 
         }
@@ -74,8 +74,8 @@ public sealed interface OrderResult
      * @param investmentTransaction
      * @param cashTransaction
      */
-    record SellWithCashSuccess (
-        InvestmentTransaction investmentTransaction, CashTransaction cashTransaction) 
+    record SellWithCashSuccess(InvestmentTransaction investmentTransaction, 
+                                CashTransaction cashTransaction) 
         implements OrderResult {
 
         }
@@ -86,7 +86,8 @@ public sealed interface OrderResult
      * @param investmentTransaction
      * @param stablesAccount
      */
-    record SellWithStablesSuccess (InvestmentTransaction investmentTransaction, InvestmentTransaction stablesAccount) 
+    record SellWithStablesSuccess(InvestmentTransaction investmentTransaction, 
+                                InvestmentTransaction stablesAccount) 
         implements OrderResult {
 
         }
@@ -96,7 +97,7 @@ public sealed interface OrderResult
      *
      * @param investmentTransaction
      */
-    record SellNoPaymentSuccess (InvestmentTransaction investmentTransaction) 
+    record SellNoPaymentSuccess(InvestmentTransaction investmentTransaction) 
         implements OrderResult {
 
         }
@@ -107,7 +108,7 @@ public sealed interface OrderResult
      * @param required
      * @param available
      */
-    record InsufficientFunds (Asset required, Asset available) 
+    record InsufficientFunds(Asset required, Asset available) 
         implements OrderResult {
 
         }
@@ -118,7 +119,7 @@ public sealed interface OrderResult
      * @param requested
      * @param available
      */
-    record InsufficientAssets (BigDecimal requested, BigDecimal available) 
+    record InsufficientAssets(BigDecimal requested, BigDecimal available) 
         implements OrderResult {
 
         }
@@ -128,7 +129,7 @@ public sealed interface OrderResult
      *
      * @param message
      */
-    record CurrencyConversionError (String message) 
+    record CurrencyConversionError(String message) 
         implements OrderResult {
 
         }

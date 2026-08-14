@@ -2,13 +2,15 @@ package it.unibo.unibodget.persistency.parser.api;
 
 /**
  * Exception thrown when a parsing operation fails due to
- * malformed content or unexpected structure
+ * malformed content or unexpected structure.
+ * 
+ * <p>
  * This exception class extends {@link Throwable}
  */
 public class DataParserException extends Throwable {
 
     /**
-     * Constructs a new {@code DataParserException} with no detail message
+     * Constructs a new {@code DataParserException} with no detail message.
      */
     public DataParserException() {
         super();

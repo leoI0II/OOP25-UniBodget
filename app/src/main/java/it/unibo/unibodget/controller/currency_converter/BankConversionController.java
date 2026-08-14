@@ -14,6 +14,9 @@ import java.util.List;
  */
 public class BankConversionController {
 
+    private static final double FIX_50 = 50.0;
+    private static final double PERC_50 = 50.0;
+
     private final BankService bankService = new BankService();
 
     /**
@@ -52,6 +55,6 @@ public class BankConversionController {
      *         {@code false} otherwise.
      */
     public boolean canAddBank(final double fixed, final double percent) {
-        return fixed <= 50.0 && percent <= 50.0;
+        return fixed <= FIX_50 && percent <= PERC_50;
     }
 }

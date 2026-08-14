@@ -21,6 +21,8 @@ import it.unibo.unibodget.persistency.writer.impl.JsonFileUpdater;
  */
 public final class WriterFactory {
 
+    private static final String JSON = "json";
+
     private WriterFactory() {
         // prevent instantiation: utility class
     }
@@ -35,7 +37,7 @@ public final class WriterFactory {
      */
     public static FileAppender createAppender(final String type) {
         return switch (type.toLowerCase()) {
-            case "json" -> new JsonFileAppender();
+            case JSON -> new JsonFileAppender();
             default -> throw new IllegalArgumentException("Unsupported appender type: " + type);
         };
     }
@@ -50,7 +52,7 @@ public final class WriterFactory {
      */
     public static FileOverwriter createOverwriter(final String type) {
         return switch (type.toLowerCase()) {
-            case "json" -> new JsonFileOverwriter();
+            case JSON -> new JsonFileOverwriter();
             default -> throw new IllegalArgumentException("Unsupported overwriter type: " + type);
         };
     }
@@ -65,7 +67,7 @@ public final class WriterFactory {
      */
     public static FileSaver createSaver(final String type) {
         return switch (type.toLowerCase()) {
-            case "json" -> new JsonFileSaver();
+            case JSON -> new JsonFileSaver();
             default -> throw new IllegalArgumentException("Unsupported saver type: " + type);
         };
     }
@@ -81,7 +83,7 @@ public final class WriterFactory {
      */
     public static FileUpdater createUpdater(final String type) {
         return switch (type.toLowerCase()) {
-            case "json" -> new JsonFileUpdater();
+            case JSON -> new JsonFileUpdater();
             default -> throw new IllegalArgumentException("Unsupported updater type: " + type);
         };
     }

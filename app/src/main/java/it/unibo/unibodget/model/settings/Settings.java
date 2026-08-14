@@ -17,7 +17,7 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
  * Represents the global user preferences for the application.
  *
  * <p>
- * This includes:
+ * This includes: </p>
  * <ul>
  *     <li>the current UI theme</li>
  *     <li>the base currency used across all views</li>
@@ -28,6 +28,7 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
  * <p>
  * The class is fully serializable via Jackson and supports
  * snapshot‑based persistence for undo/restore operations.
+ * </p>
  */
 public final class Settings {
 
@@ -43,9 +44,8 @@ public final class Settings {
     private LocalDate lastModified;
 
     /**
-     * Creates a Settings instance with default values:
+     * Creates a Settings instance with default values.
      * 
-     * <p>
      * <ul>
      *     <li>Theme: {@link Theme#DEFAULT}</li>
      *     <li>Base currency: EUR</li>
@@ -93,8 +93,10 @@ public final class Settings {
     /**
      * Sets the theme and records a snapshot if the theme actually changed.
      *
-     * <p>This ensures that the history only grows when meaningful
-     * changes occur.</p>
+     * <p>
+     * This ensures that the history only grows when meaningful
+     * changes occur.
+     * </p>
      */
     public void setTheme(final Theme theme) { 
         if (!theme.equals(this.theme)) {
@@ -105,6 +107,8 @@ public final class Settings {
 
     /** 
      * Returns the base currency code (e.g. "EUR"). 
+     * 
+     * @return base currency code
      */
     public String getBaseCurrency() { 
         return baseCurrency; 
@@ -112,6 +116,8 @@ public final class Settings {
 
     /** 
      * Sets the base currency code. 
+     * 
+     * @param currency the new base currency code (not null)
      */
     public void setBaseCurrency(final String currency) { 
         this.baseCurrency = currency; 
@@ -119,6 +125,8 @@ public final class Settings {
 
     /**
      * Returns an immutable view of the preference history.
+     * 
+     * @return list of snapshots
      */
     public List<SettingsSnapshot> getPreferenceHistory() {
         return List.copyOf(this.preferenceHistory);
@@ -126,6 +134,11 @@ public final class Settings {
 
     /**
      * Replaces the entire preference history.
+     * 
+     * <p>
+     * This method is primarily intended for deserialization and testing.
+     * 
+     * @param list the new list of snapshots (may be null or empty)
      */
     public void setPreferenceHistory(final List<SettingsSnapshot> list) {
         this.preferenceHistory.clear();
@@ -135,7 +148,7 @@ public final class Settings {
     }
 
     /**
-     * Get LocalDate last modified
+     * Get LocalDate last modified.
      * 
      * @return LocalDate last modified
      */
@@ -144,7 +157,7 @@ public final class Settings {
     }
 
     /**
-     * Set LocalDate last modified
+     * Set LocalDate last modified.
      * 
      * @param date LocalDate last modified
      */
@@ -162,6 +175,9 @@ public final class Settings {
     /**
      * Creates a new Settings instance from a snapshot.
      * The history is intentionally reset.
+     * 
+     * @param snap the snapshot to restore from
+     * @return a new Settings instance reflecting the snapshot
      */
     public static Settings fromSnapshot(final SettingsSnapshot snap) {
         return new Settings(
@@ -173,6 +189,11 @@ public final class Settings {
 
     /**
      * Returns a deep copy of this Settings instance.
+     * 
+     * <p>
+     * The copy has its own independent history and window preferences.
+     * 
+     * @return a new Settings instance with the same values
      */
     public Settings copy() {
         return new Settings(
@@ -184,12 +205,18 @@ public final class Settings {
 
     /** 
      * Returns the window layout preferences.
+     * 
+     * @return window preferences
      */
     public WindowPreferences getWindowPrefs() { 
         return windowPrefs; 
     }
 
-    /** Sets the window layout preferences. */
+    /** 
+     * Sets the window layout preferences. 
+     * 
+     * @param prefs the new window preferences (not null)
+     */
     public void setWindowPrefs(final WindowPreferences prefs) { 
         this.windowPrefs = prefs; 
     }
@@ -197,11 +224,16 @@ public final class Settings {
     /**
      * Resolves the base currency code into a {@link CurrencyUnit}.
      *
-     * <p>This method is ignored during JSON serialization and used
-     * only at runtime.</p>
+     * <p>
+     * This method is ignored during JSON serialization and used
+     * only at runtime.
+     * </p>
+     * 
+     * @return the CurrencyUnit corresponding to the base currency code
      */
     @JsonIgnore
     public CurrencyUnit getBaseCurrencyUnit() {
         return Currency.get(baseCurrency);
     }
+
 }

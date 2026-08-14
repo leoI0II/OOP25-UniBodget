@@ -22,6 +22,7 @@ import java.util.Map;
  */
 public final class JsonDataParser<T> implements DataParser<T> {
 
+    private static final String QUOTE = "\"";
     private final Class<T> targetClass;
 
     /**
@@ -58,27 +59,27 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @param json the JSON object as a string
      * @return     a map containing the parsed key-value pairs
      */
-    private Map<String, Object> parseJsonObject(String json) {
+    private Map<String, Object> parseJsonObject(final String json) {
         final Map<String, Object> map = new HashMap<>();
 
         // Removes surrounding braces and trims whitespace
-        json = json.trim();
-        if (json.startsWith("{")) {
-            json = json.substring(1);
+        String trimmed = json.trim();
+        if (trimmed.startsWith("{")) {
+            trimmed = trimmed.substring(1);
         }
-        if (json.endsWith("}")) {
-            json = json.substring(0, json.length() - 1);
+        if (trimmed.endsWith("}")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
         }
         // Splits the object into individual key-value entries
-        final String[] entries = json.split(",");
+        final String[] entries = trimmed.split(",");
         // Processes each entry and extracts the key and value
         for (final String entry : entries) {
             final String[] kv = entry.split(":", 2);
             if (kv.length != 2) {
                 continue; // skip malformed entries
             }
-            final String key = kv[0].trim().replace("\"", "");
-            final String value = kv[1].trim().replace("\"", "");
+            final String key = kv[0].trim().replace(QUOTE, "");
+            final String value = kv[1].trim().replace(QUOTE, "");
             map.put(key, value);
         }
         return map;
@@ -151,21 +152,21 @@ public final class JsonDataParser<T> implements DataParser<T> {
      * @return                      a list of parsed objects
      * @throws DataParserException  if the array is malformed or parsing fails
      */
-    public List<T> parseList(String jsonArray) throws DataParserException {
+    public List<T> parseList(final String jsonArray) throws DataParserException {
         try {
             final List<T> result = new ArrayList<>();
-            jsonArray = jsonArray.trim();
+            String trimmed = jsonArray.trim();
             // Ensures the string is a valid JSON array
-            if (!jsonArray.startsWith("[") || !jsonArray.endsWith("]")) {
-                throw new DataParserException("Invalid JSON array: " + jsonArray);
+            if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+                throw new DataParserException("Invalid JSON array: " + trimmed);
             }
             // Removes the surrounding brackets
-            jsonArray = jsonArray.substring(1, jsonArray.length() - 1).trim();
-            if (jsonArray.isEmpty()) {
+            trimmed = trimmed.substring(1, trimmed.length() - 1).trim();
+            if (trimmed.isEmpty()) {
                 return result; // empty array
             }
             // Splits the array into individual JSON objects
-            final String[] objects = jsonArray.split("\\},\\s*\\{");
+            final String[] objects = trimmed.split("\\},\\s*\\{");
             // Parses each object separately
             for (final String obj : objects) {
                 String jsonObject = obj.trim();
@@ -198,7 +199,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
             // Reads the entire file content as a string
             String json = Files.readString(file).trim();
             // Locates the key associated with the array and extracts the array content
-            final int keyIndex = json.indexOf("\"" + arrayKey + "\"");
+            final int keyIndex = json.indexOf(QUOTE + arrayKey + QUOTE);
             if (keyIndex == -1) {
                 throw new DataParserException("Key '" + arrayKey + "' not found");
             }

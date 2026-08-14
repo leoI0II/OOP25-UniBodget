@@ -17,7 +17,9 @@ package it.unibo.unibodget.persistency.writer.impl;
 public final class JsonUtils {
 
     /** Prevents instantiation of this utility class. */
-    private JsonUtils() {}
+    private JsonUtils() {
+        
+    }
 
     /**
      * Pretty-prints a JSON array containing one or more JSON objects.
@@ -28,13 +30,15 @@ public final class JsonUtils {
      * @return a human-readable, indented version of the array
      */
     public static String prettyPrintArray(String json) {
-        json = json.trim();
-        if (json.equals("[]")) return "[\n]";
+        String trimmed = json.trim();
+        if ("[]".equals(trimmed)) {
+            return "[\n]";
+        }
 
         final StringBuilder sb = new StringBuilder();
         sb.append("[\n");
 
-        final String body = json.substring(1, json.length() - 1).trim();
+        final String body = trimmed.substring(1, trimmed.length() - 1).trim();
         final String[] elements = body.split("},\\s*\\{");
 
         for (int i = 0; i < elements.length; i++) {
@@ -68,15 +72,15 @@ public final class JsonUtils {
      * @return a formatted, indented version of the JSON object
      */
     public static String prettyPrint(String json) {
-        json = json.trim();
+        String trimmed = json.trim();
         final StringBuilder sb = new StringBuilder();
         int indent = 0;
         boolean inString = false;
 
-        for (int i = 0; i < json.length(); i++) {
-            final char c = json.charAt(i);
+        for (int i = 0; i < trimmed.length(); i++) {
+            final char c = trimmed.charAt(i);
 
-            if (c == '"' && (i == 0 || json.charAt(i - 1) != '\\')) {
+            if (c == '"' && (i == 0 || trimmed.charAt(i - 1) != '\\')) {
                 inString = !inString;
             }
 

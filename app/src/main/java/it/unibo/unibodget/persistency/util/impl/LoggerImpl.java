@@ -14,7 +14,7 @@ import it.unibo.unibodget.persistency.util.api.Logger;
  * When an error includes a {@code Throwable}, its stack trace is printed
  * to assist debugging
  */
-public class LoggerImpl implements Logger {
+public final class LoggerImpl implements Logger {
 
     @Override
     public void info(final String message) {
@@ -33,5 +33,5 @@ public class LoggerImpl implements Logger {
             cause.printStackTrace();
         }
     }
-    
+
 }
