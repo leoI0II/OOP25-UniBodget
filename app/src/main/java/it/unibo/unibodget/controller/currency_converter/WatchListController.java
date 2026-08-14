@@ -11,16 +11,22 @@ public final class WatchListController {
 
     private final WatchList model;
 
-    public WatchListController(WatchList model) {
+    /**
+     * Creates a controller that manages a {@link WatchList}.
+     *
+     * @param model the watchlist model to operate on
+     */
+    public WatchListController(final WatchList model) {
         this.model = model;
     }
 
     /**
      * Attempts to add a currency pair to the watchlist.
-     * * @param pair the pair to add
+     * 
+     * @param pair the pair to add
      * @return true if the pair was added, false if it already existed
      */
-    public boolean addPair(WatchlistPair pair) {
+    public boolean addPair(final WatchlistPair pair) {
         if (pair == null) {
             return false;
         }
@@ -29,15 +35,17 @@ public final class WatchListController {
 
     /**
      * Removes a currency pair from the watchlist.
-     * * @param pair the pair to remove
+     * 
+     * @param pair the pair to remove
      */
-    public void removePair(WatchlistPair pair) {
+    public void removePair(final WatchlistPair pair) {
         model.remove(pair);
     }
 
     /**
      * Returns the current set of saved pairs.
-     * * @return an unmodifiable set of WatchlistPair
+     * 
+     * @return an unmodifiable set of WatchlistPair
      */
     public Set<WatchlistPair> getFavorites() {
         return model.getFavorites();

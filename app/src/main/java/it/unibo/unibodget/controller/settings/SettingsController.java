@@ -1,15 +1,23 @@
 package it.unibo.unibodget.controller.settings;
 
-import it.unibo.unibodget.model.settings.*;
-
 import java.util.List;
+
+import it.unibo.unibodget.model.settings.CurrencyContext;
+import it.unibo.unibodget.model.settings.Settings;
+import it.unibo.unibodget.model.settings.SettingsManager;
+import it.unibo.unibodget.model.settings.SettingsSnapshot;
+import it.unibo.unibodget.model.settings.Theme;
+import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.settings.WindowPreferences;
 
 /**
  * Controller responsible for managing {@link Settings} and coordinating
  * updates between the model layer and UI-level managers such as
  * {@link ThemeManager} and {@link CurrencyContext}.
  *
- * <p>The controller exposes high-level operations for:</p>
+ * <p>
+ * The controller exposes high-level operations for:
+ * </p>
  * <ul>
  *     <li>changing the theme</li>
  *     <li>changing the base currency</li>
@@ -17,7 +25,9 @@ import java.util.List;
  *     <li>saving and restoring configurations</li>
  * </ul>
  *
- * <p>All changes are persisted through {@link SettingsManager}.</p>
+ * <p>
+ * All changes are persisted through {@link SettingsManager}.
+ * </p>
  */
 public final class SettingsController {
 
@@ -34,7 +44,8 @@ public final class SettingsController {
     }
 
     /** 
-     * Return active settings
+     * Return active settings.
+     * 
      * @return the active settings instance 
      */
     public Settings getSettings() { 
@@ -42,7 +53,8 @@ public final class SettingsController {
     }
 
     /** 
-     * Return all saved configuration
+     * Return all saved configuration.
+     * 
      * @return all saved configuration snapshots 
      */
     public List<SettingsSnapshot> getAllSavedConfigurations() { 
@@ -55,8 +67,8 @@ public final class SettingsController {
      *
      * @param newTheme the theme to apply
      */
-    public void changeTheme(Theme newTheme) {
-        Theme oldTheme = settings.getTheme();
+    public void changeTheme(final Theme newTheme) {
+        final Theme oldTheme = settings.getTheme();
         settings.setLastModified(java.time.LocalDate.now());
         if (oldTheme.equals(newTheme)) {
             return;
@@ -75,8 +87,8 @@ public final class SettingsController {
      *
      * @param newBase the new base currency code
      */
-    public void changeBaseCurrency(String newBase) {
-        String oldBase = settings.getBaseCurrency();
+    public void changeBaseCurrency(final String newBase) {
+        final String oldBase = settings.getBaseCurrency();
         settings.setLastModified(java.time.LocalDate.now());
         if (oldBase.equals(newBase)) {
             return;
@@ -94,8 +106,8 @@ public final class SettingsController {
      *
      * @param prefs the new window preferences
      */
-    public void updateWindowPrefs(WindowPreferences prefs) {
-        WindowPreferences old = settings.getWindowPrefs();
+    public void updateWindowPrefs(final WindowPreferences prefs) {
+        final WindowPreferences old = settings.getWindowPrefs();
         settings.setLastModified(java.time.LocalDate.now());
         if (old.equals(prefs)) {
             return;
@@ -120,12 +132,14 @@ public final class SettingsController {
     /**
      * Applies a previously saved configuration snapshot.
      *
-     * <p>This replaces the current settings with the snapshot values,
-     * updates global managers, and persists the new state.</p>
+     * <p>
+     * This replaces the current settings with the snapshot values,
+     * updates global managers, and persists the new state.
+     * </p>
      *
      * @param snap the snapshot to restore
      */
-    public void applyConfiguration(SettingsSnapshot snap) {
+    public void applyConfiguration(final SettingsSnapshot snap) {
         // Replace settings with snapshot
         this.settings = Settings.fromSnapshot(snap);
         settings.setLastModified(java.time.LocalDate.now());
@@ -135,5 +149,5 @@ public final class SettingsController {
         // Persist restored configuration
         manager.saveCurrent(settings);
     }
-    
+
 }

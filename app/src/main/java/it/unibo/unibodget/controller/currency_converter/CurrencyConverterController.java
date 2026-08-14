@@ -15,9 +15,11 @@ import java.util.Map;
 /**
  * Controller responsible for coordinating interactions between the currency model
  * (exchange-rate API + conversion engine) and the UI layer.
+ * 
  * <p>
  * This class exposes high-level operations such as performing conversions,
  * retrieving historical exchange-rate data, and preparing chart-ready history points.
+ * 
  * <br>
  * No business logic is implemented here: all computations are delegated to the
  * underlying model components. The controller only orchestrates calls and handles
@@ -36,7 +38,7 @@ public class CurrencyConverterController {
      * @param converter the converter used to perform currency conversions;
      *                  must not be {@code null}
      */
-    public CurrencyConverterController(ExchangeRateAPI api, CurrencyConverter converter) {
+    public CurrencyConverterController(final ExchangeRateAPI api, final CurrencyConverter converter) {
         this.api = api;
         this.converter = converter;
     }
@@ -53,11 +55,11 @@ public class CurrencyConverterController {
      * @throws IllegalArgumentException if the conversion cannot be performed,
      *                                  for example due to missing exchange-rate data
      */
-    public BigDecimal convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to) {
+    public BigDecimal convert(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to) {
         try {
-            CurrencyConversionResult result = converter.convert(amount, from, to);
+            final CurrencyConversionResult result = converter.convert(amount, from, to);
             return result.getConvertedAmount();
-        } catch (Exception e) {
+        } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Unable to perform conversion: " + e.getMessage());
         }
     }
@@ -74,8 +76,8 @@ public class CurrencyConverterController {
      *
      * @throws IllegalArgumentException if the API cannot retrieve historical data
      */
-    public Map<LocalDate, Double> getHistoricalRates(CurrencyUnit base, CurrencyUnit target,
-                                                     LocalDate from, LocalDate to) {
+    public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
+                                                     final LocalDate from, final LocalDate to) {
         return api.getHistoricalRates(base, target, from, to);
     }
 
@@ -87,12 +89,13 @@ public class CurrencyConverterController {
      *
      * @throws IllegalArgumentException if the API cannot retrieve the latest rates
      */
-    public Map<CurrencyUnit, Double> getLatestRates(CurrencyUnit base) {
+    public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         return api.getLatestRates(base);
     }
 
     /**
      * Returns the underlying {@link CurrencyConverter} used by this controller.
+     * 
      * <p>
      * This may be useful for advanced operations or for accessing converter-specific
      * configuration.
@@ -106,6 +109,7 @@ public class CurrencyConverterController {
     /**
      * Retrieves historical exchange-rate values for a currency pair and transforms them
      * into a chronologically ordered list of {@link CurrencyHistoryPoint} objects.
+     * 
      * <p>
      * This method is intended for chart views or any UI component that requires
      * pre-structured historical data.
@@ -118,12 +122,12 @@ public class CurrencyConverterController {
      *
      * @throws IllegalArgumentException if historical data cannot be retrieved
      */
-    public List<CurrencyHistoryPoint> getHistoryPoints(CurrencyUnit base, CurrencyUnit target,
-                                                       LocalDate from, LocalDate to) {
-        Map<LocalDate, Double> rates = getHistoricalRates(base, target, from, to);
+    public List<CurrencyHistoryPoint> getHistoryPoints(final CurrencyUnit base, final CurrencyUnit target,
+                                                       final LocalDate from, final LocalDate to) {
+        final Map<LocalDate, Double> rates = getHistoricalRates(base, target, from, to);
 
-        List<CurrencyHistoryPoint> points = new ArrayList<>();
-        for (Map.Entry<LocalDate, Double> entry : rates.entrySet()) {
+        final List<CurrencyHistoryPoint> points = new ArrayList<>();
+        for (final Map.Entry<LocalDate, Double> entry : rates.entrySet()) {
             points.add(new CurrencyHistoryPoint(entry.getKey(), entry.getValue()));
         }
 
