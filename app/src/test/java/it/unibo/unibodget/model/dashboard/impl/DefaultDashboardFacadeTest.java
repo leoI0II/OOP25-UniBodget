@@ -25,6 +25,13 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  */
 class DefaultDashboardFacadeTest {
 
+        private static final String MAIN_WALLET = "Main wallet";
+        private static final String S_1000 = "1000.00";
+        private static final String S_0_80 = "0.80";
+        private static final String SALARY = "Salary";
+        private static final String FOOD = "Food";
+        private static final String MARCO_P = "Marco";
+
     private CashAccountService walletService;
     private DefaultCategoryService categoryService;
     private DefaultBudgetMonitor budgetMonitor;
@@ -50,19 +57,19 @@ class DefaultDashboardFacadeTest {
 
     @Test
     void shouldLoadDashboardSnapshotForCurrentWallet() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         wallet.setBudgetSettings(
-                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"))
+                new DefaultBudgetSettings(new BigDecimal(S_1000), new BigDecimal(S_0_80))
         );
         walletService.addWallet(wallet);
 
         final Category salary = new Category(
-                "Salary",
+                SALARY,
                 new ARGBColor(0xFF4CAF50),
                 CategoryType.INCOME
         );
         final Category food = new Category(
-                "Food",
+                FOOD,
                 new ARGBColor(0xFFFF9800),
                 CategoryType.EXPENSE
         );
@@ -71,7 +78,7 @@ class DefaultDashboardFacadeTest {
                 Asset.of(FiatCurrency.EUR, new BigDecimal("2000.00")),
                 salary,
                 LocalDate.now(),
-                "Salary",
+                SALARY,
                 "Monthly salary"
         ));
         walletService.addTransaction(new CashTransaction(
@@ -84,14 +91,14 @@ class DefaultDashboardFacadeTest {
 
         final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
 
-        assertEquals("Main wallet", snapshot.getWalletName());
+        assertEquals(MAIN_WALLET, snapshot.getWalletName());
         assertEquals(FiatCurrency.EUR.toString(), snapshot.getWalletCurrency());
         assertEquals(0, new BigDecimal("1700.00").compareTo(snapshot.getTotalBalance()));
         assertEquals(2, snapshot.getRecentTransactions().size());
-        assertEquals(0, new BigDecimal("2000.00").compareTo(snapshot.getCategorySummaries().get("Salary")));
-        assertEquals(0, new BigDecimal("300.00").compareTo(snapshot.getCategorySummaries().get("Food")));
-        assertEquals(0, new BigDecimal("1000.00").compareTo(snapshot.getBudgetLimit()));
-        assertEquals(0, new BigDecimal("0.80").compareTo(snapshot.getWarningThreshold()));
+        assertEquals(0, new BigDecimal("2000.00").compareTo(snapshot.getCategorySummaries().get(SALARY)));
+        assertEquals(0, new BigDecimal("300.00").compareTo(snapshot.getCategorySummaries().get(FOOD)));
+        assertEquals(0, new BigDecimal(S_1000).compareTo(snapshot.getBudgetLimit()));
+        assertEquals(0, new BigDecimal(S_0_80).compareTo(snapshot.getWarningThreshold()));
         assertEquals(BudgetStatus.SAFE, snapshot.getBudgetStatus());
         assertEquals(0, snapshot.getFriendLoanSummaries().size());
         assertEquals(3, snapshot.getWalletInsights().size());
@@ -103,7 +110,7 @@ class DefaultDashboardFacadeTest {
         final CashAccount secondWallet = new CashAccount("Second wallet", FiatCurrency.USD);
 
         firstWallet.setBudgetSettings(
-                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"))
+                new DefaultBudgetSettings(new BigDecimal(S_1000), new BigDecimal(S_0_80))
         );
         secondWallet.setBudgetSettings(
                 new DefaultBudgetSettings(new BigDecimal("500.00"), new BigDecimal("0.90"))
@@ -113,7 +120,7 @@ class DefaultDashboardFacadeTest {
         walletService.addWallet(secondWallet);
 
         final Category firstCategory = new Category(
-                "Food",
+                FOOD,
                 new ARGBColor(0xFFFF9800),
                 CategoryType.EXPENSE
         );
@@ -161,9 +168,9 @@ class DefaultDashboardFacadeTest {
 
     @Test
     void shouldIncludeFriendLoanSummariesInSnapshot() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         wallet.setBudgetSettings(
-                new DefaultBudgetSettings(new BigDecimal("1000.00"), new BigDecimal("0.80"))
+                new DefaultBudgetSettings(new BigDecimal(S_1000), new BigDecimal(S_0_80))
         );
         walletService.addWallet(wallet);
 
@@ -179,26 +186,26 @@ class DefaultDashboardFacadeTest {
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                 friendLoanCategory,
                 LocalDate.now(),
-                "Loan to Marco",
+                "Loan to " + MARCO_P,
                 "Initial loan",
                 marcoLoanId,
-                "Marco"
+                MARCO_P
         ));
 
         walletService.addTransaction(new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("40.00")),
                 friendLoanCategory,
                 LocalDate.now(),
-                "Marco repayment",
+                MARCO_P + " repayment",
                 "Partial repayment",
                 marcoLoanId,
-                "Marco"
+                MARCO_P
         ));
 
         final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
 
         assertEquals(1, snapshot.getFriendLoanSummaries().size());
-        assertEquals("Marco", snapshot.getFriendLoanSummaries().get(0).getFriendName());
+        assertEquals(MARCO_P, snapshot.getFriendLoanSummaries().get(0).getFriendName());
         assertEquals(0, new BigDecimal("100.00").compareTo(snapshot.getFriendLoanSummaries().get(0).getTotalGiven()));
         assertEquals(0, new BigDecimal("40.00").compareTo(snapshot.getFriendLoanSummaries().get(0).getTotalReceived()));
         assertEquals(0, new BigDecimal("60.00").compareTo(snapshot.getFriendLoanSummaries().get(0).getNetBalance()));

@@ -34,10 +34,18 @@ import it.unibo.unibodget.model.wallet.InvestmentAccount;
 /**
  * Tests for DefaultInvestmentController.
  *
+ * <p>
  * Fixed rates used (MockExchangeRateProvider / MockPriceProvider):
- *   AAPL = $150, BTC = $50 000, ETH = $4 000, USD→EUR = 0.91
+ * AAPL = $150, BTC = $50 000, ETH = $4 000, USD→EUR = 0.91
  */
 public final class DefaultInvestmentControllerTest {
+
+    private static final String S_150 = "150";
+    private static final String S_50000 = "50000";
+    private static final String S_5 = "5";
+    private static final String OTHER = "Other";
+    private static final int I_5 = 5;
+    private static final int I_9 = 9;
 
     private static final LocalDate TODAY = LocalDate.now();
 
@@ -106,7 +114,7 @@ public final class DefaultInvestmentControllerTest {
     @Test
     void testGetCurrentBalanceAfterBuy() {
         // 10 AAPL @ $150 market price -> balance = $1500
-        buyAapl(BigDecimal.TEN, new BigDecimal("150"));
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
         assertEquals(
             new BigDecimal("1500").stripTrailingZeros(),
             controller.getCurrentBalance().amount().stripTrailingZeros()
@@ -116,7 +124,7 @@ public final class DefaultInvestmentControllerTest {
     @Test
     void testGetAggregatedBalancesContainsBothCurrencies() {
         // 10 AAPL -> USD balance $1500, EUR balance 1500 * 0.91 = $1365
-        buyAapl(BigDecimal.TEN, new BigDecimal("150"));
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
         final var balances = controller.getAggregatedBalances();
         assertEquals(2, balances.size());
         assertEquals(
@@ -149,7 +157,7 @@ public final class DefaultInvestmentControllerTest {
 
     @Test
     void testGetAllOwnedAssetsAfterBuy() {
-        buyAapl(BigDecimal.TEN, new BigDecimal("150"));
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
         final var owned = controller.getAllOwnedAssets();
         assertEquals(1, owned.size());
         assertTrue(owned.contains(StockMarketCurrency.AAPL));
@@ -182,8 +190,8 @@ public final class DefaultInvestmentControllerTest {
         // 2 AAPL @ $150 + $5 fee = $305
         final var cost = controller.estimateOrderCost(
             OrderType.BUY, StockMarketCurrency.AAPL, BigDecimal.TWO,
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
-            Asset.of(FiatCurrency.USD, new BigDecimal("5")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
             new PaymentSource.CashAccountChannel(cashAccount)
         );
         assertEquals(FiatCurrency.USD, cost.currency());
@@ -195,8 +203,8 @@ public final class DefaultInvestmentControllerTest {
         // 2 AAPL @ $150 − $5 fee = $295 proceeds
         final var proceeds = controller.estimateOrderCost(
             OrderType.SELL, StockMarketCurrency.AAPL, BigDecimal.TWO,
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
-            Asset.of(FiatCurrency.USD, new BigDecimal("5")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
             new PaymentSource.CashAccountChannel(cashAccount)
         );
         assertEquals(FiatCurrency.USD, proceeds.currency());
@@ -225,8 +233,8 @@ public final class DefaultInvestmentControllerTest {
         assertTrue(controller.canBuy(
             new PaymentSource.CashAccountChannel(cashAccount),
             StockMarketCurrency.AAPL, BigDecimal.TEN,
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
-            Asset.of(FiatCurrency.USD, new BigDecimal("5"))
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5))
         ));
     }
 
@@ -236,7 +244,7 @@ public final class DefaultInvestmentControllerTest {
         assertFalse(controller.canBuy(
             new PaymentSource.CashAccountChannel(cashAccount),
             CryptoCurrency.BTC, BigDecimal.valueOf(100),
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
             Asset.zero(FiatCurrency.USD)
         ));
     }
@@ -246,7 +254,7 @@ public final class DefaultInvestmentControllerTest {
         assertTrue(controller.canBuy(
             new PaymentSource.NoPaymentChannel(),
             StockMarketCurrency.AAPL, BigDecimal.TEN,
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
             Asset.zero(FiatCurrency.USD)
         ));
     }
@@ -285,14 +293,14 @@ public final class DefaultInvestmentControllerTest {
     @Test
     void testCanTransferBetweenDifferentAccountsWithSufficientPosition() {
         buyBtc(BigDecimal.TEN);
-        final var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, priceProvider);
         assertTrue(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanTransferWithInsufficientPositionReturnsFalse() {
         buyBtc(BigDecimal.ONE);
-        final var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, priceProvider);
         assertFalse(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.TEN));
     }
 
@@ -306,8 +314,8 @@ public final class DefaultInvestmentControllerTest {
         final var result = controller.executeBuyOrder(
             account, new PaymentSource.CashAccountChannel(cashAccount),
             StockMarketCurrency.AAPL, BigDecimal.TEN,
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
-            Asset.of(FiatCurrency.USD, new BigDecimal("5")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
             TODAY, "buy 10 AAPL"
         );
         assertInstanceOf(OrderResult.BuyWithCashSuccess.class, result);
@@ -327,7 +335,7 @@ public final class DefaultInvestmentControllerTest {
         final var result = controller.executeBuyOrder(
             account, new PaymentSource.CashAccountChannel(cashAccount),
             CryptoCurrency.BTC, BigDecimal.valueOf(100),
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
             Asset.zero(FiatCurrency.USD),
             TODAY, ""
         );
@@ -346,13 +354,13 @@ public final class DefaultInvestmentControllerTest {
         final var result = controller.executeSellOrder(
             account, new PaymentSource.CashAccountChannel(cashAccount),
             StockMarketCurrency.AAPL, BigDecimal.valueOf(5),
-            Asset.of(FiatCurrency.USD, new BigDecimal("150")),
-            Asset.of(FiatCurrency.USD, new BigDecimal("5")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
             TODAY, "partial sell"
         );
         assertInstanceOf(OrderResult.SellWithCashSuccess.class, result);
         assertEquals(
-            BigDecimal.valueOf(5).stripTrailingZeros(),
+            BigDecimal.valueOf(I_5).stripTrailingZeros(),
             account.getPositionForAsset(StockMarketCurrency.AAPL).get().quantity().stripTrailingZeros()
         );
         // 10 000 + 745 = 10 745
@@ -367,7 +375,7 @@ public final class DefaultInvestmentControllerTest {
         final var result = controller.executeSellOrder(
             account, new PaymentSource.CashAccountChannel(cashAccount),
             CryptoCurrency.BTC, BigDecimal.ONE,
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
             Asset.zero(FiatCurrency.USD),
             TODAY, ""
         );
@@ -381,13 +389,13 @@ public final class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderSuccess() {
         buyBtc(BigDecimal.TEN);
-        final var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, priceProvider);
         final var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.ONE, TODAY, ""
         );
         assertInstanceOf(OrderResult.TransferSuccess.class, result);
         assertEquals(
-            BigDecimal.valueOf(9).stripTrailingZeros(),
+            BigDecimal.valueOf(I_9).stripTrailingZeros(),
             account.getPositionForAsset(CryptoCurrency.BTC).get().quantity().stripTrailingZeros()
         );
         assertEquals(
@@ -408,7 +416,7 @@ public final class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderWithInsufficientPositionReturnsError() {
         buyBtc(BigDecimal.ONE);
-        final var other = new InvestmentAccount("Other", FiatCurrency.USD, priceProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, priceProvider);
         final var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.TEN, TODAY, ""
         );
@@ -432,7 +440,7 @@ public final class DefaultInvestmentControllerTest {
         account.addTransaction(InvestmentTransaction.of(
             Asset.of(CryptoCurrency.BTC, quantity),
             Category.INVESTMENT_BUY, TODAY, "", "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000")),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
             Asset.zero(FiatCurrency.USD)
         ));
     }

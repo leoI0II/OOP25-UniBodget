@@ -20,6 +20,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 class DefaultFriendLoanSummaryServiceTest {
 
+        private static final String MARCO_P = "Marco";
+
     @Test
     void shouldSummarizeFriendLoansByLoanId() {
         final DefaultFriendLoanSummaryService service = new DefaultFriendLoanSummaryService();
@@ -37,20 +39,20 @@ class DefaultFriendLoanSummaryServiceTest {
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                 friendLoanCategory,
                 LocalDate.of(2026, 5, 1),
-                "Loan to Marco",
+                "Loan to " + MARCO_P,
                 "Initial loan",
                 marcoLoanId,
-                "Marco"
+                MARCO_P
         );
 
         final CashTransaction marcoRepayment = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")),
                 friendLoanCategory,
                 LocalDate.of(2026, 5, 10),
-                "Marco repayment",
+                MARCO_P + " repayment",
                 "Partial repayment",
                 marcoLoanId,
-                "Marco"
+                MARCO_P
         );
 
         final CashTransaction lucaLoan = new CashTransaction(
@@ -72,7 +74,7 @@ class DefaultFriendLoanSummaryServiceTest {
         final FriendLoanSummary first = result.get(0);
         final FriendLoanSummary second = result.get(1);
 
-        assertEquals("Marco", first.getFriendName());
+        assertEquals(MARCO_P, first.getFriendName());
         assertEquals(new BigDecimal("100.00"), first.getTotalGiven());
         assertEquals(new BigDecimal("30.00"), first.getTotalReceived());
         assertEquals(new BigDecimal("70.00"), first.getNetBalance());

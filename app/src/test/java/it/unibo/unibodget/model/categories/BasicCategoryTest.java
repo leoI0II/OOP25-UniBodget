@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.utils.ARGBColor;
 
-class AbstractCategoryTest {
+class BasicCategoryTest {
 
     private static final String FOOD = "Food";
     private static final String RED = "#FF0000";

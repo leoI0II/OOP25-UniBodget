@@ -26,6 +26,11 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  */
 class DefaultWalletServiceTest {
 
+    private static final String MAIN_WALLET = "Main wallet";
+    private static final String FIRST = "First";
+    private static final String SECOND = "Second";
+    private static final String TEST = "Test";
+
     private WalletService<CashTransaction, CashAccount> service;
 
     @BeforeEach
@@ -35,7 +40,7 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldSetFirstAddedWalletAsCurrentWallet() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
 
         service.addWallet(wallet);
 
@@ -45,8 +50,8 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldSelectWalletById() {
-        final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
-        final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
+        final CashAccount firstWallet = new CashAccount(FIRST, FiatCurrency.EUR);
+        final CashAccount secondWallet = new CashAccount(SECOND, FiatCurrency.USD);
 
         service.addWallet(firstWallet);
         service.addWallet(secondWallet);
@@ -59,7 +64,7 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldReturnFalseWhenSelectingUnknownWallet() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         final CashAccount otherWallet = new CashAccount("Other wallet", FiatCurrency.USD);
 
         service.addWallet(wallet);
@@ -72,7 +77,7 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldAddTransactionToCurrentWallet() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         service.addWallet(wallet);
 
         final Category category = new Category(
@@ -97,11 +102,11 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldRemoveTransactionFromCurrentWallet() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         service.addWallet(wallet);
 
         final Category category = new Category(
-                "Test",
+                TEST,
                 new ARGBColor(0xFFFF9800),
                 CategoryType.EXPENSE
         );
@@ -123,11 +128,11 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldClearCurrentWalletHistory() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         service.addWallet(wallet);
 
         final Category category = new Category(
-                "Test",
+                TEST,
                 new ARGBColor(0xFFFF9800),
                 CategoryType.EXPENSE
         );
@@ -155,7 +160,7 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldNotifyObserversWhenWalletStateChanges() {
-        final CashAccount wallet = new CashAccount("Main wallet", FiatCurrency.EUR);
+        final CashAccount wallet = new CashAccount(MAIN_WALLET, FiatCurrency.EUR);
         final AtomicBoolean notified = new AtomicBoolean(false);
 
         service.addObserver(() -> notified.set(true));
@@ -166,8 +171,8 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldInitializeCurrentWalletFromConstructorList() {
-        final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
-        final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
+        final CashAccount firstWallet = new CashAccount(FIRST, FiatCurrency.EUR);
+        final CashAccount secondWallet = new CashAccount(SECOND, FiatCurrency.USD);
 
         final WalletService<CashTransaction, CashAccount> walletService =
                 new DefaultWalletService<>(List.of(firstWallet, secondWallet));
@@ -178,8 +183,8 @@ class DefaultWalletServiceTest {
 
     @Test
     void shouldSelectAnotherWalletWhenCurrentWalletIsRemoved() {
-        final CashAccount firstWallet = new CashAccount("First", FiatCurrency.EUR);
-        final CashAccount secondWallet = new CashAccount("Second", FiatCurrency.USD);
+        final CashAccount firstWallet = new CashAccount(FIRST, FiatCurrency.EUR);
+        final CashAccount secondWallet = new CashAccount(SECOND, FiatCurrency.USD);
 
         service.addWallet(firstWallet);
         service.addWallet(secondWallet);

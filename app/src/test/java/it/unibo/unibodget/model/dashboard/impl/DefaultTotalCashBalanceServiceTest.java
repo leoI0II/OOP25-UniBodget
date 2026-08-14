@@ -22,6 +22,9 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  */
 class DefaultTotalCashBalanceServiceTest {
 
+    private static final String INCOME = "Income";
+    private static final String S_100 = "100.00";
+
     private CashAccountService walletService;
     private CashBalanceConverter balanceConverter;
     private DefaultTotalCashBalanceService totalBalanceService;
@@ -42,18 +45,18 @@ class DefaultTotalCashBalanceServiceTest {
         walletService.addWallet(secondWallet);
 
         final Category income = new Category(
-                "Income",
+                INCOME,
                 new ARGBColor(0xFF4CAF50),
                 CategoryType.INCOME
         );
 
         walletService.selectWallet(firstWallet.getId());
         walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("100.00")),
+                Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
                 income,
                 LocalDate.now(),
                 "Salary",
-                "Income"
+                INCOME
         ));
 
         walletService.selectWallet(secondWallet.getId());
@@ -62,7 +65,7 @@ class DefaultTotalCashBalanceServiceTest {
                 income,
                 LocalDate.now(),
                 "Gift",
-                "Income"
+                INCOME
         ));
 
         final Asset total = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
@@ -80,27 +83,27 @@ class DefaultTotalCashBalanceServiceTest {
         walletService.addWallet(usdWallet);
 
         final Category income = new Category(
-                "Income",
+                INCOME,
                 new ARGBColor(0xFF4CAF50),
                 CategoryType.INCOME
         );
 
         walletService.selectWallet(eurWallet.getId());
         walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("100.00")),
+                Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
                 income,
                 LocalDate.now(),
                 "Salary",
-                "Income"
+                INCOME
         ));
 
         walletService.selectWallet(usdWallet.getId());
         walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.USD, new BigDecimal("100.00")),
+                Asset.of(FiatCurrency.USD, new BigDecimal(S_100)),
                 income,
                 LocalDate.now(),
                 "Bonus",
-                "Income"
+                INCOME
         ));
 
         final Asset totalInEur = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
