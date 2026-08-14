@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.utils.ARGBColor;
 
-class BasicCategoryTest {
+class AbstractCategoryTest {
 
     private static final String FOOD = "Food";
     private static final String RED = "#FF0000";
@@ -45,7 +45,7 @@ class BasicCategoryTest {
         assertFalse(c.toString().contains(RED));
     }
 
-    static class TestCategory extends BasicCategory {
+    static class TestCategory extends AbstractCategory {
         TestCategory(final String name, final ARGBColor color, final CategoryType type) {
             super(name, color, type);
         }

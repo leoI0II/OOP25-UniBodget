@@ -22,7 +22,7 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  * <p>
  * This class behaves as a value object: equality is based on both name and color.
  */
-public abstract class BasicCategory {
+public abstract class AbstractCategory {
 
     private String name;
     private ARGBColor color;
@@ -35,7 +35,7 @@ public abstract class BasicCategory {
      * @param color     the color associated with the category
      * @param type      the high-level classification of the category
      */
-    public BasicCategory(final String name, 
+    public AbstractCategory(final String name, 
                         final ARGBColor color,
                         final CategoryType type) {
         this.name = Objects.requireNonNull(name);
@@ -70,6 +70,11 @@ public abstract class BasicCategory {
         return this.type;
     }
 
+    /**
+     * Returns a string representation of the category.
+     *
+     * @return a readable string for the category
+     */
     @Override
     public String toString() {
         return "Category{name='" 
@@ -81,18 +86,29 @@ public abstract class BasicCategory {
                 + "'}";
     }
 
+    /**
+     * Checks if this category is equal to another object.
+     *
+     * @param o the object to compare with
+     * @return true if the objects are equal, false otherwise
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof BasicCategory)) {
+        if (!(o instanceof AbstractCategory)) {
             return false;
         }
-        final BasicCategory c = (BasicCategory) o;
+        final AbstractCategory c = (AbstractCategory) o;
         return this.name.equals(c.name) && this.color.equals(c.color) && this.type.equals(c.type);
     }
 
+    /**
+     * Returns the hash code for this category.
+     *
+     * @return the hash code based on name, color, and type
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.name, this.color, this.type);

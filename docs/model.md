@@ -9,7 +9,7 @@ classDiagram
     %% ======= CATEGORIES =========
     %% ============================
 
-    class BasicCategory {
+    class AbstractCategory {
         <<abstract>>
         -String name
         -ARGBColor color
@@ -38,10 +38,10 @@ classDiagram
     }
 
     %% Relations
-    Category --|> BasicCategory
+    Category --|> AbstractCategory
     CategoryPreset --> Category
-    BasicCategory --> CategoryType
-    BasicCategory --> ARGBColor
+    AbstractCategory --> CategoryType
+    AbstractCategory --> ARGBColor
 
 
     %% ============================
