@@ -17,7 +17,7 @@ public final class SerializerFactory {
     private SerializerFactory() {
         // Utility class
     }
-    
+
     /**
      * Creates a serializer based on the file extension.
      *

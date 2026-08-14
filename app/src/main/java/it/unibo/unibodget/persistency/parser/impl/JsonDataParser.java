@@ -197,7 +197,7 @@ public final class JsonDataParser<T> implements DataParser<T> {
     public List<T> parseListFromFile(final Path file, final String arrayKey) throws DataParserException {
         try {
             // Reads the entire file content as a string
-            String json = Files.readString(file).trim();
+            final String json = Files.readString(file).trim();
             // Locates the key associated with the array and extracts the array content
             final int keyIndex = json.indexOf(QUOTE + arrayKey + QUOTE);
             if (keyIndex == -1) {

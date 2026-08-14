@@ -11,7 +11,7 @@ import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
  * <p>
  * This implementation delegates all serialization work to the
  * shared ObjectMapper configured in {@link PersistenceJacksonConfig}.
- * <p>
+ * </p>
  * 
  * @param <T> the type of object to serialize
  */

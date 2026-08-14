@@ -2,8 +2,6 @@ package it.unibo.unibodget.persistency.parser.impl;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
 

@@ -97,6 +97,8 @@ public final class Settings {
      * This ensures that the history only grows when meaningful
      * changes occur.
      * </p>
+     * 
+     * @param theme the new theme to apply
      */
     public void setTheme(final Theme theme) { 
         if (!theme.equals(this.theme)) {

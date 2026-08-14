@@ -39,7 +39,11 @@ import java.util.Map;
  */
 public final class JsonDataSerializer<T> implements DataSerializer<T> {
     private final String quote = "\"";
+    private final String quote2 = "\":";
 
+    /**
+     * Creates a new serializer instance.
+     */
     public JsonDataSerializer() {
         // No initialization needed
     }
@@ -47,6 +51,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
     /**
      * Creates a new serializer instance.
      *
+     * <p>
      * The {@code rootType} parameter is kept for API compatibility but is
      * not required by this implementation.
      *
@@ -154,7 +159,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
             }
             sb.append(quote)
                 .append(escape(entry.getKey().toString()))
-                .append("\":")
+                .append(quote2)
                 .append(serializeValue(entry.getValue(), visited));
             first = false;
         }
@@ -183,7 +188,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
             if (!first) {
                 sb.append(",");
             }
-            sb.append(quote).append(comp.getName()).append("\":");
+            sb.append(quote).append(comp.getName()).append(quote2);
 
             final Object fieldValue = comp.getAccessor().invoke(record);
             sb.append(serializeValue(fieldValue, visited));
@@ -227,7 +232,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
                 if (!first) {
                     sb.append(",");
                 }
-                sb.append("\"").append(field.getName()).append("\":");
+                sb.append("\"").append(field.getName()).append(quote2);
 
                 final Object fieldValue = field.get(obj);
                 sb.append(serializeValue(fieldValue, visited));

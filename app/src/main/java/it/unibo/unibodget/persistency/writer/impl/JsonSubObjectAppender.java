@@ -58,7 +58,7 @@ public class JsonSubObjectAppender extends AbstractFileAppender {
         }
 
         final int arrayStart = json.indexOf("[", keyIndex);
-        final int arrayEnd   = json.indexOf("]", arrayStart);
+        final int arrayEnd = json.indexOf("]", arrayStart);
 
         if (arrayStart < 0 || arrayEnd < 0) {
             throw new IOException("Key '" + listKey + "' does not contain an array");

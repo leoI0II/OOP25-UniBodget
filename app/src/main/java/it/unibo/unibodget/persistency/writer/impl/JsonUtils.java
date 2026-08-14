@@ -16,9 +16,11 @@ package it.unibo.unibodget.persistency.writer.impl;
  */
 public final class JsonUtils {
 
+    private static final String NEWLINE = "\n";
+
     /** Prevents instantiation of this utility class. */
     private JsonUtils() {
-        
+
     }
 
     /**
@@ -29,8 +31,8 @@ public final class JsonUtils {
      * @param json the raw JSON array string
      * @return a human-readable, indented version of the array
      */
-    public static String prettyPrintArray(String json) {
-        String trimmed = json.trim();
+    public static String prettyPrintArray(final String json) {
+        final String trimmed = json.trim();
         if ("[]".equals(trimmed)) {
             return "[\n]";
         }
@@ -56,7 +58,7 @@ public final class JsonUtils {
             if (i < elements.length - 1) {
                 sb.append(",");
             }
-            sb.append("\n");
+            sb.append(NEWLINE);
         }
 
         sb.append("]");
@@ -71,8 +73,8 @@ public final class JsonUtils {
      * @param json the raw JSON object string
      * @return a formatted, indented version of the JSON object
      */
-    public static String prettyPrint(String json) {
-        String trimmed = json.trim();
+    public static String prettyPrint(final String json) {
+        final String trimmed = json.trim();
         final StringBuilder sb = new StringBuilder();
         int indent = 0;
         boolean inString = false;
@@ -92,13 +94,13 @@ public final class JsonUtils {
             switch (c) {
                 case '{':
                 case '[':
-                    sb.append(c).append("\n");
+                    sb.append(c).append(NEWLINE);
                     indent++;
                     appendIndent(sb, indent);
                     break;
                 case '}':
                 case ']':
-                    sb.append("\n");
+                    sb.append(NEWLINE);
                     indent--;
                     appendIndent(sb, indent);
                     sb.append(c);
