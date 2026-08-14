@@ -121,7 +121,7 @@ public interface CurrencyUnit {
      *
      * @return a list of basic {@link CurrencyUnit} instances
      */
-    public static List<CurrencyUnit> basicCurrencies() {
+    static List<CurrencyUnit> basicCurrencies() {
         final List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
         final ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
             list.stream()

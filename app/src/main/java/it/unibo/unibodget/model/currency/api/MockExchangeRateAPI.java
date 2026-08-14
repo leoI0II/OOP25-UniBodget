@@ -30,11 +30,29 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
         mockRates.putAll(rates);
     }
 
+    /**
+     * Returns a mock map of the latest exchange rates for the specified base currency.
+     * The returned rates are hardcoded and do not reflect real market data.
+     * 
+     * @param base the base currency for which to retrieve the latest rates
+     * @return a map of target currencies to their mock exchange-rate values
+     */
     @Override
     public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         return mockRates;
     }
 
+    /**
+     * Returns a mock historical exchange-rate time-series for the specified currency pair
+     * over the given date range. The returned rates are constant and do not reflect
+     * real market data.
+     * 
+     * @param base the base currency for which to retrieve historical rates
+     * @param target the target currency for which to retrieve historical rates
+     * @param from the start date of the historical interval (inclusive)
+     * @param to the end date of the historical interval (inclusive)
+     * @return a map of dates to mock exchange-rate values
+     */
     @Override
     public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
                                                     final LocalDate from, final LocalDate to) {

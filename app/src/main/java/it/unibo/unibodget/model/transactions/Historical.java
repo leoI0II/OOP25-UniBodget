@@ -24,10 +24,18 @@ public final class Historical<T extends Transaction> {
     @JsonProperty("transactions")
     private final List<T> history;
 
+    /**
+     * Constructs an empty historical ledger.
+     */
     public Historical() {
         this.history = new ArrayList<>();
     }
 
+    /**
+     * Constructs a historical ledger initialized with the given list of transactions.
+     *
+     * @param history the initial list of transactions; must not be null
+     */
     public Historical(final List<T> history) {
         this.history = new ArrayList<>(Objects.requireNonNull(history));
     }
@@ -53,6 +61,8 @@ public final class Historical<T extends Transaction> {
 
     /**
      * Removes a transaction from the ledger.
+     * 
+     * <p>
      * Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
@@ -63,6 +73,8 @@ public final class Historical<T extends Transaction> {
 
     /**
      * Replaces an existing transaction with a new one, preserving its position in the ledger.
+     * 
+     * <p>
      * Uses {@link Object#equals} to locate {@code oldTransaction}.
      * Does nothing if {@code oldTransaction} is not found.
      *

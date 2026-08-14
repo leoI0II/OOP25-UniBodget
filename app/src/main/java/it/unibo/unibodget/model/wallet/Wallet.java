@@ -31,7 +31,7 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
  */
 public abstract class Wallet<T extends Transaction> {
 
-    private static final Map<String, AtomicInteger> nameCounters = new ConcurrentHashMap<>();
+    private static final Map<String, AtomicInteger> NAMECOUNTERS = new ConcurrentHashMap<>();
 
     private final UUID id;
     private String name;
@@ -93,7 +93,7 @@ public abstract class Wallet<T extends Transaction> {
     // typePrefix is provided by the subclass because Java generics are erased at runtime:
     // Wallet cannot inspect T to determine whether it is CashTransaction or InvestmentTransaction.
     private static String generateDefaultName(final String typePrefix) {
-        return typePrefix + " " + nameCounters
+        return typePrefix + " " + NAMECOUNTERS
             .computeIfAbsent(typePrefix, k -> new AtomicInteger(0))
             .incrementAndGet();
     }

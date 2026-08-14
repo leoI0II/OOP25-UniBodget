@@ -110,7 +110,7 @@ public class BankConverterWidgetFX {
                 } else {
                     resultLabel.setText("Select a bank and currencies!");
                 }
-            } catch (final Exception ex) {
+            } catch (final IllegalArgumentException ex) {
                 resultLabel.setText("Calculation Error");
             }
         });
@@ -181,7 +181,7 @@ public class BankConverterWidgetFX {
                         alert.showAndWait();
                     }
 
-                } catch (final Exception e) {
+                } catch (final IllegalArgumentException e) {
                     // Show input error
                     final Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Input Error");

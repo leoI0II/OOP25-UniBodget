@@ -4,7 +4,15 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
- * 
+ * Defines a service capable of retrieving the current market price of an asset
+ * expressed in a specified target currency.
+ *
+ * <p>
+ * Implementations of this interface provide the logic required to obtain
+ * up‑to‑date pricing information for assets such as fiat currencies, stocks,
+ * or cryptocurrencies. The price may be obtained from external APIs, local
+ * caches, or predefined mock values depending on the specific provider.
+ * </p>
  */
 public interface PriceProvider {
 
@@ -15,6 +23,6 @@ public interface PriceProvider {
      * @param targetCurrency the currency in which to express the price
      * @return the current price of the asset in the target currency
      */
-    Asset getCurrentPrice(final CurrencyUnit asset, final CurrencyUnit targetCurrency);
+    Asset getCurrentPrice(CurrencyUnit asset, CurrencyUnit targetCurrency);
 
 }

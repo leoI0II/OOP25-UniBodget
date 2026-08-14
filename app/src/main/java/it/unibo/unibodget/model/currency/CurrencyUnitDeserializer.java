@@ -21,6 +21,14 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
  */
 public class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUnit> {
 
+    /**
+     * Deserializes a JSON value into a {@link CurrencyUnit} instance.
+     * 
+     * @param p the JSON parser
+     * @param ctxt the deserialization context
+     * @return a {@link CurrencyUnit} placeholder with the parsed code
+     * @throws IOException if an I/O error occurs during parsing
+     */
     @Override
     public CurrencyUnit deserialize(final JsonParser p, final DeserializationContext ctxt)
             throws IOException {

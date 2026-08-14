@@ -8,6 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Manages the collection of banks used for currency‑conversion fee calculations.
+ *
+ * <p>
+ * This class provides a simple in‑memory model backed by a JSON file stored in the
+ * application resources. The list of banks is loaded lazily: the first time a
+ * {@code BankList} instance is created, the JSON file is read and its contents
+ * populate the internal list. If the file is empty or cannot be loaded, a set of
+ * predefined mock banks is generated to ensure that the application always has
+ * valid data available.
+ */
 public final class BankList {
 
     private static final double FIXED_FEE_1 = 1.0;
@@ -20,7 +31,7 @@ public final class BankList {
     private static final Path PATH = Path.of("data/json/currency/bank/Banks.json");
     private static final String RESOURCE = "/json/currency/bank/Banks.json";
 
-    private static boolean initialized = false;
+    private static boolean initialized;
     private static final List<Bank> LOADED = new ArrayList<>();
 
     /**
@@ -98,6 +109,7 @@ public final class BankList {
      * This ensures that the application always has a valid set of banks to work with.
      */
     public static void init() {
+        initialized = false;
         try {
             final ModelFileManager<Bank> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Bank.class);

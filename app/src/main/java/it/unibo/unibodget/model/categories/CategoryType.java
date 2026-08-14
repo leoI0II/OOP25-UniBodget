@@ -15,5 +15,5 @@ public enum CategoryType {
     EXPENSE,
     TRANSFER,
     FRIEND_LOAN,
-    BANK_LOAN;
+    BANK_LOAN
 }

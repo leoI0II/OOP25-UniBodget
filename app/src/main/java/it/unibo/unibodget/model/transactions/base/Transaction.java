@@ -21,16 +21,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * - a {@link LocalDate} indicating when the transaction occurred
  * - an optional textual description
  * - optional notes for additional context
+ * </p>
  *
  * <p>
  * This class is immutable: all fields are final and set at construction time.
+ * </p>
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
     @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
 })
-public sealed abstract class Transaction permits CashTransaction, InvestmentTransaction {
+public abstract sealed class Transaction permits CashTransaction, InvestmentTransaction {
 
     private final Asset asset;
     private final Category category;
@@ -154,6 +156,17 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
         return Objects.hash(asset, category, date, description, notes);
     }
 
+    /**
+     * Returns a string representation of this transaction.
+     *
+     * <p>
+     * The returned string includes the asset, category, date, description, and notes.
+     * Subclasses overriding this method should include their additional state in the
+     * string representation.
+     * </p>
+     *
+     * @return a string describing this transaction
+     */
     @Override
     public String toString() {
         return "Transaction{asset=" + asset

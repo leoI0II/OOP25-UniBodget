@@ -17,7 +17,7 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  * - active flag for archive/reactivate behavior
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class Category extends BasicCategory {
+public final class Category extends AbstractCategory {
 
     public static final Category FOOD =
             new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
@@ -116,6 +116,9 @@ public final class Category extends BasicCategory {
 
     /**
      * Sets the active status of the category.
+     * 
+     * @return {@code true} if the category is active,
+     *         {@code false} otherwise
      */
     public boolean isDefault() {
         return origin == CategoryOrigin.DEFAULT;

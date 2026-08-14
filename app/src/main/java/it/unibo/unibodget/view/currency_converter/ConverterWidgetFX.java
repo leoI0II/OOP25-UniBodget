@@ -320,7 +320,7 @@ public class ConverterWidgetFX {
                 final double rate = result.divide(amount, 4, java.math.RoundingMode.HALF_UP).doubleValue();
                 new MarketAlert(this.alertService).checkAndShowAlerts(rate, from, to);
 
-            } catch (final Exception ex) {
+            } catch (final IllegalArgumentException ex) {
                 output.setFont(font);
                 output.setText("Error: " + ex.getMessage());
             }

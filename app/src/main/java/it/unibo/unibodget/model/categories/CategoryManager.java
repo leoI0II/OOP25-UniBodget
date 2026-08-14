@@ -30,8 +30,12 @@ public final class CategoryManager {
     private CategoryManager() {
     }
 
-    /*
+    /**
      * Initializes the category manager by loading categories from the JSON file.
+     * 
+     * <p>
+     * If the file is empty or cannot be loaded, default categories are generated.
+     * This method is called automatically on first access to the manager. 
      */
     public static void init() {
         initialized = false;

@@ -16,10 +16,6 @@ import it.unibo.unibodget.model.currency.StockMarketCurrency;
  */
 public class MockExchangeRateProvider implements ExchangeRateProvider {
 
-    private record Pair(CurrencyUnit from, CurrencyUnit to) {
-
-    }
-
     private static final Map<Pair, BigDecimal> RATES = Map.ofEntries(
         // Fiat ↔ Fiat
         Map.entry(new Pair(FiatCurrency.EUR, FiatCurrency.USD), new BigDecimal("1.10")),
@@ -61,5 +57,12 @@ public class MockExchangeRateProvider implements ExchangeRateProvider {
             BigDecimal.ONE
         );
         return Asset.of(target, src.amount().multiply(rate));
+    }
+
+    /*
+     * Represents a currency pair for exchange rate lookup.
+     */
+    private record Pair(CurrencyUnit from, CurrencyUnit to) {
+
     }
 }

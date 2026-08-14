@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class BasicCurrencyConverter implements CurrencyConverter {
 
-    private final int SCALE = 20;
+    private final int scale = 20;
 
     private final ExchangeRateAPI api;
     private final CurrencyUnit baseCurrency;
@@ -37,6 +37,17 @@ public class BasicCurrencyConverter implements CurrencyConverter {
         this.baseCurrency = baseCurrency;
     }
 
+    /**
+     * Converts an amount from one currency to another using the exchange rates
+     * provided by the {@link ExchangeRateAPI}. The conversion is performed relative
+     * to the internal base currency.
+     * 
+     * @param amount the amount to convert
+     * @param from the source currency unit
+     * @param to the target currency unit
+     * @return a {@link CurrencyConversionResult} containing the converted amount,
+     *         the applied exchange rate, and the source/target currencies
+     */
     @Override
     public CurrencyConversionResult convert(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to) {
         if (from.getType() == CurrencyType.STOCK || to.getType() == CurrencyType.STOCK) {
@@ -54,15 +65,15 @@ public class BasicCurrencyConverter implements CurrencyConverter {
         rates.forEach((unit, value) -> normalized.put(unit.getCode(), value));
 
         if (!normalized.containsKey(from.getCode()) || !normalized.containsKey(to.getCode())) {
-            System.out.println("1. Exchange rates not available for the selected currencies: " 
+            System.out.println("1. Exchange rates not available for the selected currencies: "
                                 + from.getCode() + " or " + to.getCode());
             throw new IllegalArgumentException("Tasso di cambio non disponibile per le valute selezionate.");
         }
 
         final BigDecimal fromRate = BigDecimal.valueOf(normalized.get(from.getCode()));
-        final BigDecimal toRate   = BigDecimal.valueOf(normalized.get(to.getCode()));
+        final BigDecimal toRate = BigDecimal.valueOf(normalized.get(to.getCode()));
 
-        final BigDecimal amountInBase = amount.divide(fromRate, SCALE, RoundingMode.HALF_UP);
+        final BigDecimal amountInBase = amount.divide(fromRate, scale, RoundingMode.HALF_UP);
         final BigDecimal converted = amountInBase.multiply(toRate)
             .setScale(10, RoundingMode.HALF_UP);
 
