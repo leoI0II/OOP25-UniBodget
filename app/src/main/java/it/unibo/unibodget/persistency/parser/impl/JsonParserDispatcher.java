@@ -30,7 +30,7 @@ public final class JsonParserDispatcher {
      * @return the parsed instance of type {@code T}
      * @throws DataParserException if parsing fails
      */
-    public static <T> T parse(String json, Class<T> type) throws DataParserException {
+    public static <T> T parse(final String json, final Class<T> type) throws DataParserException {
         if (shouldUseComplexParser(type)) {
             return new JsonComplexDataParser<>(type).parse(json);
         }
@@ -45,7 +45,7 @@ public final class JsonParserDispatcher {
      * @return the JSON string representation of {@code value}
      * @throws DataSerializerException if serialization fails
      */
-    public static <T> String serialize(T value) throws DataSerializerException {
+    public static <T> String serialize(final T value) throws DataSerializerException {
         if (shouldUseComplexParser(value.getClass())) {
             return new JsonComplexDataSerializer<T>().serialize(value);
         }
@@ -60,12 +60,20 @@ public final class JsonParserDispatcher {
      * @param type the {@link Class} to evaluate
      * @return {@code true} if the complex parser should be used, {@code false} otherwise
      */
-    private static boolean shouldUseComplexParser(Class<?> type) {
-        if (type.isArray()) return true; 
-        if (Collection.class.isAssignableFrom(type)) return true;
-        if (Map.class.isAssignableFrom(type)) return true;
-        if (type.isRecord()) return true;
-        for (Field f : type.getDeclaredFields()) {
+    private static boolean shouldUseComplexParser(final Class<?> type) {
+        if (type.isArray()) {
+            return true; 
+        }
+        if (Collection.class.isAssignableFrom(type)) {
+            return true;
+        }
+        if (Map.class.isAssignableFrom(type)) {
+            return true;
+        }
+        if (type.isRecord()) {
+            return true;
+        }
+        for (final Field f : type.getDeclaredFields()) {
             if (!isSimpleType(f.getType())) {
                 return true;
             }
@@ -81,7 +89,7 @@ public final class JsonParserDispatcher {
      * @param type the {@link Class} to evaluate
      * @return {@code true} if the type is simple, {@code false} otherwise
      */
-    private static boolean isSimpleType(Class<?> type) {
+    private static boolean isSimpleType(final Class<?> type) {
         return type.isPrimitive()
             || type == String.class
             || Number.class.isAssignableFrom(type)

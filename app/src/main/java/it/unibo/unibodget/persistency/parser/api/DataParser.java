@@ -1,8 +1,8 @@
 package it.unibo.unibodget.persistency.parser.api;
 
 /**
- * Defines the contract for parsing data into a specific type
- * @param <T> the type of the parsed data
+ * Defines the contract for parsing data into a specific type @param <T> 
+ * the type of the parsed data
  * 
  * <p>
  * A generic interface for parsing raw textual content and converting it

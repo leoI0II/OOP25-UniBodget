@@ -47,7 +47,7 @@ public final class SettingsManager {
      * @param s the settings to persist
      */
     public void saveCurrent(final Settings s) {
-        try (final ModelFileManager<Settings> mgr =
+        try (ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
             mgr.open();
@@ -77,7 +77,7 @@ public final class SettingsManager {
      */
     private static void init() {
         initialized = false;
-        try (final ModelFileManager<Settings> mgr =
+        try (ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
             mgr.open();

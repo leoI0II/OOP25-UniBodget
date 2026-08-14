@@ -10,14 +10,18 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 /**
  * Custom Jackson deserializer for {@link LocalDate}.
  *
- * <p>This deserializer converts ISO-8601 date strings (e.g., "2024-05-17")
+ * <p>
+ * This deserializer converts ISO-8601 date strings (e.g., "2024-05-17")
  * into {@code LocalDate} instances. It is used by the persistence layer to
  * ensure that date values stored as strings in JSON files are correctly
- * reconstructed when loading application data.</p>
+ * reconstructed when loading application data.
+ * </p>
  *
- * <p>The expected input format is the default ISO representation produced by
+ * <p>
+ * The expected input format is the default ISO representation produced by
  * {@code LocalDate.toString()}, which guarantees compatibility with the
- * corresponding {@code LocalDateSerializer}.</p>
+ * corresponding {@code LocalDateSerializer}.
+ * </p>
  */
 public final class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
 
@@ -30,7 +34,7 @@ public final class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
      * @throws IOException if the input cannot be read or parsed
      */
     @Override
-    public LocalDate deserialize(JsonParser parser, DeserializationContext ctxt)
+    public LocalDate deserialize(final JsonParser parser, final DeserializationContext ctxt)
             throws IOException {
         return LocalDate.parse(parser.getValueAsString());
     }

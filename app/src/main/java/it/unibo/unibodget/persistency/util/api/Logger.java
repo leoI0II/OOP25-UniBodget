@@ -11,7 +11,7 @@ public interface Logger {
      *
      * @param message the message to log
      */
-    void info(final String message);
+    void info(String message);
 
     /**
      * Logs a warning message, indicating a potential 
@@ -20,7 +20,7 @@ public interface Logger {
      * 
      * @param message the message to log
      */
-    void warn(final String message);
+    void warn(String message);
 
     /**
      * Logs an error message with a throwable cause.
@@ -28,5 +28,5 @@ public interface Logger {
      * @param message the message to log
      * @param cause the throwable cause
      */
-    void error(final String message, final Throwable cause);
+    void error(String message, Throwable cause);
 }

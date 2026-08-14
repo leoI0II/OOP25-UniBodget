@@ -29,7 +29,7 @@ public final class ParserFactory {
      * @throws DataParserException  if the file type is not supported
      */
     public static <T> DataParser<T> of(final Class<T> targetClass, final String filePath) throws DataParserException {
-        switch (FilesUtils.getFileExtension(filePath)){
+        switch (FilesUtils.getFileExtension(filePath)) {
             case "json":
                 return new JsonDataParser<>(targetClass);
             default:
