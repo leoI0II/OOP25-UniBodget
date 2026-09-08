@@ -7,90 +7,163 @@ import it.unibo.unibodget.model.utils.ARGBColor;
 /**
  * Abstract base class for all category types.
  *
- * Defines the minimal shared structure for representing
- * a transaction category, consisting of:
- * - a readable name
- * - a color expressed as a HEX string
- * - a high-level type (income, expense, loan)
+ * <p>
+ * Defines the minimal shared structure required to represent a transaction
+ * category in the application.
+ * </p>
  *
- * Concrete implementations may represent:
- * - user‑defined categories loaded from JSON (see {@link Category})
- * - predefined categories exposed through an enum (see {@link CategoryPreset})
+ * <p>
+ * Every category has:
+ * </p>
+ * <ul>
+ * <li>a human-readable name,</li>
+ * <li>a display color,</li>
+ * <li>a high-level type describing its financial meaning.</li>
+ * </ul>
  *
- * This class behaves as a value object: equality is based on both name and color.
+ * <p>
+ * Concrete subclasses may enrich this base structure with application-specific
+ * metadata such as origin, lifecycle state, or persistence-related details.
+ * </p>
  */
 public abstract class BasicCategory {
 
     private String name;
     private ARGBColor color;
-    private CategoryType type;
+    private final CategoryType type;
 
     /**
-     * Creates a new Category with the given name and HEX color.
+     * Creates a new category base object.
      *
-     * @param name      the descriptive name of the category
-     * @param colorHex  the color associated with the category
-     * @param type      the high-level classification of the category
+     * @param name
+     *            the category name; must not be {@code null} or blank
+     * @param color
+     *            the display color; must not be {@code null}
+     * @param type
+     *            the category type; must not be {@code null}
+     * @throws NullPointerException
+     *             if any mandatory argument is {@code null}
+     * @throws IllegalArgumentException
+     *             if the category name is blank
      */
-    public BasicCategory(final String name, 
-                        final ARGBColor color,
-                        final CategoryType type) {
-        this.name = Objects.requireNonNull(name);
+    public BasicCategory(
+            final String name,
+            final ARGBColor color,
+            final CategoryType type) {
+        this.name = requireValidName(name);
         this.color = Objects.requireNonNull(color);
         this.type = Objects.requireNonNull(type);
     }
 
     /**
-     * Returns the name of the category.
+     * Returns the category name.
      *
-     * @return the category name
+     * @return the category name, never {@code null}
      */
     public String getName() {
         return this.name;
     }
 
     /**
-     * Returns the HEX color associated with the category.
+     * Returns the category color.
      *
-     * @return the category color in HEX format
+     * @return the category color, never {@code null}
      */
     public ARGBColor getColorHex() {
         return this.color;
     }
 
     /**
-     * Returns the HEX color associated with the category.
+     * Returns the category type.
      *
-     * @return the category color in HEX format
+     * @return the category type, never {@code null}
      */
     public CategoryType getType() {
         return this.type;
     }
 
-    @Override
-    public String toString() {
-        return "Category{name='" + this.name + 
-                "', color='" + this.color.toHexString() + 
-                "', type='" + this.type + "'}";
+    /**
+     * Updates the category name.
+     *
+     * <p>
+     * This method is intentionally protected so that subclasses can enforce
+     * domain rules before exposing rename operations publicly.
+     * </p>
+     *
+     * @param name
+     *            the new category name; must not be {@code null} or blank
+     * @throws NullPointerException
+     *             if {@code name} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code name} is blank
+     */
+    protected void setName(final String name) {
+        this.name = requireValidName(name);
+    }
+
+    /**
+     * Updates the category color.
+     *
+     * <p>
+     * This method is intentionally protected so that subclasses can enforce
+     * domain rules before exposing recolor operations publicly.
+     * </p>
+     *
+     * @param color
+     *            the new color; must not be {@code null}
+     * @throws NullPointerException
+     *             if {@code color} is {@code null}
+     */
+    protected void setColorHex(final ARGBColor color) {
+        this.color = Objects.requireNonNull(color);
+    }
+
+    /**
+     * Validates and normalizes a category name.
+     *
+     * @param name
+     *            the raw category name
+     * @return the trimmed validated name
+     * @throws NullPointerException
+     *             if {@code name} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code name} is blank
+     */
+    private static String requireValidName(final String name) {
+        Objects.requireNonNull(name);
+        final String normalized = name.trim();
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be blank.");
+        }
+        return normalized;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public String toString() {
+        return "Category{name='"
+                + this.name
+                + "', color='"
+                + this.color.toHexString()
+                + "', type='"
+                + this.type
+                + "'}";
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (this == object) {
             return true;
         }
-        if (!(o instanceof BasicCategory)) {
+        if (!(object instanceof BasicCategory other)) {
             return false;
         }
-        BasicCategory c = (BasicCategory) o;
-        return this.name.equals(c.name) && 
-                this.color.equals(c.color) && 
-                this.type.equals(c.type);
+        return this.name.equals(other.name)
+                && this.color.equals(other.color)
+                && this.type == other.type;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.name, this.color, this.type);
     }
-    
 }

@@ -15,7 +15,8 @@ import it.unibo.unibodget.model.currency.Asset;
  * <p>
  * A cash transaction may optionally contain friend-loan metadata. This allows
  * friend-loan movements to be tracked and persisted exactly like any other
- * wallet transaction.</p>
+ * wallet transaction.
+ * </p>
  */
 public final class CashTransaction extends Transaction {
 
@@ -25,14 +26,20 @@ public final class CashTransaction extends Transaction {
     /**
      * Creates a new standard cash transaction with no friend-loan metadata.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be null
-     * @param category the category describing the nature of the transaction;
-     * must not be null
-     * @param date the date on which the transaction occurred; must not be null
-     * @param description a short human-readable description of the transaction;
-     * may be null
-     * @param notes optional additional notes or comments; may be null
+     * @param asset
+     *            the monetary value associated with the transaction; must not be
+     *            {@code null}
+     * @param category
+     *            the category describing the nature of the transaction; must not
+     *            be {@code null}
+     * @param date
+     *            the date on which the transaction occurred; must not be
+     *            {@code null}
+     * @param description
+     *            a short human-readable description of the transaction; may be
+     *            {@code null}
+     * @param notes
+     *            optional additional notes or comments; may be {@code null}
      */
     public CashTransaction(
             final Asset asset,
@@ -44,22 +51,61 @@ public final class CashTransaction extends Transaction {
     }
 
     /**
+     * Creates a new standard cash transaction with an explicit identifier and no
+     * friend-loan metadata.
+     *
+     * @param id
+     *            the stable transaction identifier; must not be {@code null}
+     * @param asset
+     *            the monetary value associated with the transaction; must not be
+     *            {@code null}
+     * @param category
+     *            the category describing the nature of the transaction; must not
+     *            be {@code null}
+     * @param date
+     *            the date on which the transaction occurred; must not be
+     *            {@code null}
+     * @param description
+     *            a short human-readable description of the transaction; may be
+     *            {@code null}
+     * @param notes
+     *            optional additional notes or comments; may be {@code null}
+     */
+    public CashTransaction(
+            final UUID id,
+            final Asset asset,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes) {
+        this(id, asset, category, date, description, notes, null, null);
+    }
+
+    /**
      * Creates a new cash transaction, optionally linked to a friend loan.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be null
-     * @param category the category describing the nature of the transaction;
-     * must not be null
-     * @param date the date on which the transaction occurred; must not be null
-     * @param description a short human-readable description of the transaction;
-     * may be null
-     * @param notes optional additional notes or comments; may be null
-     * @param friendLoanId the identifier of the linked friend loan; may be null
-     * @param friendName the name of the related friend; may be null
-     * @throws IllegalArgumentException if friend-loan metadata is provided for
-     * a transaction whose category type is not
-     * {@link CategoryType#FRIEND_LOAN}, or if only one of the two friend-loan
-     * fields is provided
+     * @param asset
+     *            the monetary value associated with the transaction; must not be
+     *            {@code null}
+     * @param category
+     *            the category describing the nature of the transaction; must not
+     *            be {@code null}
+     * @param date
+     *            the date on which the transaction occurred; must not be
+     *            {@code null}
+     * @param description
+     *            a short human-readable description of the transaction; may be
+     *            {@code null}
+     * @param notes
+     *            optional additional notes or comments; may be {@code null}
+     * @param friendLoanId
+     *            the identifier of the linked friend loan; may be {@code null}
+     * @param friendName
+     *            the name of the related friend; may be {@code null}
+     * @throws IllegalArgumentException
+     *             if friend-loan metadata is provided for a transaction whose
+     *             category type is not {@link CategoryType#FRIEND_LOAN}, or if
+     *             only one of the two friend-loan fields is provided
      */
     public CashTransaction(
             final Asset asset,
@@ -70,6 +116,72 @@ public final class CashTransaction extends Transaction {
             final UUID friendLoanId,
             final String friendName) {
         super(asset, category, date, description, notes);
+
+        final boolean hasLoanId = friendLoanId != null;
+        final boolean hasFriendName = friendName != null && !friendName.isBlank();
+        final boolean isFriendLoanCategory = category.getType() == CategoryType.FRIEND_LOAN;
+
+        if (hasLoanId != hasFriendName) {
+            throw new IllegalArgumentException(
+                    "friendLoanId and friendName must either both be provided or both be absent."
+            );
+        }
+
+        if (isFriendLoanCategory && !hasLoanId) {
+            throw new IllegalArgumentException(
+                    "FRIEND_LOAN transactions must provide both friendLoanId and friendName."
+            );
+        }
+
+        if (!isFriendLoanCategory && hasLoanId) {
+            throw new IllegalArgumentException(
+                    "Friend-loan metadata can only be set for FRIEND_LOAN transactions."
+            );
+        }
+
+        this.friendLoanId = friendLoanId;
+        this.friendName = friendName;
+    }
+
+    /**
+     * Creates a new cash transaction with an explicit identifier, optionally
+     * linked to a friend loan.
+     *
+     * @param id
+     *            the stable transaction identifier; must not be {@code null}
+     * @param asset
+     *            the monetary value associated with the transaction; must not be
+     *            {@code null}
+     * @param category
+     *            the category describing the nature of the transaction; must not
+     *            be {@code null}
+     * @param date
+     *            the date on which the transaction occurred; must not be
+     *            {@code null}
+     * @param description
+     *            a short human-readable description of the transaction; may be
+     *            {@code null}
+     * @param notes
+     *            optional additional notes or comments; may be {@code null}
+     * @param friendLoanId
+     *            the identifier of the linked friend loan; may be {@code null}
+     * @param friendName
+     *            the name of the related friend; may be {@code null}
+     * @throws IllegalArgumentException
+     *             if friend-loan metadata is provided for a transaction whose
+     *             category type is not {@link CategoryType#FRIEND_LOAN}, or if
+     *             only one of the two friend-loan fields is provided
+     */
+    public CashTransaction(
+            final UUID id,
+            final Asset asset,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes,
+            final UUID friendLoanId,
+            final String friendName) {
+        super(id, asset, category, date, description, notes);
 
         final boolean hasLoanId = friendLoanId != null;
         final boolean hasFriendName = friendName != null && !friendName.isBlank();
@@ -118,7 +230,8 @@ public final class CashTransaction extends Transaction {
     /**
      * Returns whether this transaction belongs to a friend loan.
      *
-     * @return true if this transaction contains friend-loan metadata
+     * @return {@code true} if this transaction contains friend-loan metadata,
+     *         otherwise {@code false}
      */
     public boolean isFriendLoanTransaction() {
         return friendLoanId != null;
@@ -142,7 +255,8 @@ public final class CashTransaction extends Transaction {
     @Override
     public String toString() {
         return "CashTransaction{"
-                + "asset=" + getAsset()
+                + "id=" + getId()
+                + ", asset=" + getAsset()
                 + ", category=" + getCategory()
                 + ", date=" + getDate()
                 + ", description='" + getDescription() + '\''

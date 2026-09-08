@@ -642,6 +642,9 @@ public record DashboardViewState(
     /**
      * Transaction row state.
      *
+     * @param transactionId
+     *            optional transaction identifier used by the UI for edit/delete
+     *            actions
      * @param description
      *            transaction description
      * @param dateText
@@ -656,6 +659,7 @@ public record DashboardViewState(
      *            true if the amount should be rendered as positive
      */
     public record TransactionRowViewState(
+            UUID transactionId,
             String description,
             String dateText,
             String categoryText,
@@ -664,8 +668,37 @@ public record DashboardViewState(
             boolean positiveAmount) {
 
         /**
+         * Backward-compatible constructor preserving the old six-argument
+         * creation style.
+         *
+         * @param description
+         *            transaction description
+         * @param dateText
+         *            formatted date text
+         * @param categoryText
+         *            category display text
+         * @param amountText
+         *            formatted amount text
+         * @param categoryColorHex
+         *            category badge color in CSS hexadecimal form
+         * @param positiveAmount
+         *            true if the amount should be rendered as positive
+         */
+        public TransactionRowViewState(
+                final String description,
+                final String dateText,
+                final String categoryText,
+                final String amountText,
+                final String categoryColorHex,
+                final boolean positiveAmount) {
+            this(null, description, dateText, categoryText, amountText, categoryColorHex, positiveAmount);
+        }
+
+        /**
          * Compact canonical constructor with null-safety.
          *
+         * @param transactionId
+         *            optional transaction identifier
          * @param description
          *            description
          * @param dateText

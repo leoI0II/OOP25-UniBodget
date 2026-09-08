@@ -98,13 +98,29 @@ public final class DefaultTransactionHistoryFilterService {
     }
 
     private Comparator<CashTransaction> comparatorFor(final TransactionSortOrder sortOrder) {
+        final Comparator<CashTransaction> byDateAsc = Comparator
+                .comparing(CashTransaction::getDate)
+                .thenComparing(
+                        CashTransaction::getDescription,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                )
+                .thenComparing(transaction -> transaction.getAsset().amount().abs());
+
+        final Comparator<CashTransaction> byAmountDesc = Comparator
+                .comparing(
+                        (CashTransaction transaction) -> transaction.getAsset().amount().abs(),
+                        Comparator.reverseOrder()
+                )
+                .thenComparing(CashTransaction::getDate, Comparator.reverseOrder())
+                .thenComparing(
+                        CashTransaction::getDescription,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                );
+
         return switch (sortOrder) {
-            case NEWEST_FIRST -> Comparator.comparing(CashTransaction::getDate).reversed();
-            case OLDEST_FIRST -> Comparator.comparing(CashTransaction::getDate);
-            case HIGHEST_AMOUNT_FIRST -> Comparator.comparing(
-                    transaction -> transaction.getAsset().amount().abs(),
-                    Comparator.reverseOrder()
-            );
+            case NEWEST_FIRST -> byDateAsc.reversed();
+            case OLDEST_FIRST -> byDateAsc;
+            case HIGHEST_AMOUNT_FIRST -> byAmountDesc;
         };
     }
 }
