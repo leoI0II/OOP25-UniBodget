@@ -22,29 +22,45 @@ public class ExchangeRate {
      * @param rate      the exchange rate value (target per base)
      * @param timestamp the moment when the rate was obtained
      */
-    public ExchangeRate(CurrencyUnit base, CurrencyUnit target, double rate, Instant timestamp) {
+    public ExchangeRate(final CurrencyUnit base, final CurrencyUnit target, final double rate, final Instant timestamp) {
         this.base = base;
         this.target = target;
         this.rate = rate;
         this.timestamp = timestamp;
     }
 
-    /** @return the base currency */
+    /**
+     * Get base currency unit.
+     * 
+     * @return the base currency.
+     */
     public CurrencyUnit getBase() {
         return base;
     }
 
-    /** @return the target currency */
+    /** 
+     * Get target currency unit.
+     * 
+     * @return the target currency.
+     */
     public CurrencyUnit getTarget() {
         return target;
     }
 
-    /** @return the exchange rate value */
+    /** 
+     * Get value of rate.
+     * 
+     * @return the exchange rate value.
+     */
     public double getRate() {
         return rate;
     }
 
-    /** @return the timestamp of the rate */
+    /** 
+     * Get time stamp in instant format.
+     * 
+     * @return the timestamp of the rate.
+     */
     public Instant getTimestamp() {
         return timestamp;
     }

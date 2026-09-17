@@ -206,19 +206,19 @@ classDiagram
         BANK_LOAN;
     }
 
-    class BasicCategory {
+    class AbstractCategory {
         <<abstract>>
         - name : String
         - color : ARGBColor
         - type : CategoryType
 
-        + BasicCategory(String, ARGBColor, CategoryType)
+        + AbstractCategory(String, ARGBColor, CategoryType)
         + getName() String
         + getColor() ARGBColor
         + getType() CategoryType
     }
-    BasicCategory --|> ARGBColor    : uses
-    BasicCategory --|> CategoryType : uses
+    AbstractCategory --|> ARGBColor    : uses
+    AbstractCategory --|> CategoryType : uses
 
     class Category {
         - final Category FOOD$

@@ -10,8 +10,10 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 /**
  * Computes the total balance across all cash wallets in a desired currency.
  *
- * <p>Each cash wallet balance is converted into the requested target currency
- * and then summed to produce a single aggregated total.</p>
+ * <p>
+ * Each cash wallet balance is converted into the requested target currency
+ * and then summed to produce a single aggregated total.
+ * </p>
  */
 public final class DefaultTotalCashBalanceService {
 

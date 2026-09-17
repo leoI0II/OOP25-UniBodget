@@ -1,161 +1,212 @@
-// package it.unibo.unibodget.view.currency_converter;
+package it.unibo.unibodget.view.currency_converter;
 
-// import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
-// import it.unibo.unibodget.model.currency.CurrencyUnit;
-// import it.unibo.unibodget.model.currency.FiatCurrency;
-// import it.unibo.unibodget.model.settings.Theme;
-// import it.unibo.unibodget.model.settings.ThemeManager;
-// import javafx.geometry.Insets;
-// import javafx.geometry.Pos;
-// import javafx.scene.control.*;
-// import javafx.scene.layout.*;
-// import javafx.scene.paint.Color;
+import java.time.LocalDate;
+import java.util.Map;
 
-// import java.math.BigDecimal;
+import it.unibo.unibodget.controller.currency_converter.BankConversionController;
+import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
+import it.unibo.unibodget.controller.currency_converter.WatchListController;
+import it.unibo.unibodget.model.currency.Currency;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
+import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
+import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
+import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.model.currency.watchlist.WatchList;
+import it.unibo.unibodget.model.settings.Theme;
+import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.settings.WindowPreferences;
+import it.unibo.unibodget.view.UI.FXAdapter;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 
-// /**
-//  * JavaFX view for the currency converter feature.
-//  * 
-//  * This class builds and displays the graphical interface used to convert
-//  * monetary values between different currencies. It interacts with a
-//  * {@link CurrencyConverterController} to perform the actual conversion logic.
-//  * 
-//  * The layout is momentanealy structured as follows:
-//  * - a title label
-//  * - a card-like container with input fields and the convert button
-//  * - a result section displaying the conversion output
-//  */
-// public class CurrencyConverterViewFX extends VBox {
+/**
+ * Main dashboard screen for all currency‑related operations.
+ * 
+ * <p>
+ * This JavaFX view hosts multiple widgets:
+ * <ul>
+ *     <li>{@link ConverterWidgetFX} – base currency converter</li>
+ *     <li>{@link WatchlistWidgetFX} – watchlist for favorite currency pairs</li>
+ *     <li>{@link BankConverterWidgetFX} – bank‑mediated conversion with fees</li>
+ *     <li>Historical chart viewer</li>
+ * </ul>
+ * 
+ * <p>
+ * The dashboard applies theme‑aware styling, window preferences, and
+ * orchestrates the interaction between widgets.
+ */
+public final class CurrencyConverterViewFX extends Application {
 
-//     private final CurrencyConverterController controller;
+    private static final double ROOT_PADDING = 35;
+    private static final int DAYS_TO_SUBTRACT = 5;
 
-//     /**
-//      * Creates a new currency converter view bound to the given controller.
-//      *
-//      * @param controller the controller responsible for performing conversions,
-//      *                   must not be {@code null}
-//      */
-//     public CurrencyConverterViewFX(CurrencyConverterController controller) {
-//         this.controller = controller;
-//         buildUI();
-//     }
+    /** Shared controller injected via launchWith(). */
+    private static CurrencyConverterController sharedController;
 
-//     /**
-//      * Builds and initializes all UI components of the currency converter view.
-//      */
-//     private void buildUI() {
+    /** Window size and maximize preferences. */
+    private static final WindowPreferences PREFS = new WindowPreferences();
 
-//         // --- THEME ---
-//         var theme = ThemeManager.getTheme();
-//         Color fxColor = theme.getPrimaryColor().toFXColor();
-//         Color textColor = theme.getTextColor().toFXColor();
-//         Color buttonColor = theme.getButtonColor().toFXColor();
-//         Color buttonTextColor = Theme.getReadableTextColor(theme.getButtonColor()).toFXColor();
-//         var font = theme.toFXFont();
+    /**
+     * Launches the JavaFX application with a pre‑initialized controller.
+     *
+     * @param controller the main currency converter controller
+     */
+    public static void launchWith(final CurrencyConverterController controller) {
+        sharedController = controller;
+        Application.launch(CurrencyConverterViewFX.class);
+    }
 
-//         // --- Title ---
-//         Label title = new Label("Currency Converter");
-//         title.setFont(font);
-//         title.setTextFill(textColor);
+    @Override
+    public void start(final Stage stage) {
+        if (sharedController == null) {
+            throw new IllegalStateException("Controller not initialized. Use launchWith().");
+        }
 
-//         // --- Card container ---
-//         VBox card = new VBox(15);
-//         card.setPadding(new Insets(20));
-//         card.setBackground(new Background(
-//                 new BackgroundFill(fxColor, new CornerRadii(12), Insets.EMPTY)
-//         ));
+        /* -------------------- THEME SETUP -------------------- */
+        final Theme theme = ThemeManager.getTheme();
+        final Color primaryColor = FXAdapter.toFXColor(theme.getPrimaryColor());
+        final Color textColor = FXAdapter.toFXColor(theme.getTextColor());
+        final Color darkPrimary = primaryColor.deriveColor(0, 1.0, 0.15, 1.0);
 
-//         // --- Amount field ---
-//         Label amountLabel = new Label("Amount:");
-//         amountLabel.setFont(font);
-//         amountLabel.setTextFill(textColor);
+        final Font titleFont = Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 14);
 
-//         TextField amountField = new TextField();
-//         amountField.setPromptText("Amount");
-//         amountField.setFont(font);
-//         amountField.setStyle("-fx-text-fill: " + theme.getTextColor().toHexString() + ";");
+        /* -------------------- PAGE TITLE -------------------- */
+        final Label pageTitle = new Label("Currencies Converter Dashboard");
+        pageTitle.setFont(titleFont);
+        pageTitle.setTextFill(textColor);
 
-//         // --- Currency selectors ---
-//         Label fromLabel = new Label("From:");
-//         fromLabel.setFont(font);
-//         fromLabel.setTextFill(textColor);
+        /* -------------------- WIDGET INSTANTIATION -------------------- */
+        // Base converter widget
+        final ConverterWidgetFX converterWidget =
+                new ConverterWidgetFX(sharedController, new CurrencyAlertService());
 
-//         Label toLabel = new Label("To:");
-//         toLabel.setFont(font);
-//         toLabel.setTextFill(textColor);
+        // Watchlist widget
+        final WatchList watchlistModel = new WatchList();
+        final WatchListController watchlistController = new WatchListController(watchlistModel);
+        final WatchlistWidgetFX watchlistWidget =
+                new WatchlistWidgetFX(watchlistController, converterWidget);
 
-//         ComboBox<String> fromBox = new ComboBox<>();
-//         ComboBox<String> toBox = new ComboBox<>();
+        // Alert service with a sample alert
+        final CurrencyAlertService alertService = new CurrencyAlertService();
+        alertService.addAlert(new CurrencyAlert(
+                Currency.get("EUR"),
+                Currency.get("USD"),
+                0.5,
+                true // triggers when rate < 0.5
+        ));
 
-//         fromBox.setStyle("-fx-font-size: " + theme.getFontSize() + "px; -fx-text-fill: " + theme.getTextColor().toHexString() + ";");
-//         toBox.setStyle("-fx-font-size: " + theme.getFontSize() + "px; -fx-text-fill: " + theme.getTextColor().toHexString() + ";");
+        // Bank conversion widget
+        final BankConversionController bankController = new BankConversionController();
+        final BankConverterWidgetFX bankConverterWidget = new BankConverterWidgetFX(
+                bankController,
+                converterWidget.getAmountField(),
+                converterWidget.getFromBox(),
+                converterWidget.getToBox(),
+                (BasicCurrencyConverter) sharedController.getConverter()
+        );
 
-//         // Populate currency lists
-//         CurrencyUnit.allCurrencies().forEach(cu -> {
-//             fromBox.getItems().add(cu.getCode());
-//             toBox.getItems().add(cu.getCode());
-//         });
+        /* -------------------- HISTORICAL CHART BUTTON -------------------- */
+        final Button showChartButton = new Button("Show Chart");
+        showChartButton.setOnAction(e -> {
+            ExchangeRateAPI historyApi = new ExchangeRateAPIClient();
+            final Map<LocalDate, Double> history = historyApi.getHistoricalRates(
+                    FiatCurrency.EUR,
+                    FiatCurrency.USD,
+                    LocalDate.now().minusDays(5),
+                    LocalDate.now()
+            );
 
-//         // Default selection: first two fiat currencies
-//         var fiat = FiatCurrency.values();
-//         if (fiat.length >= 2) {
-//             fromBox.setValue(fiat[0].getCode());
-//             toBox.setValue(fiat[1].getCode());
-//         }
+            // if https call result nothing -> offline/error mode on
+            if (history.isEmpty()) {
+                System.out.println("Offline mode: using mock history");
 
-//         // --- Convert button ---
-//         Button convertButton = new Button("Convert");
-//         convertButton.setFont(font);
-//         convertButton.setBackground(new Background(
-//                 new BackgroundFill(buttonColor, new CornerRadii(8), Insets.EMPTY)
-//         ));
-//         convertButton.setTextFill(buttonTextColor);
+                final Map<LocalDate, Double> mockHistory =
+                        MockExchangeRateAPI.generateMockHistory(
+                                LocalDate.now().minusDays(DAYS_TO_SUBTRACT),
+                                LocalDate.now()
+                        );
 
-//         // --- Output area ---
-//         Label resultLabel = new Label("Result:");
-//         resultLabel.setFont(font);
-//         resultLabel.setTextFill(textColor);
+                historyApi = new MockExchangeRateAPI(
+                        FiatCurrency.EUR,
+                        MockExchangeRateAPI.generateMockLatestRates(FiatCurrency.EUR)
+                ) {
+                    @Override
+                    public Map<LocalDate, Double> getHistoricalRates(
+                            final CurrencyUnit base, final CurrencyUnit target,
+                            final LocalDate from, final LocalDate to) {
+                        return mockHistory;
+                    }
+                };
+            }
 
-//         TextArea output = new TextArea();
-//         output.setEditable(false);
-//         output.setPrefHeight(150);
-//         output.setFont(font);
-//         output.setStyle("-fx-text-fill: " + theme.getTextColor().toHexString() + ";");
+            final BasicCurrencyConverter historyConverter =
+                new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
+            final CurrencyConverterController historyController =
+                new CurrencyConverterController(historyApi, historyConverter);
+            CurrencyHistoryChartView.showInNewWindow(historyController);
+        });
 
-//         // Conversion logic
-//         convertButton.setOnAction(e -> {
-//             try {
-//                 BigDecimal amount = new BigDecimal(amountField.getText());
-//                 CurrencyUnit from = CurrencyUnit.getByCode(fromBox.getValue());
-//                 CurrencyUnit to = CurrencyUnit.getByCode(toBox.getValue());
+        /* -------------------- TOP BAR -------------------- */
+        final HBox topBar = new HBox(20);
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.getChildren().addAll(pageTitle, showChartButton);
 
-//                 BigDecimal result = controller.convert(amount, from, to);
+        /* -------------------- MAIN CONTENT -------------------- */
+        final HBox contentRow = new HBox(25);
+        contentRow.setAlignment(Pos.TOP_LEFT);
+        contentRow.getChildren().addAll(
+                converterWidget.getView(),
+                watchlistWidget.getView(),
+                bankConverterWidget.getView()
+        );
 
-//                 output.setText(amount + " " + from.getCode() + " = "
-//                         + result + " " + to.getCode());
+        final VBox root = new VBox(30, topBar, contentRow);
+        root.setPadding(new Insets(ROOT_PADDING));
+        root.setAlignment(Pos.TOP_LEFT);
 
-//             } catch (Exception ex) {
-//                 output.setText("Error: " + ex.getMessage());
-//             }
-//         });
+        /* -------------------- BACKGROUND GRADIENT -------------------- */
+        final LinearGradient bgGradient = new LinearGradient(
+                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, primaryColor),
+                new Stop(1, darkPrimary)
+        );
+        root.setBackground(new Background(new BackgroundFill(bgGradient, CornerRadii.EMPTY, Insets.EMPTY)));
 
-//         // Add components to card
-//         card.getChildren().addAll(
-//                 amountLabel, amountField,
-//                 fromLabel, fromBox,
-//                 toLabel, toBox,
-//                 convertButton
-//         );
+        /* -------------------- WINDOW SETUP -------------------- */
+        stage.setScene(new Scene(root));
+        stage.setTitle("UniBodget - Currency Dashboard");
 
-//         // Layout settings
-//         this.setSpacing(20);
-//         this.setPadding(new Insets(25));
-//         this.setAlignment(Pos.TOP_CENTER);
-//         this.setBackground(new Background(
-//                 new BackgroundFill(fxColor, CornerRadii.EMPTY, Insets.EMPTY)
-//         ));
+        // Save window width changes
+        stage.widthProperty().addListener((obs, old, val) -> PREFS.setWidth(val.doubleValue()));
 
-//         // Add all components to root container
-//         this.getChildren().addAll(title, card, resultLabel, output);
-//     }
-// }
+        // Restore window size or maximize
+        if (PREFS.isMaximized()) {
+            stage.setMaximized(true);
+        } else {
+            stage.setWidth(PREFS.getWidth());
+            stage.setHeight(PREFS.getHeight());
+        }
+
+        stage.show();
+    }
+}

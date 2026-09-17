@@ -3,6 +3,7 @@ package it.unibo.unibodget.model.currency;
 /**
  * Enum to represent fiat currencies.
  * 
+ * <p>
  * Each enum constant defines:
  * - type (fixed to "Fiat")
  * - symbol
@@ -13,15 +14,15 @@ package it.unibo.unibodget.model.currency;
 public enum FiatCurrency implements CurrencyUnit {
 
     EUR("€", "EUR", "Euro", "EUR"),
-    USD("$", "USD", "United States Dollar", "USD"),
+    USD(CurrencySymbols.DOLLAR, "USD", "United States Dollar", "USD"),
     GBP("£", "GBP", "Pound Sterling", "GBP"),
     RUB("₽", "RUB", "Russian Ruble", "RUB"),
     JPY("¥", "JPY", "Japanese Yen", "JPY"),
-    AUD("$", "AUD", "Australian Dollar", "AUD"),
-    CAD("$", "CAD", "Canadian Dollar", "CAD"),
+    AUD(CurrencySymbols.DOLLAR, "AUD", "Australian Dollar", "AUD"),
+    CAD(CurrencySymbols.DOLLAR, "CAD", "Canadian Dollar", "CAD"),
     CHF("₣", "CHF", "Swiss Franc", "CHF"),
     CNY("¥", "CNY", "Chinese Yuan", "CNY"),
-    HKD("$", "HKD", "Hong Kong Dollar", "HKD"),
+    HKD(CurrencySymbols.DOLLAR, "HKD", "Hong Kong Dollar", "HKD"),
     INR("₹", "INR", "Indian Rupee", "INR");
 
     private final CurrencyType type = CurrencyType.FIAT;
@@ -33,13 +34,12 @@ public enum FiatCurrency implements CurrencyUnit {
     /**
      * Constructs a fiat currency definition.
      *
-     * @param type      the type of currency (fixed to "Fiat" for this enum)
      * @param symbol    the graphical symbol of the currency
      * @param shortName the short identifier (ISO-like code)
      * @param fullName  the full descriptive name
      * @param code      the standardized currency code
      */
-    FiatCurrency(String symbol, String shortName, String fullName, String code) {
+    FiatCurrency(final String symbol, final String shortName, final String fullName, final String code) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -52,7 +52,7 @@ public enum FiatCurrency implements CurrencyUnit {
     }
 
     @Override
-    public String getSymbol() { 
+    public String getSymbol() {
         return this.symbol; 
     }
 

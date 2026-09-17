@@ -6,7 +6,8 @@ import java.util.Objects;
 /**
  * Immutable dashboard insight ready to be displayed in the UI.
  *
- * <p>A wallet insight contains:
+ * <p>
+ * A wallet insight contains:
  * <ul>
  *   <li>a short title identifying the type of insight,</li>
  *   <li>a user-facing message,</li>

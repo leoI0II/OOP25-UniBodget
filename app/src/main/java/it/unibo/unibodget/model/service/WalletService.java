@@ -11,7 +11,8 @@ import it.unibo.unibodget.model.wallet.Wallet;
 /**
  * Service responsible for managing wallets and the history of the current wallet.
  *
- * <p>The service exposes the available wallets, the currently selected wallet,
+ * <p>
+ * The service exposes the available wallets, the currently selected wallet,
  * and the operations used to inspect and update the history of that wallet.</p>
  */
 public interface WalletService<T extends Transaction, W extends Wallet<T>> {

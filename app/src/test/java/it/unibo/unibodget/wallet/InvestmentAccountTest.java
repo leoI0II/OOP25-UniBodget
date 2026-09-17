@@ -18,8 +18,31 @@ import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 
-public class InvestmentAccountTest {
-    
+/**
+ * Unit tests for {@link InvestmentAccount}.
+ * 
+ * <p>
+ * This class verifies the correct behavior of investment transactions,
+ * including buys, sells, position updates, balance calculations, and
+ * profit/loss evaluation. All tests rely on a mock {@link PriceProvider}
+ * to ensure deterministic results.
+ * </p>
+ */
+public final class InvestmentAccountTest {
+
+    private static final BigDecimal BTC_BUY_PRICE = new BigDecimal("50000.00");
+    private static final BigDecimal BTC_BUY_PRICE_2 = new BigDecimal("55000.00");
+    private static final BigDecimal ETH_BUY_4K = new BigDecimal("4000.0");
+    private static final BigDecimal AAPL_BUY_150 = new BigDecimal("150.0");
+    private static final BigDecimal AAPL_BUY_100 = new BigDecimal("100.00");
+    private static final BigDecimal AAPL_BUY_200 = new BigDecimal("200.00");
+    private static final BigDecimal MINUS_FIVE = BigDecimal.valueOf(-5);
+    private static final BigDecimal PROFIT_500 = new BigDecimal("500.00");
+
+    private static final String NOTES = "notes";
+    private static final String EMPTY_NOTES = "";
+    private static final String NOTES_APPL = "test buy aapl";
+
     private InvestmentAccount account;
     private PriceProvider mockPriceProvider;
 
@@ -42,14 +65,14 @@ public class InvestmentAccountTest {
             LocalDate.now(),
             "",
             "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000.00")),
+            Asset.of(FiatCurrency.USD, BTC_BUY_PRICE),
             Asset.zero(FiatCurrency.USD)
         ));
         assertEquals(1, account.getPositions().size());
 
         assertEquals(BigDecimal.ONE, account.getPositions().get(0).quantity());
         assertEquals(
-            new BigDecimal("50000.00").stripTrailingZeros(), 
+            BTC_BUY_PRICE.stripTrailingZeros(), 
             account.getPositions().get(0).averageBasisCost().amount().stripTrailingZeros()
         );
     }
@@ -62,7 +85,7 @@ public class InvestmentAccountTest {
             LocalDate.now(),
             "",
             "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000.00")),
+            Asset.of(FiatCurrency.USD, BTC_BUY_PRICE),
             Asset.zero(FiatCurrency.USD)
         ));
         account.addTransaction(InvestmentTransaction.of(
@@ -71,7 +94,7 @@ public class InvestmentAccountTest {
             LocalDate.now(),
             "",
             "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("55000.00")),
+            Asset.of(FiatCurrency.USD, BTC_BUY_PRICE_2),
             Asset.zero(FiatCurrency.USD)
         ));
         assertEquals(1, account.getPositions().size());
@@ -91,7 +114,7 @@ public class InvestmentAccountTest {
                 LocalDate.now(),
                 "",
                 "",
-                Asset.of(FiatCurrency.USD, new BigDecimal("55000.00")),
+                Asset.of(FiatCurrency.USD, BTC_BUY_PRICE_2),
                 Asset.zero(FiatCurrency.USD)
             )
         );
@@ -102,7 +125,7 @@ public class InvestmentAccountTest {
                 LocalDate.now(),
                 "",
                 "",
-                Asset.of(FiatCurrency.USD, new BigDecimal("55000.00")),
+                Asset.of(FiatCurrency.USD, BTC_BUY_PRICE_2),
                 Asset.zero(FiatCurrency.USD)
             )
         );
@@ -118,7 +141,7 @@ public class InvestmentAccountTest {
                 LocalDate.now(),
                 "",
                 "",
-                Asset.of(FiatCurrency.USD, new BigDecimal("55000.00")),
+                Asset.of(FiatCurrency.USD, BTC_BUY_PRICE_2),
                 Asset.zero(FiatCurrency.USD)
             )
         );
@@ -128,7 +151,7 @@ public class InvestmentAccountTest {
             LocalDate.now(),
             "",
             "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("4000.0")),
+            Asset.of(FiatCurrency.USD, ETH_BUY_4K),
             Asset.zero(FiatCurrency.USD)
         ));
         assertEquals(2, account.getPositions().size());
@@ -152,9 +175,9 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN), // Buying 10 AAPL shares
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "test buy aapl",
-            "notes",
-            Asset.of(FiatCurrency.USD, BigDecimal.valueOf(150)),
+            NOTES_APPL,
+            NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_150),
             Asset.zero(FiatCurrency.USD)
         ));
 
@@ -170,18 +193,18 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN), // Buying 10 AAPL shares
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "test buy aapl",
-            "notes",
-            Asset.of(FiatCurrency.USD, new BigDecimal("100.00")),
+            NOTES_APPL,
+            NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_100),
             Asset.zero(FiatCurrency.USD)
         ));
-        var profit = account.getUnrealizedProfitLoss();
+        final var profit = account.getUnrealizedProfitLoss();
         assertEquals(
-            new BigDecimal("500.00").stripTrailingZeros(),
+            PROFIT_500.stripTrailingZeros(),
             profit.amount().stripTrailingZeros()
         );
         assertEquals(
-            new BigDecimal("500.00").stripTrailingZeros(),
+            PROFIT_500.stripTrailingZeros(),
             account.getPositions().get(0).getUnrealizedProfitLoss().amount().stripTrailingZeros()
         );
     }
@@ -192,12 +215,12 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN), // Buying 10 AAPL shares
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "test buy aapl",
-            "notes",
-            Asset.of(FiatCurrency.USD, new BigDecimal("200.00")),
+            NOTES_APPL,
+            NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_200),
             Asset.zero(FiatCurrency.USD)
         ));
-        var profit = account.getUnrealizedProfitLoss();
+        final var profit = account.getUnrealizedProfitLoss();
         assertEquals(
             new BigDecimal("-500.00").stripTrailingZeros(),
             profit.amount().stripTrailingZeros()
@@ -214,9 +237,9 @@ public class InvestmentAccountTest {
             Asset.of(CryptoCurrency.BTC, BigDecimal.ONE), // Buying 1 BTC
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("50000.00")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, BTC_BUY_PRICE),
             Asset.zero(FiatCurrency.USD)
         ));
         assertEquals(BigDecimal.ZERO,
@@ -230,22 +253,22 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("100.0")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_100),
             Asset.zero(FiatCurrency.USD)
         ));
         account.addTransaction(InvestmentTransaction.of(
-            Asset.of(StockMarketCurrency.AAPL, BigDecimal.valueOf(-5)), // Selling 5 AAPL shares
+            Asset.of(StockMarketCurrency.AAPL, MINUS_FIVE), // Selling 5 AAPL shares
             Category.INVESTMENT_SELL,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("200.0")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_200),
             Asset.zero(FiatCurrency.USD)
         ));
         assertEquals(
-            new BigDecimal("500.00").stripTrailingZeros(),
+            PROFIT_500.stripTrailingZeros(),
             account.getRealizedProfitLoss().amount().stripTrailingZeros()
         );
     }
@@ -256,17 +279,17 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("100.0")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_100),
             Asset.zero(FiatCurrency.USD)
         ));
         account.addTransaction(InvestmentTransaction.of(
-            Asset.of(StockMarketCurrency.AAPL, BigDecimal.valueOf(-5)),
+            Asset.of(StockMarketCurrency.AAPL, MINUS_FIVE),
             Category.INVESTMENT_SELL,
             LocalDate.now(),
-            "",
-            "",
+            EMPTY_NOTES,
+            EMPTY_NOTES,
             Asset.of(FiatCurrency.USD, new BigDecimal("80.0")),
             Asset.zero(FiatCurrency.USD)
         ));
@@ -279,8 +302,8 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
+            EMPTY_NOTES,
+            EMPTY_NOTES,
             Asset.of(FiatCurrency.USD, new BigDecimal("100.0")),
             Asset.zero(FiatCurrency.USD)
         ));
@@ -288,9 +311,9 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("150.0")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_150),
             Asset.zero(FiatCurrency.USD)
         ));
 
@@ -298,9 +321,9 @@ public class InvestmentAccountTest {
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN.negate()),
             Category.INVESTMENT_BUY,
             LocalDate.now(),
-            "",
-            "",
-            Asset.of(FiatCurrency.USD, new BigDecimal("200.0")),
+            EMPTY_NOTES,
+            EMPTY_NOTES,
+            Asset.of(FiatCurrency.USD, AAPL_BUY_200),
             Asset.zero(FiatCurrency.USD)
         ));
 

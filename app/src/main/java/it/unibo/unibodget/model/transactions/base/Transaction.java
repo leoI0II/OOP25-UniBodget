@@ -4,6 +4,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
@@ -12,22 +17,23 @@ import it.unibo.unibodget.model.currency.Asset;
  *
  * <p>
  * Each transaction contains:
+ * - an {@link Asset} describing the monetary value and currency
+ * - a {@link Category} classifying the type of movement
+ * - a {@link LocalDate} indicating when the transaction occurred
+ * - an optional textual description
+ * - optional notes for additional context
  * </p>
- * <ul>
- * <li>an {@link Asset} describing the monetary value and currency,</li>
- * <li>a {@link Category} classifying the type of movement,</li>
- * <li>a {@link LocalDate} indicating when the transaction occurred,</li>
- * <li>an optional textual description,</li>
- * <li>optional notes for additional context,</li>
- * <li>a stable unique identifier used by the application to reference the
- * transaction safely across UI, filtering, editing, and deletion flows.</li>
- * </ul>
  *
  * <p>
  * This class is immutable: all fields are final and set at construction time.
  * </p>
  */
-public sealed abstract class Transaction permits CashTransaction, InvestmentTransaction {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
+    @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
+})
+public abstract class Transaction {
 
     private final UUID id;
     private final Asset asset;
@@ -57,14 +63,14 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
      *             if {@code asset}, {@code category}, or {@code date} is
      *             {@code null}
      */
-    public Transaction(
-            final Asset asset,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes) {
-        this(UUID.randomUUID(), asset, category, date, description, notes);
-    }
+    // public Transaction(
+    //         final Asset asset,
+    //         final Category category,
+    //         final LocalDate date,
+    //         final String description,
+    //         final String notes) {
+    //     this(UUID.randomUUID(), asset, category, date, description, notes);
+    // }
 
     /**
      * Creates a new transaction with the given explicit identifier.
@@ -107,6 +113,25 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
         this.date = Objects.requireNonNull(date);
         this.description = description;
         this.notes = notes;
+    }
+
+    /**
+     * Creates a transaction while allowing Jackson to reconstruct it from JSON.
+     *
+     * @param asset the monetary asset associated with the transaction
+     * @param category the transaction category
+     * @param date the transaction date
+     * @param description an optional description
+     * @param notes optional notes
+     */
+    @JsonCreator
+    public Transaction(
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes) {
+        this(UUID.randomUUID(), asset, category, date, description, notes);
     }
 
     /**
@@ -163,6 +188,17 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
         return notes;
     }
 
+    /**
+     * Compares this transaction with another object for equality.
+     *
+     * <p>
+     * Subclasses overriding this method must invoke {@code super.equals(Object)}
+     * and include all additional state introduced by the subclass in the comparison,
+     * preserving the general contract of {@link Object#equals(Object)}.
+     *
+     * @param o the object to compare with
+     * @return {@code true} if the two objects are equal; {@code false} otherwise
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -180,11 +216,32 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
                 && Objects.equals(notes, other.notes);
     }
 
+    /**
+     * Returns the hash code for this transaction.
+     *
+     * <p>
+     * Subclasses overriding this method must invoke {@code super.hashCode()}
+     * and include all additional state introduced by the subclass, preserving the
+     * contract between {@link #equals(Object)} and {@link #hashCode()}.
+     *
+     * @return the hash code of this transaction
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id, asset, category, date, description, notes);
     }
 
+    /**
+     * Returns a string representation of this transaction.
+     *
+     * <p>
+     * The returned string includes the asset, category, date, description, and notes.
+     * Subclasses overriding this method should include their additional state in the
+     * string representation.
+     * </p>
+     *
+     * @return a string describing this transaction
+     */
     @Override
     public String toString() {
         return "Transaction{"

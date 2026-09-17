@@ -1,6 +1,7 @@
 package it.unibo.unibodget.persistency.writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +24,14 @@ import it.unibo.unibodget.persistency.writer.impl.JsonFileUpdater;
  */
 class WriterFactoryTest {
 
+    private static final String JSON = "json";
+
     /**
      * Ensures that requesting a JSON appender returns a {@link JsonFileAppender}.
      */
     @Test
     void testCreateJsonAppender() {
-        FileAppender appender = WriterFactory.createAppender("json");
+        final FileAppender appender = WriterFactory.createAppender(JSON);
         assertTrue(appender instanceof JsonFileAppender);
     }
 
@@ -37,7 +40,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonOverwriter() {
-        FileOverwriter overwriter = WriterFactory.createOverwriter("json");
+        final FileOverwriter overwriter = WriterFactory.createOverwriter(JSON);
         assertTrue(overwriter instanceof JsonFileOverwriter);
     }
 
@@ -46,7 +49,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonSaver() {
-        FileSaver saver = WriterFactory.createSaver("json");
+        final FileSaver saver = WriterFactory.createSaver(JSON);
         assertTrue(saver instanceof JsonFileSaver);
     }
 
@@ -55,7 +58,7 @@ class WriterFactoryTest {
      */
     @Test
     void testCreateJsonUpdater() {
-        FileUpdater updater = WriterFactory.createUpdater("json");
+        final FileUpdater updater = WriterFactory.createUpdater(JSON);
         assertTrue(updater instanceof JsonFileUpdater);
     }
 
@@ -64,9 +67,13 @@ class WriterFactoryTest {
      */
     @Test
     void testUnsupportedTypesThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> WriterFactory.createAppender("xml"));
-        assertThrows(IllegalArgumentException.class, () -> WriterFactory.createOverwriter("txt"));
-        assertThrows(IllegalArgumentException.class, () -> WriterFactory.createSaver("yaml"));
-        assertThrows(IllegalArgumentException.class, () -> WriterFactory.createUpdater("csv"));
+        assertThrows(IllegalArgumentException.class, 
+            () -> WriterFactory.createAppender("xml"));
+        assertThrows(IllegalArgumentException.class, 
+            () -> WriterFactory.createOverwriter("txt"));
+        assertThrows(IllegalArgumentException.class,
+            () -> WriterFactory.createSaver("yaml"));
+        assertThrows(IllegalArgumentException.class, 
+            () -> WriterFactory.createUpdater("csv"));
     }
 }

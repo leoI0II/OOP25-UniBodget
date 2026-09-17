@@ -81,8 +81,10 @@ public final class FriendLoanSummary {
     /**
      * Returns the signed net balance of the friend loan.
      *
-     * <p>A positive balance means the user has given more than received.
-     * A negative balance means the user has received more than given.</p>
+     * <p>
+     * A positive balance means the user has given more than received.
+     * A negative balance means the user has received more than given.
+     * </p>
      *
      * @return the signed net balance
      */

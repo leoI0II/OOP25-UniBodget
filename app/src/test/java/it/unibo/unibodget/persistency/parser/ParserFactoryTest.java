@@ -1,6 +1,8 @@
 package it.unibo.unibodget.persistency.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +16,7 @@ import it.unibo.unibodget.model.categories.Category;
 /**
  * Unit tests for {@link ParserFactory}.
  *
+ * <p>
  * These tests verify that:
  * - JSON files produce a {@link JsonDataParser}
  * - unsupported file extensions trigger a {@link DataParserException}
@@ -26,7 +29,7 @@ public class ParserFactoryTest {
      */
     @Test
     void testJsonParserCreation() throws DataParserException {
-        DataParser<Category> parser =
+        final DataParser<Category> parser =
             ParserFactory.of(Category.class, "categories.json");
 
         assertNotNull(parser);

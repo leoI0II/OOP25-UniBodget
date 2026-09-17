@@ -1,9 +1,14 @@
 package it.unibo.unibodget.persistency.writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
-import java.nio.file.*;
-import org.junit.jupiter.api.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.persistency.writer.impl.JsonFileSaver;
 
@@ -17,9 +22,9 @@ class JsonFileSaverTest {
      */
     @Test
     void testSaveCreatesFile() throws IOException {
-        Path temp = Files.createTempDirectory("save").resolve("file.json");
+        final Path temp = Files.createTempDirectory("save").resolve("file.json");
 
-        JsonFileSaver saver = new JsonFileSaver();
+        final JsonFileSaver saver = new JsonFileSaver();
         saver.save(temp, "{ \"a\": 1 }");
 
         assertTrue(Files.exists(temp));
@@ -31,9 +36,9 @@ class JsonFileSaverTest {
      */
     @Test
     void testSaveFailsIfExists() throws IOException {
-        Path temp = Files.createTempFile("exists", ".json");
+        final Path temp = Files.createTempFile("exists", ".json");
 
-        JsonFileSaver saver = new JsonFileSaver();
+        final JsonFileSaver saver = new JsonFileSaver();
 
         assertThrows(IOException.class, () ->
             saver.save(temp, "X")

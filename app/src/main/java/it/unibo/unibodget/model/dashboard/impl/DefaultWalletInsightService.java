@@ -13,10 +13,13 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link WalletInsightService}.
  *
- * <p>This service computes dashboard insights by comparing the
- * current month against the previous month.</p>
+ * <p>
+ * This service computes dashboard insights by comparing the
+ * current month against the previous month.
+ * </p>
  *
- * <p>The current implementation produces three insights:
+ * <p>
+ * The current implementation produces three insights:
  * <ul>
  *   <li>spending change,</li>
  *   <li>savings change,</li>
@@ -28,6 +31,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final int PERCENT_SCALE = 2;
+    private static final String INCOME = "Income";
+    private static final String SAVINGS = "Savings";
+    private static final String SPENT = "You spent ";
+    private static final String SPENDING = "Spending";
 
     /**
      * {@inheritDoc}
@@ -62,9 +69,11 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes the total expenses for the specified month.
      *
-     * <p>Transactions of type {@link CategoryType#EXPENSE} and
+     * <p>
+     * Transactions of type {@link CategoryType#EXPENSE} and
      * {@link CategoryType#FRIEND_LOAN} are both counted as spending
-     * and contribute their absolute amount.</p>
+     * and contribute their absolute amount.
+     * </p>
      *
      * @param transactions
      *            the transactions to inspect
@@ -91,8 +100,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes the total income for the specified month.
      *
-     * <p>Only transactions of type {@link CategoryType#INCOME} are counted,
-     * and each contributes its absolute amount.</p>
+     * <p>
+     * Only transactions of type {@link CategoryType#INCOME} are counted,
+     * and each contributes its absolute amount.
+     * </p>
      *
      * @param transactions
      *            the transactions to inspect
@@ -145,7 +156,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0 && current.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Spending",
+                    SPENDING,
                     "No spending recorded this month or last month.",
                     InsightTrend.NEUTRAL,
                     BigDecimal.ZERO,
@@ -155,8 +166,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + current + " this month; no spending was recorded last month.",
+                    SPENDING,
+                    SPENT + current + " this month; no spending was recorded last month.",
                     InsightTrend.NEUTRAL,
                     current,
                     null
@@ -165,8 +176,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + percentage + "% less than last month (" + absoluteDelta + " less).",
+                    SPENDING,
+                    SPENT + percentage + "% less than last month (" + absoluteDelta + " less).",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
                     percentage
@@ -175,8 +186,8 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Spending",
-                    "You spent " + percentage + "% more than last month (" + absoluteDelta + " more).",
+                    SPENDING,
+                    SPENT + percentage + "% more than last month (" + absoluteDelta + " more).",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
                     percentage
@@ -184,7 +195,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Spending",
+                SPENDING,
                 "Your spending is in line with last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,
@@ -195,7 +206,9 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Builds the savings insight by comparing current and previous savings.
      *
-     * <p>Savings are computed as income minus expenses for the month.</p>
+     * <p>
+     * Savings are computed as income minus expenses for the month.
+     * </p>
      *
      * @param current
      *            the current-month savings
@@ -210,7 +223,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Savings",
+                    SAVINGS,
                     "You saved " + absoluteDelta + " more than last month.",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
@@ -220,7 +233,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Savings",
+                    SAVINGS,
                     "You saved " + absoluteDelta + " less than last month.",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
@@ -229,7 +242,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Savings",
+                SAVINGS,
                 "Your savings match last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,
@@ -253,7 +266,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0 && current.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "No income recorded this month or last month.",
                     InsightTrend.NEUTRAL,
                     BigDecimal.ZERO,
@@ -263,7 +276,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (previous.compareTo(BigDecimal.ZERO) == 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "You recorded " + current + " income this month; no income was recorded last month.",
                     InsightTrend.POSITIVE,
                     current,
@@ -273,7 +286,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "Your income increased by " + percentage + "% compared to last month.",
                     InsightTrend.POSITIVE,
                     absoluteDelta,
@@ -283,7 +296,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
 
         if (delta.compareTo(BigDecimal.ZERO) < 0) {
             return new WalletInsight(
-                    "Income",
+                    INCOME,
                     "Your income decreased by " + percentage + "% compared to last month.",
                     InsightTrend.NEGATIVE,
                     absoluteDelta,
@@ -292,7 +305,7 @@ public final class DefaultWalletInsightService implements WalletInsightService {
         }
 
         return new WalletInsight(
-                "Income",
+                INCOME,
                 "Your income matches last month.",
                 InsightTrend.NEUTRAL,
                 BigDecimal.ZERO,
@@ -303,8 +316,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
     /**
      * Computes a percentage change using the provided base and delta.
      *
-     * <p>The returned value is expressed as a percentage in the range
-     * expected for dashboard display, for example {@code 20.00} for 20%.</p>
+     * <p>
+     * The returned value is expressed as a percentage in the range
+     * expected for dashboard display, for example {@code 20.00} for 20%.
+     * </p>
      *
      * @param base
      *            the reference amount against which the change is measured

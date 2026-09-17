@@ -1,7 +1,8 @@
 package it.unibo.unibodget.persistency.util;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Comparator;
  * and directories created during test execution. Useful in test suites 
  * that generate multiple temporary resources
  * 
+ * <p>
  * Features:
  * - Deletes files safely without throwing exceptions
  * - Deletes directories recursively, including nested content
@@ -27,13 +29,14 @@ public final class TestCleanupUtils {
     /**
      * Deletes a file or directory recursively if it exists.
      *
+     * <p>
      * If the path refers to:
      * - a file      → it is deleted directly
      * - a directory → all its contents are deleted first, then the directory itself
      * 
      * @param path the file or directory to delete; may be null
      */
-    public static void deleteRecursively(Path path) {
+    public static void deleteRecursively(final Path path) {
         if (path == null || !Files.exists(path)) {
             return;
         }
@@ -46,14 +49,14 @@ public final class TestCleanupUtils {
                      .forEach(p -> {
                          try {
                              Files.deleteIfExists(p);
-                         } catch (IOException ignored) {
+                         } catch (final IOException ignored) {
                             // Clean up errors intentionally ignored to avoid test failures
                          }
                      });
             } else {
                 Files.deleteIfExists(path); // Delete single file
             }
-        } catch (IOException ignored) {
+        } catch (final IOException ignored) {
             // Intentionally ignore cleanup errors
         }
     }

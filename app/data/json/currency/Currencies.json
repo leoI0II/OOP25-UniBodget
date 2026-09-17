@@ -1,0 +1,130 @@
+{
+  "currencies": [
+    {
+      "type": "FIAT",
+      "symbol": "€",
+      "shortName": "EUR",
+      "fullName": "Euro",
+      "code": "EUR"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "$",
+      "shortName": "USD",
+      "fullName": "US Dollar",
+      "code": "USD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "£",
+      "shortName": "GBP",
+      "fullName": "British Pound",
+      "code": "GBP"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "¥",
+      "shortName": "JPY",
+      "fullName": "Japanese Yen",
+      "code": "JPY"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "CHF",
+      "shortName": "CHF",
+      "fullName": "Swiss Franc",
+      "code": "CHF"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "C$",
+      "shortName": "CAD",
+      "fullName": "Canadian Dollar",
+      "code": "CAD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "A$",
+      "shortName": "AUD",
+      "fullName": "Australian Dollar",
+      "code": "AUD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "NZ$",
+      "shortName": "NZD",
+      "fullName": "New Zealand Dollar",
+      "code": "NZD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "₹",
+      "shortName": "INR",
+      "fullName": "Indian Rupee",
+      "code": "INR"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "₩",
+      "shortName": "KRW",
+      "fullName": "South Korean Won",
+      "code": "KRW"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "R$",
+      "shortName": "BRL",
+      "fullName": "Brazilian Real",
+      "code": "BRL"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "MX$",
+      "shortName": "MXN",
+      "fullName": "Mexican Peso",
+      "code": "MXN"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "HK$",
+      "shortName": "HKD",
+      "fullName": "Hong Kong Dollar",
+      "code": "HKD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "S$",
+      "shortName": "SGD",
+      "fullName": "Singapore Dollar",
+      "code": "SGD"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "kr",
+      "shortName": "SEK",
+      "fullName": "Swedish Krona",
+      "code": "SEK"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "kr",
+      "shortName": "NOK",
+      "fullName": "Norwegian Krone",
+      "code": "NOK"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "kr",
+      "shortName": "DKK",
+      "fullName": "Danish Krone",
+      "code": "DKK"
+    },
+    {
+      "type": "FIAT",
+      "symbol": "ZAR",
+      "shortName": "ZAR",
+      "fullName": "South African Rand",
+      "code": "ZAR"
+    }
+  ]
+}

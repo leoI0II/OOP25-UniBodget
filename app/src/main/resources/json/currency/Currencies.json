@@ -1,0 +1,25 @@
+{
+  "currencies": [
+    {
+      "type": "CUSTOM",
+      "symbol": "€",
+      "shortName": "EUR",
+      "fullName": "Euro",
+      "code": "EUR"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "$",
+      "shortName": "USD",
+      "fullName": "US Dollar",
+      "code": "USD"
+    },
+    {
+      "type": "CUSTOM",
+      "symbol": "£",
+      "shortName": "GBP",
+      "fullName": "British Pound",
+      "code": "GBP"
+    }
+  ]
+}

@@ -8,7 +8,8 @@ import it.unibo.unibodget.model.wallet.InvestmentAccount;
 /**
  * A concrete {@link DefaultWalletService} specialized for {@link InvestmentAccount} wallets.
  *
- * <p>Locks the generic type parameters to {@code <InvestmentTransaction, InvestmentAccount>},
+ * <p>
+ * Locks the generic type parameters to {@code <InvestmentTransaction, InvestmentAccount>},
  * so callers do not need to specify them explicitly.
  */
 public final class InvestmentAccountService extends DefaultWalletService<InvestmentTransaction, InvestmentAccount> {

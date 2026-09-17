@@ -21,6 +21,10 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 class DefaultTransactionHistoryFilterServiceTest {
 
+        private static final int Y_2026 = 2026;
+        private static final int M_5 = 5;
+        private static final int D_15 = 15;
+
     private DefaultTransactionHistoryFilterService service;
 
     private CashTransaction salaryTransaction;
@@ -56,7 +60,7 @@ class DefaultTransactionHistoryFilterServiceTest {
         salaryTransaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("2500.00")),
                 salaryCategory,
-                LocalDate.of(2026, 5, 1),
+                LocalDate.of(Y_2026, M_5, 1),
                 "Monthly salary",
                 "Company payment"
         );
@@ -64,7 +68,7 @@ class DefaultTransactionHistoryFilterServiceTest {
         groceriesTransaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")),
                 foodCategory,
-                LocalDate.of(2026, 5, 10),
+                LocalDate.of(Y_2026, M_5, 10),
                 "Groceries",
                 "Supermarket shopping"
         );
@@ -72,7 +76,7 @@ class DefaultTransactionHistoryFilterServiceTest {
         rentTransaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-700.00")),
                 rentCategory,
-                LocalDate.of(2026, 5, 3),
+                LocalDate.of(Y_2026, M_5, 3),
                 "Rent payment",
                 "May rent"
         );
@@ -80,7 +84,7 @@ class DefaultTransactionHistoryFilterServiceTest {
         transferTransaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-200.00")),
                 transferCategory,
-                LocalDate.of(2026, 5, 15),
+                LocalDate.of(Y_2026, M_5, D_15),
                 "Transfer to savings",
                 "Monthly transfer"
         );
@@ -146,8 +150,8 @@ class DefaultTransactionHistoryFilterServiceTest {
         final TransactionFilterCriteria criteria = new TransactionFilterCriteria(
                 null,
                 null,
-                LocalDate.of(2026, 5, 2),
-                LocalDate.of(2026, 5, 10),
+                LocalDate.of(Y_2026, M_5, 2),
+                LocalDate.of(Y_2026, M_5, 10),
                 null,
                 TransactionSortOrder.NEWEST_FIRST
         );
@@ -253,8 +257,8 @@ class DefaultTransactionHistoryFilterServiceTest {
         final TransactionFilterCriteria criteria = new TransactionFilterCriteria(
                 null,
                 CategoryType.EXPENSE,
-                LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 5, 31),
+                LocalDate.of(Y_2026, M_5, 1),
+                LocalDate.of(Y_2026, M_5, 31),
                 "rent",
                 TransactionSortOrder.NEWEST_FIRST
         );

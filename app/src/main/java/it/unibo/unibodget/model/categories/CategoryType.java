@@ -3,6 +3,7 @@ package it.unibo.unibodget.model.categories;
 /**
  * Represents the high‑level classification of a transaction category.
  *
+ * <p>
  * This type allows the application to distinguish between:
  * - income categories (money received)
  * - expense categories (money spent)

@@ -3,6 +3,9 @@ package it.unibo.unibodget.model.categories;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
@@ -22,7 +25,8 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  * custom categories.
  * </p>
  */
-public final class Category extends BasicCategory {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class Category extends AbstractCategory {
 
     /**
      * Built-in food category.
@@ -94,11 +98,11 @@ public final class Category extends BasicCategory {
      *             if a default category is created as inactive
      */
     public Category(
-            final String name,
-            final ARGBColor color,
-            final CategoryType type,
-            final CategoryOrigin origin,
-            final boolean active) {
+            @JsonProperty("name") final String name,
+            @JsonProperty("colorHex") final ARGBColor color,
+            @JsonProperty("type") final CategoryType type,
+            @JsonProperty("origin") final CategoryOrigin origin,
+            @JsonProperty("active") final boolean active) {
         super(name, color, type);
         this.origin = Objects.requireNonNull(origin);
         if (origin == CategoryOrigin.DEFAULT && !active) {
@@ -260,4 +264,5 @@ public final class Category extends BasicCategory {
     public int hashCode() {
         return Objects.hash(super.hashCode(), origin, active);
     }
+
 }

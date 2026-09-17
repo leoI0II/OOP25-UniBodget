@@ -10,15 +10,17 @@ import it.unibo.unibodget.persistency.writer.api.FileAppender;
 /**
  * JSON implementation of a {@link FileAppender}.
  * 
+ * <p>
  * This appender ensures that the target file exists and then appends the given
  * content to it using {@link StandardOpenOption#APPEND}. No JSON validation is
  * performed because of the caller
  */
-public class JsonFileAppender extends BasicFileAppender {
+public class JsonFileAppender extends AbstractFileAppender {
 
     /**
      * Appends the given content to the specified JSON file.
      * 
+     * <p>
      * If the file does not exist, it is created along with any missing parent
      * directories. The content is then appended at the end of the file.
      * 
@@ -27,7 +29,7 @@ public class JsonFileAppender extends BasicFileAppender {
      * @throws IOException if the file cannot be created or written
      */
     @Override
-    public void append(Path path, String content) throws IOException {
+    public void append(final Path path, final String content) throws IOException {
         ensureFileExists(path);
         Files.writeString(path, content, StandardOpenOption.APPEND);
     }

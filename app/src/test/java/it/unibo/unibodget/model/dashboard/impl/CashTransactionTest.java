@@ -23,6 +23,11 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 class CashTransactionTest {
 
+        private static final String MARCO_P = "Marco";
+        private static final int Y_2026 = 2026;
+        private static final int M_5 = 5;
+        private static final int D_12 = 12;
+
     @Test
     void shouldCreateStandardTransactionWithoutFriendLoanMetadata() {
         final Category food = new Category(
@@ -34,7 +39,7 @@ class CashTransactionTest {
         final CashTransaction transaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
                 food,
-                LocalDate.of(2026, 5, 12),
+                LocalDate.of(Y_2026, M_5, D_12),
                 "Lunch",
                 "Lunch with friends"
         );
@@ -56,16 +61,16 @@ class CashTransactionTest {
         final CashTransaction transaction = new CashTransaction(
                 Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                 friendLoan,
-                LocalDate.of(2026, 5, 12),
-                "Loan to Marco",
+                LocalDate.of(Y_2026, M_5, D_12),
+                "Loan to " + MARCO_P,
                 "Temporary loan",
                 loanId,
-                "Marco"
+                MARCO_P
         );
 
         assertTrue(transaction.isFriendLoanTransaction());
         assertEquals(Optional.of(loanId), transaction.getFriendLoanId());
-        assertEquals(Optional.of("Marco"), transaction.getFriendName());
+        assertEquals(Optional.of(MARCO_P), transaction.getFriendName());
     }
 
     @Test
@@ -81,11 +86,11 @@ class CashTransactionTest {
                 () -> new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
                         food,
-                        LocalDate.of(2026, 5, 12),
+                        LocalDate.of(Y_2026, M_5, D_12),
                         "Lunch",
                         "Lunch with friends",
                         UUID.randomUUID(),
-                        "Marco"
+                        MARCO_P
                 )
         );
     }
@@ -103,8 +108,8 @@ class CashTransactionTest {
                 () -> new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                         friendLoan,
-                        LocalDate.of(2026, 5, 12),
-                        "Loan to Marco",
+                        LocalDate.of(Y_2026, M_5, D_12),
+                        "Loan to " + MARCO_P,
                         "Temporary loan",
                         UUID.randomUUID(),
                         null

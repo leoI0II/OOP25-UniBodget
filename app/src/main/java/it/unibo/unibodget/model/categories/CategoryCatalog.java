@@ -33,6 +33,10 @@ public final class CategoryCatalog {
      */
     public CategoryCatalog() {
         this.customCategories = new ArrayList<>();
+        CategoryManager.init();
+        CategoryManager.getAll().stream()
+                .filter(Category::isCustom)
+                .forEach(customCategories::add);
     }
 
     /**
@@ -152,7 +156,10 @@ public final class CategoryCatalog {
         if (existsByName(category.getName())) {
             throw new IllegalArgumentException("A category with the same name already exists.");
         }
+        // Persist the new custom category using CategoryManager
+        System.out.println("Adding custom category: " + category);
         customCategories.add(category);
+        CategoryManager.add(category);
     }
 
     /**
@@ -209,7 +216,10 @@ public final class CategoryCatalog {
      *             not exist
      */
     public void archiveCustomCategory(final String categoryName) {
-        getCustomCategoryByName(categoryName).archive();
+        //getCustomCategoryByName(categoryName).archive();
+        final Category category = getCustomCategoryByName(categoryName);
+        category.archive();
+        CategoryManager.saveAll();
     }
 
     /**
@@ -224,7 +234,10 @@ public final class CategoryCatalog {
      *             not exist
      */
     public void reactivateCustomCategory(final String categoryName) {
-        getCustomCategoryByName(categoryName).reactivate();
+        //getCustomCategoryByName(categoryName).reactivate();
+        final Category category = getCustomCategoryByName(categoryName);
+        category.reactivate();
+        CategoryManager.saveAll();
     }
 
     /**

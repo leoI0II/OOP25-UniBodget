@@ -1,0 +1,22 @@
+{
+  "themes": [
+    {
+      "name": "Light",
+      "primaryColor": { "hex": "#FFFFFF" },
+      "buttonColor": { "hex": "#DDDDDD" },
+      "textColor": { "hex": "#000000" },
+      "fontFamily": "Arial",
+      "fontSize": 14,
+      "boldText": false
+    },
+    {
+      "name": "Dark",
+      "primaryColor": { "hex": "#222222" },
+      "buttonColor": { "hex": "#444444" },
+      "textColor": { "hex": "#FFFFFF" },
+      "fontFamily": "Arial",
+      "fontSize": 14,
+      "boldText": false
+    }
+  ]
+}

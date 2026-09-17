@@ -6,6 +6,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
@@ -14,19 +18,21 @@ import it.unibo.unibodget.model.transactions.base.Transaction;
 /**
  * Abstract base class representing a financial wallet that holds a ledger of transactions.
  *
- * <p>A wallet is parameterized on the transaction type it accepts, enforcing at compile time
+ * <p>
+ * A wallet is parameterized on the transaction type it accepts, enforcing at compile time
  * that only compatible transactions can be added (e.g. a {@code CashAccount} only accepts
  * {@code CashTransaction} instances).
  *
- * <p>The balance is never stored as a field: subclasses must compute it dynamically from
+ * <p>
+ * The balance is never stored as a field: subclasses must compute it dynamically from
  * the transaction history by implementing {@link #getBalance()}.
  *
  * @param <T> the type of {@link Transaction} this wallet accepts
  */
 public abstract class Wallet<T extends Transaction> {
 
-    private static final Map<String, AtomicInteger> nameCounters = new ConcurrentHashMap<>();
-    
+    private static final Map<String, AtomicInteger> NAMECOUNTERS = new ConcurrentHashMap<>();
+
     private final UUID id;
     private String name;
     private final Historical<T> history;
@@ -51,6 +57,28 @@ public abstract class Wallet<T extends Transaction> {
     }
 
     /**
+     * Creates a wallet with a specific ID and existing transaction history.
+     *
+     * @param id           the unique identifier of this wallet
+     * @param name         the display name of this wallet; if empty a default is generated
+     * @param baseCurrency the reference currency used to express the balance
+     * @param history      the pre-existing transaction ledger
+     * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
+     */
+    @JsonCreator
+    protected Wallet(
+            @JsonProperty("id") final UUID id,
+            @JsonProperty("name") final String name,
+            @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
+            @JsonProperty("history") final Historical<T> history,
+            final String typePrefix) {
+        this.id = id != null ? id : UUID.randomUUID();
+        this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
+        this.baseCurrency = baseCurrency;
+        this.history = history;
+    }
+
+    /**
      * Creates a wallet with an empty transaction history.
      * If {@code name} is empty, a default name is generated using {@code typePrefix}.
      *
@@ -65,7 +93,7 @@ public abstract class Wallet<T extends Transaction> {
     // typePrefix is provided by the subclass because Java generics are erased at runtime:
     // Wallet cannot inspect T to determine whether it is CashTransaction or InvestmentTransaction.
     private static String generateDefaultName(final String typePrefix) {
-        return typePrefix + " " + nameCounters
+        return typePrefix + " " + NAMECOUNTERS
             .computeIfAbsent(typePrefix, k -> new AtomicInteger(0))
             .incrementAndGet();
     }
@@ -102,7 +130,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return the {@link Historical} ledger
      */
-    public Historical<T>    getHistory() {
+    public Historical<T> getHistory() {
         return history;
     }
 
@@ -134,6 +162,7 @@ public abstract class Wallet<T extends Transaction> {
      *
      * @return an {@link Asset} representing the current balance in the base currency
      */
+    @JsonIgnore
     public abstract Asset getBalance();
 
 }

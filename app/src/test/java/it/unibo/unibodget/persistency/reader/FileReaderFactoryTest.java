@@ -1,6 +1,8 @@
 package it.unibo.unibodget.persistency.reader;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +20,7 @@ import it.unibo.unibodget.persistency.util.TestCleanupUtils;
 /**
  * Unit test class for {@link FileReaderFactory}.
  *
+ * <p>
  * This test suite verifies that:
  * - unsupported extensions trigger an {@link IllegalArgumentException}
  * - missing extensions also trigger an {@link IllegalArgumentException}
@@ -38,19 +41,6 @@ class FileReaderFactoryTest {
         createJsonFile();
         createTxtFile();
     }
-
-    /**
-     * This test is useful for debugging purposes, to verify that the temporary files are created correctly
-     * and contain the expected content. It can be commented out or removed in production.
-     * /
-    @Test
-    void debugPrintTempFiles() throws IOException {
-        System.out.println("JSON file created at: " + tempJsonFile.toAbsolutePath());
-        System.out.println("JSON file content: " + Files.readString(tempJsonFile));
-        System.out.println("TXT file created at: " + tempTxtFile.toAbsolutePath());
-        System.out.println("TXT file content: " + Files.readString(tempTxtFile));
-    }
-    */
 
     /**
      * Creates a temporary JSON file for testing.
@@ -74,7 +64,7 @@ class FileReaderFactoryTest {
      */
     @Test
     void testCreateJsonReader() {
-        FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
+        final FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
         assertTrue(reader instanceof JsonReader);
     }
 
@@ -84,9 +74,9 @@ class FileReaderFactoryTest {
      */
     @Test
     void testUnsupportedExtensionThrowsException() {
-        String fakePath = "file.unsupported";
+        final String fakePath = "file.unsupported";
 
-        IllegalArgumentException ex = assertThrows(
+        final IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> FileReaderFactory.create(fakePath)
         );
@@ -100,9 +90,9 @@ class FileReaderFactoryTest {
      */
     @Test
     void testMissingExtensionThrowsException() {
-        String noExtPath = "file";
+        final String noExtPath = "file";
 
-        IllegalArgumentException ex = assertThrows(
+        final IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> FileReaderFactory.create(noExtPath)
         );
@@ -116,8 +106,8 @@ class FileReaderFactoryTest {
      */
     @Test
     void testReaderReadsFileCorrectly() throws IOException {
-        FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
-        Object content = reader.readFile();
+        final FileReader<?> reader = FileReaderFactory.create(tempJsonFile.toString());
+        final Object content = reader.readFile();
 
         assertNotNull(content);
         assertTrue(content.toString().contains("key"));
@@ -127,6 +117,7 @@ class FileReaderFactoryTest {
     /**
      * Cleans up all temporary files created during the test execution.
      *
+     * <p>
      * This method is executed after each test and ensures that no temporary
      * resources remain on the filesystem. It uses {@link TestCleanupUtils}
      * to safely delete files or directories

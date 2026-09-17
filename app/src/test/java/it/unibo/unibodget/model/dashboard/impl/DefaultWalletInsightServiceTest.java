@@ -21,6 +21,15 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 class DefaultWalletInsightServiceTest {
 
+        private static final String SALARY = "Salary";
+        private static final String FOOD = "Food";
+        private static final String GROCERIES = "Groceries";
+        private static final String SPENDING = "Spending";
+        private static final String INCOME = "Income";
+        private static final int GREEN_500 = 0xFF4CAF50;
+        private static final int ORANGE_500 = 0xFFFF9800;
+        private static final int PURPLE_500 = 0xFF9C27B0;
+
     private DefaultWalletInsightService service;
     private Category incomeCategory;
     private Category expenseCategory;
@@ -33,18 +42,18 @@ class DefaultWalletInsightServiceTest {
     void setUp() {
         service = new DefaultWalletInsightService();
         incomeCategory = new Category(
-                "Salary",
-                new ARGBColor(0xFF4CAF50),
+                SALARY,
+                new ARGBColor(GREEN_500),
                 CategoryType.INCOME
         );
         expenseCategory = new Category(
-                "Food",
-                new ARGBColor(0xFFFF9800),
+                FOOD,
+                new ARGBColor(ORANGE_500),
                 CategoryType.EXPENSE
         );
         friendLoanCategory = new Category(
                 "Friend loan",
-                new ARGBColor(0xFF9C27B0),
+                new ARGBColor(PURPLE_500),
                 CategoryType.FRIEND_LOAN
         );
     }
@@ -63,21 +72,21 @@ class DefaultWalletInsightServiceTest {
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")),
                         expenseCategory,
                         now,
-                        "Groceries",
+                        GROCERIES,
                         null
                 ),
                 new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                         expenseCategory,
                         lastMonth,
-                        "Groceries",
+                        GROCERIES,
                         null
                 )
         );
 
         final WalletInsight spendingInsight = service.computeInsights(transactions).get(0);
 
-        assertEquals("Spending", spendingInsight.title());
+        assertEquals(SPENDING, spendingInsight.title());
         assertEquals(InsightTrend.POSITIVE, spendingInsight.trend());
         assertEquals(0, new BigDecimal("20.00").compareTo(spendingInsight.deltaAmount()));
         assertEquals(0, new BigDecimal("20.00").compareTo(spendingInsight.deltaPercentage()));
@@ -97,28 +106,28 @@ class DefaultWalletInsightServiceTest {
                         Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
                         incomeCategory,
                         now,
-                        "Salary",
+                        SALARY,
                         null
                 ),
                 new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-300.00")),
                         expenseCategory,
                         now,
-                        "Food",
+                        FOOD,
                         null
                 ),
                 new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
                         incomeCategory,
                         lastMonth,
-                        "Salary",
+                        SALARY,
                         null
                 ),
                 new CashTransaction(
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-500.00")),
                         expenseCategory,
                         lastMonth,
-                        "Food",
+                        FOOD,
                         null
                 )
         );
@@ -154,14 +163,14 @@ class DefaultWalletInsightServiceTest {
                         Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
                         expenseCategory,
                         lastMonth,
-                        "Groceries",
+                        GROCERIES,
                         null
                 )
         );
 
         final WalletInsight spendingInsight = service.computeInsights(transactions).get(0);
 
-        assertEquals("Spending", spendingInsight.title());
+        assertEquals(SPENDING, spendingInsight.title());
         assertEquals(InsightTrend.POSITIVE, spendingInsight.trend());
         assertEquals(0, new BigDecimal("50.00").compareTo(spendingInsight.deltaAmount()));
         assertEquals(0, new BigDecimal("50.00").compareTo(spendingInsight.deltaPercentage()));
@@ -177,13 +186,13 @@ class DefaultWalletInsightServiceTest {
 
         assertEquals(3, insights.size());
 
-        assertEquals("Spending", insights.get(0).title());
+        assertEquals(SPENDING, insights.get(0).title());
         assertEquals(InsightTrend.NEUTRAL, insights.get(0).trend());
 
         assertEquals("Savings", insights.get(1).title());
         assertEquals(InsightTrend.NEUTRAL, insights.get(1).trend());
 
-        assertEquals("Income", insights.get(2).title());
+        assertEquals(INCOME, insights.get(2).title());
         assertEquals(InsightTrend.NEUTRAL, insights.get(2).trend());
     }
 }

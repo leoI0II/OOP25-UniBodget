@@ -1,0 +1,78 @@
+package it.unibo.unibodget.model.categories;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+import it.unibo.unibodget.model.utils.ARGBColor;
+
+class CategoryTest {
+
+    private static final String CAT_NAME = "MyCat";
+    private static final String CAT_NAME_X = "X";
+    private static final String DARK_BLUE = "#123456";
+    private static final String GREEN = "#00FF00";
+
+    @Test
+    void defaultCategoriesShouldBeAlwaysActive() {
+        assertTrue(Category.FOOD.isActive());
+        assertTrue(Category.FOOD.isDefault());
+        assertFalse(Category.FOOD.isCustom());
+    }
+
+    @Test
+    void customCategoryShouldBeActiveByDefault() {
+        final Category c = 
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
+        assertTrue(c.isActive());
+        assertTrue(c.isCustom());
+        assertFalse(c.isDefault());
+    }
+
+    @Test
+    void shouldArchiveCustomCategory() {
+        final Category c = 
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
+        c.archive();
+        assertFalse(c.isActive());
+    }
+
+    @Test
+    void shouldReactivateCustomCategory() {
+        final Category c = 
+            new Category(CAT_NAME, new ARGBColor(GREEN), CategoryType.EXPENSE);
+        c.archive();
+        c.reactivate();
+        assertTrue(c.isActive());
+    }
+
+    @Test
+    void shouldNotArchiveDefaultCategory() {
+        assertThrows(IllegalStateException.class, () -> Category.FOOD.archive());
+    }
+
+    @Test
+    void shouldNotReactivateDefaultCategory() {
+        assertThrows(IllegalStateException.class, () -> Category.FOOD.reactivate());
+    }
+
+    @Test
+    void shouldReturnDefaultCategories() {
+        assertFalse(Category.getDefaultCategories().isEmpty());
+    }
+
+    @Test
+    void shouldImplementEqualsAndHashCode() {
+        final Category c1 = 
+            new Category(CAT_NAME_X, new ARGBColor(DARK_BLUE), CategoryType.EXPENSE);
+        final Category c2 = 
+            new Category(CAT_NAME_X, new ARGBColor(DARK_BLUE), CategoryType.EXPENSE);
+
+        assertEquals(c1, c2);
+        assertEquals(c1.hashCode(), c2.hashCode());
+    }
+
+}

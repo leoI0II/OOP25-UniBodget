@@ -5,6 +5,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
@@ -42,12 +45,34 @@ public final class CashTransaction extends Transaction {
      *            optional additional notes or comments; may be {@code null}
      */
     public CashTransaction(
+        final Asset asset,
+        final Category category,
+        final LocalDate date,
+        final String description,
+        final String notes) {
+        this(asset, category, date, description, notes, null, null);
+    }
+
+    /**
+     * Creates a new cash transaction with the specified parameters.
+     *
+     * @param asset         the monetary value associated with the transaction; must not
+     *                      be null
+     * @param category      the assigned category; must not be null
+     * @param date          the date on which the transaction occurred; must not be null
+     * @param description   a short human-readable description of the transaction;
+     *                      may be null
+     * @param notes         optional additional notes or comments; may be null
+     * @return              a new cash transaction instance
+     */
+    public static CashTransaction of(
             final Asset asset,
             final Category category,
             final LocalDate date,
             final String description,
-            final String notes) {
-        this(asset, category, date, description, notes, null, null);
+            final String notes
+    ) {
+        return new CashTransaction(asset, category, date, description, notes);
     }
 
     /**
@@ -107,14 +132,15 @@ public final class CashTransaction extends Transaction {
      *             category type is not {@link CategoryType#FRIEND_LOAN}, or if
      *             only one of the two friend-loan fields is provided
      */
+    @JsonCreator
     public CashTransaction(
-            final Asset asset,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes,
-            final UUID friendLoanId,
-            final String friendName) {
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes,
+            @JsonProperty("friendLoanId") final UUID friendLoanId,
+            @JsonProperty("friendName") final String friendName) {
         super(asset, category, date, description, notes);
 
         final boolean hasLoanId = friendLoanId != null;

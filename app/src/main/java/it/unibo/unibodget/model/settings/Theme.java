@@ -2,20 +2,34 @@ package it.unibo.unibodget.model.settings;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
  * Represents a visual theme used by the application's user interface.
  *
- * <p>A {@code Theme} defines the core visual identity of the UI, including:
- * a human-readable name, a primary background color, a button color,
- * a text color, and typographic settings such as font family, size,
- * and weight.</p>
+ * <p>
+ * A {@code Theme} defines the core visual identity of the UI, including:</p>
+ * <ul>
+ *     <li>a human-readable name</li>
+ *     <li>primary background color</li>
+ *     <li>button color</li>
+ *     <li>text color</li>
+ *     <li>font family and size</li>
+ *     <li>whether text is bold</li>
+ * </ul>
  *
- * <p>This class belongs to the model layer and contains only theme data.
+ * <p>
+ * This class is part of the model layer and contains only theme data.
  * It does not depend on JavaFX or other UI-specific APIs.</p>
  */
 public final class Theme {
+
+    private static final int HALF = 128;
+    private static final int FONT_14 = 14;
+    private static final String FONT_ARIAL = "Arial";
 
     /**
      * The default theme used when no user preference is available.
@@ -26,8 +40,8 @@ public final class Theme {
                     ARGBColor.WHITE,
                     ARGBColor.LIGHT_GRAY,
                     getReadableTextColor(ARGBColor.WHITE),
-                    "Arial",
-                    14,
+                    FONT_ARIAL,
+                    FONT_14,
                     false
             );
 
@@ -42,33 +56,33 @@ public final class Theme {
     /**
      * Creates a new {@code Theme} with explicit values.
      *
-     * @param name the theme name
+     * @param name        the theme name
      * @param primaryColor the primary background color
-     * @param buttonColor the button color
-     * @param textColor the text color
-     * @param fontFamily the font family
-     * @param fontSize the font size
-     * @param boldText whether bold text is enabled
+     * @param buttonColor  the button color
+     * @param textColor    the text color
+     * @param fontFamily   the font family
+     * @param fontSize     the font size (must be positive)
+     * @param boldText     whether bold text is enabled
      */
+    @JsonCreator
     public Theme(
-            final String name,
-            final ARGBColor primaryColor,
-            final ARGBColor buttonColor,
-            final ARGBColor textColor,
-            final String fontFamily,
-            final int fontSize,
-            final boolean boldText
-    ) {
+        @JsonProperty("name") final String name,
+        @JsonProperty("primaryColor") final ARGBColor primaryColor,
+        @JsonProperty("buttonColor") final ARGBColor buttonColor,
+        @JsonProperty("textColor") final ARGBColor textColor,
+        @JsonProperty("fontFamily") final String fontFamily,
+        @JsonProperty("fontSize") final int fontSize,
+        @JsonProperty("boldText") final boolean boldText) {
+
         this.name = Objects.requireNonNull(name);
         this.primaryColor = Objects.requireNonNull(primaryColor);
         this.buttonColor = Objects.requireNonNull(buttonColor);
         this.textColor = Objects.requireNonNull(textColor);
         this.fontFamily = Objects.requireNonNull(fontFamily);
 
-        if (fontSize <= 0) {
-            throw new IllegalArgumentException("Font size must be positive");
-        }
-        this.fontSize = fontSize;
+        // Fallback to default size if invalid
+        this.fontSize = fontSize > 0 ? fontSize : DEFAULT.fontSize;
+
         this.boldText = boldText;
     }
 
@@ -76,10 +90,10 @@ public final class Theme {
      * Creates a new {@code Theme} with explicit color values
      * and default typography settings.
      *
-     * @param name the theme name
+     * @param name         the theme name
      * @param primaryColor the primary background color
-     * @param buttonColor the button color
-     * @param textColor the text color
+     * @param buttonColor  the button color
+     * @param textColor    the text color
      */
     public Theme(
             final String name,
@@ -87,15 +101,15 @@ public final class Theme {
             final ARGBColor buttonColor,
             final ARGBColor textColor
     ) {
-        this(name, primaryColor, buttonColor, textColor, "Arial", 14, false);
+        this(name, primaryColor, buttonColor, textColor, FONT_ARIAL, FONT_14, false);
     }
 
     /**
      * Creates a new {@code Theme} using HEX color strings.
      * The text color is automatically computed for readability.
      *
-     * @param name the theme name
-     * @param hexColor the primary background color in HEX format
+     * @param name           the theme name
+     * @param hexColor       the primary background color in HEX format
      * @param buttonHexColor the button color in HEX format
      */
     public Theme(final String name, final String hexColor, final String buttonHexColor) {
@@ -104,38 +118,73 @@ public final class Theme {
                 new ARGBColor(hexColor),
                 new ARGBColor(buttonHexColor),
                 getReadableTextColor(new ARGBColor(hexColor)),
-                "Arial",
-                14,
+                FONT_ARIAL,
+                FONT_14,
                 false
         );
     }
 
-    public String getName() {
-        return name;
+    /** 
+     * Return theme name.
+     * 
+     * @return the theme name 
+     */
+    public String getName() { 
+        return name; 
     }
 
-    public ARGBColor getPrimaryColor() {
-        return primaryColor;
+    /** 
+     * Return primary background color.
+     * 
+     * @return the primary background color
+     */
+    public ARGBColor getPrimaryColor() { 
+        return primaryColor; 
     }
 
-    public ARGBColor getButtonColor() {
-        return buttonColor;
+    /** 
+     * Return button color.
+     * 
+     * @return the button color 
+     */
+    public ARGBColor getButtonColor() { 
+        return buttonColor; 
     }
 
-    public ARGBColor getTextColor() {
-        return textColor;
+    /** 
+     * Return text color.
+     * 
+     * @return the text color 
+     */
+    public ARGBColor getTextColor() { 
+        return textColor; 
     }
 
-    public String getFontFamily() {
-        return fontFamily;
+    /** 
+     * Return font family.
+     * 
+     * @return the font family 
+     */
+    public String getFontFamily() { 
+        return fontFamily; 
     }
 
-    public int getFontSize() {
-        return fontSize;
+    /** 
+     * Return font size.
+     * 
+     * @return the font size 
+     */
+    public int getFontSize() { 
+        return fontSize; 
     }
 
-    public boolean isBoldText() {
-        return boldText;
+    /** 
+     * Return if the text is bold.
+     * 
+     * @return true if bold text is enabled 
+     */
+    public boolean isBoldText() { 
+        return boldText; 
     }
 
     /**
@@ -143,7 +192,7 @@ public final class Theme {
      * on top of the given background color.
      *
      * @param color the background color to evaluate
-     * @return black or white depending on readability
+     * @return black or white depending on luminance
      */
     public static ARGBColor getReadableTextColor(final ARGBColor color) {
         final double luminance =
@@ -151,7 +200,7 @@ public final class Theme {
                 + 0.587 * color.green()
                 + 0.114 * color.blue();
 
-        return luminance > 128 ? ARGBColor.BLACK : ARGBColor.WHITE;
+        return luminance > HALF ? ARGBColor.BLACK : ARGBColor.WHITE;
     }
 
     @Override
@@ -197,4 +246,5 @@ public final class Theme {
                 boldText
         );
     }
+
 }
