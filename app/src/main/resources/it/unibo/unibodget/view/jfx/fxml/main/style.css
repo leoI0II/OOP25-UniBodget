@@ -1,8 +1,9 @@
 .menu-button .arrow-button {
-    -fx-padding: 0;
-    visibility: hidden;
+    -fx-padding: 0em;
 }
 .menu-button .arrow {
-    visibility: hidden;
-    -fx-padding: 0;
+    -fx-padding: 0em;
+    -fx-shape: null;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
 }
