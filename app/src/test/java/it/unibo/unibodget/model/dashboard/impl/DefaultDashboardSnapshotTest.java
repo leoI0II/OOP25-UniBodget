@@ -9,7 +9,7 @@
 // import static org.junit.jupiter.api.Assertions.assertThrows;
 // import org.junit.jupiter.api.Test;
 
-// import it.unibo.unibodget.model.transactions.base.Transaction;
+// import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 // import it.unibo.unibodget.model.wallet.CashAccount;
 
 // /**
@@ -39,7 +39,7 @@
 //                 "Main wallet",
 //                 "EUR",
 //                 new BigDecimal("1700.00"),
-//                 List.<Transaction>of(),
+//                 List.<AbstractTransaction>of(),
 //                 Map.of("Food", new BigDecimal("300.00")),
 //                 new BigDecimal("1000.00"),
 //                 new BigDecimal("0.80"),

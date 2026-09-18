@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
@@ -19,7 +19,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     private final String walletName;
     private final String walletCurrency;
     private final BigDecimal totalBalance;
-    private final List<Transaction> recentTransactions;
+    private final List<AbstractTransaction> recentTransactions;
     private final Map<String, BigDecimal> categorySummaries;
     private final BigDecimal budgetLimit;
     private final BigDecimal warningThreshold;
@@ -56,7 +56,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
             final String walletName,
             final String walletCurrency,
             final BigDecimal totalBalance,
-            final List<Transaction> recentTransactions,
+            final List<AbstractTransaction> recentTransactions,
             final Map<String, BigDecimal> categorySummaries,
             final BigDecimal budgetLimit,
             final BigDecimal warningThreshold,
@@ -93,7 +93,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     }
 
     @Override
-    public List<Transaction> getRecentTransactions() {
+    public List<AbstractTransaction> getRecentTransactions() {
         return Collections.unmodifiableList(recentTransactions);
     }
 

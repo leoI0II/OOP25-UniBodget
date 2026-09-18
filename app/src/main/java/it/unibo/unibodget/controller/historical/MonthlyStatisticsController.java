@@ -1,18 +1,18 @@
 package it.unibo.unibodget.controller.historical;
 
-import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.transactions.MonthlyStatistics;
-import it.unibo.unibodget.model.transactions.MonthlyStatistics.CategoryTotal;
-import it.unibo.unibodget.model.transactions.Historical;
-import it.unibo.unibodget.model.transactions.base.Transaction;
-
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.transactions.Historical;
+import it.unibo.unibodget.model.transactions.MonthlyStatistics;
+import it.unibo.unibodget.model.transactions.MonthlyStatistics.CategoryTotal;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 
 /**
  * Controller responsible for computing monthly financial statistics from a
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public final class MonthlyStatisticsController {
 
-    private final Historical<? extends Transaction> historical;
+    private final Historical<? extends AbstractTransaction> historical;
 
     /**
      * Creates a new {@code MonthlyStatisticsController}.
@@ -42,7 +42,7 @@ public final class MonthlyStatisticsController {
      * @param historical the transaction ledger used to compute monthly statistics;
      *                   must not be {@code null}
      */
-    public MonthlyStatisticsController(final Historical<? extends Transaction> historical) {
+    public MonthlyStatisticsController(final Historical<? extends AbstractTransaction> historical) {
         this.historical = historical;
     }
 
@@ -68,7 +68,7 @@ public final class MonthlyStatisticsController {
      * @return a {@link MonthlyStatistics} instance containing all aggregated values
      */
     public MonthlyStatistics computeStatistics(final YearMonth month) {
-        final List<? extends Transaction> monthTransactions = historical.filterByMonth(month);
+        final List<? extends AbstractTransaction> monthTransactions = historical.filterByMonth(month);
 
         final Map<String, BigDecimal> sumsByCategory = new LinkedHashMap<>();
         final Map<String, CategoryType> typeByCategory = new LinkedHashMap<>();
@@ -77,7 +77,7 @@ public final class MonthlyStatisticsController {
         BigDecimal totalExpense = BigDecimal.ZERO;
 
         // Aggregate per-category totals and compute income/expense sums
-        for (final Transaction transaction : monthTransactions) {
+        for (final AbstractTransaction transaction : monthTransactions) {
             final Category category = transaction.getCategory();
             final BigDecimal amount = transaction.getAsset().amount();
             final String categoryName = category.getName();

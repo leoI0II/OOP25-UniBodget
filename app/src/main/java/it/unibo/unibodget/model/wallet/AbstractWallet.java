@@ -13,43 +13,48 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.transactions.Historical;
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
 
 /**
- * Abstract base class representing a financial wallet that holds a ledger of transactions.
+ * Abstract base class representing a financial wallet that holds a ledger of
+ * transactions.
  *
  * <p>
- * A wallet is parameterized on the transaction type it accepts, enforcing at compile time
- * that only compatible transactions can be added (e.g. a {@code CashAccount} only accepts
- * {@code CashTransaction} instances).
+ * A wallet is parameterized on the transaction type it accepts, enforcing at
+ * compile time that only compatible transactions can be added (e.g. a
+ * {@code CashAccount} only accepts {@code CashTransaction} instances).
  *
  * <p>
- * The balance is never stored as a field: subclasses must compute it dynamically from
- * the transaction history by implementing {@link #getBalance()}.
+ * The balance is never stored as a field: subclasses must compute it
+ * dynamically from the transaction history by implementing
+ * {@link #getBalance()}.
  *
- * @param <T> the type of {@link Transaction} this wallet accepts
+ * @param <T> the type of {@link AbstractTransaction} this wallet accepts
  */
-public abstract class Wallet<T extends Transaction> {
+public abstract class AbstractWallet<T extends AbstractTransaction> {
 
-    private static final Map<String, AtomicInteger> NAMECOUNTERS = new ConcurrentHashMap<>();
-
+    private static final Map<String, AtomicInteger> NAME_COUNTERS = new ConcurrentHashMap<>();
     private final UUID id;
     private String name;
     private final Historical<T> history;
     private final CurrencyUnit baseCurrency;
 
     /**
-     * Creates a wallet with an existing transaction history.
-     * If {@code name} is empty, a default name is generated using {@code typePrefix}
-     * (e.g. "Cash Account 1", "Investment Account 2").
+     * Creates a wallet with an existing transaction history. If {@code name} is
+     * empty, a default name is generated using {@code typePrefix} (e.g. "Cash
+     * Account 1", "Investment Account 2").
      *
-     * @param name         the display name of this wallet; if empty a default is generated
+     * @param name the display name of this wallet; if empty a default is
+     * generated
      * @param baseCurrency the reference currency used to express the balance
-     * @param history      the pre-existing transaction ledger
-     * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
+     * @param history the pre-existing transaction ledger
+     * @param typePrefix prefix used for the auto-generated name (supplied by
+     * the subclass)
      */
-    protected Wallet(final String name, final CurrencyUnit baseCurrency,
-                     final Historical<T> history, final String typePrefix) {
+    protected AbstractWallet(final String name, final CurrencyUnit baseCurrency,
+            final Historical<T> history, final String typePrefix) {
         this.id = UUID.randomUUID();
         this.name = name.isEmpty() ? generateDefaultName(typePrefix) : name;
         this.baseCurrency = baseCurrency;
@@ -59,14 +64,16 @@ public abstract class Wallet<T extends Transaction> {
     /**
      * Creates a wallet with a specific ID and existing transaction history.
      *
-     * @param id           the unique identifier of this wallet
-     * @param name         the display name of this wallet; if empty a default is generated
+     * @param id the unique identifier of this wallet
+     * @param name the display name of this wallet; if empty a default is
+     * generated
      * @param baseCurrency the reference currency used to express the balance
-     * @param history      the pre-existing transaction ledger
-     * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
+     * @param history the pre-existing transaction ledger
+     * @param typePrefix prefix used for the auto-generated name (supplied by
+     * the subclass)
      */
     @JsonCreator
-    protected Wallet(
+    protected AbstractWallet(
             @JsonProperty("id") final UUID id,
             @JsonProperty("name") final String name,
             @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
@@ -79,23 +86,25 @@ public abstract class Wallet<T extends Transaction> {
     }
 
     /**
-     * Creates a wallet with an empty transaction history.
-     * If {@code name} is empty, a default name is generated using {@code typePrefix}.
+     * Creates a wallet with an empty transaction history. If {@code name} is
+     * empty, a default name is generated using {@code typePrefix}.
      *
-     * @param name         the display name of this wallet; if empty a default is generated
+     * @param name the display name of this wallet; if empty a default is
+     * generated
      * @param baseCurrency the reference currency used to express the balance
-     * @param typePrefix   prefix used for the auto-generated name (supplied by the subclass)
+     * @param typePrefix prefix used for the auto-generated name (supplied by
+     * the subclass)
      */
-    protected Wallet(final String name, final CurrencyUnit baseCurrency, final String typePrefix) {
+    protected AbstractWallet(final String name, final CurrencyUnit baseCurrency, final String typePrefix) {
         this(name, baseCurrency, new Historical<>(), typePrefix);
     }
 
     // typePrefix is provided by the subclass because Java generics are erased at runtime:
     // Wallet cannot inspect T to determine whether it is CashTransaction or InvestmentTransaction.
     private static String generateDefaultName(final String typePrefix) {
-        return typePrefix + " " + NAMECOUNTERS
-            .computeIfAbsent(typePrefix, k -> new AtomicInteger(0))
-            .incrementAndGet();
+        return typePrefix + " " + NAME_COUNTERS
+                .computeIfAbsent(typePrefix, k -> new AtomicInteger(0))
+                .incrementAndGet();
     }
 
     /**
@@ -154,13 +163,15 @@ public abstract class Wallet<T extends Transaction> {
             throw new IllegalArgumentException("Transaction amount cannot be zero.");
         }
         history.addTransaction(transaction);
+        MessageBus.send(new TransactionAddedEvent(this, transaction));
     }
 
     /**
-     * Computes and returns the current balance of this wallet.
-     * The balance is always derived from the transaction history, never cached.
+     * Computes and returns the current balance of this wallet. The balance is
+     * always derived from the transaction history, never cached.
      *
-     * @return an {@link Asset} representing the current balance in the base currency
+     * @return an {@link Asset} representing the current balance in the base
+     * currency
      */
     @JsonIgnore
     public abstract Asset getBalance();

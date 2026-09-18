@@ -1,16 +1,12 @@
 package it.unibo.unibodget.model.currency;
 
 /**
- * Enum to represent stock market currencies.
- * 
- * <p>
- * Each enum constant defines:
- * - type (fixed to "Stock" for this enum)
- * - symbol
- * - short ISO name
- * - full company name
- * - ISO code
+ * Supported stock market instruments.
+ *
+ * <p>Each constant represents a publicly traded company, identified by its ticker symbol.
+ * All stocks share the {@code "$"} display symbol and use 2 decimal places for display.</p>
  */
+@SuppressWarnings("checkstyle:MultipleStringLiterals")
 public enum StockMarketCurrency implements CurrencyUnit {
 
     AAPL(CurrencySymbols.DOLLAR, "AAPL", "Apple Inc.", "AAPL"),
@@ -35,35 +31,51 @@ public enum StockMarketCurrency implements CurrencyUnit {
      * @param fullName  the full descriptive name of the company or traded asset
      * @param code      the standardized code used internally or by external data providers
      */
-    StockMarketCurrency(final String symbol, final String shortName, final String fullName, final String code) {
+    StockMarketCurrency(
+            final String symbol,
+            final String shortName,
+            final String fullName,
+            final String code
+    ) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
         this.code = code;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
         return this.type;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getSymbol() { 
-        return this.symbol; 
+    public String getSymbol() {
+        return this.symbol;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getShortName() { 
-        return this.shortName; 
+    public String getShortName() {
+        return this.shortName;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getFullName() { 
-        return this.fullName; 
+    public String getFullName() {
+        return this.fullName;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getCode() {
         return this.code;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getDisplayDecimals() {
+        return 2;
     }
 }

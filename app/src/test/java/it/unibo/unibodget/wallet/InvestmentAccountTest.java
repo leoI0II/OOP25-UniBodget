@@ -5,12 +5,12 @@
 // import java.math.BigDecimal;
 // import java.time.LocalDate;
 
+// import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
+// import it.unibo.unibodget.model.converter.provider.MockExchangeRateProvider;
 // import org.junit.jupiter.api.BeforeEach;
 // import org.junit.jupiter.api.Test;
 
 // import it.unibo.unibodget.model.categories.Category;
-// import it.unibo.unibodget.model.converter.provider.MockPriceProvider;
-// import it.unibo.unibodget.model.converter.provider.PriceProvider;
 // import it.unibo.unibodget.model.currency.Asset;
 // import it.unibo.unibodget.model.currency.CryptoCurrency;
 // import it.unibo.unibodget.model.currency.FiatCurrency;
@@ -18,26 +18,16 @@
 // import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 // import it.unibo.unibodget.model.wallet.InvestmentAccount;
 
-// /**
-//  * Unit tests for {@link InvestmentAccount}.
-//  * 
-//  * <p>
-//  * This class verifies the correct behavior of investment transactions,
-//  * including buys, sells, position updates, balance calculations, and
-//  * profit/loss evaluation. All tests rely on a mock {@link PriceProvider}
-//  * to ensure deterministic results.
-//  * </p>
-//  */
-// public final class InvestmentAccountTest {
+// public class InvestmentAccountTest {
+    
+//     private InvestmentAccount account;
+//     private ExchangeRateProvider exchangeRateProvider;
 
-//     private static final BigDecimal BTC_BUY_PRICE = new BigDecimal("50000.00");
-//     private static final BigDecimal BTC_BUY_PRICE_2 = new BigDecimal("55000.00");
-//     private static final BigDecimal ETH_BUY_4K = new BigDecimal("4000.0");
-//     private static final BigDecimal AAPL_BUY_150 = new BigDecimal("150.0");
-//     private static final BigDecimal AAPL_BUY_100 = new BigDecimal("100.00");
-//     private static final BigDecimal AAPL_BUY_200 = new BigDecimal("200.00");
-//     private static final BigDecimal MINUS_FIVE = BigDecimal.valueOf(-5);
-//     private static final BigDecimal PROFIT_500 = new BigDecimal("500.00");
+//     @BeforeEach
+//     void setUp() {
+//         exchangeRateProvider = new MockExchangeRateProvider();
+//         account = new InvestmentAccount("Test Account", FiatCurrency.USD, exchangeRateProvider);
+//     }
 
 //     private static final String NOTES = "notes";
 //     private static final String EMPTY_NOTES = "";

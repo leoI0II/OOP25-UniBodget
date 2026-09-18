@@ -15,17 +15,17 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Represents a cash‑based wallet containing a ledger of {@link CashTransaction}
  * and a configurable monthly budget. A {@code CashAccount} computes its balance
- * dynamically from its transaction history and stores user‑defined budget limits.
- * It is the aggregate root for all cash operations within UniBodget.
+ * dynamically from its transaction history and stores user‑defined budget
+ * limits. It is the aggregate root for all cash operations within UniBodget.
  */
-public final class CashAccount extends Wallet<CashTransaction> {
+public final class CashAccount extends AbstractWallet<CashTransaction> {
 
     private DefaultBudgetSettings budgetSettings;
 
     /**
-     * Creates a {@code CashAccount} from JSON data.
-     * If {@code history} is null, an empty ledger is created.
-     * If {@code budgetSettings} is null, a default configuration is applied.
+     * Creates a {@code CashAccount} from JSON data. If {@code history} is null,
+     * an empty ledger is created. If {@code budgetSettings} is null, a default
+     * configuration is applied.
      *
      * @param name the display name of the wallet
      * @param baseCurrency the currency used to express the balance
@@ -89,7 +89,8 @@ public final class CashAccount extends Wallet<CashTransaction> {
      * Computes the current balance by summing all {@link Asset} values
      * contained in the transaction history. The balance is never cached.
      *
-     * @return an {@link Asset} representing the total balance in the base currency
+     * @return an {@link Asset} representing the total balance in the base
+     * currency
      */
     @Override
     public Asset getBalance() {
@@ -97,5 +98,4 @@ public final class CashAccount extends Wallet<CashTransaction> {
                 .map(CashTransaction::getAsset)
                 .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
-
 }

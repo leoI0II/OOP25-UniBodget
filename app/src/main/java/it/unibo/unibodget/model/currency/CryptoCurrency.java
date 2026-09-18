@@ -32,6 +32,11 @@ public enum CryptoCurrency implements CurrencyUnit {
     LINK("⛓", "LINK", "Chainlink", "LINK", "chainlink", false),
     UNI("U", "UNI", "Uniswap", "UNI", "uniswap", false);
 
+    private static final int BTC_DECIMALS = 8;
+    private static final int ETH_DECIMALS = 6;
+    private static final int STABLE_DECIMALS = 2;
+    private static final int DEFAULT_DECIMALS = 4;
+
     private final CurrencyType type = CurrencyType.CRYPTO;
     private final String symbol;
     private final String shortName;
@@ -50,8 +55,14 @@ public enum CryptoCurrency implements CurrencyUnit {
      * @param apiId     the identifier used by external APIs or data providers
      * @param isStableCoin whether the cryptocurrency is a stablecoin (e.g., USDT)
      */
-    CryptoCurrency(final String symbol, final String shortName, final String fullName, 
-                    final String code, final String apiId, final boolean isStableCoin) {
+    CryptoCurrency(
+            final String symbol,
+            final String shortName,
+            final String fullName,
+            final String code,
+            final String apiId,
+            final boolean isStableCoin
+    ) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -60,47 +71,62 @@ public enum CryptoCurrency implements CurrencyUnit {
         this.isStableCoin = isStableCoin;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
         return this.type;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getSymbol() { 
-        return this.symbol; 
+    public String getSymbol() {
+        return this.symbol;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getShortName() { 
-        return this.shortName; 
+    public String getShortName() {
+        return this.shortName;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public String getFullName() { 
-        return this.fullName; 
+    public String getFullName() {
+        return this.fullName;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getCode() {
         return this.code;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public int getDisplayDecimals() {
+        return switch (this) {
+            case BTC -> BTC_DECIMALS;
+            case ETH -> ETH_DECIMALS;
+            case USDT, EURC -> STABLE_DECIMALS;
+            default -> DEFAULT_DECIMALS;
+        };
+    }
+
     /**
-     * Get ApiId.
-     * 
-     * @return apiId
+     * Returns the CoinGecko API identifier used to fetch live price data.
+     *
+     * @return the API id, e.g. {@code "bitcoin"} for BTC
      */
     public String getApiId() {
         return this.apiId;
     }
 
-    /** 
-     * Return true if it's stable, false otherwise.
-     * 
-     * @return true if stable
+    /**
+     * Returns whether this cryptocurrency is a stablecoin.
+     *
+     * @return {@code true} for stablecoins such as USDT, USDC, EURC
      */
     public boolean isStableCoin() {
         return this.isStableCoin;
     }
-
 }

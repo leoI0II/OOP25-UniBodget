@@ -31,50 +31,50 @@ public final class Category extends AbstractCategory {
     /**
      * Built-in food category.
      */
-    public static final Category FOOD =
-            new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    public static final Category FOOD
+            = new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in rent category.
      */
-    public static final Category RENT =
-            new Category("Rent", new ARGBColor(0xFF9C27B0), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    public static final Category RENT
+            = new Category("Rent", new ARGBColor(0xFF9C27B0), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in savings category.
      */
-    public static final Category SAVINGS =
-            new Category("Savings", new ARGBColor(0xFF4CAF50), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
+    public static final Category SAVINGS
+            = new Category("Savings", new ARGBColor(0xFF4CAF50), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in transport category.
      */
-    public static final Category TRANSPORT =
-            new Category("Transport", new ARGBColor(0xFF009688), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    public static final Category TRANSPORT
+            = new Category("Transport", new ARGBColor(0xFF009688), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in transfer category.
      */
-    public static final Category TRANSFER =
-            new Category("Transfer", new ARGBColor(0xFF2196F3), CategoryType.TRANSFER, CategoryOrigin.DEFAULT, true);
+    public static final Category TRANSFER
+            = new Category("Transfer", new ARGBColor(0xFF2196F3), CategoryType.TRANSFER, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in investment buy category.
      */
-    public static final Category INVESTMENT_BUY =
-            new Category("Investment Buy", new ARGBColor(0xFFFFC107), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    public static final Category INVESTMENT_BUY
+            = new Category("Investment Buy", new ARGBColor(0xFFFFC107), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in investment sell category.
      */
-    public static final Category INVESTMENT_SELL =
-            new Category("Investment Sell", new ARGBColor(0xFFFFC107), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
+    public static final Category INVESTMENT_SELL
+            = new Category("Investment Sell", new ARGBColor(0xFFFFC107), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
 
     /**
      * Built-in friend loan category.
      */
-    public static final Category FRIEND_LOAN =
-            new Category("Friend Loan", new ARGBColor(0xFF795548), CategoryType.FRIEND_LOAN, CategoryOrigin.DEFAULT, true);
+    public static final Category FRIEND_LOAN
+            = new Category("Friend Loan", new ARGBColor(0xFF795548), CategoryType.FRIEND_LOAN, CategoryOrigin.DEFAULT, true);
 
     private final CategoryOrigin origin;
     private boolean active;
@@ -82,20 +82,14 @@ public final class Category extends AbstractCategory {
     /**
      * Creates a category with explicit metadata.
      *
-     * @param name
-     *            the category name
-     * @param color
-     *            the category color
-     * @param type
-     *            the category type
-     * @param origin
-     *            the origin of the category
-     * @param active
-     *            whether the category is active
-     * @throws NullPointerException
-     *             if any mandatory argument is {@code null}
-     * @throws IllegalArgumentException
-     *             if a default category is created as inactive
+     * @param name the category name
+     * @param color the category color
+     * @param type the category type
+     * @param origin the origin of the category
+     * @param active whether the category is active
+     * @throws NullPointerException if any mandatory argument is {@code null}
+     * @throws IllegalArgumentException if a default category is created as
+     * inactive
      */
     public Category(
             @JsonProperty("name") final String name,
@@ -114,12 +108,9 @@ public final class Category extends AbstractCategory {
     /**
      * Creates a new active custom category.
      *
-     * @param name
-     *            the category name
-     * @param color
-     *            the category color
-     * @param type
-     *            the category type
+     * @param name the category name
+     * @param color the category color
+     * @param type the category type
      */
     public Category(final String name, final ARGBColor color, final CategoryType type) {
         this(name, color, type, CategoryOrigin.CUSTOM, true);
@@ -128,7 +119,7 @@ public final class Category extends AbstractCategory {
     /**
      * Returns the built-in categories available in every application instance.
      *
-     * @return an immutable list of default categories
+     * @return an unmodifiable list of all default {@code Category} instances
      */
     public static List<Category> getDefaultCategories() {
         return List.of(
@@ -153,9 +144,9 @@ public final class Category extends AbstractCategory {
     }
 
     /**
-     * Returns whether the category is active.
+     * Returns whether this category is currently active.
      *
-     * @return {@code true} if active, otherwise {@code false}
+     * @return {@code true} if the category is active, {@code false} if archived
      */
     public boolean isActive() {
         return active;
@@ -182,14 +173,10 @@ public final class Category extends AbstractCategory {
     /**
      * Renames a custom category.
      *
-     * @param newName
-     *            the new category name
-     * @throws IllegalStateException
-     *             if this category is a default category
-     * @throws NullPointerException
-     *             if {@code newName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code newName} is blank
+     * @param newName the new category name
+     * @throws IllegalStateException if this category is a default category
+     * @throws NullPointerException if {@code newName} is {@code null}
+     * @throws IllegalArgumentException if {@code newName} is blank
      */
     public void rename(final String newName) {
         if (isDefault()) {
@@ -201,12 +188,9 @@ public final class Category extends AbstractCategory {
     /**
      * Changes the color of a custom category.
      *
-     * @param newColor
-     *            the new color
-     * @throws IllegalStateException
-     *             if this category is a default category
-     * @throws NullPointerException
-     *             if {@code newColor} is {@code null}
+     * @param newColor the new color
+     * @throws IllegalStateException if this category is a default category
+     * @throws NullPointerException if {@code newColor} is {@code null}
      */
     public void recolor(final ARGBColor newColor) {
         if (isDefault()) {
@@ -218,8 +202,7 @@ public final class Category extends AbstractCategory {
     /**
      * Archives a custom category.
      *
-     * @throws IllegalStateException
-     *             if this category is a default category
+     * @throws IllegalStateException if this category is a default category
      */
     public void archive() {
         if (isDefault()) {
@@ -231,8 +214,7 @@ public final class Category extends AbstractCategory {
     /**
      * Reactivates a custom category.
      *
-     * @throws IllegalStateException
-     *             if this category is a default category
+     * @throws IllegalStateException if this category is a default category
      */
     public void reactivate() {
         if (isDefault()) {
@@ -241,12 +223,18 @@ public final class Category extends AbstractCategory {
         this.active = true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "Category{name='%s', color='%s', type='%s', origin='%s', active='%s'}"
                 .formatted(getName(), getColorHex().toHexString(), getType(), origin, active);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(final Object object) {
         if (this == object) {
@@ -260,9 +248,11 @@ public final class Category extends AbstractCategory {
                 && origin == other.origin;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), origin, active);
     }
-
 }

@@ -11,22 +11,10 @@ import java.util.Objects;
 import it.unibo.unibodget.persistency.ModelFileManager;
 
 /**
- * Represents a currency loaded from external JSON configuration.
- * 
- * <p>
- * A {@code Currency} instance defines:
- * <ul>
- *     <li>the {@link CurrencyType} category</li>
- *     <li>a graphical symbol</li>
- *     <li>a short identifier</li>
- *     <li>a full descriptive name</li>
- *     <li>a standardized ISO-like currency code</li>
- * </ul>
- * 
- * <p>
- * Currency objects may be created dynamically or loaded from the JSON file
- * {@code /json/currency/Currencies.json}. Loaded currencies are cached using
- * lazy initialization.
+ * A currency loaded from external JSON configuration.
+ *
+ * <p>Unlike the enum-based currencies ({@link FiatCurrency}, {@link CryptoCurrency}),
+ * this class supports dynamic currencies defined at runtime.</p>
  */
 public final class Currency implements CurrencyUnit {
     private static final Map<String, Currency> LOADED = new HashMap<>();
@@ -60,8 +48,13 @@ public final class Currency implements CurrencyUnit {
      * @param fullName  the full descriptive name
      * @param code      the standardized currency code; must not be {@code null}
      */
-    public Currency(final CurrencyType type, final String symbol, final String shortName, 
-                    final String fullName, final String code) {
+    public Currency(
+            final CurrencyType type,
+            final String symbol,
+            final String shortName,
+            final String fullName,
+            final String code
+    ) {
         this.type = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);
         this.shortName = Objects.requireNonNull(shortName);
@@ -69,85 +62,55 @@ public final class Currency implements CurrencyUnit {
         this.code = Objects.requireNonNull(code);
     }
 
-    /**
-     * Returns the currency type.
-     *
-     * @return the {@link CurrencyType} of this currency
-     */
+    /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
         return this.type;
     }
 
-    /**
-     * Returns the graphical symbol of the currency.
-     *
-     * @return the symbol string
-     */
+    /** {@inheritDoc} */
     @Override
     public String getSymbol() {
         return this.symbol;
     }
 
-    /**
-     * Returns the short identifier of the currency.
-     *
-     * @return the short name
-     */
+    /** {@inheritDoc} */
     @Override
     public String getShortName() {
         return this.shortName;
     }
 
-    /**
-     * Returns the full descriptive name of the currency.
-     *
-     * @return the full name
-     */
+    /** {@inheritDoc} */
     @Override
     public String getFullName() {
         return this.fullName;
     }
 
-    /**
-     * Returns the standardized currency code.
-     *
-     * @return the currency code
-     */
+    /** {@inheritDoc} */
     @Override
     public String getCode() {
         return this.code;
     }
 
-    /**
-     * Returns a human-readable representation of the currency.
-     *
-     * @return a formatted string containing short name, symbol, and full name
-     */
+    /** {@inheritDoc} */
+    @Override
+    public int getDisplayDecimals() {
+        return 2;
+    }
+
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return String.format("%s [%s] - %s", this.shortName, this.symbol, this.fullName);
     }
 
-    /**
-     * Computes the hash code using the currency code.
-     *
-     * @return the hash code
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return Objects.hash(this.code);
     }
 
-    /**
-     * Compares this currency with another object for equality.
-     *
-     * <p>
-     * Two currencies are considered equal if they share the same code.
-     *
-     * @param obj the object to compare
-     * @return {@code true} if the other object is a {@code Currency} with the same code
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -172,11 +135,11 @@ public final class Currency implements CurrencyUnit {
     public static void init() {
         initialized = false;
         try {
-            final ModelFileManager<Currency> mgr =
-                new ModelFileManager<>(PATH, RESOURCE, Currency.class);
-            mgr.open();
-            List<Currency> list = mgr.loadList("currencies");
-            mgr.close();
+            List<Currency> list;
+            try (ModelFileManager<Currency> mgr = new ModelFileManager<>(PATH, RESOURCE, Currency.class)) {
+                mgr.open();
+                list = mgr.loadList("currencies");
+            }
             if (list == null || list.isEmpty()) {
                 System.out.println("Currency JSON empty → using mock currencies");
                 list = generateMockCurrencies();
