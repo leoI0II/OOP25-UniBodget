@@ -13,29 +13,29 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import it.unibo.unibodget.model.currency.Asset;
-import it.unibo.unibodget.model.currency.CryptoCurrency;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.StockMarketCurrency;
-import it.unibo.unibodget.model.investment.OrderResult;
-import it.unibo.unibodget.model.investment.OrderType;
-import it.unibo.unibodget.model.investment.Position;
-import it.unibo.unibodget.model.investment.PaymentSource;
-import it.unibo.unibodget.model.investment.ExportResult;
-import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
-import it.unibo.unibodget.model.settings.Settings;
-import it.unibo.unibodget.model.utils.MessageBus;
-import it.unibo.unibodget.model.utils.event.CreateNewInvestmentWalletRequestedEvent;
-import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.CryptoCurrency;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.StockMarketCurrency;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
+import it.unibo.unibodget.model.investment.ExportResult;
+import it.unibo.unibodget.model.investment.OrderResult;
+import it.unibo.unibodget.model.investment.OrderType;
+import it.unibo.unibodget.model.investment.PaymentSource;
+import it.unibo.unibodget.model.investment.Position;
+import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
+import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.CreateNewInvestmentWalletRequestedEvent;
+import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 
@@ -48,7 +48,7 @@ public class DefaultInvestmentController implements InvestmentController {
 
     private final InvestmentAccountService investmentAccountService;
     private final CashAccountService cashAccountService;
-    private final ExchangeRateProvider exchangeRateProvider;
+    private final CurrencyConverter exchangeRateProvider;
     private final Settings settings;
     private final InvestmentsSnapshotService snapshotService;
 
@@ -64,7 +64,7 @@ public class DefaultInvestmentController implements InvestmentController {
     public DefaultInvestmentController(
             final InvestmentAccountService investmentAccountService,
             final CashAccountService cashAccountService,
-            final ExchangeRateProvider exchangeRateProvider,
+            final CurrencyConverter exchangeRateProvider,
             final Settings settings,
             final InvestmentsSnapshotService snapshotService
     ) {
@@ -127,8 +127,8 @@ public class DefaultInvestmentController implements InvestmentController {
     public Asset getAggregatedBalance() {
         return getAllInvestmentAccounts().stream()
                 .map(InvestmentAccount::getBalance)
-                .map(balance -> exchangeRateProvider.convert(balance, settings.getBaseCurrency()))
-                .reduce(Asset.zero(settings.getBaseCurrency()), Asset::add);
+                .map(balance -> exchangeRateProvider.convert(balance.amount(), balance.currency(), settings.getBaseCurrencyUnit()).getAsset())
+                .reduce(Asset.zero(settings.getBaseCurrencyUnit()), Asset::add);
     }
 
     /**
@@ -216,10 +216,11 @@ public class DefaultInvestmentController implements InvestmentController {
      */
     @Override
     public Asset getCurrentMarketPrice(final CurrencyUnit asset) {
-        return exchangeRateProvider.convert(
-                Asset.of(asset, BigDecimal.ONE),
-                getCurrentAccountOrThrow().getBaseCurrency()
-        );
+        // return exchangeRateProvider.convert(
+        //         Asset.of(asset, BigDecimal.ONE),
+        //         getCurrentAccountOrThrow().getBaseCurrency()
+        // );
+        return exchangeRateProvider.convert(BigDecimal.ONE, asset, getCurrentAccountOrThrow().getBaseCurrency()).getAsset();
     }
 
     /**
@@ -269,7 +270,8 @@ public class DefaultInvestmentController implements InvestmentController {
 
         return nativeTotalCost.currency().equals(targetCurrency)
                 ? nativeTotalCost
-                : exchangeRateProvider.convert(nativeTotalCost, targetCurrency);
+                // : exchangeRateProvider.convert(nativeTotalCost, targetCurrency);
+                : exchangeRateProvider.convert(nativeTotalCost.amount(), nativeTotalCost.currency(), targetCurrency).getAsset();
     }
 
     /**
@@ -441,7 +443,8 @@ public class DefaultInvestmentController implements InvestmentController {
                         notes,
                         Asset.of(
                                 stableCoinSrc.stableCoin(),
-                                exchangeRateProvider.convert(cost, stableCoinSrc.stableCoin()).amount()
+                                // exchangeRateProvider.convert(cost, stableCoinSrc.stableCoin()).amount()
+                                exchangeRateProvider.convert(cost.amount(), cost.currency(), stableCoinSrc.stableCoin()).getConvertedAmount()
                         ),
                         fee
                 );
@@ -512,7 +515,8 @@ public class DefaultInvestmentController implements InvestmentController {
                 final var stableCoinBuyTransaction = InvestmentTransaction.of(
                         Asset.of(
                                 stableCoinDst.stableCoin(),
-                                exchangeRateProvider.convert(proceeds, stableCoinDst.stableCoin()).amount()
+                                // exchangeRateProvider.convert(proceeds, stableCoinDst.stableCoin()).amount()
+                                exchangeRateProvider.convert(proceeds.amount(), proceeds.currency(), stableCoinDst.stableCoin()).getConvertedAmount()
                         ), // Stablecoin inflow
                         Category.INVESTMENT_BUY,
                         date,
