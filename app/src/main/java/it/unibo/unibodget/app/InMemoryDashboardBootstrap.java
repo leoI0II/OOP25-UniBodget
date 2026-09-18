@@ -2,6 +2,8 @@ package it.unibo.unibodget.app;
 
 import it.unibo.unibodget.controller.dashboard.impl.DefaultDashboardController;
 import it.unibo.unibodget.model.categories.CategoryCatalog;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
+import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
@@ -37,6 +39,7 @@ final class InMemoryDashboardBootstrap {
     private final CashTransactionFactory cashTransactionFactory;
     private final DefaultDashboardView dashboardView;
     private final DefaultDashboardController dashboardController;
+    private final BasicCurrencyConverter converter;
 
     /**
      * Creates and wires the in-memory dashboard application graph.
@@ -52,6 +55,7 @@ final class InMemoryDashboardBootstrap {
         this.friendLoanSummaryService = new DefaultFriendLoanSummaryService();
         this.walletInsightService = new DefaultWalletInsightService();
         this.cashTransactionFactory = new CashTransactionFactory();
+        this.converter = new BasicCurrencyConverter(new ExchangeRateAPIImpl(), settings.getBaseCurrencyUnit());
 
         this.dashboardFacade = new DefaultDashboardFacade(
                 cashAccountService,
@@ -64,7 +68,7 @@ final class InMemoryDashboardBootstrap {
 
         this.totalCashBalanceService = new DefaultTotalCashBalanceService(
                 cashAccountService,
-                new InMemoryCashBalanceConverter()
+                converter
         );
 
         this.dashboardView = new DefaultDashboardView();

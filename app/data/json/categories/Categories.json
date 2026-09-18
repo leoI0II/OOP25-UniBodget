@@ -10,8 +10,8 @@
     "type" : "EXPENSE",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Rent",
     "colorHex" : {
@@ -23,8 +23,8 @@
     "type" : "EXPENSE",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Savings",
     "colorHex" : {
@@ -36,8 +36,8 @@
     "type" : "INCOME",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Transport",
     "colorHex" : {
@@ -49,8 +49,8 @@
     "type" : "EXPENSE",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Transfer",
     "colorHex" : {
@@ -62,8 +62,8 @@
     "type" : "TRANSFER",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Investment Buy",
     "colorHex" : {
@@ -75,8 +75,8 @@
     "type" : "EXPENSE",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Investment Sell",
     "colorHex" : {
@@ -88,8 +88,8 @@
     "type" : "INCOME",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Friend Loan",
     "colorHex" : {
@@ -101,21 +101,8 @@
     "type" : "FRIEND_LOAN",
     "origin" : "DEFAULT",
     "active" : true,
-    "custom" : false,
-    "default" : true
-  }, {
-    "name" : "Bank Loan",
-    "colorHex" : {
-      "alpha" : 255,
-      "red" : 96,
-      "green" : 125,
-      "blue" : 139
-    },
-    "type" : "BANK_LOAN",
-    "origin" : "DEFAULT",
-    "active" : true,
-    "custom" : false,
-    "default" : true
+    "default" : true,
+    "custom" : false
   }, {
     "name" : "Duplicate",
     "colorHex" : {
@@ -127,7 +114,33 @@
     "type" : "EXPENSE",
     "origin" : "CUSTOM",
     "active" : true,
-    "custom" : true,
-    "default" : false
+    "default" : false,
+    "custom" : true
+  }, {
+    "name" : "affitto",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 255,
+      "green" : 0,
+      "blue" : 0
+    },
+    "type" : "EXPENSE",
+    "origin" : "CUSTOM",
+    "active" : true,
+    "default" : false,
+    "custom" : true
+  }, {
+    "name" : "shopping",
+    "colorHex" : {
+      "alpha" : 255,
+      "red" : 153,
+      "green" : 204,
+      "blue" : 153
+    },
+    "type" : "EXPENSE",
+    "origin" : "CUSTOM",
+    "active" : true,
+    "default" : false,
+    "custom" : true
   } ]
 }

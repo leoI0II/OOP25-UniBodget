@@ -181,7 +181,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
     @Override
     public void onCreateWalletRequested() {
         try {
-            final FiatCurrency currentCurrency = settings.getBaseCurrency() instanceof FiatCurrency fiat
+            final FiatCurrency currentCurrency = settings.getBaseCurrencyUnit() instanceof FiatCurrency fiat
                     ? fiat
                     : FiatCurrency.EUR;
 
@@ -513,12 +513,12 @@ public final class DefaultDashboardController implements DashboardViewActions {
      * @return the corresponding view state
      */
     private DashboardViewState toViewState(final DashboardSnapshot snapshot) {
-        final Asset totalAcrossWallets = totalCashBalanceService.getTotalBalanceIn(settings.getBaseCurrency());
+        final Asset totalAcrossWallets = totalCashBalanceService.getTotalBalanceIn(settings.getBaseCurrencyUnit());
         final String walletCurrencyLabel = snapshot.getWalletCurrency();
 
         final CurrencyUnit selectedWalletCurrency = cashAccountService.getCurrentWallet()
                 .map(CashAccount::getBaseCurrency)
-                .orElse(settings.getBaseCurrency());
+                .orElse(settings.getBaseCurrencyUnit());
 
         final List<SidebarWalletItemViewState> wallets = cashAccountService.getWallets().stream()
                 .map(wallet -> new SidebarWalletItemViewState(
@@ -590,7 +590,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
                         ),
                         new SidebarFooterTotalViewState(
                                 "Total across wallets",
-                                formatSignedAmount(totalAcrossWallets.amount(), settings.getBaseCurrency()),
+                                formatSignedAmount(totalAcrossWallets.amount(), settings.getBaseCurrencyUnit()),
                                 formatCurrencyLabel(settings.getBaseCurrency())
                         )
                 ),
@@ -951,12 +951,12 @@ public final class DefaultDashboardController implements DashboardViewActions {
      */
     private void openBaseCurrencyDialog() {
         try {
-            final FiatCurrency currentCurrency = settings.getBaseCurrency() instanceof FiatCurrency fiat
+            final FiatCurrency currentCurrency = settings.getBaseCurrencyUnit() instanceof FiatCurrency fiat
                     ? fiat
                     : FiatCurrency.EUR;
             final BaseCurrencyDialog dialog = new BaseCurrencyDialog(currentCurrency);
             dialog.showAndWait().ifPresent(selectedCurrency -> {
-                settings.setBaseCurrency(selectedCurrency);
+                settings.setBaseCurrency(selectedCurrency.getShortName());
                 refreshDashboard();
             });
         } catch (Exception exception) {

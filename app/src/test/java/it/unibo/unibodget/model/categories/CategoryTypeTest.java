@@ -1,7 +1,6 @@
 package it.unibo.unibodget.model.categories;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.Test;
 
 class CategoryTypeTest {
@@ -12,7 +11,6 @@ class CategoryTypeTest {
         assertNotNull(CategoryType.EXPENSE);
         assertNotNull(CategoryType.TRANSFER);
         assertNotNull(CategoryType.FRIEND_LOAN);
-        assertNotNull(CategoryType.BANK_LOAN);
     }
 
 }

@@ -6,9 +6,9 @@ import it.unibo.unibodget.model.currency.CurrencyConversionResult;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
- * Defines the operations required to convert monetary amounts between currencies.
- * Implementations are expected to rely on exchange-rate providers to obtain
- * the necessary conversion data.
+ * Defines the operations required to convert monetary amounts between
+ * currencies. Implementations are expected to rely on exchange-rate providers
+ * to obtain the necessary conversion data.
  */
 public interface CurrencyConverter {
 
@@ -19,7 +19,9 @@ public interface CurrencyConverter {
      * @param amount the amount to convert; must be non-negative
      * @param from the source currency
      * @param to the target currency
-     * @return a {@link CurrencyConversionResult} describing the conversion outcome
+     * @return a {@link CurrencyConversionResult} describing the conversion
+     * outcome
      */
     CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to);
+
 }

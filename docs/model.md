@@ -34,7 +34,6 @@ classDiagram
         INCOME
         EXPENSE
         FRIEND_LOAN
-        BANK_LOAN
     }
 
     %% Relations

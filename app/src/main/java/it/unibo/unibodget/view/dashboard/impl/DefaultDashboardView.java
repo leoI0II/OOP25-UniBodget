@@ -897,44 +897,73 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      *            the dashboard state
      */
     private void renderWalletList(final DashboardViewState state) {
-        this.walletListBox.getChildren().clear();
+    this.walletListBox.getChildren().clear();
 
-        for (final SidebarWalletItemViewState wallet : state.sidebar().walletSection().wallets()) {
-            final Button walletButton = new Button();
-            walletButton.setMaxWidth(Double.MAX_VALUE);
-            walletButton.setAlignment(Pos.CENTER_LEFT);
-            walletButton.setWrapText(true);
-            walletButton.setText(wallet.walletName() + "\n" + wallet.balanceText());
-            walletButton.setOnAction(event -> {
-                if (this.actions != null) {
-                    this.actions.onWalletSelected(wallet.walletId());
-                }
-            });
+    for (final SidebarWalletItemViewState wallet
+            : state.sidebar().walletSection().wallets()) {
 
-            if (wallet.selected()) {
-                walletButton.setStyle(
-                        "-fx-background-color: rgba(70, 130, 220, 0.38);"
-                        + "-fx-text-fill: white;"
-                        + "-fx-background-radius: 14;"
-                        + "-fx-padding: 14 16 14 16;"
-                        + "-fx-font-weight: bold;"
-                        + "-fx-border-color: rgba(120,190,255,0.42);"
-                        + "-fx-border-radius: 14;"
-                );
-            } else {
-                walletButton.setStyle(
-                        "-fx-background-color: rgba(255,255,255,0.07);"
-                        + "-fx-text-fill: rgba(255,255,255,0.92);"
-                        + "-fx-background-radius: 14;"
-                        + "-fx-padding: 14 16 14 16;"
-                        + "-fx-border-color: rgba(255,255,255,0.08);"
-                        + "-fx-border-radius: 14;"
-                );
+        final Button walletButton = new Button();
+        walletButton.setMaxWidth(Double.MAX_VALUE);
+        walletButton.setAlignment(Pos.CENTER_LEFT);
+        walletButton.setWrapText(true);
+        walletButton.setText(
+                wallet.walletName()
+                + "\n"
+                + wallet.balanceText()
+        );
+
+        walletButton.setOnAction(event -> {
+            if (this.actions != null && wallet.walletId() != null) {
+                this.actions.onWalletSelected(wallet.walletId());
             }
+        });
 
-            this.walletListBox.getChildren().add(walletButton);
+        // Context menu: Edit / Delete wallet
+        final MenuItem editWalletItem = new MenuItem("Edit wallet");
+        final MenuItem deleteWalletItem = new MenuItem("Delete wallet");
+        final ContextMenu walletContextMenu = new ContextMenu(
+                editWalletItem,
+                deleteWalletItem
+        );
+
+        editWalletItem.setOnAction(e -> {
+            if (this.actions != null && wallet.walletId() != null) {
+                this.actions.onEditWalletRequested(wallet.walletId());
+            }
+        });
+
+        deleteWalletItem.setOnAction(e -> {
+            if (this.actions != null && wallet.walletId() != null) {
+                this.actions.onDeleteWalletRequested(wallet.walletId());
+            }
+        });
+
+        walletButton.setContextMenu(walletContextMenu);
+
+        if (wallet.selected()) {
+            walletButton.setStyle(
+                    "-fx-background-color: rgba(70, 130, 220, 0.38);"
+                    + "-fx-text-fill: white;"
+                    + "-fx-background-radius: 14;"
+                    + "-fx-padding: 14 16 14 16;"
+                    + "-fx-font-weight: bold;"
+                    + "-fx-border-color: rgba(120,190,255,0.42);"
+                    + "-fx-border-radius: 14;"
+            );
+        } else {
+            walletButton.setStyle(
+                    "-fx-background-color: rgba(255,255,255,0.07);"
+                    + "-fx-text-fill: rgba(255,255,255,0.92);"
+                    + "-fx-background-radius: 14;"
+                    + "-fx-padding: 14 16 14 16;"
+                    + "-fx-border-color: rgba(255,255,255,0.08);"
+                    + "-fx-border-radius: 14;"
+            );
         }
+
+        this.walletListBox.getChildren().add(walletButton);
     }
+}
 
     /**
      * Renders the sidebar footer totals.

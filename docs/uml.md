@@ -202,8 +202,7 @@ classDiagram
         INCOME,
         EXPENSE,
         TRANSFER,
-        FRIEND_LOAN,
-        BANK_LOAN;
+        FRIEND_LOAN
     }
 
     class AbstractCategory {

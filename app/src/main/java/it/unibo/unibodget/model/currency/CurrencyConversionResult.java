@@ -51,6 +51,10 @@ public class CurrencyConversionResult {
         return new BigDecimal(String.valueOf(convertedAmount));
     }
 
+    public Asset getAsset(){
+        return new Asset(to, getConvertedAmount());
+    }
+
     /** 
      * Get the applied exchange rate. 
      * 

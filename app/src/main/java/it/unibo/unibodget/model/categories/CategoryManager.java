@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
 
@@ -20,6 +22,7 @@ public final class CategoryManager {
 
     private static final Path PATH = Path.of("data/json/categories/Categories.json");
     private static final String RESOURCE = "/json/categories/Categories.json";
+    private static final Logger LOGGER = Logger.getLogger(CategoryManager.class.getName());
 
     private static List<Category> loaded = new ArrayList<>();
     private static boolean initialized;
@@ -40,11 +43,11 @@ public final class CategoryManager {
     public static void init() {
         initialized = false;
         try {
-            final ModelFileManager<Category> mgr =
-                new ModelFileManager<>(PATH, RESOURCE, Category.class);
-            mgr.open();
-            loaded = new ArrayList<>(mgr.loadList("categories"));
-            mgr.close();
+            try (ModelFileManager<Category> mgr =
+                    new ModelFileManager<>(PATH, RESOURCE, Category.class)) {
+                mgr.open();
+                loaded = new ArrayList<>(mgr.loadList("categories"));
+            }
             if (loaded.isEmpty()) {
                 System.out.println("No categories found in file, loading default categories.");
                 loaded.addAll(Category.getDefaultCategories());
@@ -53,7 +56,7 @@ public final class CategoryManager {
             initialized = true;
 
         } catch (final IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to load categories from file", e);
             System.out.println("Unable to load categories from file, loading default categories.");
             loaded.clear();
             loaded.addAll(Category.getDefaultCategories());
@@ -117,12 +120,11 @@ public final class CategoryManager {
      */
     public static void saveAll() {
         try {
-            final ModelFileManager<Category> mgr =
-                new ModelFileManager<>(PATH, RESOURCE, Category.class);
-
-            mgr.open();
-            mgr.saveList("categories", loaded);
-            mgr.close();
+            try (ModelFileManager<Category> mgr =
+                    new ModelFileManager<>(PATH, RESOURCE, Category.class)) {
+                mgr.open();
+                mgr.saveList("categories", loaded);
+            }
 
         } catch (final IOException e) {
             throw new RuntimeException("Unable to save categories", e);
