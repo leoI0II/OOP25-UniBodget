@@ -9,17 +9,37 @@ plugins {
     java
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
-//    id("org.danilopianini.gradle-java-qa") version "1.155.0"
+    id("org.danilopianini.gradle-java-qa") version "1.155.0"
 }
 
 repositories {
     mavenCentral()
 }
 
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation(libs.junit.jupiter)
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // This dependency is used by the application.
+    implementation(libs.guava)
+}
+
+javafx {
+    version = "21"
+    modules("javafx.controls")
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+application {
+    // Define the main class for the application.
+    mainClass.set("it.unibo.unibodget.unibodget")
 }
 
 javafx {
@@ -34,6 +54,12 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.jooq:jool:0.9.15")
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+
     runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
 
     testImplementation(libs.junit.jupiter)
@@ -44,7 +70,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("it.unibo.unibodget.App")
+    mainClass.set("it.unibo.unibodget.app.UnibodgetApp")
 }
 
 tasks.test {

@@ -1,15 +1,14 @@
 package it.unibo.unibodget.model.utils;
 
-import javafx.scene.paint.Color;
-
 /**
- * An immutable representation of a color in the ARGB (Alpha, Red, Green, Blue) color space.
- * Each component is an 8-bit value ranging from 0 to 255.
+ * An immutable representation of a color in the ARGB (Alpha, Red, Green, Blue)
+ * color space. Each component is an 8-bit value ranging from 0 to 255.
  *
- * @param alpha the alpha (transparency) component, where 0 is fully transparent and 255 is fully opaque
- * @param red   the red color component (0-255)
+ * @param alpha the alpha (transparency) component, where 0 is fully transparent
+ * and 255 is fully opaque
+ * @param red the red color component (0-255)
  * @param green the green color component (0-255)
- * @param blue  the blue color component (0-255)
+ * @param blue the blue color component (0-255)
  */
 public record ARGBColor(int alpha, int red, int green, int blue) {
 
@@ -37,9 +36,11 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     private static final int HEX_RADIX = 16;
 
     /**
-     * Compact constructor that validates all color components upon instantiation.
+     * Compact constructor that validates all color components upon
+     * instantiation.
      *
-     * @throws IllegalArgumentException if any of the components are outside the valid 0-255 range
+     * @throws IllegalArgumentException if any of the components are outside the
+     * valid 0-255 range
      */
     public ARGBColor {
         checkValue(alpha, "Alpha");
@@ -49,12 +50,12 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     }
 
     /**
-     * Creates a fully opaque color using the specified red, green, and blue components.
-     * The alpha component is automatically set to 255.
+     * Creates a fully opaque color using the specified red, green, and blue
+     * components. The alpha component is automatically set to 255.
      *
-     * @param red   the red color component (0-255)
+     * @param red the red color component (0-255)
      * @param green the green color component (0-255)
-     * @param blue  the blue color component (0-255)
+     * @param blue the blue color component (0-255)
      */
     public ARGBColor(final int red, final int green, final int blue) {
         this(MAX, red, green, blue);
@@ -63,7 +64,8 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     /**
      * Creates a color from a 32-bit packed integer in ARGB format.
      *
-     * @param argb the packed integer containing alpha in the highest byte, followed by red, green, and blue
+     * @param argb the packed integer containing alpha in the highest byte,
+     * followed by red, green, and blue
      */
     public ARGBColor(final int argb) {
         this(
@@ -74,13 +76,15 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     }
 
     /**
-     * Creates a color by parsing a hexadecimal string.
-     * The string can be in either 6-character ({@code #RRGGBB} or {@code RRGGBB})
-     * or 8-character ({@code #AARRGGBB} or {@code AARRGGBB}) format.
+     * Creates a color by parsing a hexadecimal string. The string can be in
+     * either 6-character ({@code #RRGGBB} or {@code RRGGBB}) or 8-character
+     * ({@code #AARRGGBB} or {@code AARRGGBB}) format.
      *
      * @param hex the hexadecimal string representing the color
-     * @throws IllegalArgumentException if the string format or length is invalid
-     * @throws NumberFormatException    if the string contains non-hexadecimal characters
+     * @throws IllegalArgumentException if the string format or length is
+     * invalid
+     * @throws NumberFormatException if the string contains non-hexadecimal
+     * characters
      */
     public ARGBColor(final String hex) {
         this(parseHexToInt(hex));
@@ -90,7 +94,7 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
      * Validates a single color component.
      *
      * @param value the numeric value of the component
-     * @param name  the name of the component (used for the exception message)
+     * @param name the name of the component (used for the exception message)
      * @throws IllegalArgumentException if the value is not between 0 and 255
      */
     private static void checkValue(final int value, final String name) {
@@ -100,12 +104,13 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     }
 
     /**
-     * Parses a hexadecimal color string into a 32-bit integer.
-     * If the string lacks an alpha channel (6 characters), it defaults to fully opaque (FF).
+     * Parses a hexadecimal color string into a 32-bit integer. If the string
+     * lacks an alpha channel (6 characters), it defaults to fully opaque (FF).
      *
      * @param hex the raw hexadecimal string
      * @return the parsed 32-bit ARGB integer
-     * @throws IllegalArgumentException if the string is not exactly 6 or 8 characters long (excluding the '#')
+     * @throws IllegalArgumentException if the string is not exactly 6 or 8
+     * characters long (excluding the '#')
      */
     private static int parseHexToInt(final String hex) {
         String clean = hex.replaceFirst("^#", "");
@@ -123,25 +128,14 @@ public record ARGBColor(int alpha, int red, int green, int blue) {
     }
 
     /**
-     * Returns the string representation of this color in an 8-character hexadecimal format.
+     * Returns the string representation of this color in an 8-character
+     * hexadecimal format.
      *
-     * @return a formatted string in the form of {@code #AARRGGBB} (e.g., {@code #FFFF0000} for pure opaque red)
+     * @return a formatted string in the form of {@code #AARRGGBB} (e.g.,
+     * {@code #FFFF0000} for pure opaque red)
      */
     public String toHexString() {
         return String.format("#%02X%02X%02X%02X", alpha, red, green, blue);
     }
 
-    /**
-     * Converts this ARGBColor into a JavaFX Color instance.
-     *
-     * @return a JavaFX Color with the same ARGB components
-     */
-    public Color toFXColor() {
-        return Color.rgb(
-            this.red,
-            this.green,
-            this.blue,
-            this.alpha / (float) MAX
-        );
-    }
 }

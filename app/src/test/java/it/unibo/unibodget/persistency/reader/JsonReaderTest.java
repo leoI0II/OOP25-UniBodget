@@ -14,13 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import it.unibo.unibodget.persistency.reader.impl.BasicReader;
 import it.unibo.unibodget.persistency.reader.impl.JsonReader;
 import it.unibo.unibodget.persistency.util.TestCleanupUtils;
 
 /**
  * Unit test class for {@link JsonReader}.
  *
+ * <p>
  * This test suite verifies that:
  * - JsonReader correctly reads the content of a valid JSON file
  * - JsonReader throws exceptions when the file does not exist
@@ -47,8 +47,8 @@ class JsonReaderTest {
      */
     @Test
     void testReadFileReturnsCorrectContent() throws IOException {
-        JsonReader reader = new JsonReader(tempJsonFile.toString());
-        String content = reader.readFile();
+        final JsonReader reader = new JsonReader(tempJsonFile.toString());
+        final String content = reader.readFile();
 
         assertNotNull(content);
         assertTrue(content.contains("Prova"));
@@ -61,7 +61,7 @@ class JsonReaderTest {
      */
     @Test
     void testConstructorThrowsIfFileDoesNotExist() {
-        String invalidPath = "non_existing_file.json";
+        final String invalidPath = "non_existing_file.json";
 
         assertThrows(IllegalArgumentException.class, () -> new JsonReader(invalidPath));
     }
@@ -81,51 +81,25 @@ class JsonReaderTest {
      */
     @Test
     void testConstructorThrowsIfPathIsDirectory() throws IOException {
-        Path directory = Files.createTempDirectory("json_reader_test_dir");
+        final Path directory = Files.createTempDirectory("json_reader_test_dir");
 
         assertThrows(IllegalArgumentException.class, () -> new JsonReader(directory.toString()));
     }
 
     /**
-     * Verifies that JsonReader throws an IllegalArgumentException
-     * when the file exists but is not readable
-     * 
-     * This test is implemented in a portable way: instead of manipulating
-     * filesystem permissions (which is unreliable on Windows), override
-     * the {@code validatePath()} method to simulate a validation failure
-     */
-    /*
-    @Test
-    void testConstructorThrowsIfFileNotReadable_Portable() {
-        class UnreadableJsonReader extends JsonReader {
-            UnreadableJsonReader(String path) {
-            super(path);
-        }
-
-            @Override
-            protected void validatePath() {
-                throw new IllegalArgumentException("File not readable");
-            }
-        }
-
-        assertThrows(IllegalArgumentException.class,
-            () -> new UnreadableJsonReader(tempJsonFile.toString())
-        );
-    }
-    */
-
-    /**
      * Verifies that JsonReader throws an IllegalArgumentException on UNIX systems
-    * when the file exists but is not readable.
-    *
-    * On POSIX-compliant systems (Linux, macOS), file permissions can be
-    * reliably manipulated using {@code setPosixFilePermissions}.
-    * 
-    * This test is enabled only on UNIX systems.
-    */
+     * when the file exists but is not readable.
+     *
+     * <p>
+     * On POSIX-compliant systems (Linux, macOS), file permissions can be
+     * reliably manipulated using {@code setPosixFilePermissions}.
+     * 
+     * <p>
+     * This test is enabled only on UNIX systems.
+     */
     @Test
     @EnabledOnOs({OS.LINUX, OS.MAC})
-    void testConstructorThrowsIfFileNotReadable_Unix() throws IOException {
+    void testConstructorThrowsIfFileNotReadableUnix() throws IOException {
         Files.setPosixFilePermissions(tempJsonFile,
             PosixFilePermissions.fromString("---------"));
 
@@ -138,19 +112,21 @@ class JsonReaderTest {
      * Verifies that JsonReader throws an IllegalArgumentException on Windows
      * when the file exists but is not readable.
      *
+     * <p>
      * Windows does not reliably support POSIX-style permission changes,
      * meaning that {@code setReadable(false)} or POSIX permission manipulation
      * may silently fail. To ensure consistent behavior, this test simulates
      * a validation failure by overriding {@code validatePath()} in a local subclass
      *
+     * <p>
      * This avoids false negatives caused by OS-specific permission handling.
      */
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testConstructorThrowsIfFileNotReadable_Windows() {
+    void testConstructorThrowsIfFileNotReadableWindows() {
 
         class UnreadableJsonReader extends JsonReader {
-            UnreadableJsonReader(String path) {
+            UnreadableJsonReader(final String path) {
                 super(path);
             }
 
@@ -168,6 +144,7 @@ class JsonReaderTest {
     /**
      * Cleans up all temporary files created during the test execution.
      *
+     * <p>
      * This method is executed after each test and ensures that no temporary
      * resources remain on the filesystem. It uses {@link TestCleanupUtils}
      * to safely delete files or directories

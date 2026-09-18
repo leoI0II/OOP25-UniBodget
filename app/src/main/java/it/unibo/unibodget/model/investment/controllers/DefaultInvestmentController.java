@@ -595,7 +595,8 @@ public class DefaultInvestmentController implements InvestmentController {
             pr.printRecord("Total cost basis", account.getTotalCostBasis());
 
             pr.println();
-            pr.printRecord("Asset", "Quantity", "Avg Cost", "Market Value", "Unrealized P/L", "Unrealized P/L %");
+            pr.printRecord(
+                "Asset", "Quantity", "Avg Cost", "Market Value", "Unrealized P/L", "Unrealized P/L %");
             for (final var position : account.getPositions()) {
                 pr.printRecord(
                         position.asset(),

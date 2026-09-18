@@ -1,6 +1,6 @@
 package it.unibo.unibodget.persistency.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -15,12 +15,14 @@ import it.unibo.unibodget.persistency.util.impl.LoggerImpl;
 /**
  * Unit test class for {@link LoggerImpl}.
  * 
+ * <p>
  * This test suite verifies that:
  * - informational messages are correctly printed to System.out
  * - warning messages are correctly printed to System.out
  * - error messages are printed to System.out
  * - throwable stack traces are printed to System.err
  * 
+ * <p>
  * The tests temporarily redirect System.out and System.err to
  * ByteArrayOutputStreams to capture and inspect the logger output.
  */
@@ -65,7 +67,7 @@ class LoggerImplTest {
     void testInfoLogging() {
         logger.info("Hello info");
 
-        String output = outputStream.toString();
+        final String output = outputStream.toString();
         assertTrue(output.contains("[INFO] Hello info"));
     }
 
@@ -77,7 +79,7 @@ class LoggerImplTest {
     void testWarnLogging() {
         logger.warn("Warning message");
 
-        String output = outputStream.toString();
+        final String output = outputStream.toString();
         assertTrue(output.contains("[WARN] Warning message"));
     }
 
@@ -89,23 +91,25 @@ class LoggerImplTest {
     void testErrorLoggingWithoutCause() {
         logger.error("Error occurred", null);
 
-        String output = outputStream.toString();
+        final String output = outputStream.toString();
         assertTrue(output.contains("[ERROR] Error occurred"));
     }
 
     /**
-     * Verifies that error messages with a throwable cause:
+     * Verifies that error messages with a throwable cause.
+     * 
+     * <p>
      * - print the error message to System.out
      * - print the stack trace to System.err
      */
     @Test
     void testErrorLoggingWithCause() {
-        Exception ex = new IllegalArgumentException("Invalid input");
+        final Exception ex = new IllegalArgumentException("Invalid input");
 
         logger.error("Something failed", ex);
 
-        String out = outputStream.toString();
-        String err = errorStream.toString();
+        final String out = outputStream.toString();
+        final String err = errorStream.toString();
 
         assertTrue(out.contains("[ERROR] Something failed"));
         assertTrue(err.contains("java.lang.IllegalArgumentException"));

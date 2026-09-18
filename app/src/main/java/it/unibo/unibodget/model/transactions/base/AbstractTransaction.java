@@ -2,13 +2,17 @@ package it.unibo.unibodget.model.transactions.base;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
-/**
- * Represents a basic financial transaction recorded by the system.
- *
+/*
  * <p>Each transaction contains:
  * <ul>
  *   <li>an {@link Asset} describing the monetary value and currency</li>
@@ -20,8 +24,15 @@ import it.unibo.unibodget.model.currency.Asset;
  *
  * <p>This class is immutable: all fields are {@code final} and set at construction time.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
+    @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
+})
 public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
 
+
+    private final UUID id;
     private final Asset asset;
     private final Category category;
     private final LocalDate date;
@@ -43,12 +54,14 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      * @throws NullPointerException if {@code asset}, {@code category}, or {@code date} is {@code null}
      */
     public AbstractTransaction(
-            final Asset asset,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes
+        final UUID id,
+        final Asset asset,
+        final Category category,
+        final LocalDate date,
+        final String description,
+        final String notes
     ) {
+        this.id = Objects.requireNonNull(id);
         this.asset = Objects.requireNonNull(asset);
         this.category = Objects.requireNonNull(category);
         this.date = Objects.requireNonNull(date);
@@ -57,12 +70,40 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
     }
 
     /**
+     * Creates a transaction while allowing Jackson to reconstruct it from JSON.
+     *
+     * @param asset the monetary asset associated with the transaction
+     * @param category the transaction category
+     * @param date the transaction date
+     * @param description an optional description
+     * @param notes optional notes
+     */
+    @JsonCreator
+    public AbstractTransaction(
+            @JsonProperty("asset") final Asset asset,
+            @JsonProperty("category") final Category category,
+            @JsonProperty("date") final LocalDate date,
+            @JsonProperty("description") final String description,
+            @JsonProperty("notes") final String notes) {
+        this(UUID.randomUUID(), asset, category, date, description, notes);
+    }
+
+    /**
+     * Returns the unique identifier of this transaction.
+     *
+     * @return the transaction identifier, never {@code null}
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
      * Returns the monetary asset associated with this transaction.
      *
-     * @return the {@link Asset} representing amount, currency and sign
+     * @return the {@link Asset} representing amount, currency, and sign
      */
-    public Asset getAsset() { 
-        return asset; 
+    public Asset getAsset() {
+        return asset;
     }
 
     /**
@@ -70,8 +111,8 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      *
      * @return the {@link Category} describing the transaction type
      */
-    public Category getCategory() { 
-        return category; 
+    public Category getCategory() {
+        return category;
     }
 
     /**
@@ -79,8 +120,8 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      *
      * @return the transaction date as a {@link LocalDate}
      */
-    public LocalDate getDate() { 
-        return date; 
+    public LocalDate getDate() {
+        return date;
     }
 
     /**
@@ -88,8 +129,8 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      *
      * @return the description, or {@code null} if not provided
      */
-    public String getDescription() { 
-        return description; 
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -97,8 +138,8 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      *
      * @return the notes, or {@code null} if not provided
      */
-    public String getNotes() { 
-        return notes; 
+    public String getNotes() {
+        return notes;
     }
 
     /** {@inheritDoc} */
@@ -111,7 +152,8 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
             return false;
         }
         final AbstractTransaction other = (AbstractTransaction) o;
-        return Objects.equals(asset, other.asset)
+        return Objects.equals(id, other.id)
+            && Objects.equals(asset, other.asset)
             && Objects.equals(category, other.category)
             && Objects.equals(date, other.date)
             && Objects.equals(description, other.description)
@@ -121,13 +163,14 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
-        return Objects.hash(asset, category, date, description, notes);
+        return Objects.hash(id, asset, category, date, description, notes);
     }
 
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "Transaction{asset=" + asset
+        return "Transaction{id=" + id
+                + ", asset=" + asset
                 + ", category=" + category
                 + ", date=" + date
                 + ", description='" + description

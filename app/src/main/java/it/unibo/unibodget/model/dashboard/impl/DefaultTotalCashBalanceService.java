@@ -3,21 +3,24 @@ package it.unibo.unibodget.model.dashboard.impl;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.CurrencyConversionResult;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Computes the total balance across all cash wallets in a desired currency.
  *
- * <p>Each cash wallet balance is converted into the requested target currency
- * and then summed to produce a single aggregated total.</p>
+ * <p>
+ * Each cash wallet balance is converted into the requested target currency
+ * and then summed to produce a single aggregated total.
+ * </p>
  */
 public final class DefaultTotalCashBalanceService {
 
     private final CashAccountService walletService;
-    private final CashBalanceConverter balanceConverter;
-
+    private final CurrencyConverter converter;
     /**
      * Creates the service with the required dependencies.
      *
@@ -28,9 +31,9 @@ public final class DefaultTotalCashBalanceService {
      */
     public DefaultTotalCashBalanceService(
             final CashAccountService walletService,
-            final CashBalanceConverter balanceConverter) {
+            final CurrencyConverter converter) {
         this.walletService = Objects.requireNonNull(walletService);
-        this.balanceConverter = Objects.requireNonNull(balanceConverter);
+        this.converter = Objects.requireNonNull(converter);
     }
 
     /**
@@ -53,6 +56,8 @@ public final class DefaultTotalCashBalanceService {
         if (balance.currency().equals(targetCurrency)) {
             return balance;
         }
-        return balanceConverter.convert(balance, targetCurrency);
+        final CurrencyConversionResult result = converter.convert(balance.amount(), balance.currency(), targetCurrency);
+        return result.getAsset();
+        //return balanceConverter.convert(balance, targetCurrency);
     }
 }

@@ -3,6 +3,10 @@ package it.unibo.unibodget.model.currency;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * Common contract for all currency types in the system.
@@ -99,10 +103,30 @@ public interface CurrencyUnit {
         Collections.addAll(list, FiatCurrency.values());
         Collections.addAll(list, CryptoCurrency.values());
         Collections.addAll(list, StockMarketCurrency.values());
+        list.addAll(Currency.all());
         return list;
     }
 
     /**
+     * Returns a list containing the basic currency units available for conversion.
+     * This excludes stock market currencies.
+     *
+     * @return a list of basic {@link CurrencyUnit} instances
+     */
+    static List<CurrencyUnit> basicCurrencies() {
+        final List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
+        final ObservableList<CurrencyUnit> filteredCurrencies = FXCollections.observableArrayList(
+            list.stream()
+            .filter(c -> c.getType() != CurrencyType.STOCK)
+            .filter(c -> c.getType() != CurrencyType.CUSTOM)
+            .filter(c -> c.getType() != CurrencyType.CRYPTO)
+            .collect(Collectors.toList())
+        );
+        System.out.println("Filtered Currencies: " + filteredCurrencies);
+        return filteredCurrencies;
+    }
+
+    /*
      * Returns the number of decimal places to use when displaying amounts in this currency.
      * For example: {@code 2} for EUR/USD, {@code 8} for BTC, {@code 4} for most altcoins.
      *

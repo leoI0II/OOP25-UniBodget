@@ -11,6 +11,7 @@ public interface BudgetMonitor {
 
     /**
      * Computes the budget status associated with the provided current value.
+     * 
      * @param currentValue the current aggregated amount considered by the monitor
      * @param settings the user-defined budget settings used during the evaluation
      * @return the resulting budget status

@@ -1,10 +1,16 @@
 package it.unibo.unibodget.model.currency;
 
 /**
- * Supported cryptocurrencies.
- *
- * <p>Each constant defines: symbol, short name, full name, currency code,
- * CoinGecko API id, and whether it is a stablecoin.</p>
+ * Enum to represent cryptocurrencies.
+ * 
+ * <p>
+ * Each enum constant defines:
+ * - type (fixed to "Crypto")
+ * - symbol
+ * - short ISO name
+ * - full name
+ * - ISO code
+ * - API identifier for price fetching
  */
 public enum CryptoCurrency implements CurrencyUnit {
 

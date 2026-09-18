@@ -6,10 +6,14 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
- * A concrete {@link DefaultWalletService} specialized for {@link CashAccount} wallets.
+ * Concrete {@link DefaultWalletService} specialization for {@link CashAccount}
+ * wallets.
  *
- * <p>Locks the generic type parameters to {@code <CashTransaction, CashAccount>},
- * so callers do not need to specify them explicitly.
+ * <p>
+ * This class locks the generic type parameters to
+ * {@code <CashTransaction, CashAccount>} so callers can work with a dedicated
+ * service type without repeatedly specifying generic arguments.
+ * </p>
  */
 public final class CashAccountService extends DefaultWalletService<CashTransaction, CashAccount> {
 
@@ -22,12 +26,16 @@ public final class CashAccountService extends DefaultWalletService<CashTransacti
 
     /**
      * Creates a cash account service initialized with the given wallets.
-     * The first wallet in the list becomes the current wallet.
      *
-     * @param initialWallets the initial {@link CashAccount} instances
+     * <p>
+     * The first wallet in the list becomes the current wallet according to the
+     * behavior defined by the superclass.
+     * </p>
+     *
+     * @param initialWallets
+     *            the initial {@link CashAccount} instances
      */
     public CashAccountService(final CashAccount... initialWallets) {
         super(List.of(initialWallets));
     }
-
 }

@@ -12,8 +12,9 @@ import it.unibo.unibodget.model.wallet.AbstractWallet;
  * Service responsible for managing a collection of wallets and the transaction
  * history of the currently selected wallet.
  *
- * <p>The service exposes the available wallets, the currently selected wallet,
- * and the operations used to inspect and update the history of that wallet.
+ * <p>
+ * The service exposes the available wallets, the currently selected wallet, and
+ * the operations used to inspect and update the history of that wallet.
  * Registered {@link WalletObserver} instances are notified whenever the wallet
  * state changes.</p>
  *
@@ -39,16 +40,14 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
     /**
      * Adds a wallet to the collection.
      *
-     * @param wallet
-     *            the wallet to add
+     * @param wallet the wallet to add
      */
     void addWallet(W wallet);
 
     /**
      * Removes a wallet by identifier.
      *
-     * @param walletId
-     *            the identifier of the wallet to remove
+     * @param walletId the identifier of the wallet to remove
      * @return {@code true} if the wallet was removed, {@code false} otherwise
      */
     boolean removeWallet(UUID walletId);
@@ -56,8 +55,7 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
     /**
      * Selects the wallet to be used as current dashboard context.
      *
-     * @param walletId
-     *            the identifier of the wallet to select
+     * @param walletId the identifier of the wallet to select
      * @return {@code true} if the wallet was selected, {@code false} otherwise
      */
     boolean selectWallet(UUID walletId);
@@ -72,27 +70,24 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
     /**
      * Adds a transaction to the current wallet history.
      *
-     * @param transaction
-     *            the transaction to add
+     * @param transaction the transaction to add
      */
     void addTransaction(T transaction);
 
     /**
      * Removes a transaction from the current wallet history.
      *
-     * @param transaction
-     *            the transaction to remove
-     * @return {@code true} if the transaction was removed, {@code false} otherwise
+     * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was removed, {@code false}
+     * otherwise
      */
     boolean removeTransaction(T transaction);
 
     /**
      * Replaces a transaction in the current wallet history.
      *
-     * @param oldTransaction
-     *            the transaction to replace
-     * @param newTransaction
-     *            the replacement transaction
+     * @param oldTransaction the transaction to replace
+     * @param newTransaction the replacement transaction
      */
     void replaceTransaction(T oldTransaction, T newTransaction);
 
@@ -104,16 +99,14 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
     /**
      * Registers an observer interested in wallet changes.
      *
-     * @param observer
-     *            the observer to register
+     * @param observer the observer to register
      */
     void addObserver(WalletObserver observer);
 
     /**
      * Removes a previously registered observer.
      *
-     * @param observer
-     *            the observer to remove
+     * @param observer the observer to remove
      */
     void removeObserver(WalletObserver observer);
 

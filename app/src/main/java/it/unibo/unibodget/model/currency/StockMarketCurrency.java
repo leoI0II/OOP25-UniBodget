@@ -9,13 +9,13 @@ package it.unibo.unibodget.model.currency;
 @SuppressWarnings("checkstyle:MultipleStringLiterals")
 public enum StockMarketCurrency implements CurrencyUnit {
 
-    AAPL("$", "AAPL", "Apple Inc.", "AAPL"),
-    MSFT("$", "MSFT", "Microsoft Corp.", "MSFT"),
-    NVDA("$", "NVDA", "NVIDIA Corp.", "NVDA"),
-    AMZN("$", "AMZN", "Amazon.com Inc.", "AMZN"),
-    GOOGL("$", "GOOGL", "Alphabet Inc.", "GOOGL"),
-    META("$", "META", "Meta Platforms Inc.", "META"),
-    TSLA("$", "TSLA", "Tesla Inc.", "TSLA");
+    AAPL(CurrencySymbols.DOLLAR, "AAPL", "Apple Inc.", "AAPL"),
+    MSFT(CurrencySymbols.DOLLAR, "MSFT", "Microsoft Corp.", "MSFT"),
+    NVDA(CurrencySymbols.DOLLAR, "NVDA", "NVIDIA Corp.", "NVDA"),
+    AMZN(CurrencySymbols.DOLLAR, "AMZN", "Amazon.com Inc.", "AMZN"),
+    GOOGL(CurrencySymbols.DOLLAR, "GOOGL", "Alphabet Inc.", "GOOGL"),
+    META(CurrencySymbols.DOLLAR, "META", "Meta Platforms Inc.", "META"),
+    TSLA(CurrencySymbols.DOLLAR, "TSLA", "Tesla Inc.", "TSLA");
 
     private final CurrencyType type = CurrencyType.STOCK;
     private final String symbol;

@@ -3,15 +3,20 @@ package it.unibo.unibodget.persistency.parser.impl;
 import it.unibo.unibodget.persistency.parser.api.DataSerializer;
 import it.unibo.unibodget.persistency.parser.api.DataSerializerException;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JSON serializer implementation used by UniBodget to convert domain model
  * objects into JSON strings without relying on external libraries.
  *
+ * <p>
  * This serializer supports:
  * - Primitive types and strings
  * - Enums
@@ -21,26 +26,38 @@ import java.util.*;
  * - POJOs with inheritance
  * - Lists and maps
  *
+ * <p>
  * To prevent infinite recursion, circular references are detected using an
  * {@link IdentityHashMap}. When a cycle is found, the value is replaced with
  * the literal {@code "<circular>"}.
  *
+ * <p>
  * Static fields are ignored during serialization, ensuring that constant
  * instances (e.g., predefined categories) do not pollute the JSON output.
  *
  * @param <T> the type of the root object to serialize
  */
 public final class JsonDataSerializer<T> implements DataSerializer<T> {
+    private final String quote = "\"";
+    private final String quote2 = "\":";
+
+    /**
+     * Creates a new serializer instance.
+     */
+    public JsonDataSerializer() {
+        // No initialization needed
+    }
 
     /**
      * Creates a new serializer instance.
      *
+     * <p>
      * The {@code rootType} parameter is kept for API compatibility but is
      * not required by this implementation.
      *
      * @param rootType the type of objects this serializer handles
      */
-    public JsonDataSerializer(Class<T> rootType) {
+    public JsonDataSerializer(final Class<T> rootType) {
         // No initialization needed for this implementation
     }
 
@@ -52,10 +69,10 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @throws DataSerializerException if serialization fails
      */
     @Override
-    public String serialize(T value) throws DataSerializerException {
+    public String serialize(final T value) throws DataSerializerException {
         try {
             return serializeValue(value, new IdentityHashMap<>());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DataSerializerException("Serialization failed", e);
         }
     }
@@ -67,18 +84,37 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited objects already processed (for circular reference detection)
      * @return the JSON representation of the value
      */
-    private String serializeValue(Object value, Map<Object, Boolean> visited) throws Exception {
-        if (value == null) return "null";
-        if (value instanceof String s) return "\"" + escape(s) + "\"";
-        if (value instanceof Number n) return n.toString();
-        if (value instanceof Boolean b) return b.toString();
-        if (value instanceof Enum<?> e) return "\"" + e.name() + "\"";
-        if (value instanceof LocalDate d) return "\"" + d.toString() + "\"";
-        if (value instanceof BigDecimal bd) return bd.toPlainString();
-        if (value instanceof List<?> list) return serializeList(list, visited);
-        if (value.getClass().isRecord()) return serializeRecord(value, visited);
-        if (value instanceof Map<?, ?> map) return serializeMap(map, visited);
-
+    private String serializeValue(final Object value, final Map<Object, Boolean> visited) throws Exception {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String s) {
+            return quote + escape(s) + quote;
+        }
+        if (value instanceof Number n) {
+            return n.toString();
+        }
+        if (value instanceof Boolean b) {
+            return b.toString();
+        }
+        if (value instanceof Enum<?> e) {
+            return quote + e.name() + quote;
+        }
+        if (value instanceof LocalDate d) {
+            return quote + d.toString() + quote;
+        }
+        if (value instanceof BigDecimal bd) {
+            return bd.toPlainString();
+        }
+        if (value instanceof List<?> list) {
+            return serializeList(list, visited);
+        }
+        if (value.getClass().isRecord()) {
+            return serializeRecord(value, visited);
+        }
+        if (value instanceof Map<?, ?> map) {
+            return serializeMap(map, visited);
+        }
         return serializeObject(value, visited);
     }
 
@@ -89,12 +125,14 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited circular reference tracker
      * @return JSON array string
      */
-    private String serializeList(List<?> list, Map<Object, Boolean> visited) throws Exception {
-        StringBuilder sb = new StringBuilder("[");
+    private String serializeList(final List<?> list, final Map<Object, Boolean> visited) throws Exception {
+        final StringBuilder sb = new StringBuilder("[");
         boolean first = true;
 
-        for (Object elem : list) {
-            if (!first) sb.append(",");
+        for (final Object elem : list) {
+            if (!first) {
+                sb.append(",");
+            }
             sb.append(serializeValue(elem, visited));
             first = false;
         }
@@ -110,14 +148,19 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited circular reference tracker
      * @return JSON object string
      */
-    private String serializeMap(Map<?, ?> map, Map<Object, Boolean> visited) throws Exception {
-        StringBuilder sb = new StringBuilder("{");
+    private String serializeMap(final Map<?, ?> map, final Map<Object, Boolean> visited) 
+        throws Exception {
+        final StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
-        for (var entry : map.entrySet()) {
-            if (!first) sb.append(",");
-            sb.append("\"").append(escape(entry.getKey().toString())).append("\":");
-            sb.append(serializeValue(entry.getValue(), visited));
+        for (final var entry : map.entrySet()) {
+            if (!first) {
+                sb.append(",");
+            }
+            sb.append(quote)
+                .append(escape(entry.getKey().toString()))
+                .append(quote2)
+                .append(serializeValue(entry.getValue(), visited));
             first = false;
         }
 
@@ -132,18 +175,22 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited circular reference tracker
      * @return JSON object string
      */
-    private String serializeRecord(Object record, Map<Object, Boolean> visited) throws Exception {
-        if (visited.containsKey(record)) return "\"<circular>\"";
+    private String serializeRecord(final Object record, final Map<Object, Boolean> visited) throws Exception {
+        final StringBuilder sb = new StringBuilder("{");
+        if (visited.containsKey(record)) {
+            return "\"<circular>\"";
+        }
         visited.put(record, true);
 
-        StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
-        for (RecordComponent comp : record.getClass().getRecordComponents()) {
-            if (!first) sb.append(",");
-            sb.append("\"").append(comp.getName()).append("\":");
+        for (final RecordComponent comp : record.getClass().getRecordComponents()) {
+            if (!first) {
+                sb.append(",");
+            }
+            sb.append(quote).append(comp.getName()).append(quote2);
 
-            Object fieldValue = comp.getAccessor().invoke(record);
+            final Object fieldValue = comp.getAccessor().invoke(record);
             sb.append(serializeValue(fieldValue, visited));
 
             first = false;
@@ -161,17 +208,19 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param visited circular reference tracker
      * @return JSON object string
      */
-    private String serializeObject(Object obj, Map<Object, Boolean> visited) throws Exception {
-        if (visited.containsKey(obj)) return "\"<circular>\"";
+    private String serializeObject(final Object obj, final Map<Object, Boolean> visited) throws Exception {
+        final StringBuilder sb = new StringBuilder("{");
+        if (visited.containsKey(obj)) {
+            return "\"<circular>\"";
+        }
         visited.put(obj, true);
 
-        StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
         Class<?> cls = obj.getClass();
         while (cls != null && cls != Object.class) {
 
-            for (Field field : cls.getDeclaredFields()) {
+            for (final Field field : cls.getDeclaredFields()) {
 
                 // Skip static fields (e.g., predefined Category constants)
                 if (Modifier.isStatic(field.getModifiers())) {
@@ -180,10 +229,12 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
 
                 field.setAccessible(true);
 
-                if (!first) sb.append(",");
-                sb.append("\"").append(field.getName()).append("\":");
+                if (!first) {
+                    sb.append(",");
+                }
+                sb.append("\"").append(field.getName()).append(quote2);
 
-                Object fieldValue = field.get(obj);
+                final Object fieldValue = field.get(obj);
                 sb.append(serializeValue(fieldValue, visited));
 
                 first = false;
@@ -202,7 +253,7 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
      * @param s the string to escape
      * @return the escaped string
      */
-    private String escape(String s) {
-        return s.replace("\"", "\\\"");
+    private String escape(final String s) {
+        return s.replace(quote, "\\\"");
     }
 }

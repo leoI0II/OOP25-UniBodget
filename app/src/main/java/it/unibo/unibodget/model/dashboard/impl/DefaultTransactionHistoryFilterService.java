@@ -9,8 +9,10 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 /**
  * Default implementation of {@link TransactionHistoryFilterService}.
  *
- * <p>This implementation applies all active filters cumulatively and then
- * sorts the resulting list according to the specified sort order.</p>
+ * <p>
+ * This implementation applies all active filters cumulatively and then
+ * sorts the resulting list according to the specified sort order.
+ * </p>
  */
 public final class DefaultTransactionHistoryFilterService {
 
@@ -21,7 +23,11 @@ public final class DefaultTransactionHistoryFilterService {
     }
 
     /**
-     * {@inheritDoc}
+     * Filters and sorts the given transactions according to the provided criteria.
+     *
+     * @param transactions the transactions to process
+     * @param criteria the active filter criteria
+     * @return the filtered and sorted transactions
      */
     public List<CashTransaction> filter(
             final List<CashTransaction> transactions,
@@ -32,7 +38,8 @@ public final class DefaultTransactionHistoryFilterService {
         return transactions.stream()
                 .filter(transaction -> matchesCategoryName(transaction, criteria))
                 .filter(transaction -> matchesCategoryType(transaction, criteria))
-                .filter(transaction -> matchesDateRange(transaction, criteria))
+                .filter(transaction -> matchesFromDate(transaction, criteria))
+                .filter(transaction -> matchesToDate(transaction, criteria))
                 .filter(transaction -> matchesKeyword(transaction, criteria))
                 .sorted(comparatorFor(criteria.getSortOrder()))
                 .toList();
@@ -42,9 +49,14 @@ public final class DefaultTransactionHistoryFilterService {
             final CashTransaction transaction,
             final TransactionFilterCriteria criteria) {
         return criteria.getCategoryName()
-                .map(categoryName -> transaction.getCategory()
-                        .getName()
-                        .equalsIgnoreCase(categoryName))
+                .map(categoryName -> {
+                    final String normalizedFilter = categoryName.trim().toLowerCase();
+                    final String normalizedCategory = transaction.getCategory()
+                            .getName()
+                            .trim()
+                            .toLowerCase();
+                    return normalizedCategory.contains(normalizedFilter);
+                })
                 .orElse(true);
     }
 
@@ -56,18 +68,20 @@ public final class DefaultTransactionHistoryFilterService {
                 .orElse(true);
     }
 
-    private boolean matchesDateRange(
+    private boolean matchesFromDate(
             final CashTransaction transaction,
             final TransactionFilterCriteria criteria) {
-        final boolean matchesFrom = criteria.getFromDate()
+        return criteria.getFromDate()
                 .map(fromDate -> !transaction.getDate().isBefore(fromDate))
                 .orElse(true);
+    }
 
-        final boolean matchesTo = criteria.getToDate()
+    private boolean matchesToDate(
+            final CashTransaction transaction,
+            final TransactionFilterCriteria criteria) {
+        return criteria.getToDate()
                 .map(toDate -> !transaction.getDate().isAfter(toDate))
                 .orElse(true);
-
-        return matchesFrom && matchesTo;
     }
 
     private boolean matchesKeyword(
@@ -76,9 +90,12 @@ public final class DefaultTransactionHistoryFilterService {
         return criteria.getKeyword()
                 .map(keyword -> {
                     final String normalizedKeyword = keyword.toLowerCase();
-                    final String description = safeLowerCase(transaction.getDescription());
-                    final String notes = safeLowerCase(transaction.getNotes());
-
+                    final String description = transaction.getDescription() == null
+                            ? ""
+                            : transaction.getDescription().toLowerCase();
+                    final String notes = transaction.getNotes() == null
+                            ? ""
+                            : transaction.getNotes().toLowerCase();
                     return description.contains(normalizedKeyword)
                             || notes.contains(normalizedKeyword);
                 })
@@ -86,16 +103,33 @@ public final class DefaultTransactionHistoryFilterService {
     }
 
     private Comparator<CashTransaction> comparatorFor(final TransactionSortOrder sortOrder) {
+        final Comparator<CashTransaction> byDateAsc = Comparator
+                .comparing(CashTransaction::getDate)
+                .thenComparing(
+                        CashTransaction::getDescription,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                )
+                .thenComparing(transaction -> transaction.getAsset().amount().abs());
+
+        final Comparator<CashTransaction> byAmountDesc = Comparator
+                .comparing(
+                        (CashTransaction transaction) -> transaction.getAsset().amount().abs(),
+                        Comparator.reverseOrder()
+                )
+                .thenComparing(CashTransaction::getDate, Comparator.reverseOrder())
+                .thenComparing(
+                        CashTransaction::getDescription,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                );
+
         return switch (sortOrder) {
-            case NEWEST_FIRST -> Comparator.comparing(CashTransaction::getDate).reversed();
-            case OLDEST_FIRST -> Comparator.comparing(CashTransaction::getDate);
-            case HIGHEST_AMOUNT_FIRST -> Comparator.comparing(
-                    (CashTransaction transaction) -> transaction.getAsset().amount().abs()
-            ).reversed();
+            case NEWEST_FIRST -> byDateAsc.reversed();
+            case OLDEST_FIRST -> byDateAsc;
+            case HIGHEST_AMOUNT_FIRST -> byAmountDesc;
         };
     }
 
-    private String safeLowerCase(final String value) {
-        return value == null ? "" : value.toLowerCase();
-    }
+//     private String safeLowerCase(final String value) {
+//         return value == null ? "" : value.toLowerCase();
+//     }
 }

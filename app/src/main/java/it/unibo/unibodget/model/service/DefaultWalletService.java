@@ -13,7 +13,8 @@ import it.unibo.unibodget.model.wallet.AbstractWallet;
 /**
  * Default implementation of {@link WalletService}.
  *
- * <p>This service stores the wallets available to the user, keeps track of the
+ * <p>
+ * This service stores the wallets available to the user, keeps track of the
  * currently selected wallet, and delegates transaction and observer operations
  * to the appropriate wallet or history.</p>
  *
@@ -29,32 +30,38 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     /**
      * Creates an empty wallet service.
      */
-    public DefaultWalletService() { }
+    public DefaultWalletService() {
+    }
 
     /**
      * Creates a wallet service initialized with the provided wallets.
      *
-     * @param initialWallets
-     *            the initial wallets
+     * @param initialWallets the initial wallets
      */
     public DefaultWalletService(final List<W> initialWallets) {
         this.wallets.addAll(Objects.requireNonNull(initialWallets));
         this.currentWallet = this.wallets.isEmpty() ? null : this.wallets.get(0);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<W> getWallets() {
         return List.copyOf(wallets);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<W> getCurrentWallet() {
         return Optional.ofNullable(currentWallet);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addWallet(final W wallet) {
         wallets.add(Objects.requireNonNull(wallet));
@@ -64,7 +71,9 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         notifyObservers();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean removeWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
@@ -86,7 +95,9 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         return removed;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean selectWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
@@ -103,20 +114,26 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<T> getCurrentTransactions() {
         return List.copyOf(getRequiredCurrentWallet().getHistory().getTransactions());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addTransaction(final T transaction) {
         getRequiredCurrentWallet().addTransaction(Objects.requireNonNull(transaction));
         notifyObservers();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean removeTransaction(final T transaction) {
         final boolean removed = getRequiredCurrentWallet()
@@ -128,7 +145,9 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         return removed;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void replaceTransaction(final T oldTransaction, final T newTransaction) {
         final boolean replaced = getRequiredCurrentWallet()
@@ -141,33 +160,42 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void clearCurrentWalletHistory() {
         getRequiredCurrentWallet().getHistory().clear();
         notifyObservers();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addObserver(final WalletObserver observer) {
         observers.add(Objects.requireNonNull(observer));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeObserver(final WalletObserver observer) {
         observers.remove(Objects.requireNonNull(observer));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyObservers() {
         observers.forEach(WalletObserver::update);
     }
 
     /**
-     * Returns the current wallet, throwing an exception if no wallet is selected.
+     * Returns the current wallet, throwing an exception if no wallet is
+     * selected.
      *
      * @return the currently selected wallet
      * @throws IllegalStateException if no wallet has been selected yet

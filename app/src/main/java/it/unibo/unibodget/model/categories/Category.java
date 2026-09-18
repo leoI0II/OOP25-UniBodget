@@ -3,6 +3,9 @@ package it.unibo.unibodget.model.categories;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.utils.ARGBColor;
 
 /**
@@ -10,62 +13,90 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  *
  * <p>
  * A category extends the shared base category with application-level metadata:
+ * </p>
  * <ul>
- *   <li>origin ({@link CategoryOrigin#DEFAULT} or {@link CategoryOrigin#CUSTOM})</li>
- *   <li>active flag for archive/reactivate behaviour</li>
+ * <li>its origin, either built-in or user-defined,</li>
+ * <li>its active state, used for archive/reactivate lifecycle management.</li>
  * </ul>
+ *
+ * <p>
+ * Default categories are always active and cannot be renamed, recolored,
+ * archived, or otherwise altered through management operations intended for
+ * custom categories.
+ * </p>
  */
-public final class Category extends BasicCategory {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class Category extends AbstractCategory {
 
-    public static final Category FOOD =
-            new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in food category.
+     */
+    public static final Category FOOD
+            = new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
-    public static final Category RENT =
-            new Category("Rent", new ARGBColor(0xFF9C27B0), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in rent category.
+     */
+    public static final Category RENT
+            = new Category("Rent", new ARGBColor(0xFF9C27B0), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
-    public static final Category SAVINGS =
-            new Category("Savings", new ARGBColor(0xFF4CAF50), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in savings category.
+     */
+    public static final Category SAVINGS
+            = new Category("Savings", new ARGBColor(0xFF4CAF50), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
 
-    public static final Category TRANSPORT =
-            new Category("Transport", new ARGBColor(0xFF009688), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in transport category.
+     */
+    public static final Category TRANSPORT
+            = new Category("Transport", new ARGBColor(0xFF009688), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
-    public static final Category TRANSFER =
-            new Category("Transfer", new ARGBColor(0xFF2196F3), CategoryType.TRANSFER, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in transfer category.
+     */
+    public static final Category TRANSFER
+            = new Category("Transfer", new ARGBColor(0xFF2196F3), CategoryType.TRANSFER, CategoryOrigin.DEFAULT, true);
 
-    public static final Category INVESTMENT_BUY =
-            new Category("Investment Buy", new ARGBColor(0xFFFFC107), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in investment buy category.
+     */
+    public static final Category INVESTMENT_BUY
+            = new Category("Investment Buy", new ARGBColor(0xFFFFC107), CategoryType.EXPENSE, CategoryOrigin.DEFAULT, true);
 
-    public static final Category INVESTMENT_SELL =
-            new Category("Investment Sell", new ARGBColor(0xFFFFC107), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in investment sell category.
+     */
+    public static final Category INVESTMENT_SELL
+            = new Category("Investment Sell", new ARGBColor(0xFFFFC107), CategoryType.INCOME, CategoryOrigin.DEFAULT, true);
 
-    public static final Category FRIEND_LOAN =
-            new Category("Friend Loan", new ARGBColor(0xFF795548), CategoryType.FRIEND_LOAN, CategoryOrigin.DEFAULT, true);
-
-    public static final Category BANK_LOAN =
-            new Category("Bank Loan", new ARGBColor(0xFF607D8B), CategoryType.BANK_LOAN, CategoryOrigin.DEFAULT, true);
+    /**
+     * Built-in friend loan category.
+     */
+    public static final Category FRIEND_LOAN
+            = new Category("Friend Loan", new ARGBColor(0xFF795548), CategoryType.FRIEND_LOAN, CategoryOrigin.DEFAULT, true);
 
     private final CategoryOrigin origin;
     private boolean active;
 
     /**
-     * Creates a new {@code Category} with full control over all fields.
+     * Creates a category with explicit metadata.
      *
-     * @param name    the category name; must not be {@code null}
-     * @param color   the category color; must not be {@code null}
-     * @param type    the category type; must not be {@code null}
-     * @param origin  whether this is a default or custom category;
-     *                must not be {@code null}
-     * @param active  {@code true} if the category is active
-     * @throws NullPointerException     if {@code origin} is {@code null}
-     * @throws IllegalArgumentException if a {@link CategoryOrigin#DEFAULT} category
-     *                                  is created with {@code active} set to {@code false}
+     * @param name the category name
+     * @param color the category color
+     * @param type the category type
+     * @param origin the origin of the category
+     * @param active whether the category is active
+     * @throws NullPointerException if any mandatory argument is {@code null}
+     * @throws IllegalArgumentException if a default category is created as
+     * inactive
      */
     public Category(
-            final String name,
-            final ARGBColor color,
-            final CategoryType type,
-            final CategoryOrigin origin,
-            final boolean active) {
+            @JsonProperty("name") final String name,
+            @JsonProperty("colorHex") final ARGBColor color,
+            @JsonProperty("type") final CategoryType type,
+            @JsonProperty("origin") final CategoryOrigin origin,
+            @JsonProperty("active") final boolean active) {
         super(name, color, type);
         this.origin = Objects.requireNonNull(origin);
         if (origin == CategoryOrigin.DEFAULT && !active) {
@@ -75,11 +106,11 @@ public final class Category extends BasicCategory {
     }
 
     /**
-     * Convenience constructor for creating an active custom category.
+     * Creates a new active custom category.
      *
-     * @param name   the category name; must not be {@code null}
-     * @param color  the category color; must not be {@code null}
-     * @param type   the category type; must not be {@code null}
+     * @param name the category name
+     * @param color the category color
+     * @param type the category type
      */
     public Category(final String name, final ARGBColor color, final CategoryType type) {
         this(name, color, type, CategoryOrigin.CUSTOM, true);
@@ -99,16 +130,14 @@ public final class Category extends BasicCategory {
                 TRANSFER,
                 INVESTMENT_BUY,
                 INVESTMENT_SELL,
-                FRIEND_LOAN,
-                BANK_LOAN
+                FRIEND_LOAN
         );
     }
 
     /**
-     * Returns the origin of this category.
+     * Returns the origin of the category.
      *
-     * @return {@link CategoryOrigin#DEFAULT} for built-in categories,
-     *         {@link CategoryOrigin#CUSTOM} for user-defined ones
+     * @return the category origin
      */
     public CategoryOrigin getOrigin() {
         return origin;
@@ -124,27 +153,56 @@ public final class Category extends BasicCategory {
     }
 
     /**
-     * Returns whether this category is a built-in default.
+     * Returns whether this is a built-in category.
      *
-     * @return {@code true} if the origin is {@link CategoryOrigin#DEFAULT}
+     * @return {@code true} if this category is default, otherwise {@code false}
      */
     public boolean isDefault() {
         return origin == CategoryOrigin.DEFAULT;
     }
 
     /**
-     * Returns whether this category was created by the user.
+     * Returns whether this is a user-defined category.
      *
-     * @return {@code true} if the origin is {@link CategoryOrigin#CUSTOM}
+     * @return {@code true} if this category is custom, otherwise {@code false}
      */
     public boolean isCustom() {
         return origin == CategoryOrigin.CUSTOM;
     }
 
     /**
-     * Archives this category, making it inactive.
+     * Renames a custom category.
      *
-     * @throws IllegalStateException if this is a default category, which cannot be archived
+     * @param newName the new category name
+     * @throws IllegalStateException if this category is a default category
+     * @throws NullPointerException if {@code newName} is {@code null}
+     * @throws IllegalArgumentException if {@code newName} is blank
+     */
+    public void rename(final String newName) {
+        if (isDefault()) {
+            throw new IllegalStateException("Default categories cannot be renamed.");
+        }
+        setName(newName);
+    }
+
+    /**
+     * Changes the color of a custom category.
+     *
+     * @param newColor the new color
+     * @throws IllegalStateException if this category is a default category
+     * @throws NullPointerException if {@code newColor} is {@code null}
+     */
+    public void recolor(final ARGBColor newColor) {
+        if (isDefault()) {
+            throw new IllegalStateException("Default categories cannot be recolored.");
+        }
+        setColorHex(newColor);
+    }
+
+    /**
+     * Archives a custom category.
+     *
+     * @throws IllegalStateException if this category is a default category
      */
     public void archive() {
         if (isDefault()) {
@@ -154,9 +212,9 @@ public final class Category extends BasicCategory {
     }
 
     /**
-     * Reactivates this category after it has been archived.
+     * Reactivates a custom category.
      *
-     * @throws IllegalStateException if this is a default category, which is always active
+     * @throws IllegalStateException if this category is a default category
      */
     public void reactivate() {
         if (isDefault()) {
@@ -165,20 +223,24 @@ public final class Category extends BasicCategory {
         this.active = true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "Category{name='%s', color='%s', type='%s', origin='%s', active='%s'}"
                 .formatted(getName(), getColorHex().toHexString(), getType(), origin, active);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object object) {
+        if (this == object) {
             return true;
         }
-        if (!(o instanceof Category other)) {
+        if (!(object instanceof Category other)) {
             return false;
         }
         return super.equals(other)
@@ -186,7 +248,9 @@ public final class Category extends BasicCategory {
                 && origin == other.origin;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), origin, active);

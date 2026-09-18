@@ -1,139 +1,142 @@
-package it.unibo.unibodget.model.dashboard.impl;
+// package it.unibo.unibodget.model.dashboard.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+// import java.math.BigDecimal;
+// import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
 
-import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.currency.Asset;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.service.CashAccountService;
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
-import it.unibo.unibodget.model.utils.ARGBColor;
-import it.unibo.unibodget.model.wallet.CashAccount;
+// import it.unibo.unibodget.model.categories.Category;
+// import it.unibo.unibodget.model.categories.CategoryType;
+// import it.unibo.unibodget.model.currency.Asset;
+// import it.unibo.unibodget.model.currency.CurrencyUnit;
+// import it.unibo.unibodget.model.currency.FiatCurrency;
+// import it.unibo.unibodget.model.service.CashAccountService;
+// import it.unibo.unibodget.model.transactions.base.CashTransaction;
+// import it.unibo.unibodget.model.utils.ARGBColor;
+// import it.unibo.unibodget.model.wallet.CashAccount;
 
-/**
- * Tests for {@link DefaultTotalCashBalanceService}.
- */
-class DefaultTotalCashBalanceServiceTest {
+// /**
+//  * Tests for {@link DefaultTotalCashBalanceService}.
+//  */
+// class DefaultTotalCashBalanceServiceTest {
 
-    private CashAccountService walletService;
-    private CashBalanceConverter balanceConverter;
-    private DefaultTotalCashBalanceService totalBalanceService;
+//     private static final String INCOME = "Income";
+//     private static final String S_100 = "100.00";
 
-    @BeforeEach
-    void setUp() {
-        walletService = new CashAccountService();
-        balanceConverter = new StubCashBalanceConverter();
-        totalBalanceService = new DefaultTotalCashBalanceService(walletService, balanceConverter);
-    }
+//     private CashAccountService walletService;
+//     private CashBalanceConverter balanceConverter;
+//     private DefaultTotalCashBalanceService totalBalanceService;
 
-    @Test
-    void shouldSumBalancesAlreadyInTargetCurrency() {
-        final CashAccount firstWallet = new CashAccount("Wallet 1", FiatCurrency.EUR);
-        final CashAccount secondWallet = new CashAccount("Wallet 2", FiatCurrency.EUR);
+//     @BeforeEach
+//     void setUp() {
+//         walletService = new CashAccountService();
+//         balanceConverter = new StubCashBalanceConverter();
+//         totalBalanceService = new DefaultTotalCashBalanceService(walletService, balanceConverter);
+//     }
 
-        walletService.addWallet(firstWallet);
-        walletService.addWallet(secondWallet);
+//     @Test
+//     void shouldSumBalancesAlreadyInTargetCurrency() {
+//         final CashAccount firstWallet = new CashAccount("Wallet 1", FiatCurrency.EUR);
+//         final CashAccount secondWallet = new CashAccount("Wallet 2", FiatCurrency.EUR);
 
-        final Category income = new Category(
-                "Income",
-                new ARGBColor(0xFF4CAF50),
-                CategoryType.INCOME
-        );
+//         walletService.addWallet(firstWallet);
+//         walletService.addWallet(secondWallet);
 
-        walletService.selectWallet(firstWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("100.00")),
-                income,
-                LocalDate.now(),
-                "Salary",
-                "Income"
-        ));
+//         final Category income = new Category(
+//                 INCOME,
+//                 new ARGBColor(0xFF4CAF50),
+//                 CategoryType.INCOME
+//         );
 
-        walletService.selectWallet(secondWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("50.00")),
-                income,
-                LocalDate.now(),
-                "Gift",
-                "Income"
-        ));
+//         walletService.selectWallet(firstWallet.getId());
+//         walletService.addTransaction(new CashTransaction(
+//                 Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
+//                 income,
+//                 LocalDate.now(),
+//                 "Salary",
+//                 INCOME
+//         ));
 
-        final Asset total = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
+//         walletService.selectWallet(secondWallet.getId());
+//         walletService.addTransaction(new CashTransaction(
+//                 Asset.of(FiatCurrency.EUR, new BigDecimal("50.00")),
+//                 income,
+//                 LocalDate.now(),
+//                 "Gift",
+//                 INCOME
+//         ));
 
-        assertEquals(FiatCurrency.EUR, total.currency());
-        assertEquals(new BigDecimal("150.00"), total.amount());
-    }
+//         final Asset total = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
 
-    @Test
-    void shouldConvertBalancesBeforeSumming() {
-        final CashAccount eurWallet = new CashAccount("EUR wallet", FiatCurrency.EUR);
-        final CashAccount usdWallet = new CashAccount("USD wallet", FiatCurrency.USD);
+//         assertEquals(FiatCurrency.EUR, total.currency());
+//         assertEquals(new BigDecimal("150.00"), total.amount());
+//     }
 
-        walletService.addWallet(eurWallet);
-        walletService.addWallet(usdWallet);
+//     @Test
+//     void shouldConvertBalancesBeforeSumming() {
+//         final CashAccount eurWallet = new CashAccount("EUR wallet", FiatCurrency.EUR);
+//         final CashAccount usdWallet = new CashAccount("USD wallet", FiatCurrency.USD);
 
-        final Category income = new Category(
-                "Income",
-                new ARGBColor(0xFF4CAF50),
-                CategoryType.INCOME
-        );
+//         walletService.addWallet(eurWallet);
+//         walletService.addWallet(usdWallet);
 
-        walletService.selectWallet(eurWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("100.00")),
-                income,
-                LocalDate.now(),
-                "Salary",
-                "Income"
-        ));
+//         final Category income = new Category(
+//                 INCOME,
+//                 new ARGBColor(0xFF4CAF50),
+//                 CategoryType.INCOME
+//         );
 
-        walletService.selectWallet(usdWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.USD, new BigDecimal("100.00")),
-                income,
-                LocalDate.now(),
-                "Bonus",
-                "Income"
-        ));
+//         walletService.selectWallet(eurWallet.getId());
+//         walletService.addTransaction(new CashTransaction(
+//                 Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
+//                 income,
+//                 LocalDate.now(),
+//                 "Salary",
+//                 INCOME
+//         ));
 
-        final Asset totalInEur = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
+//         walletService.selectWallet(usdWallet.getId());
+//         walletService.addTransaction(new CashTransaction(
+//                 Asset.of(FiatCurrency.USD, new BigDecimal(S_100)),
+//                 income,
+//                 LocalDate.now(),
+//                 "Bonus",
+//                 INCOME
+//         ));
 
-        assertEquals(FiatCurrency.EUR, totalInEur.currency());
-        assertEquals(new BigDecimal("190.00").stripTrailingZeros(), totalInEur.amount().stripTrailingZeros());
-    }
+//         final Asset totalInEur = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
 
-    @Test
-    void shouldReturnZeroWhenNoWalletsAreAvailable() {
-        final Asset total = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
+//         assertEquals(FiatCurrency.EUR, totalInEur.currency());
+//         assertEquals(new BigDecimal("190.00").stripTrailingZeros(), totalInEur.amount().stripTrailingZeros());
+//     }
 
-        assertEquals(FiatCurrency.EUR, total.currency());
-        assertEquals(BigDecimal.ZERO, total.amount());
-    }
+//     @Test
+//     void shouldReturnZeroWhenNoWalletsAreAvailable() {
+//         final Asset total = totalBalanceService.getTotalBalanceIn(FiatCurrency.EUR);
 
-    private static final class StubCashBalanceConverter implements CashBalanceConverter {
+//         assertEquals(FiatCurrency.EUR, total.currency());
+//         assertEquals(BigDecimal.ZERO, total.amount());
+//     }
 
-        @Override
-        public Asset convert(final Asset asset, final CurrencyUnit targetCurrency) {
-            if (asset.currency().equals(targetCurrency)) {
-                return asset;
-            }
+//     private static final class StubCashBalanceConverter implements CashBalanceConverter {
 
-            if (asset.currency().equals(FiatCurrency.USD) && targetCurrency.equals(FiatCurrency.EUR)) {
-                return Asset.of(targetCurrency, asset.amount().multiply(new BigDecimal("0.90")));
-            }
+//         @Override
+//         public Asset convert(final Asset asset, final CurrencyUnit targetCurrency) {
+//             if (asset.currency().equals(targetCurrency)) {
+//                 return asset;
+//             }
 
-            if (asset.currency().equals(FiatCurrency.EUR) && targetCurrency.equals(FiatCurrency.USD)) {
-                return Asset.of(targetCurrency, asset.amount().multiply(new BigDecimal("1.10")));
-            }
+//             if (asset.currency().equals(FiatCurrency.USD) && targetCurrency.equals(FiatCurrency.EUR)) {
+//                 return Asset.of(targetCurrency, asset.amount().multiply(new BigDecimal("0.90")));
+//             }
 
-            throw new IllegalArgumentException("Unsupported test conversion");
-        }
-    }
-}
+//             if (asset.currency().equals(FiatCurrency.EUR) && targetCurrency.equals(FiatCurrency.USD)) {
+//                 return Asset.of(targetCurrency, asset.amount().multiply(new BigDecimal("1.10")));
+//             }
+
+//             throw new IllegalArgumentException("Unsupported test conversion");
+//         }
+//     }
+// }

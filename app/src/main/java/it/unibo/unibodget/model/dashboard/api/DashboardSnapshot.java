@@ -7,6 +7,7 @@ import java.util.Map;
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
 import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Immutable snapshot of the information required by the dashboard view.
@@ -80,6 +81,8 @@ public interface DashboardSnapshot {
      * @return the friend-loan summaries
      */
     List<FriendLoanSummary> getFriendLoanSummaries();
+
+    List<CashAccount> getAllWallets();
 
     /**
      * Returns the wallet insights associated with the current wallet.

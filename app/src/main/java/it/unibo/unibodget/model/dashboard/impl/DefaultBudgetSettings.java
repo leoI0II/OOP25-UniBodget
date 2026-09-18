@@ -3,6 +3,8 @@ package it.unibo.unibodget.model.dashboard.impl;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
 
 /**
@@ -10,7 +12,8 @@ import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
  *
  * <p>
  * This class stores the budget configuration chosen by the user and validates
- * the provided values at construction time.</p>
+ * the provided values at construction time.
+ * </p>
  */
 public final class DefaultBudgetSettings implements BudgetSettings {
 
@@ -38,7 +41,9 @@ public final class DefaultBudgetSettings implements BudgetSettings {
      * @throws IllegalArgumentException if the limit is negative or if the
      * warning threshold is outside {@code [0, 1]}
      */
-    public DefaultBudgetSettings(final BigDecimal limitValue, final BigDecimal warningThreshold) {
+    public DefaultBudgetSettings(
+        @JsonProperty("limitValue") final BigDecimal limitValue, 
+        @JsonProperty("warningThreshold") final BigDecimal warningThreshold) {
         this.limitValue = Objects.requireNonNull(limitValue);
         if (limitValue.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("The budget limit cannot be negative");

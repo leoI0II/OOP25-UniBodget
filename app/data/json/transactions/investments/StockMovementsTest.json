@@ -1,0 +1,45 @@
+[
+    {
+        "asset": {
+            "currency": {
+                "type": "",
+                "symbol": "",
+                "shortName": "",
+                "fullName": "",
+                "code": ""
+            },
+            "amount": "",
+            "sign": ""
+        },
+        "category": {
+            "name": "",
+            "colorHex": "",
+            "type": ""
+        },
+        "date": "",
+        "description": "",
+        "notes": "",
+        "unitPrice": {
+            "currency": {
+                "type": "",
+                "symbol": "",
+                "shortName": "",
+                "fullName": "",
+                "code": ""
+            },
+            "amount": "",
+            "sign": ""
+        },
+        "fee": {
+            "currency": {
+                "type": "",
+                "symbol": "",
+                "shortName": "",
+                "fullName": "",
+                "code": ""
+            },
+            "amount": "",
+            "sign": ""
+        }
+    }
+]

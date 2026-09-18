@@ -9,7 +9,7 @@ classDiagram
     %% ======= CATEGORIES =========
     %% ============================
 
-    class BasicCategory {
+    class AbstractCategory {
         <<abstract>>
         -String name
         -ARGBColor color
@@ -34,14 +34,13 @@ classDiagram
         INCOME
         EXPENSE
         FRIEND_LOAN
-        BANK_LOAN
     }
 
     %% Relations
-    Category --|> BasicCategory
+    Category --|> AbstractCategory
     CategoryPreset --> Category
-    BasicCategory --> CategoryType
-    BasicCategory --> ARGBColor
+    AbstractCategory --> CategoryType
+    AbstractCategory --> ARGBColor
 
 
     %% ============================

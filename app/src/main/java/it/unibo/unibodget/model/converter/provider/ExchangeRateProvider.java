@@ -4,10 +4,13 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 /**
- * Strategy for converting an {@link Asset} from one currency to another.
+ * Defines a strategy for converting an {@link Asset} from one currency to another.
  *
- * <p>Implementations may fetch live rates from an external API, use a static
- * lookup table, or apply any other exchange-rate strategy.</p>
+ * <p>
+ * Implementations of this interface provide the logic required to obtain or compute
+ * exchange rates between currencies. The conversion may rely on external APIs,
+ * cached data, or predefined mock values depending on the specific provider.
+ * </p>
  */
 public interface ExchangeRateProvider {
 

@@ -7,11 +7,12 @@ import java.nio.file.Path;
 /**
  * A {@link BasicFileCreator} specialization for JSON files.
  * 
+ * <p>
  * This creator ensures that the file exists and, if newly created,
  * initializes it with an empty JSON object {}.
  */
 public class JsonFileCreator extends BasicFileCreator<String> {
-    
+
     /**
      * Creates a new JsonFileCreator.
      * No additional state is required.
@@ -28,14 +29,13 @@ public class JsonFileCreator extends BasicFileCreator<String> {
      * @throws IOException if the file cannot be created or written
      */
     @Override
-    public Path open(Path path) throws IOException {
-        boolean existed = Files.exists(path);
-        Path created = super.open(path);
-
+    public Path open(final Path path) throws IOException {
+        final boolean existed = path != null && Files.exists(path);
+        final Path created = super.open(path);
         if (!existed) {
             Files.writeString(created, "{}");
         }
-
         return created;
     }
+
 }

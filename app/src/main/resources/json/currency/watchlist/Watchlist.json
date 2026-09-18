@@ -1,0 +1,9 @@
+{
+  "watchlist" : [ {
+    "from" : "CAD",
+    "to" : "USD"
+  }, {
+    "from" : "HKD",
+    "to" : "ZAR"
+  } ]
+}

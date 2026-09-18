@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * Represents the budget configuration defined by the user.
+ * 
  * <p>
  * This abstraction is used to avoid representing the budget as a raw primitive
  * value, making its meaning explicit in the model and leaving room for future
@@ -13,6 +14,7 @@ public interface BudgetSettings {
 
     /**
      * Returns the configured budget limit.
+     * 
      * <p>
      * This is the value against which the current aggregated dashboard amount
      * is compared.
@@ -23,6 +25,7 @@ public interface BudgetSettings {
 
     /**
      * Returns the warning threshold.
+     * 
      * <p>
      * The threshold is expressed as a ratio in the range {@code [0, 1]}.
      * For example, a value of {@code 0.8} means that the warning state begins

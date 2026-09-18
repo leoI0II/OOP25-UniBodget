@@ -8,7 +8,8 @@ import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
  * Default immutable implementation of {@link DashboardSnapshot}.
@@ -18,13 +19,14 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     private final String walletName;
     private final String walletCurrency;
     private final BigDecimal totalBalance;
-    private final List<Transaction> recentTransactions;
+    private final List<AbstractTransaction> recentTransactions;
     private final Map<String, BigDecimal> categorySummaries;
     private final BigDecimal budgetLimit;
     private final BigDecimal warningThreshold;
     private final BudgetStatus budgetStatus;
     private final List<FriendLoanSummary> friendLoanSummaries;
     private final List<WalletInsight> walletInsights;
+    private final List<CashAccount> allWallets;
 
     /**
      * Creates a new dashboard snapshot.
@@ -54,13 +56,14 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
             final String walletName,
             final String walletCurrency,
             final BigDecimal totalBalance,
-            final List<Transaction> recentTransactions,
+            final List<AbstractTransaction> recentTransactions,
             final Map<String, BigDecimal> categorySummaries,
             final BigDecimal budgetLimit,
             final BigDecimal warningThreshold,
             final BudgetStatus budgetStatus,
             final List<FriendLoanSummary> friendLoanSummaries,
-            final List<WalletInsight> walletInsights) {
+            final List<WalletInsight> walletInsights,
+            final List<CashAccount> allWallets) {
         this.walletName = Objects.requireNonNull(walletName);
         this.walletCurrency = Objects.requireNonNull(walletCurrency);
         this.totalBalance = Objects.requireNonNull(totalBalance);
@@ -71,6 +74,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
         this.budgetStatus = Objects.requireNonNull(budgetStatus);
         this.friendLoanSummaries = List.copyOf(Objects.requireNonNull(friendLoanSummaries));
         this.walletInsights = List.copyOf(Objects.requireNonNull(walletInsights));
+        this.allWallets = List.copyOf(Objects.requireNonNull(allWallets));
     }
 
     @Override
@@ -89,7 +93,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     }
 
     @Override
-    public List<Transaction> getRecentTransactions() {
+    public List<AbstractTransaction> getRecentTransactions() {
         return Collections.unmodifiableList(recentTransactions);
     }
 
@@ -121,5 +125,10 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     @Override
     public List<WalletInsight> getWalletInsights() {
         return Collections.unmodifiableList(walletInsights);
+    }
+
+    @Override
+    public List<CashAccount> getAllWallets() {
+        return Collections.unmodifiableList(allWallets);
     }
 }

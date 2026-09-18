@@ -1,25 +1,244 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
-import it.unibo.unibodget.model.utils.ARGBColor;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import it.unibo.unibodget.persistency.parser.api.DataParser;
 import it.unibo.unibodget.persistency.parser.api.DataParserException;
 
-import java.lang.reflect.*;
-import java.util.*;
-
+/**
+ * A lightweight JSON parser that maps simple JSON objects and arrays
+ * to Java objects using reflection. This parser supports flat JSON
+ * structures and basic value types such as strings, numbers, booleans
+ * and enums.
+ *
+ * @param <T> the target type to be created from the parsed JSON
+ */
 public final class JsonDataParser<T> implements DataParser<T> {
 
+    private static final String QUOTE = "\"";
     private final Class<T> targetClass;
 
-    public JsonDataParser(Class<T> targetClass) {
+    /**
+     * Creates a new parser for the given target class.
+     *
+     * @param targetClass the class that JSON objects will be mapped to
+     */
+    public JsonDataParser(final Class<T> targetClass) {
         this.targetClass = targetClass;
     }
 
+    /**
+     * Parses a JSON object and converts it into an instance of the target class.
+     * The JSON must represent a single object with simple key-value pairs.
+     *
+     * @param json                  the JSON object as a string
+     * @return                      an instance of the target class populated with parsed values
+     * @throws DataParserException  if the JSON is malformed or cannot be mapped
+     */
     @Override
-    public T parse(String json) throws DataParserException {
-        T prova = null;
-        return prova;
+    public T parse(final String json) throws DataParserException {
+        try {
+            final Map<String, Object> map = parseJsonObject(json);
+            return createObjectFromMap(map, targetClass);
+        } catch (final Exception e) {
+            throw new DataParserException("Error parsing JSON object: " + e.getMessage(), e);
+        }
     }
 
-    
+    /**
+     * Converts a JSON object into a map of key-value pairs.
+     * Only flat objects are supported. Nested structures are not handled.
+     *
+     * @param json the JSON object as a string
+     * @return     a map containing the parsed key-value pairs
+     */
+    private Map<String, Object> parseJsonObject(final String json) {
+        final Map<String, Object> map = new HashMap<>();
+
+        // Removes surrounding braces and trims whitespace
+        String trimmed = json.trim();
+        if (trimmed.startsWith("{")) {
+            trimmed = trimmed.substring(1);
+        }
+        if (trimmed.endsWith("}")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        // Splits the object into individual key-value entries
+        final String[] entries = trimmed.split(",");
+        // Processes each entry and extracts the key and value
+        for (final String entry : entries) {
+            final String[] kv = entry.split(":", 2);
+            if (kv.length != 2) {
+                continue; // skip malformed entries
+            }
+            final String key = kv[0].trim().replace(QUOTE, "");
+            final String value = kv[1].trim().replace(QUOTE, "");
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    /**
+     * Creates an instance of the target class and assigns values to its fields
+     * based on the provided map. Field names must match JSON keys.
+     *
+     * @param map           a map containing JSON key-value pairs
+     * @param clazz         the class to instantiate
+     * @return              a populated instance of the target class
+     * @throws Exception    if reflection fails or a field cannot be assigned
+     */
+    private T createObjectFromMap(final Map<String, Object> map, final Class<T> clazz)
+            throws Exception {
+        // Creates a new instance using the default constructor
+        final T instance = clazz.getDeclaredConstructor().newInstance();
+        // Iterates over all declared fields and assigns matching values
+        for (final Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            final Object rawValue = map.get(field.getName());
+            if (rawValue == null) {
+                continue; // skip fields not present in the JSON
+            }
+            // Converts the raw string value into the correct Java type
+            final Object value = convertValue(rawValue, field.getType());
+            field.set(instance, value);
+        }
+        return instance;
+    }
+
+    /**
+     * Converts a raw JSON value into the expected Java type.
+     * Supports strings, integers, doubles, booleans and enums.
+     *
+     * @param raw       the raw value extracted from JSON
+     * @param type      the expected target type
+     * @return          the converted value, or null if the type is unsupported
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Object convertValue(final Object raw, final Class<?> type) {
+        final String value = raw.toString();
+        // Basic type conversions
+        if (type == String.class) {
+            return value;
+        }
+        if (type == int.class || type == Integer.class) {
+            return Integer.parseInt(value);
+        }
+        if (type == double.class || type == Double.class) {
+            return Double.parseDouble(value);
+        }
+        if (type == boolean.class || type == Boolean.class) {
+            return Boolean.parseBoolean(value);
+        }
+        // Enum conversion
+        if (type.isEnum()) {
+            return Enum.valueOf((Class<? extends Enum>) type, value);
+        }
+        // Unsupported type
+        return null;
+    }
+
+    /**
+     * Parses a JSON array containing multiple objects and converts each
+     * element into an instance of the target class.
+     *
+     * @param jsonArray             the JSON array as a string
+     * @return                      a list of parsed objects
+     * @throws DataParserException  if the array is malformed or parsing fails
+     */
+    public List<T> parseList(final String jsonArray) throws DataParserException {
+        try {
+            final List<T> result = new ArrayList<>();
+            String trimmed = jsonArray.trim();
+            // Ensures the string is a valid JSON array
+            if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+                throw new DataParserException("Invalid JSON array: " + trimmed);
+            }
+            // Removes the surrounding brackets
+            trimmed = trimmed.substring(1, trimmed.length() - 1).trim();
+            if (trimmed.isEmpty()) {
+                return result; // empty array
+            }
+            // Splits the array into individual JSON objects
+            final String[] objects = trimmed.split("\\},\\s*\\{");
+            // Parses each object separately
+            for (final String obj : objects) {
+                String jsonObject = obj.trim();
+                if (!jsonObject.startsWith("{")) {
+                    jsonObject = "{" + jsonObject;
+                }
+                if (!jsonObject.endsWith("}")) {
+                    jsonObject = jsonObject + "}";
+                }
+                result.add(parse(jsonObject));
+            }
+            return result;
+        } catch (final Exception e) {
+            throw new DataParserException("Error parsing JSON array: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Reads a JSON file, extracts the array associated with the given key,
+     * and parses each element into an instance of the target class.
+     *
+     * @param file                  the path to the JSON file
+     * @param arrayKey              the key identifying the JSON array to extract
+     * @return                      a list of parsed objects
+     * @throws DataParserException  if the file cannot be read, the key is missing,
+     *                              or the array is malformed
+     */
+    public List<T> parseListFromFile(final Path file, final String arrayKey) throws DataParserException {
+        try {
+            // Reads the entire file content as a string
+            final String json = Files.readString(file).trim();
+            // Locates the key associated with the array and extracts the array content
+            final int keyIndex = json.indexOf(QUOTE + arrayKey + QUOTE);
+            if (keyIndex == -1) {
+                throw new DataParserException("Key '" + arrayKey + "' not found");
+            }
+            // Extracts the array boundaries
+            final int start = json.indexOf("[", keyIndex);
+            final int end = json.indexOf("]", start);
+            if (start == -1 || end == -1) {
+                throw new DataParserException("Array '" + arrayKey + "' malformed");
+            }
+            final String arrayContent = json.substring(start, end + 1);
+            // Parses the extracted array
+            return parseList(arrayContent);
+        } catch (final IOException e) {
+            throw new DataParserException("Cannot read file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Reads a JSON file from the given path and parses it as a JSON array
+     * into a list of objects of type T. This method delegates file reading
+     * to JsonReader and JSON parsing to parseList(String), keeping the
+     * parsing workflow fully generic and independent of domain logic.
+     *
+     * @param file                  the path to the JSON file to load
+     * @return                      a list of parsed objects of type T
+     * @throws DataParserException  if the file cannot be read or the JSON content is invalid
+     * @throws IOException          if an I/O error occurs while reading the file
+     */
+    public List<T> loadListFromFile(final Path file) {
+        try {
+            final String json = Files.readString(file);
+            return parseList(json);
+        } catch (final DataParserException e) {
+            System.err.println("Error parsing JSON from file: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (final IOException e) {
+            System.err.println("Cannot read file: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
 }
