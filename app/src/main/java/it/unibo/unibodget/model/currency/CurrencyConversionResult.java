@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.currency;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Represents the result of a currency conversion operation.
@@ -40,6 +41,17 @@ public class CurrencyConversionResult {
      */
     public BigDecimal getAmount() {
         return new BigDecimal(String.valueOf(amount));
+    }
+
+    /**
+     * Given the amount in BigDecimal type,
+     * round as usual, to two decimal places.
+     * 
+     * @return the roundedamount
+     */
+    public BigDecimal roundAmount(BigDecimal naturalAmount){
+        final BigDecimal rounded = naturalAmount.setScale(2, RoundingMode.HALF_UP);
+        return rounded;
     }
 
     /** 
