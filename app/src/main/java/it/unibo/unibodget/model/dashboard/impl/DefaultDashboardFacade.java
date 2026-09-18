@@ -4,8 +4,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
+import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
@@ -14,8 +18,9 @@ import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
 import it.unibo.unibodget.model.dashboard.api.FriendLoanSummaryService;
 import it.unibo.unibodget.model.dashboard.api.WalletInsightService;
 import it.unibo.unibodget.model.service.CashAccountService;
+import it.unibo.unibodget.model.settings.Settings;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
-import it.unibo.unibodget.model.transactions.base.Transaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
 
 /**
@@ -33,6 +38,8 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     private final BudgetMonitor budgetMonitor;
     private final FriendLoanSummaryService friendLoanSummaryService;
     private final WalletInsightService walletInsightService;
+    private ExchangeRateProvider rateProvider;
+    private Settings settings;
 
     /**
      * Creates a new dashboard facade with the required collaborating services.
@@ -86,7 +93,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 currentWallet.getBaseCurrency().toString(),
                 currentWallet.getBalance().amount(),
                 currentTransactions.stream()
-                        .map(Transaction.class::cast)
+                        .map(AbstractTransaction.class::cast)
                         .toList(),
                 categoryService.getCategorySummaries(),
                 settings.getLimitValue(),
@@ -95,6 +102,36 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 friendLoanSummaries,
                 walletInsights
         );
+    }
+
+    @Override
+    public List<CashAccount> getAllCashAccounts() {
+        return walletService.getWallets();
+    }
+
+    @Override
+    public Optional<CashAccount> getCurrentSelectedCashAccount() {
+        return walletService.getCurrentWallet();
+    }
+
+    @Override
+    public Optional<CashAccount> getCashAccountById(UUID id) {
+        return getAllCashAccounts().stream()
+                .filter(w -> w.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public void selectWallet(UUID id) {
+        walletService.selectWallet(id);
+    }
+
+    @Override
+    public Asset getAggregatedBalance() {
+        return getAllCashAccounts().stream()
+                .map(CashAccount::getBalance)
+                .map(balance -> rateProvider.convert(balance, settings.getBaseCurrency()))
+                .reduce(Asset.zero(settings.getBaseCurrency()), Asset::add);
     }
 
     /**

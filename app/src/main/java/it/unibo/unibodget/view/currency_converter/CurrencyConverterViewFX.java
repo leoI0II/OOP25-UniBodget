@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.math.BigDecimal;
 
@@ -51,7 +52,7 @@ public class CurrencyConverterViewFX extends VBox {
         Color textColor = theme.getTextColor().toFXColor();
         Color buttonColor = theme.getButtonColor().toFXColor();
         Color buttonTextColor = Theme.getReadableTextColor(theme.getButtonColor()).toFXColor();
-        var font = theme.toFXFont();
+        var font = new Font("Arial", 15);
 
         // --- Title ---
         Label title = new Label("Currency Converter");

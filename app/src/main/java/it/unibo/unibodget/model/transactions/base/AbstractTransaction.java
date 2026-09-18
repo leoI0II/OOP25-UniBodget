@@ -9,16 +9,18 @@ import it.unibo.unibodget.model.currency.Asset;
 /**
  * Represents a basic financial transaction recorded by the system.
  *
- * Each transaction contains:
- * - an {@link Asset} describing the monetary value and currency
- * - a {@link Category} classifying the type of movement
- * - a {@link LocalDate} indicating when the transaction occurred
- * - an optional textual description
- * - optional notes for additional context
+ * <p>Each transaction contains:
+ * <ul>
+ *   <li>an {@link Asset} describing the monetary value and currency</li>
+ *   <li>a {@link Category} classifying the type of movement</li>
+ *   <li>a {@link LocalDate} indicating when the transaction occurred</li>
+ *   <li>an optional textual description</li>
+ *   <li>optional notes for additional context</li>
+ * </ul>
  *
- * This class is immutable: all fields are final and set at construction time.
+ * <p>This class is immutable: all fields are {@code final} and set at construction time.
  */
-public sealed abstract class Transaction permits CashTransaction, InvestmentTransaction {
+public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
 
     private final Asset asset;
     private final Category category;
@@ -27,20 +29,26 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
     private final String notes;
 
     /**
-     * Creates a new Transaction with the given 
-     * asset, category, date, description and notes.
+     * Creates a new {@code AbstractTransaction} with the given fields.
      *
-     * @param asset        the monetary value associated with the transaction
-     *                     must not be null
-     * @param category     the category describing the nature of the transaction
-     *                     must not be null
+     * @param asset        the monetary value associated with the transaction;
+     *                     must not be {@code null}
+     * @param category     the category describing the nature of the transaction;
+     *                     must not be {@code null}
      * @param date         the date on which the transaction occurred;
-     *                     must not be null
-     * @param description  a short human‑readable description of the transaction
-     *                     may be null
-     * @param notes        optional additional notes or comments; may be null
+     *                     must not be {@code null}
+     * @param description  a short human-readable description of the transaction;
+     *                     may be {@code null}
+     * @param notes        optional additional notes or comments; may be {@code null}
+     * @throws NullPointerException if {@code asset}, {@code category}, or {@code date} is {@code null}
      */
-    public Transaction(Asset asset, Category category, LocalDate date, String description, String notes) {
+    public AbstractTransaction(
+            final Asset asset,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes
+    ) {
         this.asset = Objects.requireNonNull(asset);
         this.category = Objects.requireNonNull(category);
         this.date = Objects.requireNonNull(date);
@@ -78,21 +86,22 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
     /**
      * Returns a short textual description of the transaction.
      *
-     * @return the description, or null if not provided
+     * @return the description, or {@code null} if not provided
      */
     public String getDescription() { 
         return description; 
     }
-    
+
     /**
      * Returns additional notes or comments associated with the transaction.
      *
-     * @return the notes, or null if not provided
+     * @return the notes, or {@code null} if not provided
      */
     public String getNotes() { 
         return notes; 
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -101,7 +110,7 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Transaction other = (Transaction) o;
+        final AbstractTransaction other = (AbstractTransaction) o;
         return Objects.equals(asset, other.asset)
             && Objects.equals(category, other.category)
             && Objects.equals(date, other.date)
@@ -109,18 +118,22 @@ public sealed abstract class Transaction permits CashTransaction, InvestmentTran
             && Objects.equals(notes, other.notes);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return Objects.hash(asset, category, date, description, notes);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "Transaction{asset=" + asset +
-               ", category=" + category +
-               ", date=" + date +
-               ", description='" + description + '\'' +
-               ", notes='" + notes + '\'' +
-               '}';
+        return "Transaction{asset=" + asset
+                + ", category=" + category
+                + ", date=" + date
+                + ", description='" + description
+                + '\''
+                + ", notes='" + notes
+                + '\''
+                + '}';
     }
 }

@@ -9,7 +9,7 @@ plugins {
     java
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
-    id("org.danilopianini.gradle-java-qa") version "1.155.0"
+//    id("org.danilopianini.gradle-java-qa") version "1.155.0"
 }
 
 repositories {
@@ -44,7 +44,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("it.unibo.unibodget.unibodget")
+    mainClass.set("it.unibo.unibodget.App")
 }
 
 tasks.test {

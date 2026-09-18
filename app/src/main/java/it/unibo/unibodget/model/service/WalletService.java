@@ -5,16 +5,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
-import it.unibo.unibodget.model.transactions.base.Transaction;
-import it.unibo.unibodget.model.wallet.Wallet;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.AbstractWallet;
 
 /**
- * Service responsible for managing wallets and the history of the current wallet.
+ * Service responsible for managing a collection of wallets and the transaction
+ * history of the currently selected wallet.
  *
  * <p>The service exposes the available wallets, the currently selected wallet,
- * and the operations used to inspect and update the history of that wallet.</p>
+ * and the operations used to inspect and update the history of that wallet.
+ * Registered {@link WalletObserver} instances are notified whenever the wallet
+ * state changes.</p>
+ *
+ * @param <T> the type of transaction managed by the wallets
+ * @param <W> the concrete wallet type, must extend {@link AbstractWallet}
  */
-public interface WalletService<T extends Transaction, W extends Wallet<T>> {
+public interface WalletService<T extends AbstractTransaction, W extends AbstractWallet<T>> {
 
     /**
      * Returns the wallets available to the user.
