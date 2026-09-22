@@ -1,7 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
 import java.util.Objects;
-
+import javafx.scene.Node;
 import javafx.scene.Scene;
 
 /**
@@ -76,4 +76,45 @@ public final class ThemeManager {
         // Apply style to the scene root
         scene.getRoot().setStyle(style);
     }
+
+    /**
+     * Applies the active theme font to the given JavaFX {@link Node}.
+     *
+     * <p>The method updates:</p>
+     * <ul>
+     *     <li>font family</li>
+     *     <li>font size</li>
+     *     <li>font weight (bold/normal)</li>
+     * </ul>
+     *
+     * <p>Font styles are applied directly to the node using inline CSS,
+     * preserving any existing styles.</p>
+     *
+     * @param node the JavaFX node to style
+     */
+    public static void applyFont(final Node node) {
+        final Theme t = getTheme();
+
+        final String fontStyle =
+            "-fx-font-family: '" + t.getFontFamily() + "';"
+            + "-fx-font-size: " + t.getFontSize() + "px;"
+            + "-fx-font-weight: "
+            + (t.isBoldText() ? "bold;" : "normal;");
+
+        node.setStyle(node.getStyle() + fontStyle);
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public static String getFontStyle() {
+        final Theme t = getTheme();
+
+        return "-fx-font-family: '" + t.getFontFamily() + "';"
+            + "-fx-font-size: " + t.getFontSize() + "px;"
+            + "-fx-font-weight: "
+            + (t.isBoldText() ? "bold;" : "normal;");
+    }
+
 }
