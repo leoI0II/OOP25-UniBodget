@@ -20,7 +20,6 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
 import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -55,7 +54,8 @@ import javafx.scene.control.Button;
  * The dashboard applies theme‑aware styling, window preferences, and
  * orchestrates the interaction between widgets.
  */
-public final class CurrencyConverterViewFX extends Application {
+public final class CurrencyConverterViewFX {
+//public final class CurrencyConverterViewFX extends Application {
 
     private static final double ROOT_PADDING = 35;
     private static final int DAYS_TO_SUBTRACT = 5;
@@ -73,11 +73,10 @@ public final class CurrencyConverterViewFX extends Application {
      */
     public static void launchWith(final CurrencyConverterController controller) {
         sharedController = controller;
-        Application.launch(CurrencyConverterViewFX.class);
-    }
+        final Stage stage = new Stage();
 
-    @Override
-    public void start(final Stage stage) {
+        //Application.launch(CurrencyConverterViewFX.class);
+
         if (sharedController == null) {
             throw new IllegalStateException("Controller not initialized. Use launchWith().");
         }
@@ -127,6 +126,7 @@ public final class CurrencyConverterViewFX extends Application {
 
         /* -------------------- HISTORICAL CHART BUTTON -------------------- */
         final Button showChartButton = new Button("Show Chart");
+        ThemeManager.applyFont(showChartButton);
         showChartButton.setOnAction(e -> {
             ExchangeRateAPI historyApi = new ExchangeRateAPIClient();
             final Map<LocalDate, Double> history = historyApi.getHistoricalRates(
@@ -208,5 +208,11 @@ public final class CurrencyConverterViewFX extends Application {
         }
 
         stage.show();
+
     }
+
+    /*@Override
+    public void start(final Stage stage) {
+
+    }*/
 }
