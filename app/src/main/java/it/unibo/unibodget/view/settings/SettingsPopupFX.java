@@ -126,7 +126,7 @@ public final class SettingsPopupFX {
         final ButtonType saveButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
         dialog.getDialogPane().setContent(grid);
-
+        
         // Logic
         dialog.setResultConverter(button -> {
             if (button == saveButton) {
@@ -172,6 +172,12 @@ public final class SettingsPopupFX {
             return null;
         });
 
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setOnShown(e ->
+            ThemeManager.applyThemeToScene(dialog.getDialogPane().getScene())
+        );
+        
         dialog.showAndWait();
     }
 }
