@@ -4,6 +4,7 @@ import it.unibo.unibodget.controller.currency_converter.CurrencyConverterControl
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.history.CurrencyHistoryPoint;
+import it.unibo.unibodget.model.settings.ThemeManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -82,18 +83,30 @@ public final class CurrencyHistoryChartView extends VBox {
         configureChart();
 
         thresholdField.setPromptText("Alert threshold");
+        ThemeManager.applyFont(statusLabel);
 
         loadButton.setOnAction(e -> onLoad());
 
         // Controls row: From, To, Threshold, Load
+        final Label fromLabel = new Label("From:");
+        final Label toLabel = new Label("To:");
+
+        ThemeManager.applyFont(fromLabel);
+        ThemeManager.applyFont(toLabel);
+        ThemeManager.applyFont(fromBox);
+        ThemeManager.applyFont(toBox);
+        ThemeManager.applyFont(thresholdField);
+        ThemeManager.applyFont(loadButton);
+
         final HBox controlsRow = new HBox(10,
-                new Label("From:"), fromBox,
-                new Label("To:"), toBox,
+                fromLabel, fromBox,
+                toLabel, toBox,
                 thresholdField, loadButton
         );
         controlsRow.setAlignment(Pos.CENTER_LEFT);
 
         getChildren().addAll(controlsRow, statusLabel, chart);
+        chart.applyCss();
     }
 
     /**
@@ -108,7 +121,15 @@ public final class CurrencyHistoryChartView extends VBox {
 
         final Stage stage = new Stage();
         stage.setTitle("Currency History - Live Data");
-        stage.setScene(new Scene(view, SCENE_WIDTH, SCENE_HEIGHT));
+
+        final Scene scene = new Scene(
+                view,
+                SCENE_WIDTH,
+                SCENE_HEIGHT
+        );
+        ThemeManager.applyThemeToScene(scene);
+        stage.setScene(scene);
+
         stage.show();
         return stage;
     }
@@ -160,6 +181,7 @@ public final class CurrencyHistoryChartView extends VBox {
             protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : item.getCode());
+                ThemeManager.applyFont(this);
             }
         };
     }
@@ -170,6 +192,9 @@ public final class CurrencyHistoryChartView extends VBox {
     private void configureChart() {
         xAxis.setLabel("Date");
         yAxis.setLabel("Rate");
+
+        xAxis.setStyle(ThemeManager.getFontStyle());
+        yAxis.setStyle(ThemeManager.getFontStyle());
 
         chart.setCreateSymbols(true);
         chart.setAnimated(false);
@@ -200,7 +225,7 @@ public final class CurrencyHistoryChartView extends VBox {
                 controller.getHistoryPoints(from, to, fromDate, toDate);
 
         points.forEach(p -> System.out.println(p.getDate() + " -> " + p.getRate()));
-
+        
         final Double threshold = parseThreshold(thresholdField.getText());
 
         plot(points, from.getCode() + " -> " + to.getCode(), threshold);
@@ -257,6 +282,16 @@ public final class CurrencyHistoryChartView extends VBox {
                 thresholdSeries.getNode().setStyle("-fx-stroke: red; -fx-stroke-dash-array: 5 5;");
             }
         }
+
+        chart.applyCss();
+
+        chart.lookupAll(".chart-legend-item-text")
+            .forEach(item -> {
+            ThemeManager.applyFont(item);
+
+            item.lookupAll("*")
+                    .forEach(ThemeManager::applyFont);
+        });
     }
 
     /**
