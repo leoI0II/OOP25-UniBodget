@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.currency_converter;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
@@ -38,6 +39,7 @@ public final class WatchlistWidgetFX {
         items.addAll(controller.getFavorites());
 
         final Label title = new Label("My Watchlist");
+        ThemeManager.applyFont(title);
 
         // Refresh highlighting when the converter selection changes
         converter.getFromBox().valueProperty().addListener((obs, old, val) -> listView.refresh());
@@ -45,6 +47,7 @@ public final class WatchlistWidgetFX {
 
         // Save button: stores the current converter pair into the watchlist
         final Button saveButton = new Button("Save couple in watchlist");
+        ThemeManager.applyFont(saveButton);
         saveButton.setOnAction(e -> {
             final String from = converter.getFromBox().getValue().getCode();
             final String to = converter.getToBox().getValue().getCode();
@@ -104,6 +107,7 @@ public final class WatchlistWidgetFX {
                 } else {
                     setStyle("");
                 }
+                ThemeManager.applyFont(this);
             }
         });
 

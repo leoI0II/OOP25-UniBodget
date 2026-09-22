@@ -6,6 +6,7 @@ import it.unibo.unibodget.model.currency.bank.Bank;
 import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -68,9 +69,11 @@ public class BankConverterWidgetFX {
         // Populate bank dropdown
         bankBox.getItems().addAll(controller.getAvailableBanks());
         bankBox.setPromptText("Select a bank...");
+        ThemeManager.applyFont(bankBox);
 
         // Main action button
         final Button calcBtn = new Button("Calculate Bank Fees");
+        ThemeManager.applyFont(calcBtn);
         calcBtn.setMaxWidth(Double.MAX_VALUE);
         calcBtn.setDisable(true);
 
@@ -115,13 +118,22 @@ public class BankConverterWidgetFX {
             }
         });
 
+        ThemeManager.applyFont(convertedLabel);
+        ThemeManager.applyFont(resultLabel);
+        ThemeManager.applyFont(detailsLabel);
+
         // Button to add a new bank
         final Button addBankBtn = new Button("+ Add bank");
+        ThemeManager.applyFont(addBankBtn);
         addBankBtn.setOnAction(e -> openAddBankDialog());
+
+        // Bank conversione label with front application
+        final Label bankLabel = new Label("Bank conversion");
+        ThemeManager.applyFont(bankLabel);
 
         // Assemble UI
         view.getChildren().addAll(
-                new Label("Bank conversion"),
+                bankLabel,
                 bankBox,
                 addBankBtn,
                 calcBtn,

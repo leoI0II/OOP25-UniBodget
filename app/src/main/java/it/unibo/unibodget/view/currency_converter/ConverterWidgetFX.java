@@ -263,6 +263,7 @@ public class ConverterWidgetFX {
 
         final ComboBox<String> directionBox = 
             new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
+        ThemeManager.applyFont(directionBox);
         directionBox.setValue("Above");
 
         final Button addAlertButton = new Button("Set Alert");
