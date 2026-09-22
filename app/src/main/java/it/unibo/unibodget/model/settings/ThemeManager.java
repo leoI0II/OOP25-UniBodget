@@ -70,7 +70,8 @@ public final class ThemeManager {
             + "-fx-font-family: '" + t.getFontFamily() + "';"
             + "-fx-font-size: " + t.getFontSize() + "px;"
             + (t.isBoldText() ? "-fx-font-weight: bold;" : "-fx-font-weight: normal;")
-            + "-fx-background-color: " + t.getPrimaryColor().toHex() + ";";
+            + "-fx-background-color: " + t.getPrimaryColor().toHex() + ";"
+            + "-fx-text-fill: " + t.getTextColor().toHex() + ";";
 
         // Apply style to the scene root
         scene.getRoot().setStyle(style);
