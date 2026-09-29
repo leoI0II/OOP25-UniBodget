@@ -18,7 +18,8 @@ import java.util.Map;
  */
 public class BasicCurrencyConverter implements CurrencyConverter {
 
-    private final int scale = 20;
+    private static final int scale = 20;
+    private static final int RESULT_SCALE = 10;
 
     private final ExchangeRateAPI api;
     private final CurrencyUnit baseCurrency;
