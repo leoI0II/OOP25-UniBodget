@@ -24,7 +24,6 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -616,6 +615,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.showAndWait();
 
             addNewWalletVC.dispose();
+            // Reflect the newly created & selected wallet across the whole UI.
+            refreshMainPanel();
             sideBarViewController.refresh();
 
         } catch (final IOException e) {

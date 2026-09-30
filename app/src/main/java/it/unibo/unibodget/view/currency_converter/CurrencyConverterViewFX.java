@@ -23,6 +23,7 @@ import it.unibo.unibodget.view.UI.FXAdapter;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -86,6 +87,36 @@ public final class CurrencyConverterViewFX extends Application {
             throw new IllegalStateException("Controller not initialized. Use launchWith().");
         }
 
+        final Parent root = buildContent(sharedController);
+
+        /* -------------------- WINDOW SETUP -------------------- */
+        stage.setScene(new Scene(root));
+        stage.setTitle("UniBodget - Currency Dashboard");
+
+        // Save window width changes
+        stage.widthProperty().addListener((obs, old, val) -> PREFS.setWidth(val.doubleValue()));
+
+        // Restore window size or maximize
+        if (PREFS.isMaximized()) {
+            stage.setMaximized(true);
+        } else {
+            stage.setWidth(PREFS.getWidth());
+            stage.setHeight(PREFS.getHeight());
+        }
+
+        stage.show();
+    }
+
+    /**
+     * Builds the currency converter dashboard content as a reusable JavaFX node.
+     *
+     * <p>Used both by the standalone {@link #start(Stage)} application and by the
+     * main shell to embed the converter inside the content area.</p>
+     *
+     * @param controller the shared currency converter controller
+     * @return the root node of the converter dashboard
+     */
+    public static Parent buildContent(final CurrencyConverterController controller) {
         /* -------------------- THEME SETUP -------------------- */
         final Theme theme = ThemeManager.getTheme();
         final Color primaryColor = FXAdapter.toFXColor(theme.getPrimaryColor());
@@ -102,7 +133,7 @@ public final class CurrencyConverterViewFX extends Application {
         /* -------------------- WIDGET INSTANTIATION -------------------- */
         // Base converter widget
         final ConverterWidgetFX converterWidget
-                = new ConverterWidgetFX(sharedController, new CurrencyAlertService());
+                = new ConverterWidgetFX(controller, new CurrencyAlertService());
 
         // Watchlist widget
         final WatchList watchlistModel = new WatchList();
@@ -126,7 +157,7 @@ public final class CurrencyConverterViewFX extends Application {
                 converterWidget.getAmountField(),
                 converterWidget.getFromBox(),
                 converterWidget.getToBox(),
-                (BasicCurrencyConverter) sharedController.getConverter()
+                (BasicCurrencyConverter) controller.getConverter()
         );
 
         /* -------------------- HISTORICAL CHART BUTTON -------------------- */
@@ -196,21 +227,6 @@ public final class CurrencyConverterViewFX extends Application {
         );
         root.setBackground(new Background(new BackgroundFill(bgGradient, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        /* -------------------- WINDOW SETUP -------------------- */
-        stage.setScene(new Scene(root));
-        stage.setTitle("UniBodget - Currency Dashboard");
-
-        // Save window width changes
-        stage.widthProperty().addListener((obs, old, val) -> PREFS.setWidth(val.doubleValue()));
-
-        // Restore window size or maximize
-        if (PREFS.isMaximized()) {
-            stage.setMaximized(true);
-        } else {
-            stage.setWidth(PREFS.getWidth());
-            stage.setHeight(PREFS.getHeight());
-        }
-
-        stage.show();
+        return root;
     }
 }

@@ -1,6 +1,12 @@
 package it.unibo.unibodget.model.dashboard.api;
 
 import it.unibo.unibodget.model.categories.CategoryCatalog;
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.wallet.CashAccount;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Facade exposing the dashboard read model and shared category data required by
@@ -22,4 +28,12 @@ public interface DashboardFacade {
      * @return the shared category catalog
      */
     CategoryCatalog getCategoryCatalog();
-} 
+
+    List<CashAccount> getAllCashAccounts();
+
+    Optional<CashAccount> getCurrentSelectedCashAccount();
+
+    Asset getAggregatedBalance();
+
+    void selectWallet(UUID id);
+}

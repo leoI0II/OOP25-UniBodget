@@ -2,8 +2,7 @@ package it.unibo.unibodget.app;
 
 import it.unibo.unibodget.controller.dashboard.impl.DefaultDashboardController;
 import it.unibo.unibodget.model.categories.CategoryCatalog;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
-import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.CategoryService;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
@@ -20,6 +19,7 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransactionFactory;
 import it.unibo.unibodget.view.dashboard.impl.DefaultDashboardView;
+
 
 /**
  * Bootstrap class wiring together the in-memory dashboard dependencies used by
@@ -39,15 +39,15 @@ final class InMemoryDashboardBootstrap {
     private final CashTransactionFactory cashTransactionFactory;
     private final DefaultDashboardView dashboardView;
     private final DefaultDashboardController dashboardController;
-    private final BasicCurrencyConverter converter;
+    private final CurrencyConverter converter;
 
     /**
      * Creates and wires the in-memory dashboard application graph.
      */
-    private InMemoryDashboardBootstrap() {
-        this.settings = new Settings();
-        ThemeManager.setTheme(settings.getTheme());
-
+    private InMemoryDashboardBootstrap(
+            final CurrencyConverter currencyConverter,
+            final Settings settings
+    ) {
         this.cashAccountService = new CashAccountService();
         this.categoryCatalog = new CategoryCatalog();
         this.categoryService = new DefaultCategoryService();
@@ -55,7 +55,10 @@ final class InMemoryDashboardBootstrap {
         this.friendLoanSummaryService = new DefaultFriendLoanSummaryService();
         this.walletInsightService = new DefaultWalletInsightService();
         this.cashTransactionFactory = new CashTransactionFactory();
-        this.converter = new BasicCurrencyConverter(new ExchangeRateAPIImpl(), settings.getBaseCurrencyUnit());
+        this.converter = currencyConverter;
+        this.settings = settings;
+
+        ThemeManager.setTheme(settings.getTheme());
 
         this.dashboardFacade = new DefaultDashboardFacade(
                 cashAccountService,
@@ -63,7 +66,9 @@ final class InMemoryDashboardBootstrap {
                 budgetMonitor,
                 friendLoanSummaryService,
                 walletInsightService,
-                categoryCatalog
+                categoryCatalog,
+                converter,
+                this.settings
         );
 
         this.totalCashBalanceService = new DefaultTotalCashBalanceService(
@@ -77,7 +82,7 @@ final class InMemoryDashboardBootstrap {
                 dashboardFacade,
                 cashAccountService,
                 totalCashBalanceService,
-                settings,
+                this.settings,
                 cashTransactionFactory
         );
 
@@ -89,8 +94,13 @@ final class InMemoryDashboardBootstrap {
      *
      * @return the configured main shell
      */
-    static MainAppShell createShell() {
-        return new MainAppShell(new InMemoryDashboardBootstrap());
+    static MainAppShell createShell(
+            final CurrencyConverter currencyConverter,
+            final Settings settings
+    ) {
+        return new MainAppShell(new InMemoryDashboardBootstrap(
+                currencyConverter, settings
+        ));
     }
 
     /**

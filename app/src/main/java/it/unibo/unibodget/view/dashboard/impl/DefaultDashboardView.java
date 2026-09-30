@@ -248,7 +248,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     public void render(final DashboardViewState state) {
         Objects.requireNonNull(state);
 
-        renderSidebar(state);
+//        renderSidebar(state);
         renderHeader(state.header());
         renderBalanceCard(state.balanceCard());
         renderExpenseRipartitionCard(state.expenseRipartitionCard());
@@ -276,7 +276,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         setPrefSize(1440, 900);
 
         buildSidebar();
-        setLeft(this.sidebarRoot);
+//        setLeft(this.sidebarRoot);
 
         final VBox centerContent = new VBox(18);
         centerContent.setPadding(new Insets(4, 0, 0, 18));

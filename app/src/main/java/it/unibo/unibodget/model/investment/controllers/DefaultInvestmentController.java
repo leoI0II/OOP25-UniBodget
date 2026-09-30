@@ -82,6 +82,7 @@ public class DefaultInvestmentController implements InvestmentController {
         final var currency = event.currency();
         final var newWallet = new InvestmentAccount(name, currency, exchangeRateProvider);
         investmentAccountService.addWallet(newWallet);
+        investmentAccountService.selectWallet(newWallet.getId());
         MessageBus.send(new NewWalletAddedEvent());
     }
 

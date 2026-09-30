@@ -1,6 +1,5 @@
 package it.unibo.unibodget.view.main;
 
-import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
@@ -16,7 +15,9 @@ import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Root JavaFX controller for the main application window.
@@ -30,28 +31,34 @@ public class MainViewController extends BaseViewController {
     @FXML private StackPane contentArea;
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
-    private final DashboardFacade dashboardFacade;
+    private final DashboardModule dashboardModule;
+    private final CurrencyConverterModule converterModule;
     private final ViewControllersFactory viewControllersFactory;
     /** Ref to the currently shown sub-controller, used to call {@link BaseViewController#dispose()} on navigation. */
     private BaseViewController currentVC;
+    /** Last wallet-based context shown (DASHBOARD or INVESTMENTS); used to restore it from the converter. */
+    private AppContext lastWalletContext = AppContext.DASHBOARD;
 
     /**
      * Creates the main controller wiring together all required services.
      *
      * @param investmentController   handles investment business logic
      * @param snapshotService        provides historical balance snapshots
-     * @param dashboardFacade        facade for the dashboard module (nullable until wired)
+     * @param dashboardModule        the dashboard MVC graph embedded as content
+     * @param converterModule        the currency-converter view embedded as content
      * @param viewControllersFactory factory used to build sub-view controllers
      */
     public MainViewController(
             final InvestmentController investmentController,
             final InvestmentsSnapshotService snapshotService,
-            final DashboardFacade dashboardFacade,
+            final DashboardModule dashboardModule,
+            final CurrencyConverterModule converterModule,
             final ViewControllersFactory viewControllersFactory
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
-        this.dashboardFacade = dashboardFacade;
+        this.dashboardModule = Objects.requireNonNull(dashboardModule);
+        this.converterModule = Objects.requireNonNull(converterModule);
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
 
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
@@ -61,11 +68,29 @@ public class MainViewController extends BaseViewController {
 
     /**
      * Called automatically by {@link javafx.fxml.FXMLLoader} after the FXML is loaded.
-     * Shows the investments view as the default content.
+     * Shows the dashboard as the default landing content.
      */
     @FXML
     public void initialize() {
-        showInvestments();
+        sideBarController.setNavigationHandler(this::navigateTo);
+        showDashboard();
+    }
+
+    /**
+     * Handles a top-level navigation request coming from the shared sidebar menu.
+     * Loads the corresponding context into the content area.
+     *
+     * @param context the selected application context
+     */
+    private void navigateTo(final AppContext context) {
+        switch (context) {
+            case DASHBOARD -> showDashboard();
+            case INVESTMENTS -> showInvestments();
+            case CONVERTER -> showConverter();
+            case SETTINGS -> ToastNotification.showInfo(
+                    contentArea.getScene().getWindow(), "Settings not integrated yet.");
+            default -> { }
+        }
     }
 
     /**
@@ -74,25 +99,23 @@ public class MainViewController extends BaseViewController {
      */
     @FXML
     public void showDashboard() {
+        lastWalletContext = AppContext.DASHBOARD;
         if (currentVC != null) {
             currentVC.dispose();
         }
-        final FXMLLoader fxmlLoader = new FXMLLoader(
-                getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/main/DashboardView.fxml")
+        final DashboardViewController delegate = new DashboardViewController(
+                dashboardModule.getFacade(),
+                dashboardModule.getController(),
+                sideBarController
         );
-        Node view = null;
-        try {
-            view = fxmlLoader.load();
-        } catch (final IOException e) {
-            throw new RuntimeException("Failed to load DashboardView", e);
-        }
-        final DashboardViewController dvc = fxmlLoader.getController();
-        currentVC = dvc;
-        dvc.setDashboardFacade(dashboardFacade);
-        sideBarController.setDelegate(dvc);
-        sideBarController.refresh();
+        currentVC = delegate;
+        sideBarController.setDelegate(delegate);
+        // Keep the shared sidebar in sync with any dashboard mutation (transactions, budget, ...).
+        dashboardModule.getController().setOnDashboardRefreshed(sideBarController::refresh);
 
-        contentArea.getChildren().setAll(view);
+        contentArea.getChildren().setAll(dashboardModule.getView());
+        // Render the dashboard center with fresh data for this navigation.
+        dashboardModule.getController().onViewOpened();
     }
 
     /**
@@ -101,6 +124,7 @@ public class MainViewController extends BaseViewController {
      */
     @FXML
     public void showInvestments() {
+        lastWalletContext = AppContext.INVESTMENTS;
         if (currentVC != null) {
             currentVC.dispose();
         }
@@ -118,12 +142,69 @@ public class MainViewController extends BaseViewController {
         currentVC = ivc;
         ivc.setSideBarViewController(sideBarController);
         sideBarController.setDelegate(ivc);
-        sideBarController.refresh();
+
+        // Attach the view to the scene BEFORE selecting a wallet: the initial
+        // selection triggers a full refresh that expects the view to be live.
+        contentArea.getChildren().setAll(view);
         if (!investmentController.getAllInvestmentAccounts().isEmpty()) {
             ivc.onItemSelected(investmentController.getAllInvestmentAccounts().getFirst().getId());
         }
+    }
 
-        contentArea.getChildren().setAll(view);
+    /**
+     * Shows the currency-converter dashboard in the content area.
+     *
+     * <p>The converter is not wallet-based, so the shared sidebar keeps showing the
+     * wallets of the last active wallet context ({@link #lastWalletContext}). Selecting
+     * a wallet (or adding one) returns to that context and applies the action there.</p>
+     */
+    @FXML
+    public void showConverter() {
+        final SideBarDelegate walletDelegate = currentVC instanceof SideBarDelegate d ? d : null;
+        final AppContext restoreContext = lastWalletContext;
+
+        sideBarController.setDelegate(new SideBarDelegate() {
+            @Override
+            public List<SideBarItem> getItems() {
+                return walletDelegate == null ? List.of() : walletDelegate.getItems();
+            }
+
+            @Override
+            public String getTotalAggregatedBalance() {
+                return walletDelegate == null ? "" : walletDelegate.getTotalAggregatedBalance();
+            }
+
+            @Override
+            public void onItemSelected(final UUID id) {
+                restoreWalletContext(restoreContext);
+                if (currentVC instanceof SideBarDelegate d) {
+                    d.onItemSelected(id);
+                }
+            }
+
+            @Override
+            public void onAddWalletRequested() {
+                restoreWalletContext(restoreContext);
+                if (currentVC instanceof SideBarDelegate d) {
+                    d.onAddWalletRequested();
+                }
+            }
+        });
+
+        contentArea.getChildren().setAll(converterModule.getView());
+    }
+
+    /**
+     * Restores a wallet-based context (dashboard or investments) into the content area.
+     *
+     * @param context the wallet context to restore
+     */
+    private void restoreWalletContext(final AppContext context) {
+        if (context == AppContext.INVESTMENTS) {
+            showInvestments();
+        } else {
+            showDashboard();
+        }
     }
 
     /**

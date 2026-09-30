@@ -117,10 +117,12 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         );
     }
 
+    @Override
     public List<CashAccount> getAllCashAccounts() {
         return walletService.getWallets();
     }
 
+    @Override
     public Optional<CashAccount> getCurrentSelectedCashAccount() {
         return walletService.getCurrentWallet();
     }
@@ -131,10 +133,12 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 .findFirst();
     }
 
+    @Override
     public void selectWallet(UUID id) {
         walletService.selectWallet(id);
     }
 
+    @Override
     public Asset getAggregatedBalance() {
         return getAllCashAccounts().stream()
                 .map(CashAccount::getBalance)
