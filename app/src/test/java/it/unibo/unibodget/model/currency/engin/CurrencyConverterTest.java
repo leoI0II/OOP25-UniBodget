@@ -12,39 +12,70 @@ import it.unibo.unibodget.model.currency.CurrencyConversionResult;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 
 class CurrencyConverterTest {
-
-    private static final double VAL_1_0 = 1.0;
-    private static final double VAL_1_2 = 1.2;
 
     @Test
     void shouldConvertCorrectly() {
         final ExchangeRateAPI api = new ExchangeRateAPI() {
+
             @Override
-            public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
+            public Map<CurrencyUnit, Double> getLatestRates(
+                    final CurrencyUnit base) {
+
+                assertEquals(FiatCurrency.USD, base);
+
                 return Map.of(
-                    FiatCurrency.EUR, VAL_1_0,
-                    FiatCurrency.USD, VAL_1_2
+                        FiatCurrency.USD, 1.0,
+                        FiatCurrency.EUR, 0.8
                 );
             }
 
             @Override
             public Map<LocalDate, Double> getHistoricalRates(
-                    final CurrencyUnit base, final CurrencyUnit target,
-                    final LocalDate from, final LocalDate to) {
-                return Map.of();
+                    final CurrencyUnit base,
+                    final CurrencyUnit target,
+                    final LocalDate from,
+                    final LocalDate to) {
+
+                throw new AssertionError(
+                        "Historical rates must not be requested"
+                );
             }
         };
 
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(api, FiatCurrency.EUR);
+        final UniversalPriceService service = new UniversalPriceService(
+                api,
+                unit -> {
+                    throw new AssertionError(
+                            "Crypto provider must not be called"
+                    );
+                },
+                unit -> {
+                    throw new AssertionError(
+                            "Stock provider must not be called"
+                    );
+                }
+        );
 
-        final CurrencyConversionResult result =
-                converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
+        final CurrencyConverter converter =
+                new BasicCurrencyConverter(service);
 
-        assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());
-        assertEquals(new BigDecimal("1.2000000000"), result.getAppliedRate());
+        final CurrencyConversionResult result = converter.convert(
+                new BigDecimal("100"),
+                FiatCurrency.EUR,
+                FiatCurrency.USD
+        );
+
+        assertEquals(
+                0,
+                new BigDecimal("125").compareTo(result.getConvertedAmount())
+        );
+
+        assertEquals(
+                0,
+                new BigDecimal("1.25").compareTo(result.getAppliedRate())
+        );
     }
-
 }

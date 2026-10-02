@@ -4,20 +4,18 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
- * Represents a monetary asset with a specific currency and amount.
- * An Asset consists of:
- * - a {@link CurrencyUnit} indicating the type of currency (e.g., USD, EUR, BTC)
- * - a {@link BigDecimal} representing the numerical amount (positive for income, negative for expense)
- * This class is a record, which provides immutability, value-based equality, and a concise syntax.
- * 
- * @param currency CurrencyUnit
- * @param amount BigDecimal
+ * Immutable monetary value: a {@link CurrencyUnit} paired with a {@link BigDecimal} amount.
+ *
+ * <p>Positive amounts represent income or holdings; negative amounts represent expenses or debts.</p>
+ *
+ * @param currency the type of currency (e.g., USD, EUR, BTC); must not be null
+ * @param amount   the numerical amount; positive for income, negative for expense; must not be null
  */
 public record Asset(CurrencyUnit currency, BigDecimal amount) {
 
     /**
      * Constructs an Asset with the given currency and amount.
-     * 
+     *
      * @param currency the currency unit of the asset; must not be null
      * @param amount the numerical amount; must not be null
      * @throws NullPointerException if either currency or amount is null
@@ -48,10 +46,19 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
         return new Asset(currency, BigDecimal.ZERO);
     }
 
+    /**
+     * Asserts that {@code other} shares the same currency as this asset.
+     *
+     * @param other the asset to check
+     * @throws IllegalArgumentException if the currencies differ
+     */
     private void requireSameCurrency(final Asset other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException(
-                "Cannot operate on assets with different currencies: " + this.currency + " vs " + other.currency
+                "Cannot operate on assets with different currencies: "
+                        + this.currency
+                        + " vs "
+                        + other.currency
             );
         }
     }

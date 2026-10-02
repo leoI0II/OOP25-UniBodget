@@ -1,27 +1,31 @@
 package it.unibo.unibodget.model.transactions;
 
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.time.YearMonth;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import it.unibo.unibodget.model.transactions.base.Transaction;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 
 /**
  * Represents an ordered collection of transactions.
  *
  * <p>
- * Acts as a historical ledger, storing a chronological list
- * of {@link Transaction} objects (or subclasses such as InvestmentTransaction).
- * It provides basic operations for:
- * - adding a new transaction
- * - retrieving the full immutable history
- * 
- * @param <T> the type of transaction stored in this historical ledger
+ * Acts as a historical ledger, storing a chronological list of
+ * {@link AbstractTransaction} objects. It provides basic operations for:
+ * <ul>
+ * <li>adding a new transaction</li>
+ * <li>removing or replacing an existing transaction</li>
+ * <li>retrieving the full immutable history</li>
+ * <li>clearing all recorded transactions</li>
+ * </ul>
+ *
+ * @param <T> the concrete transaction type stored in this ledger
  */
-public final class Historical<T extends Transaction> {
+public class Historical<T extends AbstractTransaction> {
 
     @JsonProperty("transactions")
     private final List<T> history;
@@ -34,9 +38,10 @@ public final class Historical<T extends Transaction> {
     }
 
     /**
-     * Constructs a historical ledger initialized with the given list of transactions.
+     * Creates a new ledger pre-populated with the given transactions.
      *
-     * @param history the initial list of transactions; must not be null
+     * @param history the initial list of transactions; must not be {@code null}
+     * @throws NullPointerException if {@code history} is {@code null}
      */
     public Historical(final List<T> history) {
         this.history = new ArrayList<>(Objects.requireNonNull(history));
@@ -45,7 +50,8 @@ public final class Historical<T extends Transaction> {
     /**
      * Adds a new transaction to the historical ledger.
      *
-     * @param transaction the transaction to add; must not be null
+     * @param transaction the transaction to add; must not be {@code null}
+     * @throws NullPointerException if {@code transaction} is {@code null}
      */
     public void addTransaction(final T transaction) {
         history.add(Objects.requireNonNull(transaction));
@@ -63,25 +69,32 @@ public final class Historical<T extends Transaction> {
 
     /**
      * Removes a transaction from the ledger.
-     * 
+     *
      * <p>
      * Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was found and removed,
+     * {@code false} otherwise
      */
     public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
     /**
-     * Replaces an existing transaction with a new one, preserving its position in the ledger.
-     * 
+     * Replaces an existing transaction with a new one, preserving its position
+     * in the ledger.
+     *
      * <p>
      * Uses {@link Object#equals} to locate {@code oldTransaction}.
-     * Does nothing if {@code oldTransaction} is not found.
      *
-     * @param oldTransaction the transaction to replace; must not be null
-     * @param newTransaction the replacement transaction; must not be null
+     * @param oldTransaction the transaction to replace; must not be
+     * {@code null}
+     * @param newTransaction the replacement transaction; must not be
+     * {@code null}
+     * @return {@code true} if the replacement succeeded, {@code false} if
+     * {@code oldTransaction} was not found in the ledger
+     * @throws NullPointerException if either argument is {@code null}
      */
     public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
         Objects.requireNonNull(oldTransaction);
@@ -102,10 +115,7 @@ public final class Historical<T extends Transaction> {
     }
 
     /**
-     * Compares this historical ledger with another object for equality.
-     *
-     * @param o the object to compare with
-     * @return {@code true} if the two ledgers contain the same transactions; {@code false} otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(final Object o) {
@@ -120,9 +130,7 @@ public final class Historical<T extends Transaction> {
     }
 
     /**
-     * Returns the hash code for this historical ledger.
-     *
-     * @return the hash code computed from the transaction history
+     * {@inheritDoc}
      */
     @Override
     public int hashCode() {
@@ -131,9 +139,10 @@ public final class Historical<T extends Transaction> {
 
     /**
      * Returns all transactions that occurred within the given calendar month.
-     * 
+     *
      * @param month the month to filter by
-     * @return an unmodifiable list of transactions that occurred in the specified month
+     * @return an unmodifiable list of transactions that occurred in the
+     * specified month
      */
     public List<T> filterByMonth(final YearMonth month) {
         Objects.requireNonNull(month, "month must not be null");

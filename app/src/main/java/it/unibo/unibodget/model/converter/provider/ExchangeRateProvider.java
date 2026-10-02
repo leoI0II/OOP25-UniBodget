@@ -15,19 +15,12 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 public interface ExchangeRateProvider {
 
     /**
-     * Converts the given asset into the specified target currency.
+     * Converts {@code src} into the equivalent amount expressed in {@code target}.
      *
-     * <p>
-     * The returned {@link Asset} represents the same economic value expressed
-     * in the target currency.
-     * </p>
-     *
-     * @param src    the asset to convert; must not be {@code null}
-     * @param target the currency into which the asset should be converted;
-     *               must not be {@code null}
-     * @return a new {@link Asset} expressed in the target currency
+     * @param src    the asset to convert, carrying both the amount and the source currency
+     * @param target the currency to convert into
+     * @return a new {@link Asset} with the converted amount in {@code target}
      */
     Asset convert(Asset src, CurrencyUnit target);
-
 
 }

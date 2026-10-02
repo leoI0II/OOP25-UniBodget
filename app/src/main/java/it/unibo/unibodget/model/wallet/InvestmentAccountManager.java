@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import it.unibo.unibodget.model.converter.provider.PriceProvider;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.CurrencyUnitDeserializer;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
 
@@ -27,7 +27,7 @@ public final class InvestmentAccountManager {
     private static final String RESOURCE = "/json/wallet/InvestmentAccounts.json";
     private static final String KEY = "investmentAccounts";
 
-    private final PriceProvider provider;
+    private final CurrencyConverter provider;
     private final ModelFileManager<InvestmentAccount> manager;
 
     /**
@@ -36,7 +36,7 @@ public final class InvestmentAccountManager {
      *
      * @param provider the price provider used for market value computations
      */
-    public InvestmentAccountManager(final PriceProvider provider) {
+    public InvestmentAccountManager(final CurrencyConverter provider) {
         this.provider = provider;
         this.manager =
                 new ModelFileManager<>(

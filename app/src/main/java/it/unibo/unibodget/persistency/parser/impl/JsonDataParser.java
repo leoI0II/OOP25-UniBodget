@@ -1,8 +1,5 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
-import it.unibo.unibodget.persistency.parser.api.DataParser;
-import it.unibo.unibodget.persistency.parser.api.DataParserException;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -11,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.unibo.unibodget.persistency.parser.api.DataParser;
+import it.unibo.unibodget.persistency.parser.api.DataParserException;
 
 /**
  * A lightweight JSON parser that maps simple JSON objects and arrays

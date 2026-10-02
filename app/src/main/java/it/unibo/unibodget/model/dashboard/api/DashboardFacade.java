@@ -1,18 +1,25 @@
-
 package it.unibo.unibodget.model.dashboard.api;
 
+import it.unibo.unibodget.model.categories.CategoryCatalog;
+
 /**
- * Represents the main access point to dashboard data.
- * The facade hides the internal collaboration among the dashboard
- * services and returns a unified snapshot ready to be consumed by
- * presentation components.
+ * Facade exposing the dashboard read model and shared category data required by
+ * dashboard-related user flows.
  */
 public interface DashboardFacade {
 
     /**
-     * Loads the current dashboard state as an aggregated snapshot.
+     * Loads the current dashboard snapshot.
      *
-     * @return the current dashboard snapshot
+     * @return the immutable snapshot representing the current dashboard state
      */
     DashboardSnapshot loadDashboard();
-}
+
+    /**
+     * Returns the shared category catalog used by dashboard flows such as
+     * transaction creation.
+     *
+     * @return the shared category catalog
+     */
+    CategoryCatalog getCategoryCatalog();
+} 

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +23,8 @@ import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
  * account lists. Acts as the persistence gateway for cash wallets.
  */
 public final class CashAccountManager {
+
+    private static final Logger LOGGER = Logger.getLogger(CashAccountManager.class.getName());
 
     private static final Path PATH = Path.of("data/json/wallet/CashAccounts.json");
     private static final String RESOURCE = "/json/wallet/CashAccounts.json";
@@ -60,7 +64,7 @@ public final class CashAccountManager {
             );
 
         } catch (final IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Unable to load cash accounts: {0}", e.getMessage());
             return new ArrayList<>();
         }
     }

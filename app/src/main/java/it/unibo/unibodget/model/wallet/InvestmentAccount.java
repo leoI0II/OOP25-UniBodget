@@ -12,22 +12,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import it.unibo.unibodget.model.converter.provider.PriceProvider;
+import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 
 /**
- * Wallet specialized for investment assets. It computes balance from market
- * prices, tracks realized/unrealized profit/loss, and derives open positions
- * using the Average Cost Method. All values are expressed in the base currency.
+ * A wallet specialized for investment assets (stocks, crypto, funds).
+ *
+ * <p>
+ * The balance is computed dynamically as the sum of current market values of
+ * all open positions, using a {@link ExchangeRateProvider} for live prices.
+ * Profit/loss is tracked separately as realized (from closed sells) and
+ * unrealized (on open positions), following the Average Cost Method.
  */
-public class InvestmentAccount extends Wallet<InvestmentTransaction> {
+public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
 
     @JsonIgnore
-    private final PriceProvider priceProvider;
+    private final CurrencyConverter priceProvider;
 
     /**
      * Creates an InvestmentAccount with an existing transaction history.
@@ -38,10 +43,10 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param priceProvider provider used to fetch live market prices
      */
     public InvestmentAccount(
-        final String name,
-        final CurrencyUnit baseCurrency,
-        final Historical<InvestmentTransaction> history,
-        final PriceProvider priceProvider) {
+            final String name,
+            final CurrencyUnit baseCurrency,
+            final Historical<InvestmentTransaction> history,
+            final CurrencyConverter priceProvider) {
         super(name, baseCurrency, history, "Investment Account");
         this.priceProvider = Objects.requireNonNull(priceProvider, "Price provider cannot be null");
     }
@@ -53,14 +58,16 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @param baseCurrency the currency used to express the balance
      * @param priceProvider provider used to fetch live market prices
      */
-    public InvestmentAccount(final String name, 
-                            final CurrencyUnit baseCurrency, final PriceProvider priceProvider) {
+    public InvestmentAccount(
+            final String name,
+            final CurrencyUnit baseCurrency,
+            final CurrencyConverter priceProvider) {
         this(name, baseCurrency, new Historical<>(), priceProvider);
     }
 
     /**
-     * JSON constructor used when deserializing InvestmentAccount objects.
-     * The price provider is not restored from JSON and must be reattached manually.
+     * JSON constructor used when deserializing InvestmentAccount objects. The
+     * price provider is not restored from JSON and must be reattached manually.
      *
      * @param name the wallet name
      * @param baseCurrency the currency used to express the balance
@@ -87,25 +94,26 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * @return the {@link PriceProvider}, or null if deserialized from JSON
      */
     @JsonIgnore
-    public PriceProvider getPriceProvider() {
+    public CurrencyConverter getPriceProvider() {
         return priceProvider;
     }
 
     /**
-     * Computes the current balance as the sum of market values of all open positions.
+     * Computes the current balance as the sum of market values of all open
+     * positions.
      *
      * @return an {@link Asset} representing the total balance in base currency
      */
     @Override
     public Asset getBalance() {
         return getPositions().stream()
-            .map(Position::currentMarketValue)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .map(Position::currentMarketValue)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
     /**
-     * Computes all open positions derived from the transaction history.
-     * Closed positions (net quantity ≤ 0) are excluded.
+     * Computes all open positions derived from the transaction history. Closed
+     * positions (net quantity ≤ 0) are excluded.
      *
      * @return a list of open {@link Position} objects
      */
@@ -123,7 +131,8 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
      * Returns the open position for a specific asset, if present.
      *
      * @param asset the asset to search for
-     * @return an {@link Optional} containing the position, or empty if none exists
+     * @return an {@link Optional} containing the position, or empty if none
+     * exists
      */
     public Optional<Position> getPositionForAsset(final CurrencyUnit asset) {
         return getPositions().stream()
@@ -132,15 +141,17 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
     }
 
     /**
-     * Computes a single position using the Average Cost Method.
-     * Buys increase cost and quantity; sells reduce cost proportionally.
+     * Computes a single position using the Average Cost Method. Buys increase
+     * cost and quantity; sells reduce cost proportionally.
      *
      * @param asset the asset being computed
      * @param transactions all transactions for the asset
      * @return the resulting {@link Position}
      */
-    private Position computePosition(final CurrencyUnit asset, 
-                                     final List<InvestmentTransaction> transactions) {
+    private Position computePosition(
+            final CurrencyUnit asset,
+            final List<InvestmentTransaction> transactions
+    ) {
         var totalCost = BigDecimal.ZERO;
         var totalQty = BigDecimal.ZERO;
 
@@ -161,19 +172,17 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
                 totalQty = totalQty.add(qty);
             }
         }
-
         final var avgCost = totalQty.signum() == 0
                 ? BigDecimal.ZERO
                 : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
-
-        final Asset currentPrice = priceProvider.getCurrentPrice(asset, getBaseCurrency());
+        // final Asset currentPrice = priceProvider.convert(new Asset(asset, BigDecimal.ONE), getBaseCurrency());
+        final Asset currentPrice = priceProvider.convert(BigDecimal.ONE, asset, getBaseCurrency()).getAsset();
         final Asset currentMarketValue = currentPrice.multiply(totalQty);
-
         return new Position(
-            asset,
-            totalQty,
-            Asset.of(getBaseCurrency(), avgCost),
-            currentMarketValue
+                asset,
+                totalQty,
+                Asset.of(getBaseCurrency(), avgCost),
+                currentMarketValue
         );
     }
 
@@ -197,8 +206,8 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
     @JsonIgnore
     public Asset getUnrealizedProfitLoss() {
         return getPositions().stream()
-            .map(Position::getUnrealizedProfitLoss)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .map(Position::getUnrealizedProfitLoss)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
     /**
@@ -209,10 +218,10 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
     @JsonIgnore
     public Asset getRealizedProfitLoss() {
         return getHistory().getTransactions().stream()
-            .collect(Collectors.groupingBy(t -> t.getAsset().currency()))
-            .values().stream()
-            .map(this::computeRealizedProfitLoss)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .collect(Collectors.groupingBy(t -> t.getAsset().currency()))
+                .values().stream()
+                .map(this::computeRealizedProfitLoss)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
     /**
@@ -226,35 +235,44 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
     }
 
     /**
-     * Computes total profit/loss as a percentage of total cost basis.
+     * Returns the total profit/loss as a percentage of the total cost basis.
      *
-     * @return the P/L percentage, or zero if cost basis is zero
+     * <p>
+     * Returns {@code 0} if there is no cost basis to avoid division by
+     * zero.</p>
+     *
+     * @return the P/L percentage, e.g. {@code 12.50} for +12.5%
      */
     @JsonIgnore
     public BigDecimal getTotalProfitLossPercentage() {
         final var totalCostBasis = getPositions().stream()
-            .map(Position::getTotalCost)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .map(Position::getTotalCost)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
 
         if (totalCostBasis.amount().signum() == 0) {
             return BigDecimal.ZERO;
         }
 
         return getTotalProfitLoss().amount()
-            .divide(totalCostBasis.amount(), 10, RoundingMode.HALF_UP)
-            .multiply(BigDecimal.valueOf(100));
+                .divide(totalCostBasis.amount(), 10, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
     }
 
     /**
      * Returns the total cost basis across all open positions.
      *
-     * @return an {@link Asset} representing total cost basis
+     * <p>
+     * The cost basis is the sum of {@link Position#getTotalCost()} for each
+     * open position, representing the total amount invested at average purchase
+     * price.</p>
+     *
+     * @return the total cost basis as an {@link Asset} in the base currency
      */
     @JsonIgnore
     public Asset getTotalCostBasis() {
         return getPositions().stream()
-            .map(Position::getTotalCost)
-            .reduce(Asset.zero(getBaseCurrency()), Asset::add);
+                .map(Position::getTotalCost)
+                .reduce(Asset.zero(getBaseCurrency()), Asset::add);
     }
 
     /**
@@ -270,18 +288,17 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
 
         for (final var transaction : sortedByDate(transactions)) {
             final var qty = transaction.getAsset().amount();
-            final var unitPrice = transaction.getUnitPrice().amount();
+            final var unitPrice = transaction.getUnitPrice().amount(); // Price at which the asset was bought/sold
             final var fee = transaction.getFee() != null ? transaction.getFee().amount() : BigDecimal.ZERO;
 
             if (qty.signum() > 0) { // Buy
                 totalCost = totalCost.add(qty.multiply(unitPrice)).add(fee);
                 totalQty = totalQty.add(qty);
-            } else { // Sell
+            } else { //Sell
                 final var soldQty = qty.abs();
                 final var avgCostBeforeSale = totalQty.signum() == 0
                         ? BigDecimal.ZERO
                         : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
-
                 final var pricePL = unitPrice.subtract(avgCostBeforeSale)
                         .multiply(soldQty)
                         .subtract(fee);
@@ -296,11 +313,13 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
     }
 
     /**
-     * Checks whether the wallet holds enough quantity of an asset to sell.
+     * Returns whether the account holds enough quantity of an asset to cover a
+     * sell order.
      *
-     * @param asset the asset to check
-     * @param qtyToSell the quantity requested for sale
-     * @return true if the quantity can be sold
+     * @param asset the asset to sell
+     * @param qtyToSell the quantity to sell; must be positive
+     * @return {@code true} if the open position covers {@code qtyToSell},
+     * {@code false} otherwise
      * @throws IllegalArgumentException if {@code qtyToSell} is not positive
      */
     public boolean canSell(final CurrencyUnit asset, final BigDecimal qtyToSell) {
@@ -308,23 +327,25 @@ public class InvestmentAccount extends Wallet<InvestmentTransaction> {
             throw new IllegalArgumentException("Quantity to sell must be positive.");
         }
         return getPositionForAsset(asset)
-            .map(pos -> pos.quantity().compareTo(qtyToSell) >= 0)
-            .orElse(false);
+                .map(pos -> pos.quantity().compareTo(qtyToSell) >= 0)
+                .orElse(false);
     }
 
     /**
-     * Returns a new InvestmentAccount instance with the specified price provider.
-     * Useful when loading accounts from JSON, where providers are not restored.
+     * Returns a new InvestmentAccount instance with the specified price
+     * provider. Useful when loading accounts from JSON, where providers are not
+     * restored.
      *
      * @param provider the price provider to attach
-     * @return a new {@link InvestmentAccount} with the same data and the new provider
+     * @return a new {@link InvestmentAccount} with the same data and the new
+     * provider
      */
-    public InvestmentAccount withProvider(final PriceProvider provider) {
+    public InvestmentAccount withProvider(final CurrencyConverter provider) {
         return new InvestmentAccount(
-            getName(),
-            getBaseCurrency(),
-            getHistory(),
-            provider
+                getName(),
+                getBaseCurrency(),
+                getHistory(),
+                provider
         );
     }
 }

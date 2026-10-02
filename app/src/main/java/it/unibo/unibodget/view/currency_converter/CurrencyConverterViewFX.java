@@ -8,22 +8,22 @@ import it.unibo.unibodget.controller.currency_converter.CurrencyConverterControl
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
+import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
-import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.view.UI.FXAdapter;
-import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
-import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -37,20 +37,19 @@ import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 
 /**
  * Main dashboard screen for all currency‑related operations.
- * 
+ *
  * <p>
  * This JavaFX view hosts multiple widgets:
  * <ul>
- *     <li>{@link ConverterWidgetFX} – base currency converter</li>
- *     <li>{@link WatchlistWidgetFX} – watchlist for favorite currency pairs</li>
- *     <li>{@link BankConverterWidgetFX} – bank‑mediated conversion with fees</li>
- *     <li>Historical chart viewer</li>
+ * <li>{@link ConverterWidgetFX} – base currency converter</li>
+ * <li>{@link WatchlistWidgetFX} – watchlist for favorite currency pairs</li>
+ * <li>{@link BankConverterWidgetFX} – bank‑mediated conversion with fees</li>
+ * <li>Historical chart viewer</li>
  * </ul>
- * 
+ *
  * <p>
  * The dashboard applies theme‑aware styling, window preferences, and
  * orchestrates the interaction between widgets.
@@ -61,10 +60,14 @@ public final class CurrencyConverterViewFX {
     private static final double ROOT_PADDING = 35;
     private static final int DAYS_TO_SUBTRACT = 5;
 
-    /** Shared controller injected via launchWith(). */
+    /**
+     * Shared controller injected via launchWith().
+     */
     private static CurrencyConverterController sharedController;
 
-    /** Window size and maximize preferences. */
+    /**
+     * Window size and maximize preferences.
+     */
     private static final WindowPreferences PREFS = new WindowPreferences();
 
     /**
@@ -97,14 +100,14 @@ public final class CurrencyConverterViewFX {
 
         /* -------------------- WIDGET INSTANTIATION -------------------- */
         // Base converter widget
-        final ConverterWidgetFX converterWidget =
-                new ConverterWidgetFX(sharedController, new CurrencyAlertService());
+        final ConverterWidgetFX converterWidget
+                = new ConverterWidgetFX(sharedController, new CurrencyAlertService());
 
         // Watchlist widget
         final WatchList watchlistModel = new WatchList();
         final WatchListController watchlistController = new WatchListController(watchlistModel);
-        final WatchlistWidgetFX watchlistWidget =
-                new WatchlistWidgetFX(watchlistController, converterWidget);
+        final WatchlistWidgetFX watchlistWidget
+                = new WatchlistWidgetFX(watchlistController, converterWidget);
 
         // Alert service with a sample alert
         final CurrencyAlertService alertService = new CurrencyAlertService();
@@ -141,8 +144,8 @@ public final class CurrencyConverterViewFX {
             if (history.isEmpty()) {
                 System.out.println("Offline mode: using mock history");
 
-                final Map<LocalDate, Double> mockHistory =
-                        MockExchangeRateAPI.generateMockHistory(
+                final Map<LocalDate, Double> mockHistory
+                        = MockExchangeRateAPI.generateMockHistory(
                                 LocalDate.now().minusDays(DAYS_TO_SUBTRACT),
                                 LocalDate.now()
                         );
@@ -165,6 +168,14 @@ public final class CurrencyConverterViewFX {
                     historyApi,
                     controller.getConverter()
             );
+
+/*
+            final BasicCurrencyConverter historyConverter
+                    = new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
+            final CurrencyConverterController historyController
+                    = new CurrencyConverterController(historyApi, historyConverter);
+*/
+
             CurrencyHistoryChartView.showInNewWindow(historyController);
         });
 

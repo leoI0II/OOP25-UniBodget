@@ -48,4 +48,9 @@ public final class CurrencyPlaceholder implements CurrencyUnit {
     public String getCode() {
         return code;
     }
+
+    @Override
+    public int getDisplayDecimals() {
+        return 2;                   // TODO CHECK USE THE FUCKING UTIL FOR IT
+    }
 }

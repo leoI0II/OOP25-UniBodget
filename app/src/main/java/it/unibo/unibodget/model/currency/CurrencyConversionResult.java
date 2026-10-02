@@ -63,6 +63,15 @@ public class CurrencyConversionResult {
         return new BigDecimal(String.valueOf(convertedAmount));
     }
 
+    /**
+     * Get the asset made by src CurrencyUnit and converterd amount.
+     * 
+     * @return new asset made by src CurrencyUnit and converterd amount
+     */
+    public Asset getAsset(){
+        return new Asset(to, getConvertedAmount());
+    }
+
     /** 
      * Get the applied exchange rate. 
      * 

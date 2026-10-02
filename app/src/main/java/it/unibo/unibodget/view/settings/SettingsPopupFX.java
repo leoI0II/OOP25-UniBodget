@@ -18,8 +18,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 /**
  * Popup window used to edit and apply application settings.
@@ -80,7 +80,7 @@ public final class SettingsPopupFX {
                     setText("");
                 } else {
                     // Show date + theme summary + base currency
-                    final String hex = item.getTheme().getPrimaryColor().toHex();
+                    final String hex = item.getTheme().getPrimaryColor().toHexString();
                     final String font = item.getTheme().getFontFamily();
                     final int size = item.getTheme().getFontSize();
                     setText(item.getSavedAt() + " · " + hex + " · "
@@ -91,7 +91,7 @@ public final class SettingsPopupFX {
         historyBox.setButtonCell(historyBox.getCellFactory().call(null));
 
         // Primary color (HEX)
-        final TextField colorField = new TextField(current.getTheme().getPrimaryColor().toHex());
+        final TextField colorField = new TextField(current.getTheme().getPrimaryColor().toHexString());
 
         // Font family selector
         final ComboBox<String> fontBox = new ComboBox<>();

@@ -1,0 +1,9 @@
+.menu-button .arrow-button {
+    -fx-padding: 0em;
+}
+.menu-button .arrow {
+    -fx-padding: 0em;
+    -fx-shape: null;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+}
