@@ -112,6 +112,7 @@ public interface CurrencyUnit {
         Collections.addAll(list, CryptoCurrency.values());
         Collections.addAll(list, StockMarketCurrency.values());
         list.addAll(Currency.all());
+        System.out.print(list);
         return list;
     }
 
