@@ -11,6 +11,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
@@ -159,10 +160,11 @@ public final class CurrencyConverterViewFX {
                 };
             }
 
-            final BasicCurrencyConverter historyConverter =
-                new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
             final CurrencyConverterController historyController =
-                new CurrencyConverterController(historyApi, historyConverter);
+            new CurrencyConverterController(
+                    historyApi,
+                    controller.getConverter()
+            );
             CurrencyHistoryChartView.showInNewWindow(historyController);
         });
 
