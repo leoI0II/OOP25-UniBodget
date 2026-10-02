@@ -9,108 +9,165 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyConversionResult;
 import it.unibo.unibodget.model.currency.CurrencyType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 
 class BasicCurrencyConverterTest {
 
-    private static final double RATE_1_0 = 1.0;
-    private static final double RATE_1_2 = 1.2;
-    private static final double RATE_0_8 = 0.8;
-    private static final int VAL_50 = 50;
+    /**
+     * Fixed test prices:
+     * 1 USD = 0.8 EUR;
+     * 1 stock share = 500 USD;
+     * 1 crypto unit = 60000 USD.
+     */
+    private BasicCurrencyConverter createConverter() {
+        final UniversalPriceService service = new UniversalPriceService(
+                new MockAPI(),
+                unit -> 60_000.0,
+                unit -> 500.0
+        );
 
-    private static final String FAKE = "FAKE";
+        return new BasicCurrencyConverter(service);
+    }
+
+    private static void assertAmountEquals(
+            final String expected,
+            final BigDecimal actual) {
+        assertEquals(
+                0,
+                new BigDecimal(expected).compareTo(actual),
+                "Expected " + expected + ", obtained " + actual
+        );
+    }
 
     @Test
     void shouldReturnSameAmountWhenCurrenciesMatch() {
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
-
-        final CurrencyConversionResult result =
-                converter.convert(new BigDecimal(VAL_50), FiatCurrency.EUR, FiatCurrency.EUR);
-
-        assertEquals(new BigDecimal(VAL_50), result.getConvertedAmount());
-        assertEquals(BigDecimal.ONE, result.getAppliedRate());
-    }
-
-    @Test
-    void shouldFailOnStockCurrency() {
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
-
-        assertThrows(IllegalArgumentException.class, () ->
-                converter.convert(new BigDecimal("10"), StockMarketCurrency.AAPL, FiatCurrency.EUR)
+        final CurrencyConversionResult result = createConverter().convert(
+                new BigDecimal("50"),
+                FiatCurrency.EUR,
+                FiatCurrency.EUR
         );
-    }
 
-    @Test
-    void shouldFailWhenRateMissing() {
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
-
-        final CurrencyUnit fake = new CurrencyUnit() {
-            @Override 
-            public CurrencyType getType() { 
-                return CurrencyType.FIAT; 
-            }
-
-            @Override 
-            public String getSymbol() { 
-                return "?"; 
-            }
-
-            @Override 
-            public String getShortName() { 
-                return FAKE; 
-            }
-
-            @Override 
-            public String getFullName() { 
-                return "Fake"; 
-            }
-
-            @Override 
-            public String getCode() { 
-                return FAKE; 
-            }
-        };
-
-        assertThrows(IllegalArgumentException.class, () ->
-                converter.convert(new BigDecimal("10"), fake, FiatCurrency.EUR)
-        );
+        assertAmountEquals("50", result.getConvertedAmount());
+        assertAmountEquals("1", result.getAppliedRate());
     }
 
     @Test
     void shouldConvertCorrectly() {
-        final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(new MockAPI(), FiatCurrency.EUR);
+        final CurrencyConversionResult result = createConverter().convert(
+                new BigDecimal("100"),
+                FiatCurrency.EUR,
+                FiatCurrency.USD
+        );
 
-        final CurrencyConversionResult result =
-                converter.convert(new BigDecimal("100"), FiatCurrency.EUR, FiatCurrency.USD);
-
-        assertEquals(new BigDecimal("120.0000000000"), result.getConvertedAmount());
-        assertEquals(new BigDecimal("1.2000000000"), result.getAppliedRate());
+        // 1 EUR = 1 / 0.8 USD = 1.25 USD.
+        assertAmountEquals("125", result.getConvertedAmount());
+        assertAmountEquals("1.25", result.getAppliedRate());
     }
 
-    static class MockAPI implements ExchangeRateAPI {
+    @Test
+    void shouldConvertStockToFiat() {
+        final CurrencyConversionResult result = createConverter().convert(
+                new BigDecimal("2"),
+                StockMarketCurrency.AAPL,
+                FiatCurrency.EUR
+        );
+
+        // 2 shares × 500 USD/share ÷ 1.25 USD/EUR = 800 EUR.
+        assertAmountEquals("800", result.getConvertedAmount());
+        assertAmountEquals("400", result.getAppliedRate());
+    }
+
+    @Test
+    void shouldConvertFiatToStock() {
+        final CurrencyConversionResult result = createConverter().convert(
+                new BigDecimal("800"),
+                FiatCurrency.EUR,
+                StockMarketCurrency.AAPL
+        );
+
+        assertAmountEquals("2", result.getConvertedAmount());
+        assertAmountEquals("0.0025", result.getAppliedRate());
+    }
+
+    @Test
+    void shouldConvertCryptoToStock() {
+        final CurrencyConversionResult result = createConverter().convert(
+                BigDecimal.ONE,
+                CryptoCurrency.BTC,
+                StockMarketCurrency.AAPL
+        );
+
+        // 60000 USD/BTC ÷ 500 USD/share = 120 shares/BTC.
+        assertAmountEquals("120", result.getConvertedAmount());
+        assertAmountEquals("120", result.getAppliedRate());
+    }
+
+    @Test
+    void shouldFailWhenRateMissing() {
+        final CurrencyUnit fake = new Currency(
+                CurrencyType.FIAT, "?", "FAKE", "Fake", "FAKE"
+        );
+
+        assertThrows(IllegalArgumentException.class, () ->
+                createConverter().convert(
+                        BigDecimal.TEN,
+                        fake,
+                        FiatCurrency.EUR
+                )
+        );
+    }
+
+    @Test
+    void shouldRejectInvalidStockPrice() {
+        final UniversalPriceService service = new UniversalPriceService(
+                new MockAPI(),
+                unit -> 60_000.0,
+                unit -> 0.0
+        );
+
+        final BasicCurrencyConverter converter =
+                new BasicCurrencyConverter(service);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                converter.convert(
+                        BigDecimal.TEN,
+                        FiatCurrency.USD,
+                        StockMarketCurrency.AAPL
+                )
+        );
+    }
+
+    private static final class MockAPI implements ExchangeRateAPI {
+
         @Override
-        public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
+        public Map<CurrencyUnit, Double> getLatestRates(
+                final CurrencyUnit base) {
+            assertEquals(FiatCurrency.USD, base);
+
             return Map.of(
-                FiatCurrency.EUR, RATE_1_0,
-                FiatCurrency.USD, RATE_1_2,
-                FiatCurrency.GBP, RATE_0_8
+                    FiatCurrency.USD, 1.0,
+                    FiatCurrency.EUR, 0.8,
+                    FiatCurrency.GBP, 0.75
             );
         }
 
         @Override
-        public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
-                                                         final LocalDate from, final LocalDate to) {
-            return Map.of();
+        public Map<LocalDate, Double> getHistoricalRates(
+                final CurrencyUnit base,
+                final CurrencyUnit target,
+                final LocalDate from,
+                final LocalDate to) {
+            throw new AssertionError(
+                    "Current conversion must not request historical rates"
+            );
         }
     }
-
 }
