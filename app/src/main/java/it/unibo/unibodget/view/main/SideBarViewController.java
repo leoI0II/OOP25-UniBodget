@@ -1,23 +1,14 @@
 package it.unibo.unibodget.view.main;
 
-import it.unibo.unibodget.model.utils.event.MessageEvent;
-import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
-import it.unibo.unibodget.view.utils.ToastNotification;
+import java.util.Objects;
+import java.util.function.Consumer;
+
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
-
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * JavaFX controller for the sidebar view.
@@ -31,7 +22,12 @@ public class SideBarViewController extends BaseViewController {
 
     @FXML private VBox walletList;
     @FXML private Label totalBalanceLabel;
+    @FXML private MenuItem navDashboardItem;
+    @FXML private MenuItem navConverterItem;
+    @FXML private MenuItem navPortfolioItem;
+    @FXML private MenuItem navSettingsItem;
     private SideBarDelegate delegate;
+    private Consumer<AppContext> navigationHandler = context -> { };
     private final ViewControllersFactory viewControllersFactory;
 
     public SideBarViewController(ViewControllersFactory viewControllersFactory) {
@@ -40,9 +36,24 @@ public class SideBarViewController extends BaseViewController {
 
     /**
      * Called automatically by {@code FXMLLoader} after the FXML is loaded.
+     * Wires the navigation menu items to the top-level navigation handler.
      */
     @FXML
-    public void initialize() { }
+    public void initialize() {
+        navDashboardItem.setOnAction(e -> navigationHandler.accept(AppContext.DASHBOARD));
+        navConverterItem.setOnAction(e -> navigationHandler.accept(AppContext.CONVERTER));
+        navPortfolioItem.setOnAction(e -> navigationHandler.accept(AppContext.INVESTMENTS));
+        navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+    }
+
+    /**
+     * Sets the top-level navigation handler invoked when a menu item is chosen.
+     *
+     * @param navigationHandler consumer receiving the selected {@link AppContext}
+     */
+    public void setNavigationHandler(final Consumer<AppContext> navigationHandler) {
+        this.navigationHandler = Objects.requireNonNull(navigationHandler);
+    }
 
     /**
      * Sets the delegate and immediately refreshes the sidebar.

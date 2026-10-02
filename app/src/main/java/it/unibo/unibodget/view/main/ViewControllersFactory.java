@@ -20,19 +20,27 @@ public class ViewControllersFactory {
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
+    private final DashboardModule dashboardModule;
+    private final CurrencyConverterModule converterModule;
 
     /**
      * Creates the factory with the shared services injected into every controller that needs them.
      *
      * @param investmentController the investment controller shared across investment views
      * @param snapshotService      the snapshot service used to persist portfolio balance history
+     * @param dashboardModule      the dashboard MVC graph embedded as content in the shell
+     * @param converterModule      the currency-converter view embedded as content in the shell
      */
     public ViewControllersFactory(
             final InvestmentController investmentController,
-            final InvestmentsSnapshotService snapshotService
+            final InvestmentsSnapshotService snapshotService,
+            final DashboardModule dashboardModule,
+            final CurrencyConverterModule converterModule
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
+        this.dashboardModule = Objects.requireNonNull(dashboardModule);
+        this.converterModule = Objects.requireNonNull(converterModule);
     }
 
     /**
@@ -58,7 +66,8 @@ public class ViewControllersFactory {
         if (controllerClass == MainViewController.class) {
             return new MainViewController(investmentController,
                     snapshotService,
-                    null,
+                    dashboardModule,
+                    converterModule,
                     this);
         }
         if (controllerClass == AddNewWalletDialogViewController.class) {

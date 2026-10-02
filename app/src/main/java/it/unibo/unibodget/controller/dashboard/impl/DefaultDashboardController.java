@@ -93,6 +93,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
     private final DefaultTransactionHistoryFilterService transactionHistoryFilterService;
 
     private TransactionFilterInput currentFilterInput;
+    private Runnable onDashboardRefreshed = () -> { };
 
     /**
      * Creates a new dashboard controller.
@@ -134,6 +135,18 @@ public final class DefaultDashboardController implements DashboardViewActions {
      */
     public void init() {
         view.bindActions(this);
+    }
+
+    /**
+     * Registers a callback invoked after every dashboard refresh (i.e. after any
+     * mutation such as add/edit/delete transaction, wallet or budget change).
+     *
+     * <p>Used by the shell to keep the shared sidebar in sync with dashboard data.</p>
+     *
+     * @param callback the callback to run after each refresh; must not be {@code null}
+     */
+    public void setOnDashboardRefreshed(final Runnable callback) {
+        this.onDashboardRefreshed = Objects.requireNonNull(callback);
     }
 
     @Override
@@ -497,12 +510,21 @@ public final class DefaultDashboardController implements DashboardViewActions {
      * Reloads dashboard data and asks the view to render the new state.
      */
     private void refreshDashboard() {
+        if (dashboardFacade.getAllCashAccounts().isEmpty()) {
+            view.showError("No wallet yet — use \"+ Add wallet\" to create one.");
+            onDashboardRefreshed.run();
+            return;
+        }
+        if (dashboardFacade.getCurrentSelectedCashAccount().isEmpty()) {
+            dashboardFacade.selectWallet(dashboardFacade.getAllCashAccounts().getFirst().getId());
+        }
         try {
             final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
             view.render(toViewState(snapshot));
         } catch (Exception exception) {
             view.showError("Unable to load dashboard data.");
         }
+        onDashboardRefreshed.run();
     }
 
     /**

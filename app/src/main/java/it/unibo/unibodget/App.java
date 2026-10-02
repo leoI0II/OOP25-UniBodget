@@ -1,20 +1,21 @@
 package it.unibo.unibodget;
 
-import it.unibo.unibodget.model.converter.provider.MockExchangeRateProvider;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
+import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
 import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
-import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import it.unibo.unibodget.view.main.CurrencyConverterModule;
+import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 /**
@@ -31,7 +32,10 @@ public class App extends Application {
     /** {@inheritDoc} */
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        final var mockProvider = new MockExchangeRateProvider();
+        final var currencyConverter = new BasicCurrencyConverter(
+                new ExchangeRateAPIImpl(),
+                FiatCurrency.USD
+        );
         final var investmentsService = new InvestmentAccountService();
         final var cashAccountsService = new CashAccountService();
         final var settings = new Settings();
@@ -39,19 +43,20 @@ public class App extends Application {
         final var investmentsController = new DefaultInvestmentController(
                 investmentsService,
                 cashAccountsService,
-                mockProvider,
+                currencyConverter,
                 settings,
                 snapshotService
         );
-        investmentsService.addWallet(new InvestmentAccount("Binance", FiatCurrency.USD, new MockExchangeRateProvider()));
-        investmentsService.addWallet(new InvestmentAccount("OKX", FiatCurrency.USD, new MockExchangeRateProvider()));
+        final var dashboardModule = new DashboardModule(currencyConverter, settings, cashAccountsService);
+        final var converterModule = new CurrencyConverterModule(new ExchangeRateAPIImpl(), currencyConverter);
 
         final FXMLLoader mainViewPage = new FXMLLoader(
                 getClass().getResource(
                         "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"
                 )
         );
-        final var factory = new ViewControllersFactory(investmentsController, snapshotService);
+        final var factory = new ViewControllersFactory(
+                investmentsController, snapshotService, dashboardModule, converterModule);
         mainViewPage.setControllerFactory(factory::create);
         final Node mainViewNode = mainViewPage.load();
 
