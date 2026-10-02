@@ -40,6 +40,7 @@ public final class Currency implements CurrencyUnit {
     private String shortName;
     private String fullName;
     private String code;
+    private String apiId;
 
     /**
      * Empty constructor required for JSON deserialization via Jackson.
@@ -58,7 +59,8 @@ public final class Currency implements CurrencyUnit {
      * @param symbol    the graphical symbol; must not be {@code null}
      * @param shortName the short identifier; must not be {@code null}
      * @param fullName  the full descriptive name
-     * @param code      the standardized currency code; must not be {@code null}
+     * @param code      the standardized currency code; 
+     *                  must not be {@code null}
      */
     public Currency(final CurrencyType type, final String symbol, final String shortName, 
                     final String fullName, final String code) {
@@ -67,6 +69,33 @@ public final class Currency implements CurrencyUnit {
         this.shortName = Objects.requireNonNull(shortName);
         this.fullName = fullName;
         this.code = Objects.requireNonNull(code);
+    }
+
+    /**
+     * Creates a new dynamic currency instance.
+     *
+     * @param type      the currency type; must not be {@code null}
+     * @param symbol    the graphical symbol; must not be {@code null}
+     * @param shortName the short identifier; must not be {@code null}
+     * @param fullName  the full descriptive name
+     * @param code      the standardized currency code; 
+     *                  must not be {@code null}
+     * @param apiId     the api references, if it's stock market currency;
+     *                  must not be {@code null}
+     */
+    public Currency(final CurrencyType type,
+                    final String symbol,
+                    final String shortName,
+                    final String fullName,
+                    final String code,
+                    final String apiId) {
+
+        this.type = Objects.requireNonNull(type);
+        this.symbol = Objects.requireNonNull(symbol);
+        this.shortName = Objects.requireNonNull(shortName);
+        this.fullName = fullName;
+        this.code = Objects.requireNonNull(code);
+        this.apiId = apiId;
     }
 
     /**
@@ -117,6 +146,15 @@ public final class Currency implements CurrencyUnit {
     @Override
     public String getCode() {
         return this.code;
+    }
+
+    /**
+     * Returns the external API identifier
+     * 
+     * @return api identifier or nothing. 
+     */    
+    public String getApiId() {
+        return this.apiId;
     }
 
     /**
