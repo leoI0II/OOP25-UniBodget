@@ -89,12 +89,22 @@ public class BankConverterWidgetFX {
 
         // Conversion action
         calcBtn.setOnAction(e -> {
+            convertedLabel.setText("");
+            detailsLabel.setText("");
             try {
-                final BigDecimal amount = new BigDecimal(amountField.getText());
+                //final BigDecimal amount = new BigDecimal(amountField.getText());
+                final BigDecimal amount = new BigDecimal(
+                    amountField.getText().trim().replace(',', '.')
+                );
                 final Bank bank = bankBox.getValue();
+                final CurrencyUnit from = fromBox.getValue();
+                final CurrencyUnit to = toBox.getValue();
 
-                if (bank != null && fromBox.getValue() != null && toBox.getValue() != null) {
-
+                if (bank != null || from != null || to != null) {
+                    if (amount.signum() <= 0) {
+                        resultLabel.setText("Insert value > 0");
+                        return;
+                    }
                     // Perform bank‑mediated conversion
                     final BankConversionService service = new BankConversionService(baseConverter);
                     final BankConversionResult res = service.convert(
@@ -113,8 +123,16 @@ public class BankConverterWidgetFX {
                 } else {
                     resultLabel.setText("Select a bank and currencies!");
                 }
+            } catch (final NumberFormatException ex) {
+                resultLabel.setText("Insert value > 0");
             } catch (final IllegalArgumentException ex) {
-                resultLabel.setText("Calculation Error");
+                resultLabel.setText("Conversion unavailable: " + ex.getMessage());
+                System.err.println("[BANK CONVERSION] Conversion failed");
+                ex.printStackTrace();
+            }  catch (final IllegalStateException ex) {
+                resultLabel.setText( "Price service unavailable. Please try again later." );
+                System.err.println("[BANK CONVERSION] Provider failed");
+                ex.printStackTrace();
             }
         });
 
@@ -215,4 +233,5 @@ public class BankConverterWidgetFX {
     public VBox getView() {
         return view;
     }
+
 }
