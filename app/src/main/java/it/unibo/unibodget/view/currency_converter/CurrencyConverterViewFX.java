@@ -9,27 +9,16 @@ import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
-import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
-import it.unibo.unibodget.view.UI.FXAdapter;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 /**
