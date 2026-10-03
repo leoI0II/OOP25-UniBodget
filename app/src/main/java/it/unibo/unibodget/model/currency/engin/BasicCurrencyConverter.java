@@ -1,14 +1,13 @@
 package it.unibo.unibodget.model.currency.engin;
 
 import it.unibo.unibodget.model.currency.CurrencyConversionResult;
-import it.unibo.unibodget.model.currency.CurrencyType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Standard implementation of {@link CurrencyConverter} that performs conversions
@@ -18,11 +17,10 @@ import java.util.Map;
  */
 public class BasicCurrencyConverter implements CurrencyConverter {
 
-    private static final int scale = 20;
+    private static final int RATE_SCALE = 20;
     private static final int RESULT_SCALE = 10;
 
-    private final ExchangeRateAPI api;
-    private final CurrencyUnit baseCurrency;
+    private final UniversalPriceService priceService;
 
     /**
      * Creates a new {@code BasicCurrencyConverter}.
@@ -33,16 +31,15 @@ public class BasicCurrencyConverter implements CurrencyConverter {
      * @param api the exchange-rate provider used to obtain conversion data
      * @param baseCurrency the internal base currency used for intermediate conversions
      */
-    public BasicCurrencyConverter(final ExchangeRateAPI api, final CurrencyUnit baseCurrency) {
-        this.api = api;
-        this.baseCurrency = baseCurrency;
+    public BasicCurrencyConverter(final UniversalPriceService priceService) {
+        this.priceService = Objects.requireNonNull(priceService);
     }
 
     /**
      * Converts an amount from one currency to another using the exchange rates
      * provided by the {@link ExchangeRateAPI}. The conversion is performed relative
      * to the internal base currency.
-     * 
+     *
      * @param amount the amount to convert
      * @param from the source currency unit
      * @param to the target currency unit
@@ -50,36 +47,56 @@ public class BasicCurrencyConverter implements CurrencyConverter {
      *         the applied exchange rate, and the source/target currencies
      */
     @Override
-    public CurrencyConversionResult convert(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to) {
-        if (from.getType() == CurrencyType.STOCK || to.getType() == CurrencyType.STOCK) {
-            final String errorMsg = "Conversion involving STOCK-type currencies is not supported.";
-            System.err.println(errorMsg);
-            throw new IllegalArgumentException("Le valute di tipo STOCK non sono supportate per la conversione.");
+    public CurrencyConversionResult convert(
+            final BigDecimal amount,
+            final CurrencyUnit from,
+            final CurrencyUnit to) {
+
+        Objects.requireNonNull(amount, "amount");
+        Objects.requireNonNull(from, "from");
+        Objects.requireNonNull(to, "to");
+
+        System.out.println("[CONVERSION] Request: "
+                + amount + " " + from.getCode()
+                + " (" + from.getType() + ") -> "
+                + to.getCode() + " (" + to.getType() + ")");
+
+        if (from.getCode().equalsIgnoreCase(to.getCode())) {
+            System.out.println("[CONVERSION] Same asset: rate = 1, result = "
+                    + amount);
+
+            return new CurrencyConversionResult(
+                    amount, from, to, BigDecimal.ONE, amount
+            );
         }
 
-        if (from.equals(to)) {
-            return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
+        final BigDecimal fromUsd = priceService.getPriceInUSD(from);
+        System.out.println("[CONVERSION] 1 " + from.getCode()
+                + " = " + fromUsd + " USD");
+
+        final BigDecimal toUsd = priceService.getPriceInUSD(to);
+        System.out.println("[CONVERSION] 1 " + to.getCode()
+                + " = " + toUsd + " USD");
+
+        if (fromUsd == null || fromUsd.signum() <= 0
+                || toUsd == null || toUsd.signum() <= 0) {
+            throw new IllegalArgumentException(
+                    "Prezzo non valido per " + from.getCode()
+                            + " o " + to.getCode()
+            );
         }
 
-        final Map<CurrencyUnit, Double> rates = api.getLatestRates(baseCurrency);
-        final Map<String, Double> normalized = new HashMap<>();
-        rates.forEach((unit, value) -> normalized.put(unit.getCode(), value));
+        final BigDecimal appliedRate = fromUsd.divide(
+                toUsd,
+                RATE_SCALE,
+                RoundingMode.HALF_UP
+        );
 
-        if (!normalized.containsKey(from.getCode()) || !normalized.containsKey(to.getCode())) {
-            System.out.println("1. Exchange rates not available for the selected currencies: "
-                                + from.getCode() + " or " + to.getCode());
-            throw new IllegalArgumentException("Tasso di cambio non disponibile per le valute selezionate.");
-        }
-
-        final BigDecimal fromRate = BigDecimal.valueOf(normalized.get(from.getCode()));
-        final BigDecimal toRate = BigDecimal.valueOf(normalized.get(to.getCode()));
-
-        final BigDecimal amountInBase = amount.divide(fromRate, scale, RoundingMode.HALF_UP);
-        final BigDecimal converted = amountInBase.multiply(toRate)
-            .setScale(10, RoundingMode.HALF_UP);
-
-        final BigDecimal appliedRate = toRate.divide(fromRate, 10, RoundingMode.HALF_UP);
-
-        return new CurrencyConversionResult(amount, from, to, appliedRate, converted);
+        final BigDecimal converted = amount.multiply(appliedRate)
+                .setScale(RESULT_SCALE, RoundingMode.HALF_UP);
+        return new CurrencyConversionResult(
+                amount, from, to, appliedRate, converted
+        );
     }
+
 }
