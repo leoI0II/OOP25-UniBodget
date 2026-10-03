@@ -57,8 +57,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
-    //implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    //implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
 
@@ -72,12 +72,7 @@ dependencies {
 }
 
 application {
-    //mainClass.set("it.unibo.unibodget.unibodget")
-    //mainClass.set("it.unibo.unibodget.Unibodget2") - mia temp per persistency e currency converter
-    //mainClass.set("it.unibo.unibodget.model.wallet.TestWallet") - test pers per wallet
-    //mainClass.set("it.unibo.unibodget.view.currency_converter.MainCC")
-    //mainClass.set("it.unibo.unibodget.view.currency_converter.CurrencyConverterViewFX") - non più lanciabile per new
-    mainClass.set("it.unibo.unibodget.app.UnibodgetApp")
+    mainClass.set("it.unibo.unibodget.App")
 }
 
 tasks.test {
