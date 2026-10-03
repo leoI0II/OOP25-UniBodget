@@ -1,19 +1,12 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import java.time.LocalDate;
-import java.util.Map;
-
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.Currency;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
-import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.Theme;
@@ -56,10 +49,8 @@ import javafx.stage.Stage;
  * orchestrates the interaction between widgets.
  */
 public final class CurrencyConverterViewFX {
-//public final class CurrencyConverterViewFX extends Application {
 
     private static final double ROOT_PADDING = 35;
-    private static final int DAYS_TO_SUBTRACT = 5;
 
     /**
      * Shared controller injected via launchWith().
@@ -89,7 +80,9 @@ public final class CurrencyConverterViewFX {
         final Parent root = buildContent(sharedController);
 
         /* -------------------- WINDOW SETUP -------------------- */
-        stage.setScene(new Scene(root));
+        final Scene scene = new Scene(root);
+        stage.setScene(scene);
+        ThemeManager.applyThemeToScene(scene);
         stage.setTitle("UniBodget - Currency Dashboard");
 
         // Save window width changes
@@ -116,18 +109,9 @@ public final class CurrencyConverterViewFX {
      * @return the root node of the converter dashboard
      */
     public static Parent buildContent(final CurrencyConverterController controller) {
-        /* -------------------- THEME SETUP -------------------- */
-        final Theme theme = ThemeManager.getTheme();
-        final Color primaryColor = FXAdapter.toFXColor(theme.getPrimaryColor());
-        final Color textColor = FXAdapter.toFXColor(theme.getTextColor());
-        final Color darkPrimary = primaryColor.deriveColor(0, 1.0, 0.15, 1.0);
-
-        final Font titleFont = Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 14);
-
         /* -------------------- PAGE TITLE -------------------- */
         final Label pageTitle = new Label("Currencies Converter Dashboard");
-        pageTitle.setFont(titleFont);
-        pageTitle.setTextFill(textColor);
+        ThemeManager.applyFont(pageTitle);
 
         /* -------------------- WIDGET INSTANTIATION -------------------- */
         // Base converter widget
@@ -162,54 +146,17 @@ public final class CurrencyConverterViewFX {
         /* -------------------- HISTORICAL CHART BUTTON -------------------- */
         final Button showChartButton = new Button("Show Chart");
         ThemeManager.applyFont(showChartButton);
-        showChartButton.setOnAction(e -> {
-            ExchangeRateAPI historyApi = new ExchangeRateAPIClient();
-            final Map<LocalDate, Double> history = historyApi.getHistoricalRates(
-                    FiatCurrency.EUR,
-                    FiatCurrency.USD,
-                    LocalDate.now().minusDays(5),
-                    LocalDate.now()
-            );
 
-            // if https call result nothing -> offline/error mode on
-            if (history.isEmpty()) {
-                System.out.println("Offline mode: using mock history");
-
-                final Map<LocalDate, Double> mockHistory
-                        = MockExchangeRateAPI.generateMockHistory(
-                                LocalDate.now().minusDays(DAYS_TO_SUBTRACT),
-                                LocalDate.now()
-                        );
-
-                historyApi = new MockExchangeRateAPI(
-                        FiatCurrency.EUR,
-                        MockExchangeRateAPI.generateMockLatestRates(FiatCurrency.EUR)
-                ) {
-                    @Override
-                    public Map<LocalDate, Double> getHistoricalRates(
-                            final CurrencyUnit base, final CurrencyUnit target,
-                            final LocalDate from, final LocalDate to) {
-                        return mockHistory;
-                    }
-                };
-            }
-
-            final CurrencyConverterController historyController =
+        final CurrencyConverterController historyController =
                 new CurrencyConverterController(
-                        historyApi,
+                        new ExchangeRateAPIClient(),
                         controller.getConverter()
                 );
 
-/*
-            final BasicCurrencyConverter historyConverter
-                    = new BasicCurrencyConverter(historyApi, FiatCurrency.EUR);
-            final CurrencyConverterController historyController
-                    = new CurrencyConverterController(historyApi, historyConverter);
-*/
-
-            CurrencyHistoryChartView.showInNewWindow(historyController);
-        });
-
+        showChartButton.setOnAction(e ->
+                CurrencyHistoryChartView.showInNewWindow(historyController)
+        );
+        
         /* -------------------- TOP BAR -------------------- */
         final HBox topBar = new HBox(20);
         topBar.setAlignment(Pos.CENTER_LEFT);
@@ -229,37 +176,16 @@ public final class CurrencyConverterViewFX {
         root.setAlignment(Pos.TOP_LEFT);
 
         /* -------------------- BACKGROUND GRADIENT -------------------- */
-        final LinearGradient bgGradient = new LinearGradient(
-                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0, primaryColor),
-                new Stop(1, darkPrimary)
-        );
-        root.setBackground(new Background(new BackgroundFill(bgGradient, CornerRadii.EMPTY, Insets.EMPTY)));
+        root.getStyleClass().add("theme-background");
 
-        /*
-        /* -------------------- WINDOW SETUP -------------------- /
-        stage.setScene(new Scene(root));
-        stage.setTitle("UniBodget - Currency Dashboard");
-
-        // Save window width changes
-        stage.widthProperty().addListener((obs, old, val) -> PREFS.setWidth(val.doubleValue()));
-
-        // Restore window size or maximize
-        if (PREFS.isMaximized()) {
-            stage.setMaximized(true);
-        } else {
-            stage.setWidth(PREFS.getWidth());
-            stage.setHeight(PREFS.getHeight());
+        // Applies the theme when embedded in the main application scene.
+        root.sceneProperty().addListener((observable, oldScene, newScene) -> {
+        if (newScene != null) {
+                ThemeManager.applyThemeToScene(newScene);
         }
-
-        stage.show();
-        */
+        });
 
         return root;
     }
 
-    /*@Override
-    public void start(final Stage stage) {
-
-    }*/
 }
