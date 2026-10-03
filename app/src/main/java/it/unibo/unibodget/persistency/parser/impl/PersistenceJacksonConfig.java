@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-//import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.CurrencyUnitDeserializer;
@@ -78,8 +78,8 @@ public final class PersistenceJacksonConfig {
         module.addDeserializer(Optional.class, new OptionalUUIDDeserializer());
 
         mapper.registerModule(module);
-        //mapper.registerModule(new Jdk8Module());
-        //mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new Jdk8Module());
+        mapper.registerModule(new JavaTimeModule());
 
         return mapper;
     }
