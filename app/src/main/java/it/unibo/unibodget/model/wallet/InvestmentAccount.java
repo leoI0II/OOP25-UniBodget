@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.unibo.unibodget.model.converter.provider.ExchangeRateProvider;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.api.provider.PriceProvider;
 import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.transactions.Historical;
@@ -104,6 +105,7 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
      *
      * @return an {@link Asset} representing the total balance in base currency
      */
+    @JsonIgnore 
     @Override
     public Asset getBalance() {
         return getPositions().stream()
@@ -176,7 +178,16 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
                 ? BigDecimal.ZERO
                 : totalCost.divide(totalQty, 10, RoundingMode.HALF_UP);
         // final Asset currentPrice = priceProvider.convert(new Asset(asset, BigDecimal.ONE), getBaseCurrency());
-        final Asset currentPrice = priceProvider.convert(BigDecimal.ONE, asset, getBaseCurrency()).getAsset();
+        // final Asset currentPrice = priceProvider.convert(BigDecimal.ONE, asset, getBaseCurrency()).getAsset();
+        Asset currentPrice;
+        try {
+            currentPrice = priceProvider.convert(BigDecimal.ONE, asset, getBaseCurrency()).getAsset();
+        } catch (final Exception e) {
+            System.err.println("[PORTFOLIO] Errore calcolo prezzo per " + asset.getCode() + ": " + e.getMessage());
+            final BigDecimal fallbackUnit = avgCost.signum() > 0 ? avgCost : BigDecimal.ONE;
+            currentPrice = Asset.of(getBaseCurrency(), fallbackUnit);
+        }
+
         final Asset currentMarketValue = currentPrice.multiply(totalQty);
         return new Position(
                 asset,
@@ -348,4 +359,5 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
                 provider
         );
     }
+    
 }

@@ -9,4 +9,6 @@ import it.unibo.unibodget.model.wallet.AbstractWallet;
  * @param wallet      the wallet to which the transaction was added
  * @param transaction the transaction that was added
  */
-public record TransactionAddedEvent(AbstractWallet wallet, AbstractTransaction transaction) implements MessageEvent { }
+public record TransactionAddedEvent(AbstractWallet wallet, AbstractTransaction transaction) implements MessageEvent { 
+    
+}
