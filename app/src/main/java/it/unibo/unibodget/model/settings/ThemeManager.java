@@ -1,7 +1,14 @@
 package it.unibo.unibodget.model.settings;
 
+import java.util.Collections;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import it.unibo.unibodget.model.utils.ARGBColor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 /**
@@ -22,10 +29,13 @@ public final class ThemeManager {
      */
     private static Theme currentTheme = Theme.DEFAULT;
 
+    private static final Set<Scene> SCENES =
+            Collections.newSetFromMap(new WeakHashMap<>());
+
     /** 
      * Private constructor to prevent instantiation.
      */
-    private ThemeManager() { 
+    private ThemeManager() {
 
     }
 
@@ -46,6 +56,10 @@ public final class ThemeManager {
      */
     public static void setTheme(final Theme theme) {
         currentTheme = Objects.requireNonNull(theme);
+
+        for (final Scene scene : SCENES.toArray(new Scene[0])) {
+            applyThemeToScene(scene);
+        }
     }
 
     /**
@@ -64,15 +78,47 @@ public final class ThemeManager {
      * @param scene the scene to style
      */
     public static void applyThemeToScene(final Scene scene) {
-        // Retrieve active theme
-        final Theme t = getTheme();
-        final String style = ""
-            + "-fx-font-family: '" + t.getFontFamily() + "';"
-            + "-fx-font-size: " + t.getFontSize() + "px;"
-            + (t.isBoldText() ? "-fx-font-weight: bold;" : "-fx-font-weight: normal;")
-            + "-fx-background-color: " + t.getPrimaryColor().toHexString() + ";";
-        // Apply style to the scene root
-        scene.getRoot().setStyle(style);
+        Objects.requireNonNull(scene, "scene");
+        SCENES.add(scene);
+
+        applyBackground(scene.getRoot());
+
+        // Creates control skins, including ScrollPane viewports.
+        scene.getRoot().applyCss();
+
+        applyToTree(scene.getRoot());
+
+        System.out.println("[THEME] Applied: "
+                + currentTheme.getPrimaryColor().toHexString()
+                + ", font: " + currentTheme.getFontFamily()
+                + ", size: " + currentTheme.getFontSize());
+    }
+
+    /**
+     * Recursively applies the active theme to the given JavaFX {@link Node} and its children.
+     * 
+     * @param node the JavaFX node to style
+     */
+    private static void applyToTree(final Node node) {
+        applyFont(node);
+
+        if (node.getStyleClass().contains("theme-background")) {
+            applyBackground(node);
+        }
+
+        if (node.getStyleClass().contains("theme-scroll")) {
+            applyBackground(node);
+
+            for (final Node viewport : node.lookupAll(".viewport")) {
+                applyBackground(viewport);
+            }
+        }
+
+        if (node instanceof Parent parent) {
+            for (final Node child : parent.getChildrenUnmodifiable()) {
+                applyToTree(child);
+            }
+        }
     }
 
     /**
@@ -91,28 +137,56 @@ public final class ThemeManager {
      * @param node the JavaFX node to style
      */
     public static void applyFont(final Node node) {
-        final Theme t = getTheme();
+        Objects.requireNonNull(node, "node");
 
-        final String fontStyle =
-            "-fx-font-family: '" + t.getFontFamily() + "';"
-            + "-fx-font-size: " + t.getFontSize() + "px;"
-            + "-fx-font-weight: "
-            + (t.isBoldText() ? "bold;" : "normal;");
+        final String existingStyle = node.getStyle().replaceAll(
+                "(?i)-fx-font-(?:family|size|weight)"
+                        + "\\s*:[^;]*(?:;|$)",
+                ""
+        );
 
-        node.setStyle(node.getStyle() + fontStyle);
+        node.setStyle(existingStyle + ";" + getFontStyle());
+    }
+
+    private static void applyBackground(final Node node) {
+        final String existingStyle = node.getStyle().replaceAll(
+                "(?i)-fx-background-color\\s*:[^;]*(?:;|$)",
+                ""
+        );
+
+        node.setStyle(existingStyle + ";" + getPrimaryBackgroundStyle());
     }
 
     /**
+     * Get the CSS style string for the font settings of the current theme.
      * 
-     * @return
+     * @return the CSS style string for font family, size, and weight
      */
     public static String getFontStyle() {
         final Theme t = getTheme();
 
         return "-fx-font-family: '" + t.getFontFamily() + "';"
-            + "-fx-font-size: " + t.getFontSize() + "px;"
-            + "-fx-font-weight: "
-            + (t.isBoldText() ? "bold;" : "normal;");
+                + "-fx-font-size: " + t.getFontSize() + "px;"
+                + "-fx-font-weight: "
+                + (t.isBoldText() ? "bold;" : "normal;");
     }
 
+    /**
+     * Gets the CSS style string for the primary background color of the current theme.
+     * 
+     * @return the CSS style string for the primary background color
+     */
+    public static String getPrimaryBackgroundStyle() {
+        final ARGBColor color = getTheme().getPrimaryColor();
+
+        return String.format(
+                Locale.ROOT,
+                "-fx-background-color: rgba(%d,%d,%d,%.4f);",
+                color.red(),
+                color.green(),
+                color.blue(),
+                color.alpha() / 255.0
+        );
+    }
+    
 }
