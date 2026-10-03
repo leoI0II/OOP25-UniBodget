@@ -23,10 +23,10 @@
             <Region prefHeight="41.0" prefWidth="30.0" HBox.hgrow="ALWAYS" />
             <MenuButton alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" stylesheets="@style.css" text="Menu">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Dashboard" />
-                  <MenuItem mnemonicParsing="false" text="Converter" />
-                  <MenuItem mnemonicParsing="false" text="Portfolio" />
-                  <MenuItem mnemonicParsing="false" text="Settings" />
+                  <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="Dashboard" />
+                  <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="Converter" />
+                  <MenuItem fx:id="navPortfolioItem" mnemonicParsing="false" text="Portfolio" />
+                  <MenuItem fx:id="navSettingsItem" mnemonicParsing="false" text="Settings" />
                </items>
                <HBox.margin>
                   <Insets />
