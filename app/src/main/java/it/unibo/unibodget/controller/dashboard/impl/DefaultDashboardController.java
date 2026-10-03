@@ -149,11 +149,17 @@ public final class DefaultDashboardController implements DashboardViewActions {
         this.onDashboardRefreshed = Objects.requireNonNull(callback);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onViewOpened() {
         refreshDashboard();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onWalletSelected(final UUID walletId) {
         try {
@@ -168,6 +174,9 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onNavigationRequested(final DashboardDestination destination) {
         if (destination == DashboardDestination.SETTINGS) {
@@ -175,22 +184,34 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSettingsRequested() {
         onNavigationRequested(DashboardDestination.SETTINGS);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onTransactionFiltersChanged(final TransactionFilterInput input) {
         this.currentFilterInput = Objects.requireNonNull(input);
         refreshDashboard();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onExportTransactionsRequested() {
         // Export is not implemented in the provided project code.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreateWalletRequested() {
         try {
@@ -209,6 +230,9 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreateTransactionRequested() {
         try {
@@ -240,11 +264,17 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onEditBudgetRequested() {
         openEditBudgetDialog();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onEditTransactionRequested(final UUID transactionRowId) {
         try {
@@ -281,6 +311,9 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDeleteTransactionRequested(final UUID transactionRowId) {
         try {
@@ -301,6 +334,9 @@ public final class DefaultDashboardController implements DashboardViewActions {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onManageCategoriesRequested() {
         view.showError("Category management is not available yet.");
@@ -1115,4 +1151,5 @@ public final class DefaultDashboardController implements DashboardViewActions {
                 .filter(summary -> summary.getNetBalance().signum() > 0)
                 .toList();
     }
+
 }
