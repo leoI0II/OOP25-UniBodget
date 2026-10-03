@@ -3,12 +3,16 @@ package it.unibo.unibodget.view.main;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
 import it.unibo.unibodget.view.investments.InvestmentsViewController;
 import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
+import it.unibo.unibodget.controller.settings.SettingsController;
+import it.unibo.unibodget.view.settings.SettingsPopupFX;
+import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -34,6 +38,7 @@ public class MainViewController extends BaseViewController {
     private final DashboardModule dashboardModule;
     private final CurrencyConverterModule converterModule;
     private final ViewControllersFactory viewControllersFactory;
+    private final SettingsController settingsController = new SettingsController();
     /** Ref to the currently shown sub-controller, used to call {@link BaseViewController#dispose()} on navigation. */
     private BaseViewController currentVC;
     /** Last wallet-based context shown (DASHBOARD or INVESTMENTS); used to restore it from the converter. */
@@ -87,8 +92,7 @@ public class MainViewController extends BaseViewController {
             case DASHBOARD -> showDashboard();
             case INVESTMENTS -> showInvestments();
             case CONVERTER -> showConverter();
-            case SETTINGS -> ToastNotification.showInfo(
-                    contentArea.getScene().getWindow(), "Settings not integrated yet.");
+            case SETTINGS -> showSettings();
             default -> { }
         }
     }
@@ -149,6 +153,7 @@ public class MainViewController extends BaseViewController {
         if (!investmentController.getAllInvestmentAccounts().isEmpty()) {
             ivc.onItemSelected(investmentController.getAllInvestmentAccounts().getFirst().getId());
         }
+        ThemeManager.applyThemeToScene(contentArea.getScene());
     }
 
     /**
@@ -192,6 +197,18 @@ public class MainViewController extends BaseViewController {
         });
 
         contentArea.getChildren().setAll(converterModule.getView());
+    }
+
+    /**
+     * Shows the settings popup dialog, allowing the user to change application preferences.
+     * 
+     * The dialog is modal and blocks interaction with the main window until closed.
+     * Changes are applied through the {@link SettingsController}, which handles persistence
+     * and theme updates.
+     */
+    private void showSettings() {
+        final Stage owner = (Stage) contentArea.getScene().getWindow();
+        new SettingsPopupFX(settingsController).show(owner);
     }
 
     /**
