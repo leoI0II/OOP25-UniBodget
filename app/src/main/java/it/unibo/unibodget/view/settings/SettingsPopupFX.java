@@ -13,13 +13,16 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 
 /**
  * Popup window used to edit and apply application settings.
@@ -67,31 +70,87 @@ public final class SettingsPopupFX {
         // Load current settings
         final Settings current = controller.getSettings();
         // Previous configuration
-        final ComboBox<SettingsSnapshot> historyBox = new ComboBox<>();
-        historyBox.getItems().addAll(controller.getAllSavedConfigurations());
-        historyBox.setPromptText("Previous configurations");
+        final TextArea historyArea = new TextArea();
+        historyArea.setEditable(false);
+        historyArea.setWrapText(true);
+        historyArea.setPrefRowCount(4);
+        historyArea.setPrefWidth(450);
 
-        // Custom rendering of snapshot entries
-        historyBox.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(final SettingsSnapshot item, final boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText("");
-                } else {
-                    // Show date + theme summary + base currency
-                    final String hex = item.getTheme().getPrimaryColor().toHexString();
-                    final String font = item.getTheme().getFontFamily();
-                    final int size = item.getTheme().getFontSize();
-                    setText(item.getSavedAt() + " · " + hex + " · "
-                            + font + " " + size + "pt · " + item.getBaseCurrency());
-                }
-            }
-        });
-        historyBox.setButtonCell(historyBox.getCellFactory().call(null));
+        final StringBuilder historyText = new StringBuilder();
+
+        for (final SettingsSnapshot snapshot
+                : controller.getAllSavedConfigurations()) {
+            historyText.append(snapshot.getSavedAt())
+                    .append(" · ")
+                    .append(snapshot.getTheme().getPrimaryColor().toHexString())
+                    .append(" · ")
+                    .append(snapshot.getTheme().getFontFamily())
+                    .append(" ")
+                    .append(snapshot.getTheme().getFontSize())
+                    .append("pt · ")
+                    .append(snapshot.getBaseCurrency())
+                    .append(System.lineSeparator());
+        }
+
+        historyArea.setText(
+                historyText.length() == 0
+                        ? "Nessuna configurazione precedente"
+                        : historyText.toString()
+        );
 
         // Primary color (HEX)
-        final TextField colorField = new TextField(current.getTheme().getPrimaryColor().toHexString());
+        final ARGBColor currentColor =
+        current.getTheme().getPrimaryColor();
+
+        // Nel campo mostriamo RGB: sei cifre, senza alpha.
+        final String initialHex = String.format(
+                "#%02X%02X%02X",
+                currentColor.red(),
+                currentColor.green(),
+                currentColor.blue()
+        );
+
+        final TextField colorField = new TextField(initialHex);
+
+        // Anche il picker viene inizializzato dai componenti RGB,
+        // senza interpretare il formato ARGB come CSS.
+        final ColorPicker colorPicker = new ColorPicker(
+                Color.rgb(
+                        currentColor.red(),
+                        currentColor.green(),
+                        currentColor.blue()
+                )
+        );
+
+        colorPicker.setOnAction(event -> {
+            final Color selected = colorPicker.getValue();
+
+            final String hex = String.format(
+                    "#%02X%02X%02X",
+                    Math.round(selected.getRed() * 255),
+                    Math.round(selected.getGreen() * 255),
+                    Math.round(selected.getBlue() * 255)
+            );
+
+            colorField.setText(hex);
+
+            System.out.println("[SETTINGS] Colore scelto: " + hex);
+        });
+
+        // Se scrivi un codice RGB valido, aggiorna anche il picker.
+        colorField.textProperty().addListener((obs, oldValue, newValue) -> {
+            final String hex = newValue.trim();
+
+            if (hex.matches("#[0-9a-fA-F]{6}")) {
+                colorPicker.setValue(Color.web(hex));
+            }
+        });
+
+        final HBox colorControls = new HBox(
+                10,
+                colorField,
+                colorPicker
+        );
 
         // Font family selector
         final ComboBox<String> fontBox = new ComboBox<>();
@@ -115,8 +174,8 @@ public final class SettingsPopupFX {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        grid.addRow(0, new Label("Previous:"), historyBox);
-        grid.addRow(1, new Label("Color HEX:"), colorField);
+        grid.addRow(0, new Label("Previous:"), historyArea);
+        grid.addRow(1, new Label("Color HEX:"), colorControls);
         grid.addRow(2, new Label("Font:"), fontBox);
         grid.addRow(3, new Label("Size:"), fontSize);
         grid.addRow(4, boldCheck);
@@ -130,14 +189,6 @@ public final class SettingsPopupFX {
         // Logic
         dialog.setResultConverter(button -> {
             if (button == saveButton) {
-
-                // If user selected a previous configuration → apply it directly
-                if (historyBox.getValue() != null) {
-                    controller.applyConfiguration(historyBox.getValue());
-                    ThemeManager.applyThemeToScene(owner.getScene());
-                    return null;
-                }
-
                 // Build new theme from user input
                 final Theme newTheme = new Theme(
                         "Custom",
@@ -180,4 +231,5 @@ public final class SettingsPopupFX {
         
         dialog.showAndWait();
     }
+
 }
