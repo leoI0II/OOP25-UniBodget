@@ -8,7 +8,10 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
 import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
+import it.unibo.unibodget.model.currency.api.provider.CoinGeckoPriceProvider;
+import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.model.currency.api.provider.AlphaPriceProvider;
 
 /**
  * Factory responsible for creating a fully configured
@@ -43,25 +46,24 @@ public final class CurrencyConverterFactory {
      * @return a fully initialized {@link CurrencyConverterController}
      */
     public static CurrencyConverterController create() {
+        final ExchangeRateAPI fiatApi = new ExchangeRateAPIImpl();
 
-        ExchangeRateAPI api = new ExchangeRateAPIImpl();
-
-        final FiatCurrency baseCurrency = FiatCurrency.EUR;
-
-        final Map<CurrencyUnit, Double> latest =
-                api.getLatestRates(baseCurrency);
-
-        // Fallback to mock API if the real one does not provide enough data
-        if (latest.size() <= 1) {
-            api = new MockExchangeRateAPI(
-                    baseCurrency,
-                    MockExchangeRateAPI.generateMockRatesFromCurrencies()
-            );
-        }
+        final UniversalPriceService priceService =
+                new UniversalPriceService(
+                        fiatApi,
+                        new CoinGeckoPriceProvider(),
+                        new AlphaPriceProvider()
+                );
 
         final BasicCurrencyConverter converter =
-                new BasicCurrencyConverter(api, baseCurrency);
+                new BasicCurrencyConverter(priceService);
 
-        return new CurrencyConverterController(api, converter);
+        System.out.println("[FACTORY] Fiat: ExchangeRateAPIImpl");
+        System.out.println("[FACTORY] Crypto: CoinGeckoPriceProvider");
+        System.out.println("[FACTORY] Stock: AlphaPriceProvider");
+        System.out.println("[FACTORY] Conversion via USD prices");
+
+        return new CurrencyConverterController(fiatApi, converter);
     }
+
 }
