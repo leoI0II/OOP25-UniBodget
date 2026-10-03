@@ -54,26 +54,34 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
      *         empty if an error occurs or no data is available
      */
     @Override
-    public Map<LocalDate, Double> getHistoricalRates(
-            final CurrencyUnit base, final CurrencyUnit target,
+    public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
             final LocalDate from, final LocalDate to) {
-
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException(
+                    "La data iniziale deve precedere quella finale."
+            );
+        }
         final String urlString = String.format(
                 "https://api.frankfurter.app/%s..%s?from=%s&to=%s",
                 from, to, base.getCode(), target.getCode()
         );
-
-        System.out.println("DEBUG URL: " + urlString);
-
+        System.out.println("[HISTORY] Request: " + urlString);
+        Map<LocalDate, Double> history;
         try {
             final String json = fetchJson(urlString);
-            System.out.println("DEBUG JSON: " + json);
-            return parseFrankfurterJson(json, target.getCode());
-        } catch (final IllegalStateException e) {
-            //e.printStackTrace();
-            System.out.println("Historical API failed, switching to offline.");
-            return new TreeMap<>();
+            history = parseFrankfurterJson(json, target.getCode());
+        } catch (final IllegalStateException ex) {
+            history = new TreeMap<>();
         }
+        if (history.isEmpty()) {
+            System.out.println(
+                    "[HISTORY] No real data available. "
+                    + "Returning SIMULATED data for "
+                    + base.getCode() + " -> " + target.getCode()
+            );
+            return MockExchangeRateAPI.generateMockHistory(from, to);
+        }
+        return history;
     }
 
     /**
@@ -168,4 +176,5 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
     public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         return new HashMap<>();
     }
+
 }
