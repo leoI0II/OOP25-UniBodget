@@ -42,6 +42,11 @@ public final class TmpCCApp {
      * @param args ignored
      */
     public static void main(final String[] args) {
+        final CurrencyConverterController controller =
+                CurrencyConverterFactory.create();
+
+        CurrencyConverterViewFX.launchWith(controller);
+        /*
 
         // 1. API for exchange rates (historical + latest)
         final var api = new ExchangeRateAPIImpl();
@@ -57,5 +62,6 @@ public final class TmpCCApp {
 
         // 5. Launch the FX dashboard
         CurrencyConverterViewFX.launchWith(controller);
+         */
     }
 }

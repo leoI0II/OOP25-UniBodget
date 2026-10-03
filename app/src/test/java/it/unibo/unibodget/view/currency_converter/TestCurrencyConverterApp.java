@@ -50,6 +50,11 @@ public final class TestCurrencyConverterApp {
      */
     public static void main(final String[] args) {
 
+        final CurrencyConverterController controller =
+                CurrencyConverterFactory.create();
+
+        CurrencyConverterViewFX.launchWith(controller);
+        /*
         // 1. API for exchange rates (historical + latest)
         ExchangeRateAPI api = new ExchangeRateAPIImpl();
 
@@ -76,5 +81,6 @@ public final class TestCurrencyConverterApp {
 
         // 5. Launch the FX dashboard
         CurrencyConverterViewFX.launchWith(controller);
+         */
     }
 }

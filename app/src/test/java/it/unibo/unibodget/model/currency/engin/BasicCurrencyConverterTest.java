@@ -30,8 +30,8 @@ class BasicCurrencyConverterTest {
     private BasicCurrencyConverter createConverter() {
         final UniversalPriceService service = new UniversalPriceService(
                 new MockAPI(),
-                unit -> 60_000.0,
-                unit -> 500.0
+                unit -> new BigDecimal("60000"),
+                unit -> new BigDecimal("500")
         );
 
         return new BasicCurrencyConverter(service);
@@ -126,23 +126,25 @@ class BasicCurrencyConverterTest {
     }
 
     @Test
-    void shouldRejectInvalidStockPrice() {
+    void shouldUseEmergencyFallbackWhenStockPriceIsInvalid() {
         final UniversalPriceService service = new UniversalPriceService(
                 new MockAPI(),
-                unit -> 60_000.0,
-                unit -> 0.0
+                unit -> new BigDecimal("60000"),
+                unit -> BigDecimal.ZERO
         );
 
         final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(service);
 
-        assertThrows(IllegalArgumentException.class, () ->
-                converter.convert(
-                        BigDecimal.TEN,
-                        FiatCurrency.USD,
-                        StockMarketCurrency.AAPL
-                )
+        final CurrencyConversionResult result = converter.convert(
+                BigDecimal.TEN,
+                FiatCurrency.USD,
+                StockMarketCurrency.AAPL
         );
+
+        // Emergency fallback: 1 stock share = 1 USD.
+        assertAmountEquals("10", result.getConvertedAmount());
+        assertAmountEquals("1", result.getAppliedRate());
     }
 
     private static final class MockAPI implements ExchangeRateAPI {

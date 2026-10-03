@@ -20,8 +20,8 @@ class TransactionTest {
         final Asset a = new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN);
         final LocalDate d = LocalDate.of(2024, 1, 1);
 
-        final Transaction t1 = new CashTransaction(a, Category.FOOD, d, DESC, NOTES);
-        final Transaction t2 = new CashTransaction(a, Category.FOOD, d, DESC, NOTES);
+        final AbstractTransaction t1 = new CashTransaction(a, Category.FOOD, d, DESC, NOTES);
+        final AbstractTransaction t2 = new CashTransaction(a, Category.FOOD, d, DESC, NOTES);
 
         assertEquals(t1, t2);
         assertEquals(t1.hashCode(), t2.hashCode());
