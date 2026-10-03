@@ -1,13 +1,8 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import java.util.Map;
-
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
-import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
 import it.unibo.unibodget.model.currency.api.provider.CoinGeckoPriceProvider;
 import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
