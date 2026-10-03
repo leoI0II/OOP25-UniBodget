@@ -199,7 +199,7 @@ public class ConverterWidgetFX {
         /* ---------- CURRENCY BOXES ---------- */
         //final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
         //CurrencyUnit.basicCurrencies().forEach(currencies::add);
-        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList(Currency.all());
+        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList(CurrencyUnit.allCurrencies());
 
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
@@ -216,14 +216,6 @@ public class ConverterWidgetFX {
 
         configureCurrencyBox(fromBox, font);
         configureCurrencyBox(toBox, font);
-
-        /* Default selection
-        final FiatCurrency[] fiat = FiatCurrency.values();
-        if (fiat.length >= 2) {
-            fromBox.setValue(fiat[0]);
-            toBox.setValue(fiat[1]);
-        }
-        */
 
         /* ---------- LABELS ---------- */
         final Label amountLabel = createMutedLabel("Amount", font, textColor);
@@ -307,23 +299,77 @@ public class ConverterWidgetFX {
 
         /* ---------- CONVERSION ACTION ---------- */
         convertButton.setOnAction(e -> {
-            try {
-                final BigDecimal amount = parseDecimal(amountField.getText());
-                final CurrencyUnit from = fromBox.getValue();
-                final CurrencyUnit to = toBox.getValue();
+            output.setText("");
+            resultLabel.setText("");
 
-                final BigDecimal result = controller.convert(amount, from, to);
+            final BigDecimal amount = parseDecimal(amountField.getText());
+            final CurrencyUnit from = fromBox.getValue();
+            final CurrencyUnit to = toBox.getValue();
 
-                output.setText(result.toPlainString() + " " + to.getCode());
-                resultLabel.setText("Converted from " + amount.toPlainString() + " " + from.getCode());
-
-                // Compute rate for alert evaluation
-                final double rate = result.divide(amount, 4, java.math.RoundingMode.HALF_UP).doubleValue();
-                new MarketAlert(this.alertService).checkAndShowAlerts(rate, from, to);
-
-            } catch (final IllegalArgumentException ex) {
+            // 1. check import
+            if (amount == null || amount.signum() <= 0) {
                 output.setFont(font);
-                output.setText("Error: " + ex.getMessage());
+                output.setText("Inserisci un importo maggiore di zero.");
+                return;
+            }
+
+            // 2. check currency unit both selected
+            if (from == null || to == null) {
+                output.setFont(font);
+                output.setText("Seleziona la valuta di partenza e di arrivo.");
+                return;
+            }
+
+            final BigDecimal result;
+            // 3. convert
+            try {
+                System.out.println("[VIEW] Starting conversion: "
+                        + amount + " " + from.getCode()
+                        + " -> " + to.getCode());
+
+                result = controller.convert(amount, from, to);
+
+                System.out.println("[VIEW] Conversion returned: " + result);
+
+                output.setFont(resultFont);
+                output.setText(result.toPlainString() + " " + to.getCode());
+
+                resultLabel.setText(
+                        "Converted from " + amount.toPlainString()
+                        + " " + from.getCode()
+                );
+
+            } catch (final IllegalArgumentException | IllegalStateException ex) {
+                output.setFont(font);
+                output.setText("Conversione non disponibile. Riprova più tardi.");
+
+                System.out.println("[VIEW] Conversion failed: " + ex.getMessage());
+                return;
+            }
+
+            // 4. same currency
+            if (from.getCode().equalsIgnoreCase(to.getCode())) {
+                System.out.println("[VIEW] Same currency: skipping alerts");
+                return;
+            }
+
+            // 5. check alert
+            try {
+                final double rate = result.divide(
+                        amount,
+                        4,
+                        java.math.RoundingMode.HALF_UP
+                ).doubleValue();
+
+                System.out.println("[VIEW] Checking alerts at rate: " + rate);
+
+                new MarketAlert(this.alertService)
+                        .checkAndShowAlerts(rate, from, to);
+
+                System.out.println("[VIEW] Alert check completed");
+
+            } catch (final IllegalArgumentException | IllegalStateException ex) {
+                System.out.println("[VIEW] Alert check failed: " + ex.getMessage());
             }
         });
 
@@ -439,4 +485,5 @@ public class ConverterWidgetFX {
             return null;
         }
     }
+    
 }
