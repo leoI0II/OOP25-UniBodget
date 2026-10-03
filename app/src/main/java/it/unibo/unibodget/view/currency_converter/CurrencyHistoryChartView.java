@@ -319,4 +319,5 @@ public final class CurrencyHistoryChartView extends VBox {
     public Node getChartNode() {
         return chart;
     }
+    
 }
