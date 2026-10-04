@@ -98,11 +98,12 @@ public final class Category extends AbstractCategory {
             @JsonProperty("origin") final CategoryOrigin origin,
             @JsonProperty("active") final boolean active) {
         super(name, color, type);
-        this.origin = Objects.requireNonNull(origin);
-        if (origin == CategoryOrigin.DEFAULT && !active) {
+        this.origin = origin == null ? CategoryOrigin.DEFAULT : origin;
+        final boolean effectiveActive = origin == null || active;
+        if (origin == CategoryOrigin.DEFAULT && !effectiveActive) {
             throw new IllegalArgumentException("Default categories must always be active.");
         }
-        this.active = active;
+        this.active = effectiveActive;
     }
 
     /**
