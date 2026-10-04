@@ -38,7 +38,7 @@ public class MainViewController extends BaseViewController {
     private final DashboardModule dashboardModule;
     private final CurrencyConverterModule converterModule;
     private final ViewControllersFactory viewControllersFactory;
-    private final SettingsController settingsController = new SettingsController();
+    private final SettingsController settingsController;
     /** Ref to the currently shown sub-controller, used to call {@link BaseViewController#dispose()} on navigation. */
     private BaseViewController currentVC;
     /** Last wallet-based context shown (DASHBOARD or INVESTMENTS); used to restore it from the converter. */
@@ -58,13 +58,15 @@ public class MainViewController extends BaseViewController {
             final InvestmentsSnapshotService snapshotService,
             final DashboardModule dashboardModule,
             final CurrencyConverterModule converterModule,
-            final ViewControllersFactory viewControllersFactory
+            final ViewControllersFactory viewControllersFactory,
+            final SettingsController settingsController
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
         this.dashboardModule = Objects.requireNonNull(dashboardModule);
         this.converterModule = Objects.requireNonNull(converterModule);
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
+        this.settingsController = Objects.requireNonNull(settingsController);
 
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
         subscribe(MainErrorNotificationEvent.class, this::onMainErrorNotificationEvent);
@@ -206,10 +208,36 @@ public class MainViewController extends BaseViewController {
      * Changes are applied through the {@link SettingsController}, which handles persistence
      * and theme updates.
      */
-    private void showSettings() {
+    /*private void showSettings() {
         final Stage owner = (Stage) contentArea.getScene().getWindow();
         new SettingsPopupFX(settingsController).show(owner);
+    }*/
+   /**
+ * Opens settings and refreshes the active view after a currency change.
+ */
+private void showSettings() {
+    final Stage owner = (Stage) contentArea.getScene().getWindow();
+    final String previousCurrency =
+            settingsController.getSettings().getBaseCurrency();
+
+    new SettingsPopupFX(settingsController).show(owner);
+
+    final String currentCurrency =
+            settingsController.getSettings().getBaseCurrency();
+
+    if (!previousCurrency.equals(currentCurrency)) {
+        if (currentVC instanceof InvestmentsViewController investmentsView) {
+            investmentsView.refreshData();
+        } else {
+            dashboardModule.getController().onViewOpened();
+        }
+
+        sideBarController.refresh();
     }
+
+    ThemeManager.applyThemeToScene(owner.getScene());
+}
+
 
     /**
      * Restores a wallet-based context (dashboard or investments) into the content area.

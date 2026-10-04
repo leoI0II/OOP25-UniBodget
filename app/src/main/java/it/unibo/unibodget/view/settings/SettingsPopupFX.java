@@ -2,6 +2,7 @@ package it.unibo.unibodget.view.settings;
 
 import it.unibo.unibodget.controller.settings.SettingsController;
 import it.unibo.unibodget.model.currency.Currency;
+import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
@@ -165,9 +166,13 @@ public final class SettingsPopupFX {
         boldCheck.setSelected(current.getTheme().isBoldText());
 
         // Base currency
-        final ComboBox<Currency> currencyBox = new ComboBox<>();
-        currencyBox.getItems().addAll(Currency.all());
-        currencyBox.setValue(Currency.get(current.getBaseCurrency()));
+        final ComboBox<FiatCurrency> currencyBox = new ComboBox<>();
+        currencyBox.getItems().addAll(FiatCurrency.values());
+        final FiatCurrency currentCurrency =
+                current.getBaseCurrencyUnit() instanceof FiatCurrency fiat
+                        ? fiat
+                        : FiatCurrency.EUR;
+        currencyBox.setValue(currentCurrency);
 
         // Layout
         final GridPane grid = new GridPane();
@@ -201,7 +206,8 @@ public final class SettingsPopupFX {
                 );
 
                 // Selected base currency
-                final String newCurrency = currencyBox.getValue().getShortName();
+                //final String newCurrency = currencyBox.getValue().getShortName();
+                final String newCurrency = currencyBox.getValue().getCode();
 
                 // If nothing changed → do nothing
                 final boolean unchanged = newTheme.equals(current.getTheme())

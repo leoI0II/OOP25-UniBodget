@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.main;
 
+import it.unibo.unibodget.controller.settings.SettingsController;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.view.investments.AddNewWalletDialogViewController;
@@ -22,6 +23,7 @@ public class ViewControllersFactory {
     private final InvestmentsSnapshotService snapshotService;
     private final DashboardModule dashboardModule;
     private final CurrencyConverterModule converterModule;
+    private final SettingsController settingsController;
 
     /**
      * Creates the factory with the shared services injected into every controller that needs them.
@@ -30,17 +32,20 @@ public class ViewControllersFactory {
      * @param snapshotService      the snapshot service used to persist portfolio balance history
      * @param dashboardModule      the dashboard MVC graph embedded as content in the shell
      * @param converterModule      the currency-converter view embedded as content in the shell
+     * @param settingsController   the settings controller used to manage user preferences
      */
     public ViewControllersFactory(
             final InvestmentController investmentController,
             final InvestmentsSnapshotService snapshotService,
             final DashboardModule dashboardModule,
-            final CurrencyConverterModule converterModule
+            final CurrencyConverterModule converterModule,
+            final SettingsController settingsController
     ) {
         this.investmentController = Objects.requireNonNull(investmentController);
         this.snapshotService = Objects.requireNonNull(snapshotService);
         this.dashboardModule = Objects.requireNonNull(dashboardModule);
         this.converterModule = Objects.requireNonNull(converterModule);
+        this.settingsController = Objects.requireNonNull(settingsController);
     }
 
     /**
@@ -68,7 +73,8 @@ public class ViewControllersFactory {
                     snapshotService,
                     dashboardModule,
                     converterModule,
-                    this);
+                    this,
+                    settingsController);
         }
         if (controllerClass == AddNewWalletDialogViewController.class) {
             return new AddNewWalletDialogViewController(investmentController);
