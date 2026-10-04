@@ -106,7 +106,8 @@ public class App extends Application {
                 investmentsController,
                 snapshotService,
                 dashboardModule,
-                converterModule
+                converterModule,
+                settingsController
         );
 
         mainViewPage.setControllerFactory(factory::create);
