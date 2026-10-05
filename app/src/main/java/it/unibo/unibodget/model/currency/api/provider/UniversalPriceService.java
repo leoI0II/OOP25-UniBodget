@@ -108,15 +108,6 @@ public class UniversalPriceService {
                 + (cached == null ? "MISS " : "EXPIRED ")
                 + key + " — requesting " + providerName);
 
-        /*final BigDecimal price = provider.getPriceInUSD(unit);
-
-        if (price == null || price.signum() <= 0) {
-            throw new IllegalArgumentException(
-                    "No valid USD price available for "
-                            + unit.getCode()
-            );
-        }*/
-
         BigDecimal price;
         try {
             price = provider.getPriceInUSD(unit);
@@ -199,5 +190,5 @@ public class UniversalPriceService {
 
         return targetInUsd;
     }
-    
+
 }

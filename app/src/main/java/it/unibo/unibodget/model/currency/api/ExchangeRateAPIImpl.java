@@ -40,23 +40,44 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /** Cached exchange rates keyed by {@link CurrencyUnit}. */
     private Map<CurrencyUnit, Double> cachedRates = new HashMap<>();
 
+    /** Base currency associated with the cached rates. */
+    private String cachedBaseCode;
+
     /**
      * Returns the latest exchange rates relative to the given base currency.
      *
      * <p>
      * If cached data is still valid, it is returned immediately. Otherwise,
      * a new request is sent to the external API.
+     * Preserves previous rates for the same base if the request fails.
+     * </p>
      *
      * @param base the base currency for which rates should be retrieved
      * @return a map of currency units to their exchange rate relative to {@code base}
      */
     @Override
-    public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
-        if (lastUpdate == null || Instant.now().isAfter(lastUpdate.plus(CACHE_DURATION))) {
-            cachedRates = fetchRatesFromAPI(base);
-            lastUpdate = Instant.now();
+    public synchronized Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
+        final boolean sameBase = base.getCode().equalsIgnoreCase(cachedBaseCode);
+        // Reuse valid rates only when the base currency matches
+        if (sameBase && !cachedRates.isEmpty()
+            && Instant.now().isBefore(lastUpdate.plus(CACHE_DURATION))) {
+            return Map.copyOf(cachedRates);
         }
-        return cachedRates;
+        // Fetch new rates and update the cache only if response with multiple currencies
+        final Map<CurrencyUnit, Double> fetchedRates = fetchRatesFromAPI(base);
+        if (fetchedRates.size() > 1) {
+            cachedRates = new HashMap<>(fetchedRates);
+            cachedBaseCode = base.getCode();
+            lastUpdate = Instant.now();
+            return Map.copyOf(cachedRates);
+        }
+        // Keep previous rates if the refresh fails
+        if (sameBase && !cachedRates.isEmpty()) {
+            System.err.println("[FIAT CACHE] Request failed: using previous rates.");
+            return Map.copyOf(cachedRates);
+        }
+        System.err.println("[FIAT CACHE] No rates available for " + base.getCode());
+        return Map.of();
     }
 
     /**
@@ -85,11 +106,9 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
      * @return a map of parsed exchange rates
      */
     private Map<CurrencyUnit, Double> fetchRatesFromAPI(final CurrencyUnit base) {
-        String body = "";
+        final String url = "https://open.er-api.com/v6/latest/" + base.getCode();
 
         try {
-            final String url = "https://open.er-api.com/v6/latest/" + base.getCode();
-
             final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(SECONDS_5))
@@ -99,14 +118,22 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             final HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            body = response.body();
-            System.out.println("API response: " + body);
+            if (response.statusCode() != 200) {
+                // return an empty map
+                return Map.of();
+            }
+            return parseRates(response.body(), base);
 
-        } catch (final InterruptedException | IOException e) {
-            System.out.println("HTTP error: " + e.getMessage());
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // return an empty map
+            return Map.of();
+
+        } catch (final IOException e) {
+            // return an empty map
+            e.printStackTrace();
+            return Map.of();
         }
-
-        return parseRates(body, base);
     }
 
     /**
