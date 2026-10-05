@@ -26,11 +26,6 @@ dependencies {
     implementation(libs.guava)
 }
 
-javafx {
-    version = "21"
-    modules("javafx.controls")
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -72,7 +67,16 @@ dependencies {
 }
 
 application {
+    //mainClass.set("it.unibo.unibodget.unibodget")
+    //mainClass.set("it.unibo.unibodget.Unibodget2") - mia temp per persistency e currency converter
+    //mainClass.set("it.unibo.unibodget.model.wallet.TestWallet") - test pers per wallet
+    //mainClass.set("it.unibo.unibodget.view.currency_converter.MainCC")
+    //mainClass.set("it.unibo.unibodget.view.currency_converter.CurrencyConverterViewFX") - non più lanciabile per new
     mainClass.set("it.unibo.unibodget.App")
+}
+
+tasks.named<JavaExec>("run") {
+    workingDir = rootProject.projectDir
 }
 
 tasks.test {
@@ -81,4 +85,35 @@ tasks.test {
 
 tasks.withType<Javadoc>().configureEach {
     isFailOnError = false
+}
+
+tasks.jar {
+    archiveFileName.set("UniBodget.jar")
+
+    manifest {
+        attributes["Main-Class"] = "it.unibo.unibodget.Launcher"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Include runtime dependencies, including JavaFX and Jackson.
+    from({
+        configurations.runtimeClasspath.get().map { dependency ->
+            if (dependency.isDirectory) {
+                dependency
+            } else {
+                zipTree(dependency)
+            }
+        }
+    })
+
+    // Remove dependency signatures and module descriptors.
+    exclude(
+        "META-INF/*.SF",
+        "META-INF/*.RSA",
+        "META-INF/*.DSA",
+        "META-INF/INDEX.LIST",
+        "module-info.class",
+        "META-INF/versions/**/module-info.class"
+    )
 }
