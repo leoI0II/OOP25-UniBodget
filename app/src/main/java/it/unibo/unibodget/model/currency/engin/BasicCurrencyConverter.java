@@ -56,15 +56,7 @@ public class BasicCurrencyConverter implements CurrencyConverter {
         Objects.requireNonNull(from, "from");
         Objects.requireNonNull(to, "to");
 
-        System.out.println("[CONVERSION] Request: "
-                + amount + " " + from.getCode()
-                + " (" + from.getType() + ") -> "
-                + to.getCode() + " (" + to.getType() + ")");
-
         if (from.getCode().equalsIgnoreCase(to.getCode())) {
-            System.out.println("[CONVERSION] Same asset: rate = 1, result = "
-                    + amount);
-
             return new CurrencyConversionResult(
                     amount, from, to, BigDecimal.ONE, amount
             );
