@@ -81,7 +81,7 @@ public final class Theme {
         this.fontFamily = Objects.requireNonNull(fontFamily);
 
         // Fallback to default size if invalid
-        this.fontSize = fontSize > 0 ? fontSize : DEFAULT.fontSize;
+        this.fontSize = fontSize > 0 ?fontSize : DEFAULT.fontSize;
 
         this.boldText = boldText;
     }

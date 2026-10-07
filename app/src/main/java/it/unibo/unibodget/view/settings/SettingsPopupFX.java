@@ -159,7 +159,7 @@ public final class SettingsPopupFX {
         fontBox.setValue(current.getTheme().getFontFamily());
 
         // Font size selector
-        final Spinner<Integer> fontSize = new Spinner<>(8, 40, current.getTheme().getFontSize());
+        final Spinner<Integer> fontSize = new Spinner<>(6, 20, current.getTheme().getFontSize());
 
         // Bold toggle
         final CheckBox boldCheck = new CheckBox("Bold");
