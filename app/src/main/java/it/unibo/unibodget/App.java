@@ -12,6 +12,7 @@ import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
@@ -44,6 +45,7 @@ public class App extends Application {
     private InvestmentAccountService investmentsService;
 
     private boolean persistenceReady;
+    private final SettingsController settingsController = new SettingsController();
 
     /** {@inheritDoc} */
     @Override
@@ -72,7 +74,7 @@ public class App extends Application {
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
 
-        final SettingsController settingsController = new SettingsController();
+        //settingsController = 
         final Settings settings = settingsController.getSettings();
 
         final var snapshotService = new CSVInvestmentsSnapshotService();
@@ -114,22 +116,59 @@ public class App extends Application {
         final Node mainViewNode = mainViewPage.load();
         final HBox root = (HBox) mainViewNode;
 
-        final Scene scene = new Scene(
+        /*final Scene scene = new Scene(
                 root,
-                WINDOW_WIDTH,
-                WINDOW_HEIGHT
-        );
+                settings.getWindowPrefs().getWidth(),
+                settings.getWindowPrefs().getHeight()
+        );*/
+        final Scene scene = new Scene(root);
         ThemeManager.applyThemeToScene(scene);
 
         primaryStage.setScene(scene);
+        primaryStage.setWidth(settings.getWindowPrefs().getWidth());
+        primaryStage.setHeight(settings.getWindowPrefs().getHeight());
+        primaryStage.setMaximized(settings.getWindowPrefs().isMaximized());
+
         primaryStage.setTitle("UniBodget");
         primaryStage.show();
 
+        updateWindowProperty(primaryStage, settings);
+        
         persistenceReady = true;
     }
 
     /**
-     * Saves wallet data when the JavaFX application stops normally.
+     * Updates the window preferences in the settings whenever the primary stage's
+     * width, height, or maximized state changes.
+     *
+     * @param primaryStage the main application stage
+     * @param settings the settings instance to update
+     */
+    private void updateWindowProperty(final Stage primaryStage, final Settings settings) {
+        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
+            if (!primaryStage.isMaximized()) {
+                settings.getWindowPrefs().setWidth(newValue.doubleValue());
+            }
+        });
+
+        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+            if (!primaryStage.isMaximized()) {
+                settings.getWindowPrefs().setHeight(newValue.doubleValue());
+            }
+        });
+
+        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+            settings.getWindowPrefs().setMaximized(newValue);
+        });
+    }
+
+    /**
+     * Saves all wallets and window preferences when the application stops.
+     * 
+     * <p>
+     * This method is called automatically by the JavaFX framework when the
+     * application is about to exit. It ensures that all wallet data and window
+     * preferences are persisted to storage.
      */
     @Override
     public void stop() {
@@ -142,7 +181,17 @@ public class App extends Application {
                 () -> saveWallets("Cash", () ->
                         cashAccountManager.saveAll(cashAccountsService.getWallets())),
                 () -> saveWallets("Investment", () ->
-                        investmentAccountManager.saveAll(investmentsService.getWallets()))
+                        investmentAccountManager.saveAll(investmentsService.getWallets())),
+                () -> {
+                    final WindowPreferences preferences =
+                            settingsController.getSettings().getWindowPrefs();
+
+                    settingsController.updateWindowPrefs(new WindowPreferences(
+                            preferences.getWidth(),
+                            preferences.getHeight(),
+                            preferences.isMaximized()
+                    ));
+                }
         }) {
             try {
                 save.run();

@@ -202,7 +202,12 @@ public final class Settings {
             theme, 
             baseCurrency, 
             new ArrayList<>(preferenceHistory), 
-            windowPrefs);
+            new WindowPreferences(
+                windowPrefs.getWidth(),
+                windowPrefs.getHeight(),
+                windowPrefs.isMaximized()
+            )
+        );
     }
 
     /** 
