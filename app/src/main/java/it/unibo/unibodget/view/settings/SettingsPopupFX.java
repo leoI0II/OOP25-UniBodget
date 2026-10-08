@@ -1,7 +1,6 @@
 package it.unibo.unibodget.view.settings;
 
 import it.unibo.unibodget.controller.settings.SettingsController;
-import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsSnapshot;

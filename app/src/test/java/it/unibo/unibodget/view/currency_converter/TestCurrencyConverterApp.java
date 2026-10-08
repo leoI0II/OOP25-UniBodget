@@ -1,86 +1,91 @@
 package it.unibo.unibodget.view.currency_converter;
 
-import java.util.Map;
-
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
-import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
-import it.unibo.unibodget.model.currency.api.MockExchangeRateAPI;
-import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
+import it.unibo.unibodget.controller.settings.SettingsController;
+import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.settings.WindowPreferences;
+
+import javafx.application.Application;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 /**
- * Temporary launcher class used to start the Currency Converter dashboard
- * without the full UniBodget application.
- * 
- * <p>
- * It initializes:
- * <ul>
- *     <li>a basic exchange‑rate API implementation</li>
- *     <li>a {@link BasicCurrencyConverter} with a chosen base currency</li>
- *     <li>a {@link CurrencyConverterController} that orchestrates conversions</li>
- * </ul>
- * and then launches {@link CurrencyConverterViewFX}.
+ * Standalone JavaFX launcher for testing the Currency Converter dashboard
+ * outside the full UniBodget application.
+ *
+ * <p>Loads saved settings, initializes the converter controller,
+ * applies the current theme and displays the converter dashboard.</p>
  */
-public final class TestCurrencyConverterApp {
+public final class TestCurrencyConverterApp extends Application {
 
-    /**
-     * Utility class containing only a static entry point.
-     * The constructor is private to prevent instantiation.
-     */
-    private TestCurrencyConverterApp() {
-        // prevents instantiation
-    }
-
-    /**
-     * Entry point for launching the standalone Currency Converter dashboard.
-     * 
-     * <p>
-     * This method:
-     * <ol>
-     *     <li>creates an API client for exchange rates</li>
-     *     <li>sets EUR as the base currency</li>
-     *     <li>creates a basic converter engine</li>
-     *     <li>creates the main controller</li>
-     *     <li>launches the JavaFX dashboard</li>
-     * </ol>
-     *
-     * @param args ignored
-     */
-    public static void main(final String[] args) {
+    /** {@inheritDoc} */
+    @Override
+    public void start(final Stage stage) {
+        final SettingsController settingsController = new SettingsController();
+        final WindowPreferences savedPrefs =
+                settingsController.getSettings().getWindowPrefs();
 
         final CurrencyConverterController controller =
                 CurrencyConverterFactory.create();
 
-        CurrencyConverterViewFX.launchWith(controller);
-        /*
-        // 1. API for exchange rates (historical + latest)
-        ExchangeRateAPI api = new ExchangeRateAPIImpl();
+        final Parent root = CurrencyConverterViewFX.buildContent(controller);
+        final Scene scene = new Scene(root);
 
-        // 2. Base currency for conversion engine
-        final var baseCurrency = FiatCurrency.EUR;
+        stage.setScene(scene);
+        stage.setTitle("Currency Converter");
+        stage.setWidth(savedPrefs.getWidth());
+        stage.setHeight(savedPrefs.getHeight());
+        stage.setMaximized(savedPrefs.isMaximized());
 
-        // 3. Check online / offline or error mode
-        final Map<CurrencyUnit, Double> latest = api.getLatestRates(baseCurrency);
-        if (latest.size() <= 1) {
-            System.out.println("Offline mode: using mock API");
-            api = new MockExchangeRateAPI(
-                    baseCurrency,
-                    MockExchangeRateAPI.generateMockRatesFromCurrencies()
-            );
-        } else {
-            System.out.println("Online mode: using real API");
-        }
+        ThemeManager.applyThemeToScene(scene);
+        stage.show();
 
-        // 3. Conversion engine using the API
-        final var converter = new BasicCurrencyConverter(api, baseCurrency);
+        // Persist normal window dimensions without storing maximized dimensions.
+        stage.widthProperty().addListener((obs, oldValue, newValue) -> {
+            if (!stage.isMaximized()) {
+                final WindowPreferences prefs =
+                        settingsController.getSettings().getWindowPrefs();
 
-        // 4. Main controller orchestrating conversions
-        final var controller = new CurrencyConverterController(api, converter);
+                settingsController.updateWindowPrefs(new WindowPreferences(
+                        newValue.doubleValue(),
+                        prefs.getHeight(),
+                        prefs.isMaximized()
+                ));
+            }
+        });
 
-        // 5. Launch the FX dashboard
-        CurrencyConverterViewFX.launchWith(controller);
-         */
+        stage.heightProperty().addListener((obs, oldValue, newValue) -> {
+            if (!stage.isMaximized()) {
+                final WindowPreferences prefs =
+                        settingsController.getSettings().getWindowPrefs();
+
+                settingsController.updateWindowPrefs(new WindowPreferences(
+                        prefs.getWidth(),
+                        newValue.doubleValue(),
+                        prefs.isMaximized()
+                ));
+            }
+        });
+
+        stage.maximizedProperty().addListener((obs, oldValue, newValue) -> {
+            final WindowPreferences prefs =
+                    settingsController.getSettings().getWindowPrefs();
+
+            settingsController.updateWindowPrefs(new WindowPreferences(
+                    prefs.getWidth(),
+                    prefs.getHeight(),
+                    newValue
+            ));
+        });
+    }
+
+    /**
+     * Launches the standalone Currency Converter dashboard.
+     *
+     * @param args command-line arguments
+     */
+    public static void main(final String[] args) {
+        launch(args);
     }
 }
