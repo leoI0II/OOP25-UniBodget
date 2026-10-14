@@ -17,8 +17,7 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState.ExpenseRiparti
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.FriendLoanCardViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.HeaderViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.InsightCardViewState;
-import it.unibo.unibodget.view.dashboard.state.DashboardViewState.SidebarFooterTotalViewState;
-import it.unibo.unibodget.view.dashboard.state.DashboardViewState.SidebarWalletItemViewState;
+
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionRowViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionSectionViewState;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
@@ -35,10 +34,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -103,16 +100,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private boolean initialLoadTriggered;
     private boolean updatingFilters;
 
-    private final VBox sidebarRoot;
-    private final MenuButton navigationMenuButton;
-    private final Label walletsSectionTitle;
-    private final Label walletsCountLabel;
-    private final Button createWalletButton;
-    private final VBox walletListBox;
-    private final ScrollPane walletScrollPane;
-    private final Label totalFooterLabel;
-    private final Label totalFooterAmountLabel;
-    private final Label totalFooterCurrencyLabel;
+
 
     private final Label headerTitleLabel;
     private final Label headerWalletLabel;
@@ -166,16 +154,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * Creates the dashboard view and initializes all UI components.
      */
     public DefaultDashboardView() {
-        this.sidebarRoot = new VBox(16);
-        this.navigationMenuButton = new MenuButton("\u2630");
-        this.walletsSectionTitle = new Label();
-        this.walletsCountLabel = new Label();
-        this.createWalletButton = new Button("+ New Wallet");
-        this.walletListBox = new VBox(10);
-        this.walletScrollPane = new ScrollPane(this.walletListBox);
-        this.totalFooterLabel = new Label();
-        this.totalFooterAmountLabel = new Label();
-        this.totalFooterCurrencyLabel = new Label();
+
 
         this.headerTitleLabel = new Label();
         this.headerWalletLabel = new Label();
@@ -248,7 +227,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     public void render(final DashboardViewState state) {
         Objects.requireNonNull(state);
 
-//        renderSidebar(state);
+
         renderHeader(state.header());
         renderBalanceCard(state.balanceCard());
         renderExpenseRipartitionCard(state.expenseRipartitionCard());
@@ -275,11 +254,8 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         setPadding(new Insets(18));
         setPrefSize(1440, 900);
 
-        buildSidebar();
-//        setLeft(this.sidebarRoot);
-
         final VBox centerContent = new VBox(18);
-        centerContent.setPadding(new Insets(4, 0, 0, 18));
+        centerContent.setPadding(new Insets(4, 0, 0, 0));
 
         final VBox headerBox = new VBox(4, this.headerTitleLabel, this.headerWalletLabel, this.headerSubtitleLabel);
 
@@ -364,62 +340,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         setCenter(centerContent);
     }
 
-    /**
-     * Builds the left sidebar.
-     */
-    private void buildSidebar() {
-        this.sidebarRoot.setPadding(new Insets(18));
-        this.sidebarRoot.setPrefWidth(320);
-        this.sidebarRoot.setMinWidth(290);
-        this.sidebarRoot.setMaxWidth(360);
 
-        this.navigationMenuButton.setFocusTraversable(false);
-        this.navigationMenuButton.setMaxWidth(Double.MAX_VALUE);
-
-        final Region walletHeaderSpacer = new Region();
-        HBox.setHgrow(walletHeaderSpacer, Priority.ALWAYS);
-
-        final VBox walletTextBox = new VBox(4, this.walletsSectionTitle, this.walletsCountLabel);
-        final HBox walletSectionHeader = new HBox(
-                10,
-                walletTextBox,
-                walletHeaderSpacer,
-                this.createWalletButton
-        );
-        walletSectionHeader.setAlignment(Pos.CENTER_LEFT);
-
-        this.walletListBox.setFillWidth(true);
-        this.walletListBox.setStyle("-fx-background-color: transparent;");
-
-        this.walletScrollPane.setFitToWidth(true);
-        this.walletScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        this.walletScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        this.walletScrollPane.setPrefViewportHeight(420);
-        this.walletScrollPane.setStyle(
-                "-fx-background: transparent;"
-                + "-fx-background-color: transparent;"
-                + "-fx-border-color: transparent;"
-        );
-        VBox.setVgrow(this.walletScrollPane, Priority.ALWAYS);
-
-        final VBox totalFooterBox = createSidebarFooterCard(
-                this.totalFooterLabel,
-                this.totalFooterAmountLabel,
-                this.totalFooterCurrencyLabel
-        );
-
-        final Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        this.sidebarRoot.getChildren().addAll(
-                this.navigationMenuButton,
-                walletSectionHeader,
-                this.walletScrollPane,
-                spacer,
-                new Separator(),
-                totalFooterBox
-        );
-    }
 
     /**
      * Creates the expense ripartition card.
@@ -616,26 +537,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         return box;
     }
 
-    /**
-     * Creates the emphasized footer card used at the bottom of the sidebar.
-     *
-     * @param nodes
-     *            the footer card content
-     * @return the configured footer card
-     */
-    private VBox createSidebarFooterCard(final Node... nodes) {
-        final VBox box = new VBox(10);
-        box.setPadding(new Insets(16));
-        box.setStyle(
-                "-fx-background-color: rgba(20,28,44,0.92);"
-                + "-fx-background-radius: 18;"
-                + "-fx-border-radius: 18;"
-                + "-fx-border-color: rgba(120,190,255,0.18);"
-                + "-fx-border-width: 1.2;"
-        );
-        box.getChildren().addAll(nodes);
-        return box;
-    }
+
 
     /**
      * Configures the transaction table columns and row actions.
@@ -748,11 +650,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * Configures action handlers for all interactive controls.
      */
     private void configureActions() {
-        this.createWalletButton.setOnAction(event -> {
-            if (this.actions != null) {
-                this.actions.onCreateWalletRequested();
-            }
-        });
+
 
         this.createTransactionButton.setOnAction(event -> {
             if (this.actions != null) {
@@ -808,10 +706,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene != null) {
                 Platform.runLater(() -> {
-                    final Node walletViewport = this.walletScrollPane.lookup(".viewport");
-                    if (walletViewport != null) {
-                        walletViewport.setStyle("-fx-background-color: transparent;");
-                    }
+
 
                     final Node insightsViewport = this.insightsScrollPane.lookup(".viewport");
                     if (insightsViewport != null) {
@@ -853,129 +748,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         ));
     }
 
-    /**
-     * Renders the sidebar.
-     *
-     * @param state
-     *            the dashboard state
-     */
-    private void renderSidebar(final DashboardViewState state) {
-        this.walletsSectionTitle.setText(state.sidebar().walletSection().title());
-        this.walletsCountLabel.setText(state.sidebar().walletSection().walletCountText());
 
-        renderNavigationMenu(state);
-        renderWalletList(state);
-        renderSidebarFooter(state.sidebar().totalFooter());
-    }
-
-    /**
-     * Renders the navigation menu.
-     *
-     * @param state
-     *            the dashboard state
-     */
-    private void renderNavigationMenu(final DashboardViewState state) {
-        this.navigationMenuButton.setText("\u2630");
-        this.navigationMenuButton.getItems().clear();
-
-        state.sidebar().navigationMenu().items().forEach(item -> {
-            final MenuItem menuItem = new MenuItem(item.label());
-            menuItem.setDisable(!item.enabled());
-            menuItem.setOnAction(event -> {
-                if (this.actions != null) {
-                    this.actions.onNavigationRequested(item.destination());
-                }
-            });
-            this.navigationMenuButton.getItems().add(menuItem);
-        });
-    }
-
-    /**
-     * Renders the wallet list in the sidebar.
-     *
-     * @param state
-     *            the dashboard state
-     */
-    private void renderWalletList(final DashboardViewState state) {
-    this.walletListBox.getChildren().clear();
-
-    for (final SidebarWalletItemViewState wallet
-            : state.sidebar().walletSection().wallets()) {
-
-        final Button walletButton = new Button();
-        walletButton.setMaxWidth(Double.MAX_VALUE);
-        walletButton.setAlignment(Pos.CENTER_LEFT);
-        walletButton.setWrapText(true);
-        walletButton.setText(
-                wallet.walletName()
-                + "\n"
-                + wallet.balanceText()
-        );
-
-        walletButton.setOnAction(event -> {
-            if (this.actions != null && wallet.walletId() != null) {
-                this.actions.onWalletSelected(wallet.walletId());
-            }
-        });
-
-        // Context menu: Edit / Delete wallet
-        final MenuItem editWalletItem = new MenuItem("Edit wallet");
-        final MenuItem deleteWalletItem = new MenuItem("Delete wallet");
-        final ContextMenu walletContextMenu = new ContextMenu(
-                editWalletItem,
-                deleteWalletItem
-        );
-
-        editWalletItem.setOnAction(e -> {
-            if (this.actions != null && wallet.walletId() != null) {
-                this.actions.onEditWalletRequested(wallet.walletId());
-            }
-        });
-
-        deleteWalletItem.setOnAction(e -> {
-            if (this.actions != null && wallet.walletId() != null) {
-                this.actions.onDeleteWalletRequested(wallet.walletId());
-            }
-        });
-
-        walletButton.setContextMenu(walletContextMenu);
-
-        if (wallet.selected()) {
-            walletButton.setStyle(
-                    "-fx-background-color: rgba(70, 130, 220, 0.38);"
-                    + "-fx-text-fill: white;"
-                    + "-fx-background-radius: 14;"
-                    + "-fx-padding: 14 16 14 16;"
-                    + "-fx-font-weight: bold;"
-                    + "-fx-border-color: rgba(120,190,255,0.42);"
-                    + "-fx-border-radius: 14;"
-            );
-        } else {
-            walletButton.setStyle(
-                    "-fx-background-color: rgba(255,255,255,0.07);"
-                    + "-fx-text-fill: rgba(255,255,255,0.92);"
-                    + "-fx-background-radius: 14;"
-                    + "-fx-padding: 14 16 14 16;"
-                    + "-fx-border-color: rgba(255,255,255,0.08);"
-                    + "-fx-border-radius: 14;"
-            );
-        }
-
-        this.walletListBox.getChildren().add(walletButton);
-    }
-}
-
-    /**
-     * Renders the sidebar footer totals.
-     *
-     * @param footer
-     *            the footer view state
-     */
-    private void renderSidebarFooter(final SidebarFooterTotalViewState footer) {
-        this.totalFooterLabel.setText(footer.label());
-        this.totalFooterAmountLabel.setText(footer.convertedTotalText());
-        this.totalFooterCurrencyLabel.setText("Base currency: " + footer.baseCurrencyText());
-    }
 
     /**
      * Renders the dashboard header.
@@ -1236,29 +1009,6 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 + "-fx-font-size: " + theme.getFontSize() + "px;"
         );
 
-        this.sidebarRoot.setStyle(
-                "-fx-background-color: rgba(4,8,16,0.96);"
-                + "-fx-background-radius: 22;"
-                + "-fx-border-radius: 22;"
-                + "-fx-border-color: rgba(255,255,255,0.08);"
-        );
-
-        this.navigationMenuButton.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.06);"
-                + "-fx-text-fill: " + strongText + ";"
-                + "-fx-background-radius: 14;"
-                + "-fx-padding: 10 14 10 14;"
-                + "-fx-border-color: rgba(255,255,255,0.06);"
-                + "-fx-border-radius: 14;"
-        );
-
-        this.createWalletButton.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.90);"
-                + "-fx-text-fill: #111111;"
-                + "-fx-background-radius: 12;"
-                + "-fx-padding: 8 12 8 12;"
-                + "-fx-font-weight: bold;"
-        );
 
         this.createTransactionButton.setStyle(
                 "-fx-background-color: rgba(255,255,255,0.92);"
@@ -1318,8 +1068,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         styleLabel(this.headerWalletLabel, 14, true, mediumText);
         styleLabel(this.headerSubtitleLabel, 13, false, softText);
 
-        styleLabel(this.walletsSectionTitle, 16, true, strongText);
-        styleLabel(this.walletsCountLabel, 12, false, "rgba(255,255,255,0.74)");
+
 
         styleLabel(this.balanceCardTitleLabel, 14, true, mediumText);
         styleLabel(this.balanceAmountLabel, 42, true, strongText);
@@ -1342,9 +1091,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         styleLabel(this.friendLoanMessageLabel, 13, false, softText);
 
         styleLabel(this.transactionSectionTitleLabel, 16, true, strongText);
-        styleLabel(this.totalFooterLabel, 13, false, "rgba(255,255,255,0.78)");
-        styleLabel(this.totalFooterAmountLabel, 22, true, strongText);
-        styleLabel(this.totalFooterCurrencyLabel, 12, false, "rgba(255,255,255,0.70)");
+
 
         this.transactionTable.setStyle(
                 "-fx-background-color: rgba(255,255,255,0.05);"
@@ -1386,10 +1133,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                     )
             );
 
-            final Node walletViewport = this.walletScrollPane.lookup(".viewport");
-            if (walletViewport != null) {
-                walletViewport.setStyle("-fx-background-color: transparent;");
-            }
+
 
             final Node insightsViewport = this.insightsScrollPane.lookup(".viewport");
             if (insightsViewport != null) {

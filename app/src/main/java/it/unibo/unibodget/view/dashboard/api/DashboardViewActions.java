@@ -2,7 +2,6 @@ package it.unibo.unibodget.view.dashboard.api;
 
 import java.util.UUID;
 
-import it.unibo.unibodget.view.dashboard.state.DashboardDestination;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
 
 /**
@@ -28,40 +27,12 @@ public interface DashboardViewActions {
     void onViewOpened();
 
     /**
-     * Called when a wallet is selected from the sidebar.
+     * Called when a wallet is selected.
      *
      * @param walletId the identifier of the selected wallet; must not be
      * {@code null}
      */
     void onWalletSelected(UUID walletId);
-
-    /**
-     * Called when editing a wallet is requested.
-     *
-     * @param walletId the wallet identifier
-     */
-    default void onEditWalletRequested(final UUID walletId) {
-    }
-
-    /**
-     * Called when deleting a wallet is requested.
-     *
-     * @param walletId the wallet identifier
-     */
-    default void onDeleteWalletRequested(final UUID walletId) {
-    }
-
-    /**
-     * Called when navigation to a dashboard destination is requested.
-     *
-     * @param destination the requested destination; must not be {@code null}
-     */
-    void onNavigationRequested(DashboardDestination destination);
-
-    /**
-     * Called when the settings area is requested directly.
-     */
-    void onSettingsRequested();
 
     /**
      * Called when the transaction filter input changes.

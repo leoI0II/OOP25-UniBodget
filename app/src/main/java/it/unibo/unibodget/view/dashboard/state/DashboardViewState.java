@@ -13,8 +13,6 @@ import java.util.UUID;
  * table.
  * </p>
  *
- * @param sidebar
- *            the complete sidebar state
  * @param header
  *            the dashboard header state
  * @param balanceCard
@@ -33,7 +31,6 @@ import java.util.UUID;
  *            the transactions section state
  */
 public record DashboardViewState(
-        SidebarViewState sidebar,
         HeaderViewState header,
         BalanceCardViewState balanceCard,
         ExpenseRipartitionCardViewState expenseRipartitionCard,
@@ -46,8 +43,6 @@ public record DashboardViewState(
     /**
      * Compact canonical constructor with null-safety.
      *
-     * @param sidebar
-     *            sidebar state
      * @param header
      *            header state
      * @param balanceCard
@@ -66,7 +61,6 @@ public record DashboardViewState(
      *            transaction section state
      */
     public DashboardViewState {
-        Objects.requireNonNull(sidebar);
         Objects.requireNonNull(header);
         Objects.requireNonNull(balanceCard);
         Objects.requireNonNull(expenseRipartitionCard);
@@ -75,190 +69,6 @@ public record DashboardViewState(
         Objects.requireNonNull(friendLoanCard);
         insightCards = List.copyOf(Objects.requireNonNull(insightCards));
         Objects.requireNonNull(transactionSection);
-    }
-
-    /**
-     * Sidebar state.
-     *
-     * @param navigationMenu
-     *            the navigation menu state
-     * @param walletSection
-     *            the wallet list section state
-     * @param totalFooter
-     *            the footer total state
-     */
-    public record SidebarViewState(
-            NavigationMenuViewState navigationMenu,
-            WalletSectionViewState walletSection,
-            SidebarFooterTotalViewState totalFooter) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param navigationMenu
-         *            navigation menu state
-         * @param walletSection
-         *            wallet section state
-         * @param totalFooter
-         *            footer state
-         */
-        public SidebarViewState {
-            Objects.requireNonNull(navigationMenu);
-            Objects.requireNonNull(walletSection);
-            Objects.requireNonNull(totalFooter);
-        }
-    }
-
-    /**
-     * Navigation menu state.
-     *
-     * @param items
-     *            the available navigation items
-     */
-    public record NavigationMenuViewState(
-            List<NavigationItemViewState> items) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param items
-         *            navigation items
-         */
-        public NavigationMenuViewState {
-            items = List.copyOf(Objects.requireNonNull(items));
-        }
-    }
-
-    /**
-     * Single navigation item state.
-     *
-     * @param label
-     *            the item label
-     * @param destination
-     *            the destination triggered by the item
-     * @param enabled
-     *            whether the item can be activated
-     */
-    public record NavigationItemViewState(
-            String label,
-            DashboardDestination destination,
-            boolean enabled) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param label
-         *            item label
-         * @param destination
-         *            item destination
-         * @param enabled
-         *            enabled flag
-         */
-        public NavigationItemViewState {
-            Objects.requireNonNull(label);
-            Objects.requireNonNull(destination);
-        }
-    }
-
-    /**
-     * Wallet section state shown in the sidebar.
-     *
-     * @param title
-     *            section title
-     * @param walletCountText
-     *            wallet count label
-     * @param wallets
-     *            the wallet items
-     */
-    public record WalletSectionViewState(
-            String title,
-            String walletCountText,
-            List<SidebarWalletItemViewState> wallets) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param title
-         *            section title
-         * @param walletCountText
-         *            wallet count text
-         * @param wallets
-         *            wallet item list
-         */
-        public WalletSectionViewState {
-            Objects.requireNonNull(title);
-            Objects.requireNonNull(walletCountText);
-            wallets = List.copyOf(Objects.requireNonNull(wallets));
-        }
-    }
-
-    /**
-     * Sidebar wallet item state.
-     *
-     * @param walletId
-     *            wallet identifier
-     * @param walletName
-     *            wallet display name
-     * @param balanceText
-     *            formatted balance text
-     * @param selected
-     *            whether the wallet is currently selected
-     */
-    public record SidebarWalletItemViewState(
-            UUID walletId,
-            String walletName,
-            String balanceText,
-            boolean selected) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param walletId
-         *            wallet identifier
-         * @param walletName
-         *            wallet name
-         * @param balanceText
-         *            balance text
-         * @param selected
-         *            selected flag
-         */
-        public SidebarWalletItemViewState {
-            Objects.requireNonNull(walletId);
-            Objects.requireNonNull(walletName);
-            Objects.requireNonNull(balanceText);
-        }
-    }
-
-    /**
-     * Sidebar footer total state.
-     *
-     * @param label
-     *            footer label
-     * @param convertedTotalText
-     *            converted total amount
-     * @param baseCurrencyText
-     *            base currency label
-     */
-    public record SidebarFooterTotalViewState(
-            String label,
-            String convertedTotalText,
-            String baseCurrencyText) {
-
-        /**
-         * Compact canonical constructor with null-safety.
-         *
-         * @param label
-         *            footer label
-         * @param convertedTotalText
-         *            converted total text
-         * @param baseCurrencyText
-         *            base currency text
-         */
-        public SidebarFooterTotalViewState {
-            Objects.requireNonNull(label);
-            Objects.requireNonNull(convertedTotalText);
-            Objects.requireNonNull(baseCurrencyText);
-        }
     }
 
     /**
