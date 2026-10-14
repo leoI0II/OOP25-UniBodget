@@ -7,10 +7,10 @@ import java.util.Objects;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 
 /**
- * Default implementation of {@link TransactionHistoryFilterService}.
+ * Service that filters and sorts cash transaction history.
  *
  * <p>
- * This implementation applies all active filters cumulatively and then
+ * This service applies all active filters cumulatively and then
  * sorts the resulting list according to the specified sort order.
  * </p>
  */
@@ -128,8 +128,4 @@ public final class DefaultTransactionHistoryFilterService {
             case HIGHEST_AMOUNT_FIRST -> byAmountDesc;
         };
     }
-
-//     private String safeLowerCase(final String value) {
-//         return value == null ? "" : value.toLowerCase();
-//     }
 }
