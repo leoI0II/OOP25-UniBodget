@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 import org.junit.jupiter.api.Test;
 
@@ -55,23 +54,6 @@ class HistoricalTest {
         assertTrue(replaced);
         assertTrue(h.getTransactions().contains(newTx));
         assertFalse(h.getTransactions().contains(oldTx));
-    }
-
-    @Test
-    void shouldFilterByMonth() {
-        final Historical<CashTransaction> h = new Historical<>();
-
-        final CashTransaction janTx = tx(LocalDate.of(2024, 1, 10), "Jan");
-        final CashTransaction febTx = tx(LocalDate.of(2024, 2, 10), "Feb");
-
-        h.addTransaction(janTx);
-        h.addTransaction(febTx);
-
-        final var januaryList = h.filterByMonth(YearMonth.of(2024, 1));
-
-        assertEquals(1, januaryList.size());
-        assertTrue(januaryList.contains(janTx));
-        assertFalse(januaryList.contains(febTx));
     }
 
 }

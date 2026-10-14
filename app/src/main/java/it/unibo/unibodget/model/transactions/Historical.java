@@ -1,6 +1,5 @@
 package it.unibo.unibodget.model.transactions;
 
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -136,23 +135,4 @@ public class Historical<T extends AbstractTransaction> {
     public int hashCode() {
         return Objects.hash(history);
     }
-
-    /**
-     * Returns all transactions that occurred within the given calendar month.
-     *
-     * @param month the month to filter by
-     * @return an unmodifiable list of transactions that occurred in the
-     * specified month
-     */
-    public List<T> filterByMonth(final YearMonth month) {
-        Objects.requireNonNull(month, "month must not be null");
-        final List<T> filtered = new ArrayList<>();
-        for (final T transaction : history) {
-            if (YearMonth.from(transaction.getDate()).equals(month)) {
-                filtered.add(transaction);
-            }
-        }
-        return Collections.unmodifiableList(filtered);
-    }
-
 }
