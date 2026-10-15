@@ -16,6 +16,7 @@ import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.utils.event.WalletRenamedEvent;
 
 /**
  * Abstract base class representing a financial wallet that holds a ledger of
@@ -126,12 +127,28 @@ public abstract class AbstractWallet<T extends AbstractTransaction> {
     }
 
     /**
-     * Sets the display name of this wallet.
+     * Sets the display name of this wallet and publishes a {@link WalletRenamedEvent}
+     * so that interested components (e.g. persistence) can react.
+     * Leading and trailing whitespace is removed; renaming to the same name is a no-op.
      *
-     * @param name the new name to assign
+     * <p>Naming rules are enforced here; the views catch the exception, show the
+     * message to the user and ask for another name.</p>
+     *
+     * @param name the new name to assign; must not be null or blank
+     * @throws IllegalArgumentException if {@code name} is blank
      */
     public void setName(final String name) {
-        this.name = name;
+        Objects.requireNonNull(name, "Wallet name cannot be null");
+        final String trimmed = name.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException("Wallet name cannot be blank.");
+        }
+        if (trimmed.equals(this.name)) {
+            return;
+        }
+        final String oldName = this.name;
+        this.name = trimmed;
+        MessageBus.send(new WalletRenamedEvent(this, oldName, trimmed));
     }
 
     /**

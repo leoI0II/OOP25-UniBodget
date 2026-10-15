@@ -74,4 +74,16 @@ public final class DashboardViewController extends BaseViewController implements
         dashboardController.onCreateWalletRequested();
         sideBar.refresh();
     }
+
+    @Override
+    public void onRenameRequested(final UUID id, final String newName) {
+        dashboardController.renameWallet(id, newName);
+        sideBar.refresh();
+    }
+
+    @Override
+    public void onDeleteRequested(final UUID id) {
+        dashboardController.onDeleteWalletRequested(id);
+        sideBar.refresh();
+    }
 }
