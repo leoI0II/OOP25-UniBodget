@@ -10,6 +10,24 @@ import java.math.BigDecimal;
 public interface BudgetAlertStrategy {
 
     /**
+     * Determines whether this alert strategy applies to the given current amount and budget settings.
+     *
+     * @param currentValue the current amount reached by the tracked budget
+     * @param settings the configured budget settings
+     * @return {@code true} if this strategy's condition is met, {@code false} otherwise
+     */
+    boolean applies(BigDecimal currentValue, BudgetSettings settings);
+
+    /**
+     * Evaluates the budget status for the provided current amount and budget settings.
+     *
+     * @param currentValue the current amount reached by the tracked budget
+     * @param settings the configured budget settings
+     * @return the evaluated {@link BudgetStatus}
+     */
+    BudgetStatus evaluate(BigDecimal currentValue, BudgetSettings settings);
+
+    /**
      * Evaluates the budget state for the provided values.
      *
      * @param currentValue the current amount reached by the tracked budget

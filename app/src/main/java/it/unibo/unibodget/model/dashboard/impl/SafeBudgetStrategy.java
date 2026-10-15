@@ -1,18 +1,26 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import it.unibo.unibodget.model.dashboard.api.BudgetAlertStrategy;
-import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import java.math.BigDecimal;
+
+import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 
 /**
  * Strategy representing a safe budget condition.
- * This strategy is selected when the current value is clearly below the warning threshold.
+ * Serves as the default baseline fallback when neither critical nor warning thresholds are met.
  */
-public final class SafeBudgetStrategy implements BudgetAlertStrategy {
+public final class SafeBudgetStrategy extends AbstractBudgetAlertStrategy {
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public boolean applies(final BigDecimal currentValue, final BudgetSettings settings) {
+        return true;
+    }
+
+    @Override
+    public BudgetStatus evaluate(final BigDecimal currentValue, final BudgetSettings settings) {
+        return BudgetStatus.SAFE;
+    }
+
     @Override
     public BudgetStatus evaluate(final BigDecimal currentValue, final BigDecimal limitValue) {
         return BudgetStatus.SAFE;
