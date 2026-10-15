@@ -2,6 +2,7 @@ package it.unibo.unibodget.model.wallet;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,23 +24,28 @@ public final class CashAccount extends AbstractWallet<CashTransaction> {
     private DefaultBudgetSettings budgetSettings;
 
     /**
-     * Creates a {@code CashAccount} from JSON data. If {@code history} is null,
-     * an empty ledger is created. If {@code budgetSettings} is null, a default
+     * Creates a {@code CashAccount} from JSON data. The saved {@code id} is kept,
+     * so that the wallet has the same identity across restarts; if it is missing
+     * (old files) a new one is generated. If {@code history} is null, an empty
+     * ledger is created. If {@code budgetSettings} is null, a default
      * configuration is applied.
      *
+     * @param id the saved wallet identifier, or null to generate a new one
      * @param name the display name of the wallet
      * @param baseCurrency the currency used to express the balance
      * @param history the transaction ledger, or null for an empty one
      * @param budgetSettings the budget configuration, or null for defaults
      */
     @JsonCreator
-    public CashAccount(
+    private CashAccount(
+            @JsonProperty("id") final UUID id,
             @JsonProperty("name") final String name,
             @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
             @JsonProperty("history") final Historical<CashTransaction> history,
             @JsonProperty("budgetSettings") final DefaultBudgetSettings budgetSettings) {
 
         super(
+                id,
                 name,
                 baseCurrency,
                 history != null ? history : new Historical<>(),
@@ -59,6 +65,7 @@ public final class CashAccount extends AbstractWallet<CashTransaction> {
      */
     public CashAccount(final String name, final CurrencyUnit baseCurrency) {
         this(
+                null,
                 name,
                 baseCurrency,
                 new Historical<>(),
