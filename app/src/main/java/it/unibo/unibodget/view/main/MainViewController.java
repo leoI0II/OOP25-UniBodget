@@ -196,6 +196,22 @@ public class MainViewController extends BaseViewController {
                     d.onAddWalletRequested();
                 }
             }
+
+            @Override
+            public void onRenameRequested(final UUID id, final String newName) {
+                restoreWalletContext(restoreContext);
+                if (currentVC instanceof SideBarDelegate d) {
+                    d.onRenameRequested(id, newName);
+                }
+            }
+
+            @Override
+            public void onDeleteRequested(final UUID id) {
+                restoreWalletContext(restoreContext);
+                if (currentVC instanceof SideBarDelegate d) {
+                    d.onDeleteRequested(id);
+                }
+            }
         });
 
         contentArea.getChildren().setAll(converterModule.getView());

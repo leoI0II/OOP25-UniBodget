@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A static facade implementing the Publisher-Subscriber pattern.
@@ -38,6 +40,7 @@ import java.util.function.Consumer;
  */
 public final class MessageBus {
 
+    private static final Logger LOGGER = Logger.getLogger(MessageBus.class.getName());
     private static final MessageBus INSTANCE = new MessageBus();
     private final Map<Class<?>, List<Consumer<?>>> subscribers = new HashMap<>();
 
@@ -71,6 +74,10 @@ public final class MessageBus {
      *
      * <p>If no subscribers are registered for the event type, the call is a no-op.</p>
      *
+     * <p>Subscribers are isolated from each other: if one throws, the exception is
+     * logged (event type, subscriber and full stack trace) and the remaining
+     * subscribers are still notified. The publisher never sees the exception.</p>
+     *
      * @param msg the event to publish; must implement {@link MessageEvent}
      */
     public static void send(final MessageEvent msg) {
@@ -79,8 +86,20 @@ public final class MessageBus {
         if (subs == null) {
             return;
         }
-        for (final var sub : subs) {
-            ((Consumer<MessageEvent>) sub).accept(msg);
+        // a subscriber may unsubscribe while handling the event, for security iterate over a copy
+        for (final var sub : List.copyOf(subs)) {
+            try {
+                ((Consumer<MessageEvent>) sub).accept(msg);
+            } catch (final RuntimeException e) {
+                LOGGER.log(Level.SEVERE, e, () ->
+                        "Subscriber "
+                                + sub
+                                + " failed while handling "
+                                + classType.getSimpleName()
+                                + ": "
+                                + e.getMessage()
+                );
+            }
         }
     }
 

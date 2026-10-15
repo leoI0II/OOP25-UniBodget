@@ -34,7 +34,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass.set("it.unibo.unibodget.unibodget")
+    mainClass.set("it.unibo.unibodget.App")
 }
 
 javafx {
@@ -67,11 +67,7 @@ dependencies {
 }
 
 application {
-    //mainClass.set("it.unibo.unibodget.unibodget")
-    //mainClass.set("it.unibo.unibodget.Unibodget2") - mia temp per persistency e currency converter
-    //mainClass.set("it.unibo.unibodget.model.wallet.TestWallet") - test pers per wallet
-    //mainClass.set("it.unibo.unibodget.view.currency_converter.MainCC")
-    //mainClass.set("it.unibo.unibodget.view.currency_converter.CurrencyConverterViewFX") - non più lanciabile per new
+    // FXML shell is the official entry point; UnibodgetApp remains only a standalone dashboard harness.
     mainClass.set("it.unibo.unibodget.App")
 }
 

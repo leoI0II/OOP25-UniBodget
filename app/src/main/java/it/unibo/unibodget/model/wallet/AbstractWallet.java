@@ -16,6 +16,9 @@ import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.utils.event.TransactionRemovedEvent;
+import it.unibo.unibodget.model.utils.event.TransactionReplacedEvent;
+import it.unibo.unibodget.model.utils.event.WalletRenamedEvent;
 
 /**
  * Abstract base class representing a financial wallet that holds a ledger of
@@ -126,12 +129,28 @@ public abstract class AbstractWallet<T extends AbstractTransaction> {
     }
 
     /**
-     * Sets the display name of this wallet.
+     * Sets the display name of this wallet and publishes a {@link WalletRenamedEvent}
+     * so that interested components (e.g. persistence) can react.
+     * Leading and trailing whitespace is removed; renaming to the same name is a no-op.
      *
-     * @param name the new name to assign
+     * <p>Naming rules are enforced here; the views catch the exception, show the
+     * message to the user and ask for another name.</p>
+     *
+     * @param name the new name to assign; must not be null or blank
+     * @throws IllegalArgumentException if {@code name} is blank
      */
     public void setName(final String name) {
-        this.name = name;
+        Objects.requireNonNull(name, "Wallet name cannot be null");
+        final String trimmed = name.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException("Wallet name cannot be blank.");
+        }
+        if (trimmed.equals(this.name)) {
+            return;
+        }
+        final String oldName = this.name;
+        this.name = trimmed;
+        MessageBus.send(new WalletRenamedEvent(this, oldName, trimmed));
     }
 
     /**
@@ -164,6 +183,38 @@ public abstract class AbstractWallet<T extends AbstractTransaction> {
         }
         history.addTransaction(transaction);
         MessageBus.send(new TransactionAddedEvent(this, transaction));
+    }
+
+    /**
+     * Removes a transaction from this wallet's history and publishes a
+     * {@link TransactionRemovedEvent} if it was found.
+     *
+     * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was found and removed
+     */
+    public boolean removeTransaction(final T transaction) {
+        Objects.requireNonNull(transaction, "Transaction cannot be null");
+        final boolean removed = history.removeTransaction(transaction);
+        if (removed) {
+            MessageBus.send(new TransactionRemovedEvent(this, transaction));
+        }
+        return removed;
+    }
+
+    /**
+     * Replaces a transaction of this wallet's history, keeping its position, and
+     * publishes a {@link TransactionReplacedEvent} if it was found.
+     *
+     * @param oldTransaction the transaction to replace
+     * @param newTransaction the replacement transaction
+     * @return {@code true} if {@code oldTransaction} was found and replaced
+     */
+    public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
+        final boolean replaced = history.replaceTransaction(oldTransaction, newTransaction);
+        if (replaced) {
+            MessageBus.send(new TransactionReplacedEvent(this, oldTransaction, newTransaction));
+        }
+        return replaced;
     }
 
     /**
