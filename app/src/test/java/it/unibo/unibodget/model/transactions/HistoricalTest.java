@@ -1,6 +1,5 @@
 package it.unibo.unibodget.model.transactions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,13 +15,13 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 class HistoricalTest {
 
     private CashTransaction tx(final LocalDate date, final String desc) {
-        return new CashTransaction(
-                new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE),
-                Category.FOOD,
-                date,
-                desc,
-                "notes"
-        );
+        return CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.ONE))
+                .category(Category.FOOD)
+                .date(date)
+                .description(desc)
+                .notes("notes")
+                .build();
     }
 
     @Test

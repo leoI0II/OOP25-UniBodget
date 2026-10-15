@@ -24,9 +24,12 @@ class TransactionTest {
         final UUID id1 = UUID.randomUUID();
         final UUID id2 = UUID.randomUUID();
 
-        final AbstractTransaction t1 = new CashTransaction(id1, a, Category.FOOD, d, DESC, NOTES);
-        final AbstractTransaction t2 = new CashTransaction(id1, a, Category.FOOD, d, DESC, NOTES);
-        final AbstractTransaction t3 = new CashTransaction(id2, a, Category.FOOD, d, DESC, NOTES);
+        final AbstractTransaction t1 = CashTransaction.builder()
+                .id(id1).asset(a).category(Category.FOOD).date(d).description(DESC).notes(NOTES).build();
+        final AbstractTransaction t2 = CashTransaction.builder()
+                .id(id1).asset(a).category(Category.FOOD).date(d).description(DESC).notes(NOTES).build();
+        final AbstractTransaction t3 = CashTransaction.builder()
+                .id(id2).asset(a).category(Category.FOOD).date(d).description(DESC).notes(NOTES).build();
 
         assertEquals(t1, t2);
         assertEquals(t1.hashCode(), t2.hashCode());

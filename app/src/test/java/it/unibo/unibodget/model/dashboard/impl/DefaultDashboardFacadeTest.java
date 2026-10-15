@@ -89,20 +89,20 @@ class DefaultDashboardFacadeTest {
                 CategoryType.EXPENSE
         );
 
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("2000.00")),
-                salary,
-                LocalDate.now(),
-                SALARY,
-                "Monthly salary"
-        ));
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-300.00")),
-                food,
-                LocalDate.now(),
-                "Groceries",
-                "Food expenses"
-        ));
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("2000.00")))
+                .category(salary)
+                .date(LocalDate.now())
+                .description(SALARY)
+                .notes("Monthly salary")
+                .build());
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-300.00")))
+                .category(food)
+                .date(LocalDate.now())
+                .description("Groceries")
+                .notes("Food expenses")
+                .build());
 
         final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
 
@@ -148,22 +148,22 @@ class DefaultDashboardFacadeTest {
         );
 
         walletService.selectWallet(firstWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                firstCategory,
-                LocalDate.now(),
-                "Groceries",
-                "Food expenses"
-        ));
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                .category(firstCategory)
+                .date(LocalDate.now())
+                .description("Groceries")
+                .notes("Food expenses")
+                .build());
 
         walletService.selectWallet(secondWallet.getId());
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.USD, new BigDecimal("-50.00")),
-                secondCategory,
-                LocalDate.now(),
-                "Taxi",
-                "Taxi expense"
-        ));
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.USD, new BigDecimal("-50.00")))
+                .category(secondCategory)
+                .date(LocalDate.now())
+                .description("Taxi")
+                .notes("Taxi expense")
+                .build());
 
         final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
 
@@ -200,25 +200,25 @@ class DefaultDashboardFacadeTest {
 
         final UUID marcoLoanId = UUID.randomUUID();
 
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                friendLoanCategory,
-                LocalDate.now(),
-                "Loan to " + MARCO_P,
-                "Initial loan",
-                marcoLoanId,
-                MARCO_P
-        ));
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.now())
+                .description("Loan to " + MARCO_P)
+                .notes("Initial loan")
+                .loanId(marcoLoanId)
+                .friendName(MARCO_P)
+                .build());
 
-        walletService.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("40.00")),
-                friendLoanCategory,
-                LocalDate.now(),
-                MARCO_P + " repayment",
-                "Partial repayment",
-                marcoLoanId,
-                MARCO_P
-        ));
+        walletService.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("40.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.now())
+                .description(MARCO_P + " repayment")
+                .notes("Partial repayment")
+                .loanId(marcoLoanId)
+                .friendName(MARCO_P)
+                .build());
 
         final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
 

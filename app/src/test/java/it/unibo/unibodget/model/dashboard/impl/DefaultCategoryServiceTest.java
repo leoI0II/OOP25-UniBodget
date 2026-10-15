@@ -34,27 +34,27 @@ class DefaultCategoryServiceTest {
                 CategoryType.EXPENSE
         );
 
-        final CashTransaction firstFoodTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
-                food,
-                LocalDate.now(),
-                "Lunch",
-                "Lunch with friends"
-        );
-        final CashTransaction secondFoodTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-30.00")),
-                food,
-                LocalDate.now(),
-                "Dinner",
-                "Dinner at restaurant"
-        );
-        final CashTransaction transportTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-15.00")),
-                transport,
-                LocalDate.now(),
-                "Bus",
-                "Monthly pass"
-        );
+        final CashTransaction firstFoodTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")))
+                .category(food)
+                .date(LocalDate.now())
+                .description("Lunch")
+                .notes("Lunch with friends")
+                .build();
+        final CashTransaction secondFoodTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-30.00")))
+                .category(food)
+                .date(LocalDate.now())
+                .description("Dinner")
+                .notes("Dinner at restaurant")
+                .build();
+        final CashTransaction transportTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-15.00")))
+                .category(transport)
+                .date(LocalDate.now())
+                .description("Bus")
+                .notes("Monthly pass")
+                .build();
 
         service.recomputeFromTransactions(
                 java.util.List.of(firstFoodTransaction, secondFoodTransaction, transportTransaction)

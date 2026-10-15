@@ -81,13 +81,13 @@ class DefaultWalletServiceTest {
                 CategoryType.EXPENSE
         );
 
-        final CashTransaction transaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
-                category,
-                LocalDate.now(),
-                "Salary",
-                "Monthly salary"
-        );
+        final CashTransaction transaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")))
+                .category(category)
+                .date(LocalDate.now())
+                .description("Salary")
+                .notes("Monthly salary")
+                .build();
 
         service.addTransaction(transaction);
 
@@ -106,13 +106,13 @@ class DefaultWalletServiceTest {
                 CategoryType.EXPENSE
         );
 
-        final CashTransaction transaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")),
-                category,
-                LocalDate.now(),
-                "Groceries",
-                "Groceries purchase"
-        );
+        final CashTransaction transaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")))
+                .category(category)
+                .date(LocalDate.now())
+                .description("Groceries")
+                .notes("Groceries purchase")
+                .build();
 
         service.addTransaction(transaction);
         final boolean removed = service.removeTransaction(transaction);
@@ -132,21 +132,21 @@ class DefaultWalletServiceTest {
                 CategoryType.EXPENSE
         );
 
-        service.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
-                category,
-                LocalDate.now(),
-                "Salary",
-                "Monthly salary"
-        ));
+        service.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")))
+                .category(category)
+                .date(LocalDate.now())
+                .description("Salary")
+                .notes("Monthly salary")
+                .build());
 
-        service.addTransaction(new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-400.00")),
-                category,
-                LocalDate.now(),
-                "Rent",
-                "Monthly rent"
-        ));
+        service.addTransaction(CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-400.00")))
+                .category(category)
+                .date(LocalDate.now())
+                .description("Rent")
+                .notes("Monthly rent")
+                .build());
 
         service.clearCurrentWalletHistory();
 

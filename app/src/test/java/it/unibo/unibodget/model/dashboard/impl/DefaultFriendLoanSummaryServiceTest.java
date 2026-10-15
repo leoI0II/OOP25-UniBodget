@@ -33,35 +33,35 @@ class DefaultFriendLoanSummaryServiceTest {
         final UUID marcoLoanId = UUID.randomUUID();
         final UUID lucaLoanId = UUID.randomUUID();
 
-        final CashTransaction marcoLoan = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                friendLoanCategory,
-                LocalDate.of(2026, 5, 1),
-                "Loan to Marco",
-                "Initial loan",
-                marcoLoanId,
-                "Marco"
-        );
+        final CashTransaction marcoLoan = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(2026, 5, 1))
+                .description("Loan to Marco")
+                .notes("Initial loan")
+                .loanId(marcoLoanId)
+                .friendName("Marco")
+                .build();
 
-        final CashTransaction marcoRepayment = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")),
-                friendLoanCategory,
-                LocalDate.of(2026, 5, 10),
-                "Marco repayment",
-                "Partial repayment",
-                marcoLoanId,
-                "Marco"
-        );
+        final CashTransaction marcoRepayment = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(2026, 5, 10))
+                .description("Marco repayment")
+                .notes("Partial repayment")
+                .loanId(marcoLoanId)
+                .friendName("Marco")
+                .build();
 
-        final CashTransaction lucaLoan = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")),
-                friendLoanCategory,
-                LocalDate.of(2026, 5, 3),
-                "Loan to Luca",
-                "Short loan",
-                lucaLoanId,
-                "Luca"
-        );
+        final CashTransaction lucaLoan = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(2026, 5, 3))
+                .description("Loan to Luca")
+                .notes("Short loan")
+                .loanId(lucaLoanId)
+                .friendName("Luca")
+                .build();
 
         final List<FriendLoanSummary> result = service.summarize(
                 List.of(marcoLoan, marcoRepayment, lucaLoan)

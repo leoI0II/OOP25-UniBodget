@@ -68,20 +68,18 @@ class DefaultWalletInsightServiceTest {
         final LocalDate lastMonth = now.minusMonths(1);
 
         final List<CashTransaction> transactions = List.of(
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")),
-                        expenseCategory,
-                        now,
-                        GROCERIES,
-                        null
-                ),
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                        expenseCategory,
-                        lastMonth,
-                        GROCERIES,
-                        null
-                )
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")))
+                        .category(expenseCategory)
+                        .date(now)
+                        .description(GROCERIES)
+                        .build(),
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                        .category(expenseCategory)
+                        .date(lastMonth)
+                        .description(GROCERIES)
+                        .build()
         );
 
         final WalletInsight spendingInsight = service.computeInsights(transactions).get(0);
@@ -102,34 +100,30 @@ class DefaultWalletInsightServiceTest {
         final LocalDate lastMonth = now.minusMonths(1);
 
         final List<CashTransaction> transactions = List.of(
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
-                        incomeCategory,
-                        now,
-                        SALARY,
-                        null
-                ),
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-300.00")),
-                        expenseCategory,
-                        now,
-                        FOOD,
-                        null
-                ),
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")),
-                        incomeCategory,
-                        lastMonth,
-                        SALARY,
-                        null
-                ),
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-500.00")),
-                        expenseCategory,
-                        lastMonth,
-                        FOOD,
-                        null
-                )
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")))
+                        .category(incomeCategory)
+                        .date(now)
+                        .description(SALARY)
+                        .build(),
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-300.00")))
+                        .category(expenseCategory)
+                        .date(now)
+                        .description(FOOD)
+                        .build(),
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("1000.00")))
+                        .category(incomeCategory)
+                        .date(lastMonth)
+                        .description(SALARY)
+                        .build(),
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-500.00")))
+                        .category(expenseCategory)
+                        .date(lastMonth)
+                        .description(FOOD)
+                        .build()
         );
 
         final WalletInsight savingsInsight = service.computeInsights(transactions).get(1);
@@ -150,22 +144,19 @@ class DefaultWalletInsightServiceTest {
         final UUID loanId = UUID.randomUUID();
 
         final List<CashTransaction> transactions = List.of(
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")),
-                        friendLoanCategory,
-                        now,
-                        "Loan to Marco",
-                        null,
-                        loanId,
-                        "Marco"
-                ),
-                new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                        expenseCategory,
-                        lastMonth,
-                        GROCERIES,
-                        null
-                )
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")))
+                        .category(friendLoanCategory)
+                        .date(now)
+                        .description("Loan to Marco")
+                        .friendLoan(loanId, "Marco")
+                        .build(),
+                CashTransaction.builder()
+                        .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                        .category(expenseCategory)
+                        .date(lastMonth)
+                        .description(GROCERIES)
+                        .build()
         );
 
         final WalletInsight spendingInsight = service.computeInsights(transactions).get(0);

@@ -125,13 +125,13 @@ public final class JsonDataSerializerTest {
                 CategoryType.EXPENSE
         );
 
-        final CashTransaction tx = new CashTransaction(
-                asset,
-                category,
-                LocalDate.of(2024, 1, 1),
-                "Lunch",
-                "Paid in cash"
-        );
+        final CashTransaction tx = CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(LocalDate.of(2024, 1, 1))
+                .description("Lunch")
+                .notes("Paid in cash")
+                .build();
 
         final DataSerializer<CashTransaction> serializer = 
             new JsonDataSerializer<>(CashTransaction.class);

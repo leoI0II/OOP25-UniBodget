@@ -23,13 +23,13 @@ class CashTransactionTest {
 
     @Test
     void shouldCreateStandardTransaction() {
-        final CashTransaction t = new CashTransaction(
-                new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
-                Category.FOOD,                      // categoria reale
-                LocalDate.of(2024, 1, 1),
-                DESC,
-                NOTES
-        );
+        final CashTransaction t = CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                .category(Category.FOOD)
+                .date(LocalDate.of(2024, 1, 1))
+                .description(DESC)
+                .notes(NOTES)
+                .build();
 
         assertFalse(t.isFriendLoanTransaction());
         assertTrue(t.getFriendLoanId().isEmpty());
@@ -40,15 +40,15 @@ class CashTransactionTest {
     void shouldCreateFriendLoanTransaction() {
         final UUID id = UUID.randomUUID();
 
-        final CashTransaction t = new CashTransaction(
-                new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
-                Category.FRIEND_LOAN,               // categoria reale
-                LocalDate.of(2024, 1, 1),
-                DESC,
-                NOTES,
-                id,
-                "Alice"
-        );
+        final CashTransaction t = CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                .category(Category.FRIEND_LOAN)
+                .date(LocalDate.of(2024, 1, 1))
+                .description(DESC)
+                .notes(NOTES)
+                .loanId(id)
+                .friendName("Alice")
+                .build();
 
         assertTrue(t.isFriendLoanTransaction());
         assertEquals(id, t.getFriendLoanId().get());
@@ -58,45 +58,45 @@ class CashTransactionTest {
     @Test
     void shouldFailIfOnlyOneFriendLoanFieldProvided() {
         assertThrows(IllegalArgumentException.class, () ->
-                new CashTransaction(
-                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
-                        Category.FRIEND_LOAN,
-                        LocalDate.now(),
-                        SHORT_DESCR,
-                        SHORT_NOTES,
-                        UUID.randomUUID(),
-                        null
-                )
+                CashTransaction.builder()
+                        .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                        .category(Category.FRIEND_LOAN)
+                        .date(LocalDate.now())
+                        .description(SHORT_DESCR)
+                        .notes(SHORT_NOTES)
+                        .loanId(UUID.randomUUID())
+                        .friendName(null)
+                        .build()
         );
     }
 
     @Test
     void shouldFailIfFriendLoanCategoryWithoutMetadata() {
         assertThrows(IllegalArgumentException.class, () ->
-                new CashTransaction(
-                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
-                        Category.FRIEND_LOAN,
-                        LocalDate.now(),
-                        SHORT_DESCR,
-                        SHORT_NOTES,
-                        null,
-                        null
-                )
+                CashTransaction.builder()
+                        .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                        .category(Category.FRIEND_LOAN)
+                        .date(LocalDate.now())
+                        .description(SHORT_DESCR)
+                        .notes(SHORT_NOTES)
+                        .loanId(null)
+                        .friendName(null)
+                        .build()
         );
     }
 
     @Test
     void shouldFailIfNonFriendLoanCategoryHasMetadata() {
         assertThrows(IllegalArgumentException.class, () ->
-                new CashTransaction(
-                        new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN),
-                        Category.FOOD,                 // NON FRIEND_LOAN
-                        LocalDate.now(),
-                        SHORT_DESCR,
-                        SHORT_NOTES,
-                        UUID.randomUUID(),
-                        "Bob"
-                )
+                CashTransaction.builder()
+                        .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                        .category(Category.FOOD)
+                        .date(LocalDate.now())
+                        .description(SHORT_DESCR)
+                        .notes(SHORT_NOTES)
+                        .loanId(UUID.randomUUID())
+                        .friendName("Bob")
+                        .build()
         );
     }
 

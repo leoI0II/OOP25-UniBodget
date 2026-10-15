@@ -57,37 +57,37 @@ class DefaultTransactionHistoryFilterServiceTest {
                 CategoryType.TRANSFER
         );
 
-        salaryTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("2500.00")),
-                salaryCategory,
-                LocalDate.of(Y_2026, M_5, 1),
-                "Monthly salary",
-                "Company payment"
-        );
+        salaryTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("2500.00")))
+                .category(salaryCategory)
+                .date(LocalDate.of(Y_2026, M_5, 1))
+                .description("Monthly salary")
+                .notes("Company payment")
+                .build();
 
-        groceriesTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")),
-                foodCategory,
-                LocalDate.of(Y_2026, M_5, 10),
-                "Groceries",
-                "Supermarket shopping"
-        );
+        groceriesTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-80.00")))
+                .category(foodCategory)
+                .date(LocalDate.of(Y_2026, M_5, 10))
+                .description("Groceries")
+                .notes("Supermarket shopping")
+                .build();
 
-        rentTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-700.00")),
-                rentCategory,
-                LocalDate.of(Y_2026, M_5, 3),
-                "Rent payment",
-                "May rent"
-        );
+        rentTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-700.00")))
+                .category(rentCategory)
+                .date(LocalDate.of(Y_2026, M_5, 3))
+                .description("Rent payment")
+                .notes("May rent")
+                .build();
 
-        transferTransaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-200.00")),
-                transferCategory,
-                LocalDate.of(Y_2026, M_5, D_15),
-                "Transfer to savings",
-                "Monthly transfer"
-        );
+        transferTransaction = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-200.00")))
+                .category(transferCategory)
+                .date(LocalDate.of(Y_2026, M_5, D_15))
+                .description("Transfer to savings")
+                .notes("Monthly transfer")
+                .build();
     }
 
     @Test
