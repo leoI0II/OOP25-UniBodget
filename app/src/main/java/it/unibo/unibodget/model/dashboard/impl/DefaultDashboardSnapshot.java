@@ -21,6 +21,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     private final BigDecimal totalBalance;
     private final List<AbstractTransaction> recentTransactions;
     private final Map<String, BigDecimal> categorySummaries;
+    private final Map<String, BigDecimal> expenseCategorySummaries;
     private final BigDecimal budgetLimit;
     private final BigDecimal warningThreshold;
     private final BudgetStatus budgetStatus;
@@ -51,6 +52,8 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
      *            the friend-loan summaries associated with the current wallet
      * @param walletInsights
      *            the dashboard insights associated with the current wallet
+     * @param allWallets
+     *            all available cash accounts
      */
     public DefaultDashboardSnapshot(
             final String walletName,
@@ -64,11 +67,69 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
             final List<FriendLoanSummary> friendLoanSummaries,
             final List<WalletInsight> walletInsights,
             final List<CashAccount> allWallets) {
+        this(
+                walletName,
+                walletCurrency,
+                totalBalance,
+                recentTransactions,
+                categorySummaries,
+                categorySummaries,
+                budgetLimit,
+                warningThreshold,
+                budgetStatus,
+                friendLoanSummaries,
+                walletInsights,
+                allWallets
+        );
+    }
+
+    /**
+     * Creates a new dashboard snapshot with separate general and expense category summaries.
+     *
+     * @param walletName
+     *            the name of the currently selected wallet
+     * @param walletCurrency
+     *            the textual representation of the wallet base currency
+     * @param totalBalance
+     *            the total balance shown in the dashboard
+     * @param recentTransactions
+     *            the recent transactions shown in the dashboard
+     * @param categorySummaries
+     *            the aggregated values by category
+     * @param expenseCategorySummaries
+     *            the aggregated expenditure values by category
+     * @param budgetLimit
+     *            the configured budget limit of the current wallet
+     * @param warningThreshold
+     *            the configured warning threshold of the current wallet
+     * @param budgetStatus
+     *            the current budget status
+     * @param friendLoanSummaries
+     *            the friend-loan summaries associated with the current wallet
+     * @param walletInsights
+     *            the dashboard insights associated with the current wallet
+     * @param allWallets
+     *            all available cash accounts
+     */
+    public DefaultDashboardSnapshot(
+            final String walletName,
+            final String walletCurrency,
+            final BigDecimal totalBalance,
+            final List<AbstractTransaction> recentTransactions,
+            final Map<String, BigDecimal> categorySummaries,
+            final Map<String, BigDecimal> expenseCategorySummaries,
+            final BigDecimal budgetLimit,
+            final BigDecimal warningThreshold,
+            final BudgetStatus budgetStatus,
+            final List<FriendLoanSummary> friendLoanSummaries,
+            final List<WalletInsight> walletInsights,
+            final List<CashAccount> allWallets) {
         this.walletName = Objects.requireNonNull(walletName);
         this.walletCurrency = Objects.requireNonNull(walletCurrency);
         this.totalBalance = Objects.requireNonNull(totalBalance);
         this.recentTransactions = List.copyOf(Objects.requireNonNull(recentTransactions));
         this.categorySummaries = Map.copyOf(Objects.requireNonNull(categorySummaries));
+        this.expenseCategorySummaries = Map.copyOf(Objects.requireNonNull(expenseCategorySummaries));
         this.budgetLimit = Objects.requireNonNull(budgetLimit);
         this.warningThreshold = Objects.requireNonNull(warningThreshold);
         this.budgetStatus = Objects.requireNonNull(budgetStatus);
@@ -100,6 +161,11 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     @Override
     public Map<String, BigDecimal> getCategorySummaries() {
         return Collections.unmodifiableMap(categorySummaries);
+    }
+
+    @Override
+    public Map<String, BigDecimal> getExpenseCategorySummaries() {
+        return Collections.unmodifiableMap(expenseCategorySummaries);
     }
 
     @Override

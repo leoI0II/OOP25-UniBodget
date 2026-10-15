@@ -108,6 +108,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                         .map(AbstractTransaction.class::cast)
                         .toList(),
                 categoryService.getCategorySummaries(),
+                categoryService.getExpenseCategorySummaries(),
                 budgetSettings.getLimitValue(),
                 budgetSettings.getWarningThreshold(),
                 budgetStatus,

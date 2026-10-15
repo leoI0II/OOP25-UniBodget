@@ -518,7 +518,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 .map(CashAccount::getBaseCurrency)
                 .orElse(settings.getBaseCurrencyUnit());
 
-        final Map<String, BigDecimal> expenseCategorySummaries = buildExpenseCategorySummaries(snapshot);
+        final Map<String, BigDecimal> expenseCategorySummaries = snapshot.getExpenseCategorySummaries();
         final BigDecimal totalExpense = expenseCategorySummaries.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -617,50 +617,6 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         )
                 )
         );
-    }
-
-    /**
-     * Builds category expense totals grouped by category name.
-     *
-     * @param snapshot
-     *            the dashboard snapshot
-     * @return the aggregated map
-     */
-    private Map<String, BigDecimal> buildExpenseCategorySummaries(final DashboardSnapshot snapshot) {
-        final Map<String, BigDecimal> summaries = new LinkedHashMap<>();
-
-        snapshot.getRecentTransactions().stream()
-                .filter(CashTransaction.class::isInstance)
-                .map(CashTransaction.class::cast)
-                .filter(this::isExpenseChartTransaction)
-                .forEach(transaction -> summaries.merge(
-                        transaction.getCategory().getName(),
-                        transaction.getAsset().amount().abs(),
-                        BigDecimal::add
-                ));
-
-        return summaries;
-    }
-
-    /**
-     * Returns whether the transaction should contribute to expense-oriented
-     * dashboard charts.
-     *
-     * @param transaction
-     *            the transaction to evaluate
-     * @return {@code true} if the transaction should be included
-     */
-    private boolean isExpenseChartTransaction(final CashTransaction transaction) {
-        final CategoryType type = transaction.getCategory().getType();
-        final BigDecimal amount = transaction.getAsset().amount();
-
-        if (type == CategoryType.EXPENSE) {
-            return amount.signum() < 0;
-        }
-        if (type == CategoryType.FRIEND_LOAN) {
-            return amount.signum() < 0;
-        }
-        return false;
     }
 
     /**

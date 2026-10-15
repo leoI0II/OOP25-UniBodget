@@ -20,6 +20,15 @@ public interface CategoryService {
     Map<String, BigDecimal> getCategorySummaries();
 
     /**
+     * Returns the aggregated expenditure amounts by category.
+     *
+     * @return an unmodifiable map from expense category name to aggregated positive amount
+     */
+    default Map<String, BigDecimal> getExpenseCategorySummaries() {
+        return getCategorySummaries();
+    }
+
+    /**
      * Recomputes the category summaries from the given cash transactions.
      *
      * @param transactions

@@ -55,6 +55,15 @@ public interface DashboardSnapshot {
     Map<String, BigDecimal> getCategorySummaries();
 
     /**
+     * Returns the aggregated expenditure amounts by category.
+     *
+     * @return the expense category summaries
+     */
+    default Map<String, BigDecimal> getExpenseCategorySummaries() {
+        return getCategorySummaries();
+    }
+
+    /**
      * Returns the configured budget limit of the current wallet.
      *
      * @return the budget limit
