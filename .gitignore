@@ -35,3 +35,7 @@ Thumbs.db
 
 # --- Temporary project files ---
 deleteme/
+
+# runtime data saved by the app (wallets, settings, ...)
+/data/
+/app/data/
