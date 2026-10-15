@@ -15,6 +15,7 @@ import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
+import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
@@ -38,12 +39,7 @@ public class App extends Application {
     private static final int WINDOW_HEIGHT = 700;
     private static final String ALPHA_KEY = "B56AX33NF4F29HHZ";
 
-    private CashAccountManager cashAccountManager;
-    private InvestmentAccountManager investmentAccountManager;
-
-    private CashAccountService cashAccountsService;
-    private InvestmentAccountService investmentsService;
-
+    private WalletAutoSaver walletSaver;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
 
@@ -61,11 +57,11 @@ public class App extends Application {
         final BasicCurrencyConverter currencyConverter =
                 new BasicCurrencyConverter(priceService);
 
-        cashAccountManager = new CashAccountManager();
-        investmentAccountManager = new InvestmentAccountManager(currencyConverter);
+        final var cashAccountManager = new CashAccountManager();
+        final var investmentAccountManager = new InvestmentAccountManager(currencyConverter);
 
-        cashAccountsService = new CashAccountService();
-        investmentsService = new InvestmentAccountService();
+        final var cashAccountsService = new CashAccountService();
+        final var investmentsService = new InvestmentAccountService();
 
         // Loads wallet before controllers and view
         final var loadedCashAccounts = cashAccountManager.loadAll();
@@ -73,6 +69,10 @@ public class App extends Application {
 
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
+
+        walletSaver = new WalletAutoSaver()
+                .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
+                .register(investmentsService::getWallets, investmentAccountManager::saveAll);
 
         //settingsController = 
         final Settings settings = settingsController.getSettings();
@@ -133,8 +133,9 @@ public class App extends Application {
         primaryStage.show();
 
         updateWindowProperty(primaryStage, settings);
-        
+
         persistenceReady = true;
+        walletSaver.start();
     }
 
     /**
@@ -164,7 +165,7 @@ public class App extends Application {
 
     /**
      * Saves all wallets and window preferences when the application stops.
-     * 
+     *
      * <p>
      * This method is called automatically by the JavaFX framework when the
      * application is about to exit. It ensures that all wallet data and window
@@ -176,12 +177,10 @@ public class App extends Application {
             System.out.println("[PERSISTENCE] Startup incomplete: saving skipped");
             return;
         }
+        walletSaver.stop();
         RuntimeException failure = null;
         for (final Runnable save : new Runnable[] {
-                () -> saveWallets("Cash", () ->
-                        cashAccountManager.saveAll(cashAccountsService.getWallets())),
-                () -> saveWallets("Investment", () ->
-                        investmentAccountManager.saveAll(investmentsService.getWallets())),
+                walletSaver::saveAll,
                 () -> {
                     final WindowPreferences preferences =
                             settingsController.getSettings().getWindowPrefs();
@@ -205,22 +204,6 @@ public class App extends Application {
         }
         if (failure != null) {
             throw failure;
-        }
-    }
-
-    /**
-     * Executes a save operation and logs its outcome.
-     *
-     * @param type the wallet type
-     * @param action the save operation
-     */
-    private void saveWallets(final String type, final Runnable action) {
-        try {
-            action.run();
-            System.out.println("[PERSISTENCE] " + type + " wallets saved");
-        } catch (final RuntimeException ex) {
-            System.err.println("[PERSISTENCE] " + type + " wallet saving failed");
-            throw ex;
         }
     }
 

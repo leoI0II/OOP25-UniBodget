@@ -16,6 +16,8 @@ import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.utils.event.TransactionRemovedEvent;
+import it.unibo.unibodget.model.utils.event.TransactionReplacedEvent;
 import it.unibo.unibodget.model.utils.event.WalletRenamedEvent;
 
 /**
@@ -181,6 +183,38 @@ public abstract class AbstractWallet<T extends AbstractTransaction> {
         }
         history.addTransaction(transaction);
         MessageBus.send(new TransactionAddedEvent(this, transaction));
+    }
+
+    /**
+     * Removes a transaction from this wallet's history and publishes a
+     * {@link TransactionRemovedEvent} if it was found.
+     *
+     * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was found and removed
+     */
+    public boolean removeTransaction(final T transaction) {
+        Objects.requireNonNull(transaction, "Transaction cannot be null");
+        final boolean removed = history.removeTransaction(transaction);
+        if (removed) {
+            MessageBus.send(new TransactionRemovedEvent(this, transaction));
+        }
+        return removed;
+    }
+
+    /**
+     * Replaces a transaction of this wallet's history, keeping its position, and
+     * publishes a {@link TransactionReplacedEvent} if it was found.
+     *
+     * @param oldTransaction the transaction to replace
+     * @param newTransaction the replacement transaction
+     * @return {@code true} if {@code oldTransaction} was found and replaced
+     */
+    public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
+        final boolean replaced = history.replaceTransaction(oldTransaction, newTransaction);
+        if (replaced) {
+            MessageBus.send(new TransactionReplacedEvent(this, oldTransaction, newTransaction));
+        }
+        return replaced;
     }
 
     /**

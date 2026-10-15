@@ -162,7 +162,6 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     @Override
     public boolean removeTransaction(final T transaction) {
         final boolean removed = getRequiredCurrentWallet()
-                .getHistory()
                 .removeTransaction(Objects.requireNonNull(transaction));
         if (removed) {
             notifyObservers();
@@ -176,7 +175,6 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     @Override
     public void replaceTransaction(final T oldTransaction, final T newTransaction) {
         final boolean replaced = getRequiredCurrentWallet()
-                .getHistory()
                 .replaceTransaction(
                         Objects.requireNonNull(oldTransaction),
                         Objects.requireNonNull(newTransaction));
