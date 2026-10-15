@@ -25,6 +25,7 @@ import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
 import it.unibo.unibodget.model.dashboard.impl.TransactionFilterCriteria;
 import it.unibo.unibodget.model.dashboard.impl.TransactionSortOrder;
 import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
+import it.unibo.unibodget.model.dashboard.support.WalletObserver;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
@@ -52,6 +53,7 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionRow
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionSectionViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionTableViewState;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
+import javafx.application.Platform;
 
 /**
  * Default implementation of the dashboard controller.
@@ -64,12 +66,12 @@ import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
  * </p>
  *
  * <p>
- * It also handles creation, edition, and deletion of wallet transactions using
- * the transaction service so that observer notifications remain centralized in
- * the service layer.
+ * It acts as a {@link WalletObserver} on the {@link CashAccountService},
+ * automatically refreshing the dashboard UI and notifying registered listeners
+ * whenever the wallet or its transactions are modified.
  * </p>
  */
-public final class DefaultDashboardController implements DashboardViewActions {
+public final class DefaultDashboardController implements DashboardViewActions, WalletObserver {
 
     private static final int MAX_CATEGORY_ROWS = 4;
     private static final String DEFAULT_CATEGORY_COLOR = "#7F8CFF";
@@ -84,6 +86,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
 
     private TransactionFilterInput currentFilterInput;
     private Runnable onDashboardRefreshed = () -> { };
+    private boolean refreshing;
 
     /**
      * Creates a new dashboard controller.
@@ -114,6 +117,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
         this.currentFilterInput = new TransactionFilterInput(
                 null, null, null, null, null, DEFAULT_SORT_ORDER_LABEL
         );
+        this.cashAccountService.addObserver(this);
     }
 
     /**
@@ -139,6 +143,18 @@ public final class DefaultDashboardController implements DashboardViewActions {
      * {@inheritDoc}
      */
     @Override
+    public void update() {
+        if (Platform.isFxApplicationThread()) {
+            refreshDashboard();
+        } else {
+            Platform.runLater(this::refreshDashboard);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onViewOpened() {
         refreshDashboard();
     }
@@ -152,9 +168,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
             final boolean selected = cashAccountService.selectWallet(walletId);
             if (!selected) {
                 view.showError("Unable to switch wallet.");
-                return;
             }
-            refreshDashboard();
         } catch (Exception exception) {
             view.showError("Unable to switch wallet.");
         }
@@ -193,7 +207,6 @@ public final class DefaultDashboardController implements DashboardViewActions {
             dialog.showAndWait().ifPresent(newWallet -> {
                 cashAccountService.addWallet(newWallet);
                 cashAccountService.selectWallet(newWallet.getId());
-                refreshDashboard();
             });
         } catch (Exception exception) {
             view.showError("Unable to create wallet.");
@@ -225,7 +238,6 @@ public final class DefaultDashboardController implements DashboardViewActions {
                         openFriendLoans
                 );
                 cashAccountService.addTransaction(transaction);
-                refreshDashboard();
             });
         } catch (IllegalArgumentException exception) {
             view.showError(exception.getMessage());
@@ -272,7 +284,6 @@ public final class DefaultDashboardController implements DashboardViewActions {
                         openFriendLoans
                 );
                 cashAccountService.replaceTransaction(originalTransaction, replacement);
-                refreshDashboard();
             });
         } catch (IllegalArgumentException exception) {
             view.showError(exception.getMessage());
@@ -294,9 +305,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
             final boolean removed = cashAccountService.removeTransaction(transactionToDelete);
             if (!removed) {
                 view.showError("Unable to delete transaction.");
-                return;
             }
-            refreshDashboard();
         } catch (IllegalArgumentException exception) {
             view.showError(exception.getMessage());
         } catch (Exception exception) {
@@ -324,7 +333,7 @@ public final class DefaultDashboardController implements DashboardViewActions {
                         request.limitValue(),
                         request.warningThreshold()
                 ));
-                refreshDashboard();
+                cashAccountService.notifyObservers();
             });
         } catch (Exception exception) {
             view.showError("Unable to update monthly budget.");
@@ -492,21 +501,29 @@ public final class DefaultDashboardController implements DashboardViewActions {
      * Reloads dashboard data and asks the view to render the new state.
      */
     private void refreshDashboard() {
-        if (dashboardFacade.getAllCashAccounts().isEmpty()) {
-            view.showError("No wallet yet — use \"+ Add wallet\" to create one.");
-            onDashboardRefreshed.run();
+        if (this.refreshing) {
             return;
         }
-        if (dashboardFacade.getCurrentSelectedCashAccount().isEmpty()) {
-            dashboardFacade.selectWallet(dashboardFacade.getAllCashAccounts().getFirst().getId());
-        }
+        this.refreshing = true;
         try {
-            final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
-            view.render(toViewState(snapshot));
-        } catch (Exception exception) {
-            view.showError("Unable to load dashboard data.");
+            if (dashboardFacade.getAllCashAccounts().isEmpty()) {
+                view.showError("No wallet yet — use \"+ Add wallet\" to create one.");
+                onDashboardRefreshed.run();
+                return;
+            }
+            if (dashboardFacade.getCurrentSelectedCashAccount().isEmpty()) {
+                dashboardFacade.selectWallet(dashboardFacade.getAllCashAccounts().getFirst().getId());
+            }
+            try {
+                final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
+                view.render(toViewState(snapshot));
+            } catch (Exception exception) {
+                view.showError("Unable to load dashboard data.");
+            }
+            onDashboardRefreshed.run();
+        } finally {
+            this.refreshing = false;
         }
-        onDashboardRefreshed.run();
     }
 
     /**
