@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
@@ -24,7 +23,6 @@ import it.unibo.unibodget.model.dashboard.impl.DefaultTransactionHistoryFilterSe
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
 import it.unibo.unibodget.model.dashboard.impl.TransactionFilterCriteria;
 import it.unibo.unibodget.model.dashboard.impl.TransactionSortOrder;
-import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.settings.Settings;
@@ -472,29 +470,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             final List<FriendLoanSummary> openFriendLoans) {
 
         final CashTransaction created = toCashTransaction(request, walletCurrency, openFriendLoans);
-        final UUID originalId = originalTransaction.getId();
-
-        if (created.getFriendLoanId().isPresent()) {
-            return new CashTransaction(
-                    originalId,
-                    created.getAsset(),
-                    created.getCategory(),
-                    created.getDate(),
-                    created.getDescription(),
-                    created.getNotes(),
-                    created.getFriendLoanId().get(),
-                    created.getFriendName().orElse(null)
-            );
-        }
-
-        return new CashTransaction(
-                originalId,
-                created.getAsset(),
-                created.getCategory(),
-                created.getDate(),
-                created.getDescription(),
-                created.getNotes()
-        );
+        return CashTransaction.builder(created)
+                .id(originalTransaction.getId())
+                .build();
     }
 
     /**

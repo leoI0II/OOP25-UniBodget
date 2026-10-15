@@ -75,7 +75,13 @@ public final class CashTransactionFactory {
         final BigDecimal signedAmount = normalizeStandardAmount(unsignedAmount, selectedType);
         final Asset asset = Asset.of(currency, signedAmount);
 
-        return new CashTransaction(asset, category, date, description, notes);
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .build();
     }
 
     /**
@@ -131,15 +137,14 @@ public final class CashTransactionFactory {
 
         final Asset asset = Asset.of(currency, unsignedAmount.abs().negate());
 
-        return new CashTransaction(
-                asset,
-                category,
-                date,
-                description,
-                notes,
-                UUID.randomUUID(),
-                friendName
-        );
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .friendLoan(UUID.randomUUID(), friendName)
+                .build();
     }
 
     /**
@@ -200,15 +205,14 @@ public final class CashTransactionFactory {
 
         final Asset asset = Asset.of(currency, unsignedAmount.abs());
 
-        return new CashTransaction(
-                asset,
-                category,
-                date,
-                description,
-                notes,
-                friendLoanId,
-                friendName
-        );
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .friendLoan(friendLoanId, friendName)
+                .build();
     }
 
     /**
