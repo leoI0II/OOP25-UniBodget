@@ -22,9 +22,8 @@ import it.unibo.unibodget.view.main.ViewControllersFactory;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 /**
@@ -113,8 +112,7 @@ public class App extends Application {
         );
 
         mainViewPage.setControllerFactory(factory::create);
-        final Node mainViewNode = mainViewPage.load();
-        final HBox root = (HBox) mainViewNode;
+        final Parent root = mainViewPage.load();
 
         /*final Scene scene = new Scene(
                 root,

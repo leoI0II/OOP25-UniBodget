@@ -7,3 +7,11 @@
     -fx-max-width: 0;
     -fx-max-height: 0;
 }
+/* main window: no border around the split pane and thin divider to drag */
+.main-split-pane {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+.main-split-pane > .split-pane-divider {
+    -fx-padding: 0 2 0 2;
+}
