@@ -2,7 +2,9 @@ package it.unibo.unibodget.model.investment.service;
 
 import it.unibo.unibodget.model.investment.BalanceSnapshot;
 import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.utils.event.WalletDeletedEvent;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -11,6 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,6 +55,7 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
         }
 
         MessageBus.subscribe(TransactionAddedEvent.class, this::onTransactionAddedEvent);
+        MessageBus.subscribe(WalletDeletedEvent.class, this::onWalletDeletedEvent);
     }
 
     /**
@@ -70,6 +74,26 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
     private void onTransactionAddedEvent(final TransactionAddedEvent event) {
         if (event.wallet() instanceof InvestmentAccount account) {
             save(account.getId(), BalanceSnapshot.buildInvestmentSnapshot(account));
+        }
+    }
+
+    /**
+     * Handles a {@link WalletDeletedEvent} by removing the snapshot CSV of the deleted
+     * {@link InvestmentAccount}, so that no orphan files are left on disk.
+     *
+     * <p>Failures are reported to the user as a notification instead of being thrown,
+     * since the {@link MessageBus} would only log them.</p>
+     *
+     * @param event the event carrying the wallet that was just removed
+     */
+    private void onWalletDeletedEvent(final WalletDeletedEvent event) {
+        if (event.wallet() instanceof InvestmentAccount account) {
+            try {
+                Files.deleteIfExists(fileFor(account.getId()));
+            } catch (final IOException e) {
+                MessageBus.send(new MainErrorNotificationEvent(
+                        "Unable to delete the snapshots of " + account.getName() + ": " + e.getMessage()));
+            }
         }
     }
 

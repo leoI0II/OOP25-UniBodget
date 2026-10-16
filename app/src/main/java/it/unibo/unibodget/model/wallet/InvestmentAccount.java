@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -48,7 +49,26 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
             final CurrencyUnit baseCurrency,
             final Historical<InvestmentTransaction> history,
             final CurrencyConverter priceProvider) {
-        super(name, baseCurrency, history, "Investment Account");
+        this(null, name, baseCurrency, history, priceProvider);
+    }
+
+    /**
+     * Creates an InvestmentAccount with a given identifier, used to keep the same
+     * identity when the account is rebuilt (see {@link #withProvider}).
+     *
+     * @param id the wallet identifier, or null to generate a new one
+     * @param name the display name of the wallet
+     * @param baseCurrency the currency used to express the balance
+     * @param history the transaction ledger to attach
+     * @param priceProvider provider used to fetch live market prices
+     */
+    private InvestmentAccount(
+            final UUID id,
+            final String name,
+            final CurrencyUnit baseCurrency,
+            final Historical<InvestmentTransaction> history,
+            final CurrencyConverter priceProvider) {
+        super(id, name, baseCurrency, history, "Investment Account");
         this.priceProvider = Objects.requireNonNull(priceProvider, "Price provider cannot be null");
     }
 
@@ -68,19 +88,24 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
 
     /**
      * JSON constructor used when deserializing InvestmentAccount objects. The
-     * price provider is not restored from JSON and must be reattached manually.
+     * saved {@code id} is kept (a new one is generated only if missing), so that
+     * data indexed by id, such as the balance snapshots, survives a restart.
+     * The price provider is not restored from JSON and must be reattached manually.
      *
+     * @param id the saved wallet identifier, or null to generate a new one
      * @param name the wallet name
      * @param baseCurrency the currency used to express the balance
      * @param history the transaction ledger, or null for an empty one
      */
     @JsonCreator
     private InvestmentAccount(
+            @JsonProperty("id") final UUID id,
             @JsonProperty("name") final String name,
             @JsonProperty("baseCurrency") final CurrencyUnit baseCurrency,
             @JsonProperty("history") final Historical<InvestmentTransaction> history) {
 
         super(
+                id,
                 name,
                 baseCurrency,
                 history != null ? history : new Historical<>(),
@@ -344,8 +369,8 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
 
     /**
      * Returns a new InvestmentAccount instance with the specified price
-     * provider. Useful when loading accounts from JSON, where providers are not
-     * restored.
+     * provider and the same id. Useful when loading accounts from JSON, where
+     * providers are not restored.
      *
      * @param provider the price provider to attach
      * @return a new {@link InvestmentAccount} with the same data and the new
@@ -353,6 +378,7 @@ public class InvestmentAccount extends AbstractWallet<InvestmentTransaction> {
      */
     public InvestmentAccount withProvider(final CurrencyConverter provider) {
         return new InvestmentAccount(
+                getId(),
                 getName(),
                 getBaseCurrency(),
                 getHistory(),
