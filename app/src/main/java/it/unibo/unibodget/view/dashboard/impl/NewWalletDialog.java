@@ -16,8 +16,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
+/**
+ * Dialog used to create a new cash account (wallet).
+ */
 public final class NewWalletDialog extends Dialog<CashAccount> {
 
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
+
+    /**
+     * Creates a new wallet creation dialog.
+     *
+     * @param defaultCurrency the default currency pre-selected in the dialog
+     */
     public NewWalletDialog(final FiatCurrency defaultCurrency) {
         setTitle("Create New Wallet");
         setHeaderText("Insert wallet details");
@@ -32,7 +43,7 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
                 FXCollections.observableArrayList(FiatCurrency.values())
         );
         currencyBox.setMaxWidth(Double.MAX_VALUE);
-        currencyBox.getSelectionModel().select(defaultCurrency);
+        currencyBox.getSelectionModel().select(Objects.requireNonNull(defaultCurrency));
 
         currencyBox.setConverter(new StringConverter<>() {
             @Override
@@ -63,9 +74,9 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
         });
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
         grid.add(new Label("Wallet name:"), 0, 0);
         grid.add(walletNameField, 1, 0);

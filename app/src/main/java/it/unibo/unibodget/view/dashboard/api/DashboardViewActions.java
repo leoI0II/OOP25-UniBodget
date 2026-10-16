@@ -29,15 +29,14 @@ public interface DashboardViewActions {
     /**
      * Called when a wallet is selected.
      *
-     * @param walletId the identifier of the selected wallet; must not be
-     * {@code null}
+     * @param walletId the identifier of the selected wallet, must not be null
      */
     void onWalletSelected(UUID walletId);
 
     /**
      * Called when the transaction filter input changes.
      *
-     * @param input the new transaction filter input; must not be {@code null}
+     * @param input the new transaction filter input, must not be null
      */
     void onTransactionFiltersChanged(TransactionFilterInput input);
 
@@ -69,8 +68,7 @@ public interface DashboardViewActions {
      * compatibility with existing implementations. [web:477][web:617]
      * </p>
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction row
      */
     default void onEditTransactionRequested(final UUID transactionRowId) {
     }
@@ -83,8 +81,7 @@ public interface DashboardViewActions {
      * compatibility with existing implementations. [web:477][web:617]
      * </p>
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction row
      */
     default void onDeleteTransactionRequested(final UUID transactionRowId) {
     }

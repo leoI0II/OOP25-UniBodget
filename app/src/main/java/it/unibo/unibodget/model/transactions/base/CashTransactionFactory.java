@@ -23,6 +23,13 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
  */
 public final class CashTransactionFactory {
 
+    private static final String MSG_AMOUNT_NOT_NULL = "unsignedAmount must not be null";
+    private static final String MSG_CURRENCY_NOT_NULL = "currency must not be null";
+    private static final String MSG_TYPE_NOT_NULL = "selectedType must not be null";
+    private static final String MSG_CATEGORY_NOT_NULL = "category must not be null";
+    private static final String MSG_DATE_NOT_NULL = "date must not be null";
+    private static final String MSG_FRIEND_NAME_NOT_NULL = "friendName must not be null";
+
     /**
      * Creates a standard cash transaction.
      *
@@ -57,11 +64,11 @@ public final class CashTransactionFactory {
             final String description,
             final String notes) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
 
         validatePositiveAmount(unsignedAmount);
         validateTypeConsistency(selectedType, category);
@@ -120,12 +127,12 @@ public final class CashTransactionFactory {
             final String notes,
             final String friendName) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
-        Objects.requireNonNull(friendName, "friendName must not be null");
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
+        Objects.requireNonNull(friendName, MSG_FRIEND_NAME_NOT_NULL);
 
         validatePositiveAmount(unsignedAmount);
         validateTypeConsistency(selectedType, category);
@@ -187,12 +194,12 @@ public final class CashTransactionFactory {
             final String friendName,
             final UUID friendLoanId) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
-        Objects.requireNonNull(friendName, "friendName must not be null");
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
+        Objects.requireNonNull(friendName, MSG_FRIEND_NAME_NOT_NULL);
         Objects.requireNonNull(friendLoanId, "friendLoanId must not be null");
 
         validatePositiveAmount(unsignedAmount);

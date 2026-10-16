@@ -3,7 +3,6 @@ package it.unibo.unibodget.controller.dashboard.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -167,12 +166,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             if (!selected) {
                 view.showError("Unable to switch wallet.");
             }
-        } catch (Exception exception) {
+        } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to switch wallet.");
         }
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -206,7 +203,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 cashAccountService.addWallet(newWallet);
                 cashAccountService.selectWallet(newWallet.getId());
             });
-        } catch (Exception exception) {
+        } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to create wallet.");
         }
     }
@@ -237,9 +234,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 );
                 cashAccountService.addTransaction(transaction);
             });
-        } catch (IllegalArgumentException exception) {
+        } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
-        } catch (Exception exception) {
+        } catch (final IllegalStateException exception) {
             view.showError("Unable to create transaction.");
         }
     }
@@ -283,9 +280,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 );
                 cashAccountService.replaceTransaction(originalTransaction, replacement);
             });
-        } catch (IllegalArgumentException exception) {
+        } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
-        } catch (Exception exception) {
+        } catch (final IllegalStateException exception) {
             view.showError("Unable to edit transaction.");
         }
     }
@@ -304,9 +301,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             if (!removed) {
                 view.showError("Unable to delete transaction.");
             }
-        } catch (IllegalArgumentException exception) {
+        } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
-        } catch (Exception exception) {
+        } catch (final IllegalStateException exception) {
             view.showError("Unable to delete transaction.");
         }
     }
@@ -333,7 +330,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 ));
                 cashAccountService.notifyObservers();
             });
-        } catch (Exception exception) {
+        } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to update monthly budget.");
         }
     }
@@ -358,7 +355,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             );
             dashboardFacade.getCategoryCatalog().addCustomCategory(createdCategory);
             return Optional.of(createdCategory);
-        } catch (Exception exception) {
+        } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to create category.");
             return Optional.empty();
         }
@@ -495,7 +492,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             try {
                 final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
                 view.render(toViewState(snapshot));
-            } catch (Exception exception) {
+            } catch (final IllegalArgumentException | IllegalStateException exception) {
                 view.showError("Unable to load dashboard data.");
             }
             onDashboardRefreshed.run();
@@ -694,8 +691,6 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 .toList();
     }
 
-
-
     /**
      * Builds a textual message describing current open friend loans.
      *
@@ -859,8 +854,6 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         }
         return String.format("#%02X%02X%02X", color.red(), color.green(), color.blue());
     }
-
-
 
     /**
      * Converts view-side filter input into model-side filter criteria.

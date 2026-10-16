@@ -26,6 +26,9 @@ import javafx.scene.paint.Color;
 public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
     private static final String DEFAULT_COLOR = "#4F46E5";
+    private static final double PREVIEW_BOX_SIZE = 42.0;
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
 
     private final TextField nameField;
     private final ColorPicker colorPicker;
@@ -54,17 +57,17 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
         nameField.setPromptText("Category name");
 
-        colorPreview.setMinSize(42, 42);
-        colorPreview.setPrefSize(42, 42);
-        colorPreview.setMaxSize(42, 42);
+        colorPreview.setMinSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
+        colorPreview.setPrefSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
+        colorPreview.setMaxSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
         updateColorPreview(colorPicker.getValue());
 
         colorPicker.valueProperty().addListener((obs, oldColor, newColor) -> updateColorPreview(newColor));
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
         grid.add(new Label("Type:"), 0, 0);
         grid.add(new Label(formatCategoryType(fixedType)), 1, 0);

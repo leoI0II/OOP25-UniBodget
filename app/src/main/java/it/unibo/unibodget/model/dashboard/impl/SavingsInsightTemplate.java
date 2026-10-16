@@ -3,9 +3,9 @@ package it.unibo.unibodget.model.dashboard.impl;
 import java.math.BigDecimal;
 
 /**
- * Concrete {@link MonthlyInsightTemplate} for savings comparisons.
+ * Concrete {@link AbstractMonthlyInsightTemplate} for savings comparisons.
  */
-public final class SavingsInsightTemplate extends MonthlyInsightTemplate {
+public final class SavingsInsightTemplate extends AbstractMonthlyInsightTemplate {
 
     private static final String SAVINGS = "Savings";
 

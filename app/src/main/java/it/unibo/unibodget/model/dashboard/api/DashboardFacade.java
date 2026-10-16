@@ -29,11 +29,32 @@ public interface DashboardFacade {
      */
     CategoryCatalog getCategoryCatalog();
 
+    /**
+     * Returns all available cash accounts.
+     *
+     * @return the list of all cash accounts
+     */
     List<CashAccount> getAllCashAccounts();
 
+    /**
+     * Returns the currently selected cash account, if present.
+     *
+     * @return an optional containing the currently selected cash account
+     */
     Optional<CashAccount> getCurrentSelectedCashAccount();
 
+    /**
+     * Computes the aggregated balance converted into the base currency.
+     *
+     * @return the total balance asset
+     */
     Asset getAggregatedBalance();
 
+    /**
+     * Selects the cash account matching the specified identifier.
+     *
+     * @param id
+     *            the identifier of the wallet to select
+     */
     void selectWallet(UUID id);
 }

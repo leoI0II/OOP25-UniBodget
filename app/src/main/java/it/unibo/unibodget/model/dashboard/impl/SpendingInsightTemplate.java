@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * Concrete {@link MonthlyInsightTemplate} for spending comparisons.
+ * Concrete {@link AbstractMonthlyInsightTemplate} for spending comparisons.
  */
-public final class SpendingInsightTemplate extends MonthlyInsightTemplate {
+public final class SpendingInsightTemplate extends AbstractMonthlyInsightTemplate {
 
     private static final String SPENDING = "Spending";
     private static final String SPENT_PREFIX = "You spent ";

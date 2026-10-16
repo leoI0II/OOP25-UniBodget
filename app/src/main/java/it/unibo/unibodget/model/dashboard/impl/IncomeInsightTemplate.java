@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * Concrete {@link MonthlyInsightTemplate} for income comparisons.
+ * Concrete {@link AbstractMonthlyInsightTemplate} for income comparisons.
  */
-public final class IncomeInsightTemplate extends MonthlyInsightTemplate {
+public final class IncomeInsightTemplate extends AbstractMonthlyInsightTemplate {
 
     private static final String INCOME = "Income";
 

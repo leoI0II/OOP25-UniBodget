@@ -18,6 +18,9 @@ import javafx.scene.layout.GridPane;
  */
 public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
 
+    private static final int GRID_GAP = 12;
+    private static final int PADDING_INSET = 16;
+
     private final TextField limitField;
     private final TextField warningThresholdField;
 
@@ -43,9 +46,9 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
         warningThresholdField.setPromptText("Warning threshold (0 - 1)");
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
         grid.add(new Label("Limit:"), 0, 0);
         grid.add(limitField, 1, 0);
@@ -108,7 +111,7 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
                 return null;
             }
             return new BigDecimal(text.trim());
-        } catch (NumberFormatException exception) {
+        } catch (final NumberFormatException exception) {
             return null;
         }
     }

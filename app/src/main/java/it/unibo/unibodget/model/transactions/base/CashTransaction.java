@@ -31,22 +31,14 @@ public final class CashTransaction extends AbstractTransaction {
     /**
      * Creates a new cash transaction, optionally linked to a friend loan.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be {@code null}
-     * @param category the category describing the nature of the transaction;
-     * must not be {@code null}
-     * @param date the date on which the transaction occurred; must not be
-     * {@code null}
-     * @param description a short human-readable description of the transaction;
-     * may be {@code null}
-     * @param notes optional additional notes or comments; may be {@code null}
-     * @param friendLoanId the identifier of the linked friend loan; may be
-     * {@code null}
-     * @param friendName the name of the related friend; may be {@code null}
-     * @throws IllegalArgumentException if friend-loan metadata is provided for
-     * a transaction whose category type is not
-     * {@link CategoryType#FRIEND_LOAN}, or if only one of the two friend-loan
-     * fields is provided
+     * @param asset the monetary value associated with the transaction; must not be null
+     * @param category the category describing the nature of the transaction; must not be null
+     * @param date the date on which the transaction occurred; must not be null
+     * @param description a short human-readable description of the transaction; may be null
+     * @param notes optional additional notes or comments; may be null
+     * @param friendLoanId the identifier of the linked friend loan; may be null
+     * @param friendName the name of the related friend; may be null
+     * @throws IllegalArgumentException if friend-loan metadata is invalid
      */
     @JsonCreator
     public CashTransaction(
@@ -61,26 +53,17 @@ public final class CashTransaction extends AbstractTransaction {
     }
 
     /**
-     * Creates a new cash transaction with an explicit identifier, optionally
-     * linked to a friend loan.
+     * Creates a new cash transaction with an explicit identifier, optionally linked to a friend loan.
      *
-     * @param id the stable transaction identifier; must not be {@code null}
-     * @param asset the monetary value associated with the transaction; must not
-     * be {@code null}
-     * @param category the category describing the nature of the transaction;
-     * must not be {@code null}
-     * @param date the date on which the transaction occurred; must not be
-     * {@code null}
-     * @param description a short human-readable description of the transaction;
-     * may be {@code null}
-     * @param notes optional additional notes or comments; may be {@code null}
-     * @param friendLoanId the identifier of the linked friend loan; may be
-     * {@code null}
-     * @param friendName the name of the related friend; may be {@code null}
-     * @throws IllegalArgumentException if friend-loan metadata is provided for
-     * a transaction whose category type is not
-     * {@link CategoryType#FRIEND_LOAN}, or if only one of the two friend-loan
-     * fields is provided
+     * @param id the stable transaction identifier; must not be null
+     * @param asset the monetary value associated with the transaction; must not be null
+     * @param category the category describing the nature of the transaction; must not be null
+     * @param date the date on which the transaction occurred; must not be null
+     * @param description a short human-readable description of the transaction; may be null
+     * @param notes optional additional notes or comments; may be null
+     * @param friendLoanId the identifier of the linked friend loan; may be null
+     * @param friendName the name of the related friend; may be null
+     * @throws IllegalArgumentException if friend-loan metadata is invalid
      */
     public CashTransaction(
             final UUID id,
@@ -120,21 +103,15 @@ public final class CashTransaction extends AbstractTransaction {
     }
 
     /**
-     * Static factory method for a standard cash transaction with no friend-loan
-     * metadata.
+     * Static factory method for a standard cash transaction with no friend-loan metadata.
      *
-     * @param asset the monetary value associated with the transaction; must not
-     * be {@code null}
-     * @param category the category describing the nature of the transaction;
-     * must not be {@code null}
-     * @param date the date on which the transaction occurred; must not be
-     * {@code null}
-     * @param description a short human-readable description of the transaction;
-     * may be {@code null}
-     * @param notes optional additional notes or comments; may be {@code null}
+     * @param asset the monetary value associated with the transaction; must not be null
+     * @param category the category describing the nature of the transaction; must not be null
+     * @param date the date on which the transaction occurred; must not be null
+     * @param description a short human-readable description of the transaction; may be null
+     * @param notes optional additional notes or comments; may be null
      * @return a new {@code CashTransaction}
-     * @throws NullPointerException if {@code asset}, {@code category}, or
-     * {@code date} is {@code null}
+     * @throws NullPointerException if asset, category, or date is null
      */
     public static CashTransaction of(
             final Asset asset,
@@ -155,8 +132,7 @@ public final class CashTransaction extends AbstractTransaction {
     /**
      * Returns the identifier of the linked friend loan, if present.
      *
-     * @return an {@link Optional} containing the friend-loan identifier, or an
-     * empty {@link Optional} if this is not a friend-loan transaction
+     * @return an {@link Optional} containing the friend-loan identifier, or empty
      */
     public Optional<UUID> getFriendLoanId() {
         return Optional.ofNullable(friendLoanId);
@@ -165,8 +141,7 @@ public final class CashTransaction extends AbstractTransaction {
     /**
      * Returns the name of the related friend, if present.
      *
-     * @return an {@link Optional} containing the friend's name, or an empty
-     * {@link Optional} if this is not a friend-loan transaction
+     * @return an {@link Optional} containing the friend's name, or empty
      */
     public Optional<String> getFriendName() {
         return Optional.ofNullable(friendName);
@@ -175,8 +150,7 @@ public final class CashTransaction extends AbstractTransaction {
     /**
      * Returns whether this transaction belongs to a friend loan.
      *
-     * @return {@code true} if this transaction contains friend-loan metadata,
-     * otherwise {@code false}
+     * @return true if this transaction contains friend-loan metadata
      */
     public boolean isFriendLoanTransaction() {
         return friendLoanId != null;

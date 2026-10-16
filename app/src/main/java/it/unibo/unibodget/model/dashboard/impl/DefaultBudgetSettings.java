@@ -38,8 +38,7 @@ public final class DefaultBudgetSettings implements BudgetSettings {
      *
      * @param limitValue the budget limit configured by the user
      * @param warningThreshold the ratio at which the warning state begins
-     * @throws IllegalArgumentException if the limit is negative or if the
-     * warning threshold is outside {@code [0, 1]}
+     * @throws IllegalArgumentException if limit is negative or threshold is outside [0, 1]
      */
     public DefaultBudgetSettings(
         @JsonProperty("limitValue") final BigDecimal limitValue, 

@@ -47,14 +47,14 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     /**
      * Creates a new dashboard facade with the required collaborating services.
      *
-     * @param walletService the service exposing cash wallets and the current
-     * wallet history
+     * @param walletService the service exposing cash wallets and history
      * @param categoryService the service exposing aggregated values by category
      * @param budgetMonitor the component evaluating the current budget status
-     * @param friendLoanSummaryService the service computing friend-loan
-     * summaries
+     * @param friendLoanSummaryService the service computing friend loans
      * @param walletInsightService the service computing dashboard insights
      * @param categoryCatalog the shared category catalog
+     * @param priceProvider the currency converter service
+     * @param settings the application settings
      */
     public DefaultDashboardFacade(
             final CashAccountService walletService,
@@ -128,14 +128,20 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         return walletService.getCurrentWallet();
     }
 
-    public Optional<CashAccount> getCashAccountById(UUID id) {
+    /**
+     * Finds a cash account by its unique identifier.
+     *
+     * @param id the identifier of the wallet
+     * @return an optional containing the matching cash account if present
+     */
+    public Optional<CashAccount> getCashAccountById(final UUID id) {
         return getAllCashAccounts().stream()
                 .filter(w -> w.getId().equals(id))
                 .findFirst();
     }
 
     @Override
-    public void selectWallet(UUID id) {
+    public void selectWallet(final UUID id) {
         walletService.selectWallet(id);
     }
 
@@ -143,7 +149,11 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     public Asset getAggregatedBalance() {
         return getAllCashAccounts().stream()
                 .map(CashAccount::getBalance)
-                .map(balance -> priceProvider.convert(balance.amount(), balance.currency(), settings.getBaseCurrencyUnit()).getAsset())
+                .map(balance -> priceProvider.convert(
+                        balance.amount(),
+                        balance.currency(),
+                        settings.getBaseCurrencyUnit()
+                ).getAsset())
                 .reduce(Asset.zero(settings.getBaseCurrencyUnit()), Asset::add);
     }
 

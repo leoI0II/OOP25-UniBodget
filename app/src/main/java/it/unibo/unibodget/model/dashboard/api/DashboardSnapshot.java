@@ -91,6 +91,11 @@ public interface DashboardSnapshot {
      */
     List<FriendLoanSummary> getFriendLoanSummaries();
 
+    /**
+     * Returns all available cash wallets.
+     *
+     * @return the list of all wallets
+     */
     List<CashAccount> getAllWallets();
 
     /**

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for {@link MonthlyInsightTemplate} specializations:
+ * Unit tests for {@link AbstractMonthlyInsightTemplate} specializations:
  * {@link SpendingInsightTemplate}, {@link SavingsInsightTemplate}, and {@link IncomeInsightTemplate}.
  */
 class MonthlyInsightTemplateTest {

@@ -28,9 +28,9 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
  */
 public final class DefaultWalletInsightService implements WalletInsightService {
 
-    private final MonthlyInsightTemplate spendingTemplate = new SpendingInsightTemplate();
-    private final MonthlyInsightTemplate savingsTemplate = new SavingsInsightTemplate();
-    private final MonthlyInsightTemplate incomeTemplate = new IncomeInsightTemplate();
+    private final AbstractMonthlyInsightTemplate spendingTemplate = new SpendingInsightTemplate();
+    private final AbstractMonthlyInsightTemplate savingsTemplate = new SavingsInsightTemplate();
+    private final AbstractMonthlyInsightTemplate incomeTemplate = new IncomeInsightTemplate();
 
     /**
      * {@inheritDoc}

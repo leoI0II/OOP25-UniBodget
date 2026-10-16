@@ -50,6 +50,10 @@ import javafx.util.StringConverter;
  */
 public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
+    private static final double CATEGORY_ROW_SPACING = 8.0;
+
     private final TextField descriptionField;
     private final TextField amountField;
     private final DatePicker datePicker;
@@ -155,32 +159,33 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> updateFriendLoanControls());
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
-        final HBox categoryRow = new HBox(8, categoryBox, newCategoryButton);
+        final HBox categoryRow = new HBox(CATEGORY_ROW_SPACING, categoryBox, newCategoryButton);
 
-        grid.add(new Label("Transaction type:"), 0, 0);
-        grid.add(transactionTypeBox, 1, 0);
-        grid.add(new Label("Category:"), 0, 1);
-        grid.add(categoryRow, 1, 1);
-        grid.add(new Label("Description:"), 0, 2);
-        grid.add(descriptionField, 1, 2);
-        grid.add(new Label("Amount:"), 0, 3);
-        grid.add(amountField, 1, 3);
-        grid.add(new Label("Wallet currency:"), 0, 4);
-        grid.add(walletCurrencyLabel, 1, 4);
-        grid.add(new Label("Date:"), 0, 5);
-        grid.add(datePicker, 1, 5);
-        grid.add(new Label("Friend loan mode:"), 0, 6);
-        grid.add(friendLoanOperationBox, 1, 6);
-        grid.add(new Label("Friend name:"), 0, 7);
-        grid.add(friendNameField, 1, 7);
-        grid.add(new Label("Existing loan:"), 0, 8);
-        grid.add(existingFriendLoanBox, 1, 8);
-        grid.add(new Label("Notes:"), 0, 9);
-        grid.add(notesArea, 1, 9);
+        int row = 0;
+        grid.add(new Label("Transaction type:"), 0, row);
+        grid.add(transactionTypeBox, 1, row++);
+        grid.add(new Label("Category:"), 0, row);
+        grid.add(categoryRow, 1, row++);
+        grid.add(new Label("Description:"), 0, row);
+        grid.add(descriptionField, 1, row++);
+        grid.add(new Label("Amount:"), 0, row);
+        grid.add(amountField, 1, row++);
+        grid.add(new Label("Wallet currency:"), 0, row);
+        grid.add(walletCurrencyLabel, 1, row++);
+        grid.add(new Label("Date:"), 0, row);
+        grid.add(datePicker, 1, row++);
+        grid.add(new Label("Friend loan mode:"), 0, row);
+        grid.add(friendLoanOperationBox, 1, row++);
+        grid.add(new Label("Friend name:"), 0, row);
+        grid.add(friendNameField, 1, row++);
+        grid.add(new Label("Existing loan:"), 0, row);
+        grid.add(existingFriendLoanBox, 1, row++);
+        grid.add(new Label("Notes:"), 0, row);
+        grid.add(notesArea, 1, row);
 
         getDialogPane().setContent(grid);
 
@@ -529,7 +534,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
                 return null;
             }
             return new BigDecimal(text.trim());
-        } catch (NumberFormatException exception) {
+        } catch (final NumberFormatException exception) {
             return null;
         }
     }

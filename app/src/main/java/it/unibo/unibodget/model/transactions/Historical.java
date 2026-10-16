@@ -73,27 +73,23 @@ public class Historical<T extends AbstractTransaction> {
      * Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
-     * @return {@code true} if the transaction was found and removed,
-     * {@code false} otherwise
+     * @return true if the transaction was found and removed, false otherwise
      */
     public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
     /**
-     * Replaces an existing transaction with a new one, preserving its position
-     * in the ledger.
+     * Replaces an existing transaction with a new one, preserving its position in the ledger.
      *
      * <p>
      * Uses {@link Object#equals} to locate {@code oldTransaction}.
+     * </p>
      *
-     * @param oldTransaction the transaction to replace; must not be
-     * {@code null}
-     * @param newTransaction the replacement transaction; must not be
-     * {@code null}
-     * @return {@code true} if the replacement succeeded, {@code false} if
-     * {@code oldTransaction} was not found in the ledger
-     * @throws NullPointerException if either argument is {@code null}
+     * @param oldTransaction the transaction to replace; must not be null
+     * @param newTransaction the replacement transaction; must not be null
+     * @return true if the replacement succeeded, false if not found
+     * @throws NullPointerException if either argument is null
      */
     public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
         Objects.requireNonNull(oldTransaction);

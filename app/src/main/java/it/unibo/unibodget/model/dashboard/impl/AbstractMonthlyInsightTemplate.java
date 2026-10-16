@@ -15,7 +15,7 @@ import java.util.Optional;
  * titles, and trend classifications.
  * </p>
  */
-public abstract class MonthlyInsightTemplate {
+public abstract class AbstractMonthlyInsightTemplate {
 
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final int PERCENT_SCALE = 2;
