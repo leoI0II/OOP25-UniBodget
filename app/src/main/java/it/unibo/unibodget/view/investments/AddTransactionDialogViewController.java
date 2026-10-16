@@ -28,7 +28,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -640,11 +639,5 @@ public final class AddTransactionDialogViewController extends BaseViewController
         transferNotesTextArea.clear();
         transferNotesTextArea.setPromptText("Notes...");
         setupMaxQuantityButton(transferMaxQuantityToggleButton, transferAssetComboBox, transferQuantityTextField);
-    }
-
-    @FXML
-    private void handleCloseDialog() {
-        final Stage stage = (Stage) addTransactionButton.getScene().getWindow();
-        stage.close();
     }
 }

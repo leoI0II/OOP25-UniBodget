@@ -30,12 +30,13 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -432,7 +433,6 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         final TextInputDialog dialog = new TextInputDialog();
         dialog.initOwner(currentWalletName.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.initStyle(StageStyle.UNDECORATED);
         dialog.setWidth(400);
         dialog.setHeight(400);
         dialog.setResizable(false);
@@ -507,11 +507,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             addTransactionDialog = dialog;
             dialog.initOwner(addTransactionButton.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initStyle(StageStyle.UNDECORATED);
-            dialog.setScene(new Scene(root));
-            dialog.setWidth(ADD_TRANSACTION_DIALOG_WIN_WIDTH);
-            dialog.setHeight(ADD_TRANSACTION_DIALOG_WIN_HEIGHT);
+            dialog.setTitle("Add Transaction");
+            dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
             dialog.setResizable(false);
+            closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addTransactionController.dispose());
             dialog.showAndWait();
 
@@ -613,6 +612,22 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     }
 
     /**
+     * Closes the dialog when Esc is pressed, so it can be dismissed from the
+     * keyboard on every platform (e.g. tiling window managers without title bar).
+     * The close request is fired as for the title bar button, so the dialog's
+     * {@code onCloseRequest} handler still runs.
+     *
+     * @param dialog the dialog stage, with its scene already set
+     */
+    private static void closeOnEscape(final Stage dialog) {
+        dialog.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                dialog.fireEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSE_REQUEST));
+            }
+        });
+    }
+
+    /**
      * Resets every widget of the main panel to its empty state.
      * Used when the last investment account has been deleted, otherwise the
      * panel would keep showing the data of the removed account.
@@ -652,11 +667,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             addNewWalletDialog = dialog;
             dialog.initOwner(investmentsVBoxPage.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initStyle(StageStyle.UNDECORATED);
-            dialog.setScene(new Scene(root));
-            dialog.setWidth(ADD_NEW_WALLET_DIALOG_WIDTH);
-            dialog.setHeight(ADD_NEW_WALLET_DIALOG_HEIGHT);
+            dialog.setTitle("Add Wallet");
+            dialog.setScene(new Scene(root, ADD_NEW_WALLET_DIALOG_WIDTH, ADD_NEW_WALLET_DIALOG_HEIGHT));
             dialog.setResizable(false);
+            closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addNewWalletVC.dispose());
             dialog.showAndWait();
 
