@@ -1,0 +1,330 @@
+/*
+ * investments page: layout copied from the CoinMarketCap portfolio page,
+ * colors (black background and cards) the same of the dashboard of Favour (DefaultDashboardView)
+ *
+ * note: the font sizes here work only if the font is not put inline on every node
+ * (ThemeManager.applyFont does it at the moment), inline style always wins on the font
+ */
+
+.investments-scroll,
+.investments-scroll > .viewport {
+    -fx-background-color: rgb(10, 12, 20);
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.investments-page {
+    -fx-background-color: linear-gradient(to bottom right, rgba(10, 12, 20, 0.98), rgba(24, 28, 42, 0.96));
+    -fx-padding: 20 24 20 24;
+}
+
+/* card = box a bit lighter than the background */
+.card {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(255, 255, 255, 0.10);
+    -fx-border-radius: 18;
+    -fx-padding: 18 20 18 20;
+    -fx-spacing: 6;
+}
+
+/* header */
+.wallet-name {
+    -fx-text-fill: #A1A7BB;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.wallet-name:hover {
+    -fx-underline: true;
+}
+
+.balance-big {
+    -fx-text-fill: white;
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+}
+
+/* texts inside the cards */
+.card-header {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.card-title {
+    -fx-text-fill: #A1A7BB;
+    -fx-font-size: 15px;
+}
+
+.stat-value {
+    -fx-text-fill: white;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.asset-name {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.stat-change {
+    -fx-text-fill: #A1A7BB;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* green / red for profit and loss, put by the controller (must stay after the other text rules) */
+.positive {
+    -fx-text-fill: #16C784;
+}
+
+.negative {
+    -fx-text-fill: #EA3943;
+}
+
+/* line between best and worst performer */
+.card .separator:vertical .line {
+    -fx-border-color: rgba(255, 255, 255, 0.10);
+    -fx-border-width: 0 0 0 1;
+}
+
+/* buttons */
+.primary-button {
+    -fx-background-color: #3861FB;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18 10 18;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #4A70FF;
+}
+
+.secondary-button {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-border-color: rgba(255, 255, 255, 0.10);
+    -fx-border-radius: 10;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18 10 18;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* the Value / Quantity buttons over the pie */
+.toggle-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 10;
+    -fx-padding: 3;
+    -fx-spacing: 2;
+}
+
+.pill-toggle {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A1A7BB;
+    -fx-background-radius: 8;
+    -fx-padding: 5 12 5 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.pill-toggle:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-text-fill: white;
+}
+
+/* Assets / Transactions tabs */
+.pill-tabs > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.pill-tabs > .tab-header-area {
+    -fx-padding: 0 0 8 0;
+}
+
+.pill-tabs > .tab-header-area .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-background-insets: 0 6 0 0;
+    -fx-padding: 6 14 6 14;
+}
+
+.pill-tabs > .tab-header-area .tab:selected {
+    -fx-background-color: rgba(56, 97, 251, 0.18);
+}
+
+.pill-tabs > .tab-header-area .tab .tab-label {
+    -fx-text-fill: #A1A7BB;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.pill-tabs > .tab-header-area .tab:selected .tab-label {
+    -fx-text-fill: #6188FF;
+}
+
+/* no blue focus border on the selected tab */
+.pill-tabs .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+
+.pill-tabs > .tab-content-area {
+    -fx-background-color: transparent;
+}
+
+/* charts */
+.investments-page .chart {
+    -fx-padding: 4 0 0 0;
+}
+
+.investments-page .chart-plot-background,
+.investments-page .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.investments-page .chart-legend-item {
+    -fx-text-fill: #A1A7BB;
+}
+
+.investments-page .chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.investments-page .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(255, 255, 255, 0.07);
+}
+
+.investments-page .chart-alternative-row-fill,
+.investments-page .chart-alternative-column-fill {
+    -fx-fill: transparent;
+}
+
+.investments-page .axis {
+    -fx-tick-label-fill: #A1A7BB;
+}
+
+.investments-page .axis-tick-mark,
+.investments-page .axis-minor-tick-mark {
+    -fx-stroke: transparent;
+}
+
+.investments-page .chart-vertical-zero-line,
+.investments-page .chart-horizontal-zero-line {
+    -fx-stroke: rgba(255, 255, 255, 0.20);
+}
+
+/* line colors: blue for P/L and orange for cost basis, like on CMC */
+.investments-page .default-color0.chart-series-line {
+    -fx-stroke: #3861FB;
+    -fx-stroke-width: 2px;
+}
+
+.investments-page .default-color1.chart-series-line {
+    -fx-stroke: #F7A64B;
+    -fx-stroke-width: 2px;
+}
+
+/* the dots in the legend */
+.investments-page .default-color0.chart-line-symbol {
+    -fx-background-color: #3861FB;
+}
+
+.investments-page .default-color1.chart-line-symbol {
+    -fx-background-color: #F7A64B;
+}
+
+/* pie colors + dark border between slices (by default its white) */
+.investments-page .chart-pie {
+    -fx-border-color: rgb(30, 34, 46);
+}
+
+.investments-page .default-color0.chart-pie { -fx-pie-color: #3861FB; }
+.investments-page .default-color1.chart-pie { -fx-pie-color: #F7A64B; }
+.investments-page .default-color2.chart-pie { -fx-pie-color: #16C784; }
+.investments-page .default-color3.chart-pie { -fx-pie-color: #EA3943; }
+.investments-page .default-color4.chart-pie { -fx-pie-color: #8E6CEF; }
+.investments-page .default-color5.chart-pie { -fx-pie-color: #2FC0D6; }
+.investments-page .default-color6.chart-pie { -fx-pie-color: #F0B90B; }
+.investments-page .default-color7.chart-pie { -fx-pie-color: #A1A7BB; }
+
+/* tables: no background, only lines between rows */
+.investments-page .table-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-control-inner-background: transparent;
+    -fx-control-inner-background-alt: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-text-background-color: white;
+    -fx-selection-bar: rgba(255, 255, 255, 0.10);
+    -fx-selection-bar-non-focused: rgba(255, 255, 255, 0.07);
+}
+
+.investments-page .table-row-cell {
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.06) transparent;
+    -fx-cell-size: 40px;
+}
+
+.investments-page .table-row-cell:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+.investments-page .table-view .column-header-background,
+.investments-page .table-view .column-header,
+.investments-page .table-view .filler {
+    -fx-background-color: transparent;
+}
+
+.investments-page .table-view .column-header,
+.investments-page .table-view .filler {
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 0 0 1 0;
+    -fx-size: 36px;
+}
+
+.investments-page .table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.investments-page .table-view .placeholder .label {
+    -fx-text-fill: #A1A7BB;
+}
+
+/* thin dark scroll bars */
+.investments-scroll .scroll-bar,
+.investments-page .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.investments-scroll .scroll-bar .thumb,
+.investments-page .scroll-bar .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.18);
+    -fx-background-radius: 6;
+}
+
+.investments-scroll .scroll-bar .increment-button,
+.investments-scroll .scroll-bar .decrement-button,
+.investments-page .scroll-bar .increment-button,
+.investments-page .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.investments-scroll .scroll-bar .increment-arrow,
+.investments-scroll .scroll-bar .decrement-arrow,
+.investments-page .scroll-bar .increment-arrow,
+.investments-page .scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+}

@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.investments;
 
+import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
@@ -30,6 +31,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -61,6 +63,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
     private static final String NOT_AVAILABLE = "N/A";
+    private static final String PROFIT_STYLE = "positive";
+    private static final String LOSS_STYLE = "negative";
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -102,6 +106,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private PieChart allocationPieChart;
     @FXML
     private PieChart quantityPieChart;
+    @FXML
+    private ToggleGroup pieToggleGroup;
 
     @FXML
     private TableView<Position> positionTableView;
@@ -169,7 +175,21 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     public void initialize() {
         setupPositionTable();
         setupHistoryTable();
+        setupPieToggle();
         startPriceRefreshTimeline();
+    }
+
+    /**
+     * Keeps one of the Value / Quantity buttons always selected, so one pie is always visible
+     * (the visibility of the pies is bound to the buttons in the FXML).
+     */
+    private void setupPieToggle() {
+        pieToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            // clicking again the selected button unselects it, so we select it back
+            if (newToggle == null && oldToggle != null) {
+                oldToggle.setSelected(true);
+            }
+        });
     }
 
     /**
@@ -316,20 +336,17 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * @param chart     the chart to update
      * @param positions the positions to render
      * @param sliceFunc maps a position to its pie slice
-     * @param title     chart title
      */
     private void refreshPie(
             final PieChart chart,
             final List<Position> positions,
-            final Function<Position, PieChart.Data> sliceFunc,
-            final String title) {
+            final Function<Position, PieChart.Data> sliceFunc) {
         if (positions.isEmpty()) {
             chart.getData().clear();
             return;
         }
         final var slices = positions.stream().map(sliceFunc).toList();
         chart.getData().setAll(slices);
-        chart.setTitle(title);
     }
 
     /**
@@ -340,13 +357,11 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         refreshPie(
                 allocationPieChart,
                 positions,
-                p -> new PieChart.Data(p.asset().getShortName(), p.currentMarketValue().amount().doubleValue()),
-                "Allocation Pie");
+                p -> new PieChart.Data(p.asset().getShortName(), p.currentMarketValue().amount().doubleValue()));
         refreshPie(
                 quantityPieChart,
                 positions,
-                p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()),
-                "Quantity Pie");
+                p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()));
     }
 
     /**
@@ -552,12 +567,12 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         walletBalance.setText(
                 AssetFormatter.ofAsset(investmentController.getCurrentBalance())
         );
-        allTimeProfitValue.setText(
-                AssetFormatter.ofAsset(investmentController.getCurrentAllTimeProfitLoss())
-        );
+        final Asset allTimeProfit = investmentController.getCurrentAllTimeProfitLoss();
+        allTimeProfitValue.setText(AssetFormatter.ofAsset(allTimeProfit));
         allTimeProfitPercentage.setText(
                 AssetFormatter.ofPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
         );
+        setProfitColor(allTimeProfit.isNegative(), allTimeProfitValue, allTimeProfitPercentage);
         costBasisValue.setText(
                 AssetFormatter.ofAsset(investmentController.getCurrentTotalCostBasis())
         );
@@ -571,13 +586,19 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             bestPerformerPositionPercentage.setText(
                     AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
             );
-        }, () -> bestPerformerPositionName.setText(NOT_AVAILABLE));
+            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+                    bestPerformerPositionValue, bestPerformerPositionPercentage);
+        }, () -> clearPerformer(bestPerformerPositionName, bestPerformerPositionValue,
+                bestPerformerPositionPercentage));
 
         investmentController.getWorstPerformer().ifPresentOrElse(p -> {
             worstPerformerPositionName.setText(p.asset().getShortName());
             worstPerformerPositionValue.setText(AssetFormatter.ofAsset(p.getUnrealizedProfitLoss()));
             worstPerformerPositionPercentage.setText(AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage()));
-        }, () -> worstPerformerPositionName.setText(NOT_AVAILABLE));
+            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+                    worstPerformerPositionValue, worstPerformerPositionPercentage);
+        }, () -> clearPerformer(worstPerformerPositionName, worstPerformerPositionValue,
+                worstPerformerPositionPercentage));
 
         refreshPieCharts();
         refreshPerformanceLineChart();
@@ -643,15 +664,40 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         costBasisValue.setText("");
         positionTableView.getItems().clear();
         investmentTransactionTableView.getItems().clear();
-        bestPerformerPositionName.setText(NOT_AVAILABLE);
-        bestPerformerPositionValue.setText("");
-        bestPerformerPositionPercentage.setText("");
-        worstPerformerPositionName.setText(NOT_AVAILABLE);
-        worstPerformerPositionValue.setText("");
-        worstPerformerPositionPercentage.setText("");
+        clearPerformer(bestPerformerPositionName, bestPerformerPositionValue, bestPerformerPositionPercentage);
+        clearPerformer(worstPerformerPositionName, worstPerformerPositionValue, worstPerformerPositionPercentage);
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
         performanceChart.getData().clear();
+    }
+
+    /**
+     * Shows N/A in a best/worst performer card and empties its value and percentage,
+     * so the data of the previous wallet is not left on screen.
+     *
+     * @param name       the label with the asset name
+     * @param value      the label with the profit/loss value
+     * @param percentage the label with the profit/loss percentage
+     */
+    private static void clearPerformer(final Label name, final Label value, final Label percentage) {
+        name.setText(NOT_AVAILABLE);
+        value.setText("");
+        percentage.setText("");
+    }
+
+    /**
+     * Colors the given labels green for a profit or red for a loss,
+     * using the style classes of {@code investments.css}.
+     *
+     * @param loss   {@code true} if the value is a loss
+     * @param labels the labels to color
+     */
+    private static void setProfitColor(final boolean loss, final Label... labels) {
+        for (final Label label : labels) {
+            // remove the old one first, otherwise both classes stay on the label
+            label.getStyleClass().removeAll(PROFIT_STYLE, LOSS_STYLE);
+            label.getStyleClass().add(loss ? LOSS_STYLE : PROFIT_STYLE);
+        }
     }
 
     /** {@inheritDoc} */
