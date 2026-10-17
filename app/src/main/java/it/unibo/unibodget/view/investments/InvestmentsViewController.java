@@ -17,6 +17,7 @@ import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,8 +44,10 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -114,13 +117,13 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     @FXML
     private TableColumn<Position, String> tickerColumn;
     @FXML
-    private TableColumn<Position, String> priceColumn;
+    private TableColumn<Position, Position> priceColumn;
     @FXML
-    private TableColumn<Position, String> quantityColumn;
+    private TableColumn<Position, Position> quantityColumn;
     @FXML
-    private TableColumn<Position, String> totalCostColumn;
+    private TableColumn<Position, Position> totalCostColumn;
     @FXML
-    private TableColumn<Position, String> profitLossColumn;
+    private TableColumn<Position, Position> profitLossColumn;
 
     private Timeline currentMarkerPriceRefreshTimeline;
 
@@ -131,11 +134,11 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     @FXML
     private TableColumn<InvestmentTransaction, String> txnAssetColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnQuantityColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnQuantityColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnUnitPriceColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnUnitPriceColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnFeeColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnFeeColumn;
     @FXML
     private TableColumn<InvestmentTransaction, String> txnNotesColumn;
 
@@ -199,57 +202,82 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         tickerColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().asset().getShortName()));
 
-        priceColumn.setCellValueFactory(cell -> {
-            final var position = cell.getValue();
-            final var unitCurrentMarketValue = position.currentMarketValue()
-                    .amount()
-                    .divide(position.quantity(), 2, RoundingMode.HALF_UP);
-            return new SimpleStringProperty(
-                    String.format(
-                            "%s %.2f (%s)",
-                            position.currentMarketValue().currency().getSymbol(),
-                            unitCurrentMarketValue,
-                            position.currentMarketValue().currency().getShortName()));
-        });
+        setupNumericColumn(priceColumn,
+                p -> AssetFormatter.ofAssetWithName(Asset.of(p.currentMarketValue().currency(), unitPrice(p))),
+                InvestmentsViewController::unitPrice,
+                false);
 
-        quantityColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                cell.getValue().quantity().stripTrailingZeros().toPlainString()));
+        setupNumericColumn(quantityColumn,
+                p -> p.quantity().stripTrailingZeros().toPlainString(),
+                Position::quantity,
+                false);
 
-        totalCostColumn.setCellValueFactory(cell -> {
-            final var totalCost = cell.getValue().getTotalCost();
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(totalCost)
-            );
-        });
+        setupNumericColumn(totalCostColumn,
+                p -> AssetFormatter.ofAssetWithName(p.getTotalCost()),
+                p -> p.getTotalCost().amount(),
+                false);
 
-        profitLossColumn.setCellValueFactory(cell -> {
-            final var decimals = cell.getValue().getTotalCost().currency().getDisplayDecimals();
-            final var pl = cell.getValue().getUnrealizedProfitLoss();
-            final var percent = cell.getValue().getUnrealizedProfitLossPercentage();
-            final var sign = pl.isNegative() ? "-" : "";
-            return new SimpleStringProperty(
-                    String.format(
-                            "%s %s%s (%+.2f%%)",
+        setupNumericColumn(profitLossColumn,
+                p -> {
+                    final var decimals = p.getTotalCost().currency().getDisplayDecimals();
+                    final var pl = p.getUnrealizedProfitLoss();
+                    // the amount has already its own "-", before it was added another one ("--0.01")
+                    return String.format(
+                            "%s %s (%+.2f%%)",
                             pl.currency().getSymbol(),
-                            sign,
                             pl.amount().setScale(decimals, RoundingMode.HALF_UP).toPlainString(),
-                            percent));
-        });
-        profitLossColumn.setCellFactory(col -> new TableCell<>() {
+                            p.getUnrealizedProfitLossPercentage());
+                },
+                p -> p.getUnrealizedProfitLoss().amount(),
+                true);
+    }
+
+    /**
+     * Returns the current price of one unit of the position.
+     *
+     * @param position the position
+     * @return market value divided by quantity, with the decimals of the price currency
+     */
+    private static BigDecimal unitPrice(final Position position) {
+        return position.currentMarketValue()
+                .amount()
+                .divide(position.quantity(),
+                        position.currentMarketValue().currency().getDisplayDecimals(),
+                        RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Sets up a column that shows a number as text but sorts by the number itself.
+     * If the column value is the text, the sort is alphabetical
+     * (e.g. "81738.77" goes before "709.98" because '8' is bigger than '7').
+     *
+     * @param <T>         the type of the table rows
+     * @param column      the column to set up
+     * @param toText      gives the text shown in the cell
+     * @param number      gives the number used for the sort
+     * @param colorBySign if {@code true} the text is green when the number is positive and red when negative
+     */
+    private static <T> void setupNumericColumn(
+            final TableColumn<T, T> column,
+            final Function<T, String> toText,
+            final Function<T, BigDecimal> number,
+            final boolean colorBySign) {
+        // the value of the cell is the whole row, so the comparator can take the number from it
+        column.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
+        column.setComparator(Comparator.comparing(number));
+        column.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(final String value, final boolean empty) {
-                super.updateItem(value, empty);
-                if (empty || value == null) {
+            protected void updateItem(final T item, final boolean empty) {
+                super.updateItem(item, empty);
+                // cells are reused for other rows, so we always remove the old color
+                getStyleClass().removeAll(PROFIT_STYLE, LOSS_STYLE);
+                if (empty || item == null) {
                     setText(null);
-                    setStyle("");
-                } else {
-                    setText(value);
-                    final var position = getTableView().getItems().get(getIndex());
-                    if (position.getUnrealizedProfitLoss().isNegative()) {
-                        setStyle("-fx-text-fill: #F44336;"); // rosso
-                    } else {
-                        setStyle("-fx-text-fill: #4CAF50;"); // verde
-                    }
+                    return;
+                }
+                setText(toText.apply(item));
+                if (colorBySign) {
+                    getStyleClass().add(number.apply(item).signum() < 0 ? LOSS_STYLE : PROFIT_STYLE);
                 }
             }
         });
@@ -263,43 +291,23 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                 cell.getValue().getDate().toString()));
         txnAssetColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().getAsset().currency().getShortName()));
-        txnQuantityColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                cell.getValue().getAsset().amount().stripTrailingZeros().toPlainString()));
-        txnQuantityColumn.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(final String value, final boolean empty) {
-                super.updateItem(value, empty);
-                if (empty || value == null) {
-                    setText(null);
-                    setStyle("");
-                    return;
-                } else {
-                    setText(value);
-                    final var txn = getTableView().getItems().get(getIndex());
-                    if (txn.getAsset().isNegative()) {
-                        setStyle("-fx-text-fill: #F44336;"); // rosso
-                    } else {
-                        setStyle("-fx-text-fill: #4CAF50;"); // verde
-                    }
-                }
-            }
-        });
-        txnUnitPriceColumn.setCellValueFactory(cell -> {
-            final var unitPrice = cell.getValue().getUnitPrice();
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(unitPrice)
-            );
-        });
 
-        txnFeeColumn.setCellValueFactory(cell -> {
-            final var fee = cell.getValue().getFee();
-            if (fee == null) {
-                return new SimpleStringProperty("-");
-            }
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(fee)
-            );
-        });
+        setupNumericColumn(txnQuantityColumn,
+                t -> t.getAsset().amount().stripTrailingZeros().toPlainString(),
+                t -> t.getAsset().amount(),
+                true);
+
+        setupNumericColumn(txnUnitPriceColumn,
+                t -> AssetFormatter.ofAssetWithName(t.getUnitPrice()),
+                t -> t.getUnitPrice().amount(),
+                false);
+
+        // fee can be null, in the sort it counts as 0
+        setupNumericColumn(txnFeeColumn,
+                t -> t.getFee() == null ? "-" : AssetFormatter.ofAssetWithName(t.getFee()),
+                t -> t.getFee() == null ? BigDecimal.ZERO : t.getFee().amount(),
+                false);
+
         txnNotesColumn.setCellValueFactory(cell ->
                 new SimpleStringProperty(cell.getValue().getNotes()));
     }
