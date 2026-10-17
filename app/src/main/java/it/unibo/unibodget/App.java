@@ -29,12 +29,13 @@ import javafx.stage.Stage;
 /**
  * JavaFX application entry point for UniBodget.
  *
- * <p>Bootstraps the model layer (services, controllers, snapshot service),
- * loads the main FXML view, and displays the primary stage.
+ * <p>Bootstraps services and controllers, loads the main view and
+ * persists application data when the application stops.
  */
 public class App extends Application {
 
-    private static final String ALPHA_KEY = "B56AX33NF4F29HHZ";
+    private static final String ALPHA_KEY_VARIABLE = "ALPHA_VANTAGE_API_KEY";
+    private static final String DEFAULT_ALPHA_KEY = "B56AX33NF4F29HHZ";
 
     private CashAccountManager cashAccountManager;
     private InvestmentAccountManager investmentAccountManager;
@@ -48,12 +49,14 @@ public class App extends Application {
     /** {@inheritDoc} */
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        System.setProperty("ALPHA_VANTAGE_API_KEY", ALPHA_KEY);
+        final String alphaKey = resolveAlphaKey();
+        System.setProperty(ALPHA_KEY_VARIABLE, alphaKey);
+        System.out.println(alphaKey);
 
         final UniversalPriceService priceService = new UniversalPriceService(
                 new ExchangeRateAPIImpl(),
                 new CoinGeckoPriceProvider(),
-                new AlphaPriceProvider(ALPHA_KEY)
+                new AlphaPriceProvider(alphaKey)
         );
 
         final BasicCurrencyConverter currencyConverter =
@@ -65,16 +68,14 @@ public class App extends Application {
         cashAccountsService = new CashAccountService();
         investmentsService = new InvestmentAccountService();
 
-        // Loads wallet before controllers and view
+        // Loads wallets before initializing controllers and views.
         final var loadedCashAccounts = cashAccountManager.loadAll();
         final var loadedInvestmentAccounts = investmentAccountManager.loadAll();
 
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
 
-        //settingsController = 
         final Settings settings = settingsController.getSettings();
-
         final var snapshotService = new CSVInvestmentsSnapshotService();
 
         final var investmentsController = new DefaultInvestmentController(
@@ -111,6 +112,7 @@ public class App extends Application {
         );
 
         mainViewPage.setControllerFactory(factory::create);
+
         final Node mainViewNode = mainViewPage.load();
         final HBox root = (HBox) mainViewNode;
 
@@ -121,18 +123,16 @@ public class App extends Application {
         primaryStage.setWidth(settings.getWindowPrefs().getWidth());
         primaryStage.setHeight(settings.getWindowPrefs().getHeight());
         primaryStage.setMaximized(settings.getWindowPrefs().isMaximized());
-
         primaryStage.setTitle("UniBodget");
         primaryStage.show();
 
         updateWindowProperty(primaryStage, settings);
-        
+
         persistenceReady = true;
     }
 
     /**
-     * Updates the window preferences in the settings whenever the primary stage's
-     * width, height, or maximized state changes.
+     * Updates window preferences when the window dimensions or state change.
      *
      * @param primaryStage the main application stage
      * @param settings the settings instance to update
@@ -156,12 +156,9 @@ public class App extends Application {
     }
 
     /**
-     * Saves all wallets and window preferences when the application stops.
-     * 
-     * <p>
-     * This method is called automatically by the JavaFX framework when the
-     * application is about to exit. It ensures that all wallet data and window
-     * preferences are persisted to storage.
+     * Saves wallets and window preferences when the application stops.
+     *
+     * <p>Saving is skipped if application startup did not complete.
      */
     @Override
     public void stop() {
@@ -169,7 +166,9 @@ public class App extends Application {
             System.out.println("[PERSISTENCE] Startup incomplete: saving skipped");
             return;
         }
+
         RuntimeException failure = null;
+
         for (final Runnable save : new Runnable[] {
                 () -> saveWallets("Cash", () ->
                         cashAccountManager.saveAll(cashAccountsService.getWallets())),
@@ -196,6 +195,7 @@ public class App extends Application {
                 }
             }
         }
+
         if (failure != null) {
             throw failure;
         }
@@ -218,12 +218,23 @@ public class App extends Application {
     }
 
     /**
-     * Application entry point; delegates to {@link #launch(String[])}.
+     * Reads the API key from the environment, falling back to the default key.
+     *
+     * @return the configured API key, or the default if unset or blank
+     */
+    private static String resolveAlphaKey() {
+        final String environmentKey = System.getenv(ALPHA_KEY_VARIABLE);
+        return environmentKey == null || environmentKey.isBlank()
+                ? DEFAULT_ALPHA_KEY
+                : environmentKey.strip();
+    }
+
+    /**
+     * Launches the JavaFX application.
      *
      * @param args command-line arguments forwarded to JavaFX
      */
     public static void main(final String[] args) {
         launch(args);
     }
-
 }

@@ -1,9 +1,11 @@
 package it.unibo.unibodget.view.currency_converter;
 
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
+import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.alert.MarketAlert;
@@ -16,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -37,6 +40,9 @@ import javafx.scene.text.FontWeight;
 import javafx.util.StringConverter;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * JavaFX widget representing the main currency converter tool.
@@ -118,17 +124,63 @@ public class ConverterWidgetFX {
     }
 
     /**
-     * Sets the currencies for the converter.
+     * Restores a saved pair, warning if either currency is unavailable.
      *
-     * @param fromCode the ISO code of the source currency
-     * @param toCode the ISO code of the target currency
+     * @param fromCode the source currency code
+     * @param toCode the target currency code
      */
     public void setCurrencies(final String fromCode, final String toCode) {
-        final CurrencyUnit from = Currency.get(fromCode);
-        final CurrencyUnit to = Currency.get(toCode);
+        final var from = fromBox.getItems().stream()
+                .filter(currency -> currency.getCode().equalsIgnoreCase(fromCode))
+                .findFirst();
 
-        fromBox.setValue(from);
-        toBox.setValue(to);
+        final var to = toBox.getItems().stream()
+                .filter(currency -> currency.getCode().equalsIgnoreCase(toCode))
+                .findFirst();
+
+        if (from.isEmpty() || to.isEmpty()) {
+            final String missingCodes = Stream.of(fromCode, toCode)
+                    .filter(code -> fromBox.getItems().stream()
+                            .noneMatch(currency ->
+                                    currency.getCode().equalsIgnoreCase(code)))
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            final Alert alert = new Alert(Alert.AlertType.WARNING);
+            if (card.getScene() != null) {
+                alert.initOwner(card.getScene().getWindow());
+            }
+            alert.setTitle("Watchlist");
+            alert.setHeaderText("Couple not available");
+            alert.setContentText(
+                    "Currency not available: " + missingCodes
+                    + ".\nThe current selection has not been modified."
+            );
+            alert.showAndWait();
+            return;
+        }
+
+        fromBox.setValue(from.get());
+        toBox.setValue(to.get());
+    }
+
+    /**
+     * Determines the display order of currency groups.
+     *
+     * @param currency the currency to classify
+     * @return the group order: fiat, stocks, crypto, others
+     */
+    private static int currencyGroupOrder(final CurrencyUnit currency) {
+        if (currency instanceof FiatCurrency) {
+            return 0;
+        }
+        if (currency instanceof StockMarketCurrency) {
+            return 1;
+        }
+        if (currency instanceof CryptoCurrency) {
+            return 2;
+        }
+        return 3;
     }
 
     /** 
@@ -197,22 +249,18 @@ public class ConverterWidgetFX {
         );
 
         /* ---------- CURRENCY BOXES ---------- */
-        //final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
-        //CurrencyUnit.basicCurrencies().forEach(currencies::add);
-        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList(CurrencyUnit.allCurrencies());
+        final ObservableList<CurrencyUnit> currencies =
+        FXCollections.observableArrayList(CurrencyUnit.allCurrencies());
+
+        currencies.sort(
+                Comparator.comparingInt(ConverterWidgetFX::currencyGroupOrder)
+                        .thenComparing(CurrencyUnit::getCode, String.CASE_INSENSITIVE_ORDER)
+        );
 
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
 
-        //fromBox.setValue(currencies.get(0));
-        toBox.setValue(currencies.get(1));
-
-        fromBox.setValue(Currency.get("EUR"));
-        toBox.setValue(Currency.get("USD"));
-        System.out.println("FROM selected: " + fromBox.getValue().getClass());
-        System.out.println("FROM code: " + fromBox.getValue().getCode());
-        System.out.println("TO selected: " + toBox.getValue().getClass());
-        System.out.println("TO code: " + toBox.getValue().getCode());
+        setCurrencies("EUR", "USD");
 
         configureCurrencyBox(fromBox, font);
         configureCurrencyBox(toBox, font);
