@@ -5,10 +5,12 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
@@ -64,11 +66,14 @@ public class UniversalPriceService {
 
         return switch (unit.getType()) {
             case FIAT, CUSTOM -> resolveFiatPrice(unit);
+            // all the coins of the enum in one request, so the others are already in cache
             case CRYPTO -> getCachedPrice(
-                    unit, cryptoProvider, "CoinGecko"
+                    unit, cryptoProvider, "CoinGecko",
+                    unit instanceof CryptoCurrency ? List.of(CryptoCurrency.values()) : List.of(unit)
             );
+            // alpha vantage (free) gives one stock for request, so only the asked one
             case STOCK -> getCachedPrice(
-                    unit, stockProvider, "Alpha Vantage"
+                    unit, stockProvider, "Alpha Vantage", List.of(unit)
             );
             default -> throw new IllegalArgumentException(
                     "Unsupported asset type: " + unit.getType()
@@ -79,15 +84,17 @@ public class UniversalPriceService {
     /**
      * Retrieves a cached price or fetches a new one after expiration.
      * Failed requests and invalid prices are never cached.
+     *
+     * <p>On a miss the prices of all the {@code batch} assets are requested together
+     * and all the valid ones are cached, not only the one asked.</p>
      */
     private synchronized BigDecimal getCachedPrice(
             final CurrencyUnit unit,
             final PriceProvider provider,
-            final String providerName) {
+            final String providerName,
+            final List<? extends CurrencyUnit> batch) {
 
-        final String key = unit.getType().name()
-                + ":"
-                + unit.getCode().toUpperCase(Locale.ROOT);
+        final String key = cacheKey(unit);
 
         final CachedPrice cached = cachedPrices.get(key);
         final Instant now = Instant.now();
@@ -108,14 +115,24 @@ public class UniversalPriceService {
                 + (cached == null ? "MISS " : "EXPIRED ")
                 + key + " — requesting " + providerName);
 
-        BigDecimal price;
+        Map<CurrencyUnit, BigDecimal> prices;
         try {
-            price = provider.getPriceInUSD(unit);
+            prices = provider.getPricesInUSD(batch);
         } catch (final Exception e) {
             System.err.println("[CACHE] Errore richiesta provider per "
                     + unit.getCode() + ": " + e.getMessage());
-            price = BigDecimal.ZERO;
+            prices = Map.of();
         }
+
+        // Timestamp only after a successful request.
+        final Instant fetchedAt = Instant.now();
+        prices.forEach((asset, assetPrice) -> {
+            if (assetPrice != null && assetPrice.signum() > 0) {
+                cachedPrices.put(cacheKey(asset), new CachedPrice(assetPrice, fetchedAt));
+            }
+        });
+
+        final BigDecimal price = prices.get(unit);
 
         if (price == null || price.signum() <= 0) {
             if (cached != null) {
@@ -132,16 +149,21 @@ public class UniversalPriceService {
             );
         }
 
-        // Timestamp only after a successful request.
-        final Instant fetchedAt = Instant.now();
-        cachedPrices.put(key, new CachedPrice(price, fetchedAt));
-
-        System.out.println("[CACHE] STORED " + key
-                + ": " + price + " USD"
+        System.out.println("[CACHE] STORED " + prices.size() + " prices from " + providerName
+                + " (" + key + ": " + price + " USD)"
                 + " — expires at "
                 + fetchedAt.plus(CACHE_DURATION));
 
         return price;
+    }
+
+    /**
+     * Returns the cache key of an asset, e.g. {@code CRYPTO:BTC}.
+     */
+    private static String cacheKey(final CurrencyUnit unit) {
+        return unit.getType().name()
+                + ":"
+                + unit.getCode().toUpperCase(Locale.ROOT);
     }
 
     /**
