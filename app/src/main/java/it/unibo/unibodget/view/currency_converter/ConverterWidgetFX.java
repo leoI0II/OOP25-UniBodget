@@ -259,7 +259,7 @@ public class ConverterWidgetFX {
 
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
-
+        //set base, also used for boot
         setCurrencies("EUR", "USD");
 
         configureCurrencyBox(fromBox, font);
