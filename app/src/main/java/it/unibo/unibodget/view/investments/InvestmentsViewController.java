@@ -1,6 +1,7 @@
 package it.unibo.unibodget.view.investments;
 
 import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
@@ -33,6 +34,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -47,8 +49,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -68,6 +73,14 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private static final String NOT_AVAILABLE = "N/A";
     private static final String PROFIT_STYLE = "positive";
     private static final String LOSS_STYLE = "negative";
+    private static final int TOOLTIP_DELAY_MILLIS = 100;
+    // one color for each tradeable asset (7 stocks + 17 crypto), so two assets never have the same one
+    private static final List<String> ASSET_COLORS = List.of(
+            "#3861FB", "#F7A64B", "#16C784", "#EA3943", "#8E6CEF", "#2FC0D6",
+            "#F0B90B", "#FF6FB5", "#7CDB5C", "#4FA3FF", "#FF8A5B", "#B07CFF",
+            "#26D9A6", "#FFD166", "#E05FD8", "#5EC8FF", "#C9A227", "#FF5C8A",
+            "#66E3C4", "#A0A7FF", "#FFA07A", "#9BE15D", "#D68FFF", "#A1A7BB"
+    );
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -111,6 +124,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private PieChart quantityPieChart;
     @FXML
     private ToggleGroup pieToggleGroup;
+    // created only once: JavaFX gives the color (default-color0, 1, ...) with a counter that never
+    // goes back to 0, so new series at every refresh had every time other colors
+    private final XYChart.Series<String, Number> plSeries = new XYChart.Series<>();
+    private final XYChart.Series<String, Number> costSeries = new XYChart.Series<>();
 
     @FXML
     private TableView<Position> positionTableView;
@@ -179,7 +196,18 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         setupPositionTable();
         setupHistoryTable();
         setupPieToggle();
+        setupPerformanceChart();
         startPriceRefreshTimeline();
+    }
+
+    /**
+     * Adds the P/L and cost basis series to the chart, only once.
+     * At every refresh only their points change (see {@link #refreshPerformanceLineChart()}).
+     */
+    private void setupPerformanceChart() {
+        plSeries.setName("Total P/L");
+        costSeries.setName("Cost Basis");
+        performanceChart.getData().setAll(List.of(plSeries, costSeries));
     }
 
     /**
@@ -321,21 +349,18 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         }
         final var account = investmentController.getCurrentInvestmentAccount().get();
 
-        final var plSeries = new XYChart.Series<String, Number>();
-        plSeries.setName("Total P/L");
-
-        final var costSeries = new XYChart.Series<String, Number>();
-        costSeries.setName("Cost Basis");
-
+        final List<XYChart.Data<String, Number>> plPoints = new ArrayList<>();
+        final List<XYChart.Data<String, Number>> costPoints = new ArrayList<>();
         snapshotService.getSnapshots(account.getId())
                 .forEach(snap -> {
                     final String date = snap.timestamp()
                             .format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"));
-                    plSeries.getData().add(new XYChart.Data<>(date, snap.totalPL()));
-                    costSeries.getData().add(new XYChart.Data<>(date, snap.costBasis()));
+                    plPoints.add(new XYChart.Data<>(date, snap.totalPL()));
+                    costPoints.add(new XYChart.Data<>(date, snap.costBasis()));
                 });
-        performanceChart.getData().clear();
-        performanceChart.getData().addAll(plSeries, costSeries);
+        // same series, only new points, so the colors stay the same
+        plSeries.getData().setAll(plPoints);
+        costSeries.getData().setAll(costPoints);
     }
 
     /**
@@ -344,17 +369,53 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * @param chart     the chart to update
      * @param positions the positions to render
      * @param sliceFunc maps a position to its pie slice
+     * @param valueText  gives the value shown in the tooltip of the slice
      */
     private void refreshPie(
             final PieChart chart,
             final List<Position> positions,
-            final Function<Position, PieChart.Data> sliceFunc) {
+            final Function<Position, PieChart.Data> sliceFunc,
+            final Function<Position, String> valueText) {
         if (positions.isEmpty()) {
             chart.getData().clear();
             return;
         }
         final var slices = positions.stream().map(sliceFunc).toList();
         chart.getData().setAll(slices);
+        // the nodes of the slices exist only after they are added to the chart
+        final Map<String, String> colorByName = new HashMap<>();
+        for (int i = 0; i < slices.size(); i++) {
+            final String color = colorOf(positions.get(i).asset());
+            colorByName.put(slices.get(i).getName(), color);
+            slices.get(i).getNode().setStyle("-fx-pie-color: " + color + ";");
+
+            final Tooltip tooltip = new Tooltip(
+                    slices.get(i).getName() + "\n" + valueText.apply(positions.get(i)));
+            tooltip.setShowDelay(Duration.millis(TOOLTIP_DELAY_MILLIS));
+            Tooltip.install(slices.get(i).getNode(), tooltip);
+        }
+        // the dots of the legend are other nodes with the old default-colorN, so we color them too
+        chart.lookupAll(".chart-legend-item").forEach(node -> {
+            if (node instanceof Label item && item.getGraphic() != null
+                    && colorByName.containsKey(item.getText())) {
+                item.getGraphic().setStyle("-fx-pie-color: " + colorByName.get(item.getText()) + ";");
+            }
+        });
+    }
+
+    /**
+     * Returns the color of an asset in the pies, always the same for the same asset
+     * (also after a restart), so the user can recognize it at every refresh.
+     * JavaFX instead changes the colors at every refresh (the default-colorN counter never resets).
+     *
+     * @param asset the asset
+     * @return the css color of the asset
+     */
+    private String colorOf(final CurrencyUnit asset) {
+        final int index = investmentController.getAllTradeableAssets().indexOf(asset);
+        // an asset that is not in the list (should not happen) gets a color from its code
+        final int colorIndex = index >= 0 ? index : Math.floorMod(asset.getCode().hashCode(), ASSET_COLORS.size());
+        return ASSET_COLORS.get(colorIndex % ASSET_COLORS.size());
     }
 
     /**
@@ -365,32 +426,23 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         refreshPie(
                 allocationPieChart,
                 positions,
-                p -> new PieChart.Data(p.asset().getShortName(), p.currentMarketValue().amount().doubleValue()));
+                p -> new PieChart.Data(p.asset().getShortName(), p.currentMarketValue().amount().doubleValue()),
+                p -> AssetFormatter.ofAsset(p.currentMarketValue()));
         refreshPie(
                 quantityPieChart,
                 positions,
-                p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()));
+                p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()),
+                p -> p.quantity().stripTrailingZeros().toPlainString() + " " + p.asset().getShortName());
     }
 
     /**
-     * Reloads the positions table with the latest data from the controller.
-     */
-    private void refreshPositionTable() {
-        if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
-            return;
-        }
-
-        positionTableView.getItems().setAll(investmentController.getPositions());
-        positionTableView.refresh();
-    }
-
-    /**
-     * Starts (or restarts) the periodic timer that refreshes market prices in the position table.
+     * Starts (or restarts) the periodic timer that refreshes the market prices in the whole page.
+     * Before only the table was refreshed, so the pies, balance and best/worst stayed with the old prices.
      */
     private void startPriceRefreshTimeline() {
         if (currentMarkerPriceRefreshTimeline == null) {
             currentMarkerPriceRefreshTimeline = new Timeline(
-                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshPositionTable()));
+                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshMainPanel()));
         }
         currentMarkerPriceRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
         currentMarkerPriceRefreshTimeline.playFromStart();
@@ -676,7 +728,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         clearPerformer(worstPerformerPositionName, worstPerformerPositionValue, worstPerformerPositionPercentage);
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
-        performanceChart.getData().clear();
+        plSeries.getData().clear();
+        costSeries.getData().clear();
     }
 
     /**

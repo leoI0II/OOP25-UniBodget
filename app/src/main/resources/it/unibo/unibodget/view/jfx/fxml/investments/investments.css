@@ -244,19 +244,17 @@
     -fx-background-color: #F7A64B;
 }
 
-/* pie colors + dark border between slices (by default its white) */
+/* dark border between pie slices (by default its white). the colors of the slices are put by the
+   controller, one fixed color for each asset, because JavaFX changes default-colorN at every refresh */
 .investments-page .chart-pie {
     -fx-border-color: rgb(30, 34, 46);
 }
 
-.investments-page .default-color0.chart-pie { -fx-pie-color: #3861FB; }
-.investments-page .default-color1.chart-pie { -fx-pie-color: #F7A64B; }
-.investments-page .default-color2.chart-pie { -fx-pie-color: #16C784; }
-.investments-page .default-color3.chart-pie { -fx-pie-color: #EA3943; }
-.investments-page .default-color4.chart-pie { -fx-pie-color: #8E6CEF; }
-.investments-page .default-color5.chart-pie { -fx-pie-color: #2FC0D6; }
-.investments-page .default-color6.chart-pie { -fx-pie-color: #F0B90B; }
-.investments-page .default-color7.chart-pie { -fx-pie-color: #A1A7BB; }
+/* slice under the mouse a bit lighter, the tooltip with name and value is made in the controller */
+.investments-page .chart-pie:hover {
+    -fx-opacity: 0.8;
+    -fx-cursor: hand;
+}
 
 /* tables: no background, only lines between rows */
 .investments-page .table-view {
