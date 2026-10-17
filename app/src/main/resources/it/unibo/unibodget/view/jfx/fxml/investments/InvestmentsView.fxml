@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
@@ -8,281 +7,173 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox fx:id="investmentsVBoxPage" maxHeight="Infinity" maxWidth="Infinity" prefHeight="700.0" prefWidth="700.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
-   <children>
-      <HBox prefHeight="57.0" prefWidth="700.0" spacing="10.0" VBox.vgrow="ALWAYS">
+<!-- layout copied more or less from the CoinMarketCap portfolio page, styles in investments.css -->
+<!-- scroll pane so if the window is small the page scrolls instead of squeezing the charts -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="investments-scroll" stylesheets="@investments.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
+   <content>
+      <VBox fx:id="investmentsVBoxPage" spacing="16.0" styleClass="investments-page">
          <children>
-            <Label fx:id="currentWalletName" alignment="BASELINE_LEFT" onMouseClicked="#handleCurrentWalletNameChange" prefHeight="41.0" prefWidth="319.0" text="Name" HBox.hgrow="ALWAYS">
-               <font>
-                  <Font name="System Bold" size="29.0" />
-               </font>
-               <padding>
-                  <Insets left="10.0" />
-               </padding>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-               <HBox.margin>
-                  <Insets left="8.0" right="15.0" />
-               </HBox.margin>
-            </Label>
-            <Region prefHeight="41.0" prefWidth="80.0" HBox.hgrow="ALWAYS" />
-            <Button fx:id="addTransactionButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" prefHeight="41.0" prefWidth="165.0" text="Add transaction" HBox.hgrow="NEVER">
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="13.0" />
-               </font>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
-            </Button>
-            <Button fx:id="exportToCSVBtn" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" prefHeight="41.0" prefWidth="164.0" text="Export CSV" HBox.hgrow="NEVER">
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="18.0" />
-               </font>
-            </Button>
-         </children>
-         <padding>
-            <Insets bottom="15.0" left="8.0" right="8.0" top="15.0" />
-         </padding>
-      </HBox>
-      <Region prefHeight="224.0" prefWidth="700.0" />
-      <HBox prefHeight="302.0" prefWidth="700.0">
-         <children>
-            <VBox prefHeight="130.0" prefWidth="340.0" HBox.hgrow="ALWAYS">
+            <!-- header: wallet name (click to rename), balance and the buttons -->
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
                <children>
-                  <Label prefHeight="25.0" prefWidth="340.0" text="Available balance" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="walletBalance" prefHeight="153.0" prefWidth="340.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font size="48.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                     </padding>
-                  </Label>
+                  <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="currentWalletName" onMouseClicked="#handleCurrentWalletNameChange" styleClass="wallet-name" text="Name">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Label>
+                        <Label fx:id="walletBalance" styleClass="balance-big" text="\$00.00" />
+                     </children>
+                  </VBox>
+                  <Button fx:id="addTransactionButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" styleClass="primary-button" text="+ Add transaction" />
+                  <Button fx:id="exportToCSVBtn" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" styleClass="secondary-button" text="Export CSV" />
                </children>
-            </VBox>
-            <VBox prefHeight="109.0" prefWidth="220.0" HBox.hgrow="ALWAYS">
+            </HBox>
+            <!-- charts: performance big on the left, allocation pies on the right -->
+            <HBox minHeight="280.0" prefHeight="340.0" spacing="16.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Label alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="193.0" text="All time profit" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                     <padding>
-                        <Insets right="5.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="allTimeProfitValue" prefHeight="57.0" prefWidth="198.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="28.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="allTimeProfitPercentage" alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="197.0" text="\%0" VBox.vgrow="ALWAYS">
-                     <padding>
-                        <Insets right="20.0" />
-                     </padding>
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="24.0" />
-                     </font>
-                  </Label>
-               </children>
-            </VBox>
-            <Region prefHeight="130.0" prefWidth="34.0" HBox.hgrow="ALWAYS" />
-            <VBox prefHeight="109.0" prefWidth="220.0" HBox.hgrow="ALWAYS">
-               <children>
-                  <Label alignment="CENTER_RIGHT" prefHeight="30.0" prefWidth="175.0" text="Cost Basis" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="costBasisValue" prefHeight="117.0" prefWidth="174.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="28.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="174.0" text="\%0" VBox.vgrow="ALWAYS">
-                     <padding>
-                        <Insets right="20.0" />
-                     </padding>
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="24.0" />
-                     </font>
-                  </Label>
-               </children>
-            </VBox>
-         </children>
-      </HBox>
-      <HBox prefHeight="460.0" prefWidth="700.0" spacing="10.0" VBox.vgrow="ALWAYS">
-         <children>
-            <VBox maxHeight="300.0" maxWidth="250.0" prefHeight="220.0" prefWidth="220.0" HBox.hgrow="NEVER">
-               <children>
-                  <Label prefHeight="30.0" prefWidth="213.0" text="Best performer" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="bestPerformerPositionName" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="205.0" text="NOME ASSET">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="bestPerformerPositionValue" prefHeight="64.0" prefWidth="199.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets left="5.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="bestPerformerPositionPercentage" alignment="CENTER_RIGHT" prefHeight="57.0" prefWidth="195.0" text="\%0" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets right="5.0" />
-                     </padding>
-                  </Label>
-                  <Region prefHeight="72.0" prefWidth="168.0" VBox.vgrow="ALWAYS" />
-               </children>
-            </VBox>
-            <VBox layoutX="10.0" layoutY="10.0" maxHeight="300.0" maxWidth="250.0" prefHeight="220.0" prefWidth="220.0" HBox.hgrow="NEVER">
-               <children>
-                  <Label prefHeight="30.0" prefWidth="213.0" text="Worst performer" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="worstPerformerPositionName" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="201.0" text="NOME ASSET">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Regular" size="18.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="worstPerformerPositionValue" prefHeight="64.0" prefWidth="200.0" text="\$00.00" wrapText="true" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets left="5.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="worstPerformerPositionPercentage" alignment="CENTER_RIGHT" prefHeight="57.0" prefWidth="196.0" text="\%0" VBox.vgrow="ALWAYS">
-                     <font>
-                        <Font name="FantasqueSansM Nerd Font Bold" size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets right="5.0" />
-                     </padding>
-                  </Label>
-                  <Region prefHeight="72.0" prefWidth="168.0" VBox.vgrow="ALWAYS" />
-               </children>
-            </VBox>
-            <TabPane prefHeight="264.0" prefWidth="384.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
-              <tabs>
-                <Tab text="Performance">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <VBox prefWidth="600.0" styleClass="card" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="card-header" text="Performance" />
+                        <LineChart fx:id="performanceChart" createSymbols="false" minHeight="0.0" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="chartXAxis" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="chartYAxis" />
+                           </yAxis>
+                        </LineChart>
+                     </children>
+                  </VBox>
+                  <VBox minWidth="280.0" prefWidth="360.0" styleClass="card" HBox.hgrow="SOMETIMES">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
                            <children>
-                              <LineChart fx:id="performanceChart" layoutX="-12.0" layoutY="-107.0" prefHeight="233.0" prefWidth="366.0" title="Total P/L" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                  <xAxis>
-                                      <CategoryAxis fx:id="chartXAxis" label="Date" prefHeight="20.0" prefWidth="262.0" />
-                                  </xAxis>
-                                  <yAxis>
-                                      <NumberAxis fx:id="chartYAxis" label="CURRENCY" prefHeight="156.0" prefWidth="39.0" />
-                                  </yAxis>
-                              </LineChart>
+                              <Label styleClass="card-header" text="Allocation" />
+                              <Region HBox.hgrow="ALWAYS" />
+                              <!-- buttons to switch pie, like History/Allocation on CMC -->
+                              <HBox styleClass="toggle-bar">
+                                 <fx:define>
+                                    <ToggleGroup fx:id="pieToggleGroup" />
+                                 </fx:define>
+                                 <children>
+                                    <ToggleButton fx:id="allocationToggle" mnemonicParsing="false" selected="true" styleClass="pill-toggle" text="Value" toggleGroup="$pieToggleGroup" />
+                                    <ToggleButton fx:id="quantityToggle" mnemonicParsing="false" styleClass="pill-toggle" text="Quantity" toggleGroup="$pieToggleGroup" />
+                                 </children>
+                              </HBox>
                            </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Allocation Pie">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        </HBox>
+                        <!-- both pies are here, only the one of the selected button is visible -->
+                        <StackPane minHeight="0.0" VBox.vgrow="ALWAYS">
                            <children>
-                              <PieChart fx:id="allocationPieChart" labelsVisible="true" layoutX="-107.0" layoutY="-132.0" legendVisible="true" title="Allocation" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <PieChart fx:id="allocationPieChart" labelsVisible="false" minHeight="0.0" visible="${allocationToggle.selected}" />
+                              <PieChart fx:id="quantityPieChart" labelsVisible="false" minHeight="0.0" visible="${quantityToggle.selected}" />
                            </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-                  <Tab text="Quantity Pie">
-                    <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        </StackPane>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <!-- stats: profit, cost basis and best / worst in the same card -->
+            <HBox spacing="16.0">
+               <children>
+                  <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="card-title" text="All-time profit" />
+                        <Label fx:id="allTimeProfitValue" styleClass="stat-value" text="\$00.00" />
+                        <Label fx:id="allTimeProfitPercentage" styleClass="stat-change" text="0%" />
+                     </children>
+                  </VBox>
+                  <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="card-title" text="Cost basis" />
+                        <Label fx:id="costBasisValue" styleClass="stat-value" text="\$00.00" />
+                     </children>
+                  </VBox>
+                  <HBox styleClass="card" HBox.hgrow="ALWAYS">
+                     <children>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <PieChart fx:id="quantityPieChart" layoutX="-78.0" layoutY="-117.0" title="Quantities" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <Label styleClass="card-title" text="Best performer" />
+                              <Label fx:id="bestPerformerPositionName" styleClass="asset-name" text="N/A" />
+                              <HBox spacing="8.0">
+                                 <children>
+                                    <Label fx:id="bestPerformerPositionValue" styleClass="stat-change" />
+                                    <Label fx:id="bestPerformerPositionPercentage" styleClass="stat-change" />
+                                 </children>
+                              </HBox>
                            </children>
-                        </AnchorPane>
-                    </content>
+                        </VBox>
+                        <Separator orientation="VERTICAL" />
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="card-title" text="Worst performer" />
+                              <Label fx:id="worstPerformerPositionName" styleClass="asset-name" text="N/A" />
+                              <HBox spacing="8.0">
+                                 <children>
+                                    <Label fx:id="worstPerformerPositionValue" styleClass="stat-change" />
+                                    <Label fx:id="worstPerformerPositionPercentage" styleClass="stat-change" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <!-- tables without card, like on CMC -->
+            <TabPane minHeight="240.0" prefHeight="300.0" styleClass="pill-tabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+               <tabs>
+                  <Tab text="Assets">
+                     <content>
+                        <TableView fx:id="positionTableView">
+                           <columns>
+                              <TableColumn fx:id="tickerColumn" prefWidth="185.0" text="Name" />
+                              <TableColumn fx:id="priceColumn" minWidth="0.0" prefWidth="96.0" text="Price" />
+                              <TableColumn fx:id="quantityColumn" prefWidth="87.0" text="Holdings" />
+                              <TableColumn fx:id="totalCostColumn" prefWidth="125.0" text="Total cost" />
+                              <TableColumn fx:id="profitLossColumn" prefWidth="98.0" text="Profit/Loss" />
+                           </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </content>
                   </Tab>
-              </tabs>
+                  <Tab text="Transactions">
+                     <content>
+                        <TableView fx:id="investmentTransactionTableView">
+                           <columns>
+                              <TableColumn fx:id="txnDateColumn" prefWidth="130.0" text="Date" />
+                              <TableColumn fx:id="txnAssetColumn" prefWidth="122.0" text="Asset" />
+                              <TableColumn fx:id="txnQuantityColumn" prefWidth="114.0" text="Quantity" />
+                              <TableColumn fx:id="txnUnitPriceColumn" prefWidth="79.0" text="Unit price" />
+                              <TableColumn fx:id="txnFeeColumn" prefWidth="120.0" text="Fee" />
+                              <TableColumn fx:id="txnNotesColumn" prefWidth="132.0" text="Note" />
+                           </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </content>
+                  </Tab>
+               </tabs>
             </TabPane>
          </children>
-      </HBox>
-      <TabPane prefHeight="452.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab text="Assets">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TableView fx:id="positionTableView" layoutY="-1.0" prefHeight="420.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <columns>
-                            <TableColumn fx:id="tickerColumn" prefWidth="185.8333282470703" text="Name/Ticker" />
-                            <TableColumn fx:id="priceColumn" minWidth="0.0" prefWidth="96.5" text="Price" />
-                              <TableColumn fx:id="quantityColumn" prefWidth="87.5" text="Quantity" />
-                              <TableColumn fx:id="totalCostColumn" prefWidth="125.16665649414062" text="Total cost" />
-                              <TableColumn fx:id="profitLossColumn" prefWidth="97.83334350585938" text="Profit/Loss (%)" />
-                          </columns>
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TableView>
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="History">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TableView fx:id="investmentTransactionTableView" layoutX="33.0" layoutY="33.0" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <columns>
-                            <TableColumn fx:id="txnDateColumn" prefWidth="130.33333587646484" text="Date" />
-                            <TableColumn fx:id="txnAssetColumn" prefWidth="122.0" text="Asset" />
-                              <TableColumn fx:id="txnQuantityColumn" prefWidth="114.33334350585938" text="Quantity" />
-                              <TableColumn fx:id="txnUnitPriceColumn" prefWidth="78.66665649414062" text="Unit price" />
-                              <TableColumn fx:id="txnFeeColumn" prefWidth="120.49996948242188" text="Fee" />
-                              <TableColumn fx:id="txnNotesColumn" prefWidth="132.5" text="Note" />
-                          </columns>
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TableView>
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </children>
-</VBox>
+      </VBox>
+   </content>
+</ScrollPane>

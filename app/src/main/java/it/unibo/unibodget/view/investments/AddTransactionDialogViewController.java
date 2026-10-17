@@ -28,7 +28,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -538,12 +537,17 @@ public final class AddTransactionDialogViewController extends BaseViewController
         selectedAssetComboBox.setOnAction(event -> {
             final var selected = selectedAssetComboBox.getValue();
             if (selected != null) {
-                final var price = investmentController.getCurrentMarketPrice(selected);
-                pricePerAssetTextField.setText(
-                        price.amount()
-                                .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
-                                .toPlainString()
-                );
+                try {
+                    final var price = investmentController.getCurrentMarketPrice(selected);
+                    pricePerAssetTextField.setText(
+                            price.amount()
+                                    .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
+                                    .toPlainString()
+                    );
+                } catch (final IllegalArgumentException e) {
+                    // live price not available (api down or rate limit), the user writes it by hand
+                    pricePerAssetTextField.clear();
+                }
                 updateTotalSpent();
             }
         });
@@ -640,11 +644,5 @@ public final class AddTransactionDialogViewController extends BaseViewController
         transferNotesTextArea.clear();
         transferNotesTextArea.setPromptText("Notes...");
         setupMaxQuantityButton(transferMaxQuantityToggleButton, transferAssetComboBox, transferQuantityTextField);
-    }
-
-    @FXML
-    private void handleCloseDialog() {
-        final Stage stage = (Stage) addTransactionButton.getScene().getWindow();
-        stage.close();
     }
 }

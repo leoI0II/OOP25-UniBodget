@@ -1,5 +1,7 @@
 package it.unibo.unibodget.view.investments;
 
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
@@ -16,6 +18,7 @@ import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,19 +33,27 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -60,6 +71,16 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
     private static final String NOT_AVAILABLE = "N/A";
+    private static final String PROFIT_STYLE = "positive";
+    private static final String LOSS_STYLE = "negative";
+    private static final int TOOLTIP_DELAY_MILLIS = 100;
+    // one color for each tradeable asset (7 stocks + 17 crypto), so two assets never have the same one
+    private static final List<String> ASSET_COLORS = List.of(
+            "#3861FB", "#F7A64B", "#16C784", "#EA3943", "#8E6CEF", "#2FC0D6",
+            "#F0B90B", "#FF6FB5", "#7CDB5C", "#4FA3FF", "#FF8A5B", "#B07CFF",
+            "#26D9A6", "#FFD166", "#E05FD8", "#5EC8FF", "#C9A227", "#FF5C8A",
+            "#66E3C4", "#A0A7FF", "#FFA07A", "#9BE15D", "#D68FFF", "#A1A7BB"
+    );
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -101,19 +122,25 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private PieChart allocationPieChart;
     @FXML
     private PieChart quantityPieChart;
+    @FXML
+    private ToggleGroup pieToggleGroup;
+    // created only once: JavaFX gives the color (default-color0, 1, ...) with a counter that never
+    // goes back to 0, so new series at every refresh had every time other colors
+    private final XYChart.Series<String, Number> plSeries = new XYChart.Series<>();
+    private final XYChart.Series<String, Number> costSeries = new XYChart.Series<>();
 
     @FXML
     private TableView<Position> positionTableView;
     @FXML
     private TableColumn<Position, String> tickerColumn;
     @FXML
-    private TableColumn<Position, String> priceColumn;
+    private TableColumn<Position, Position> priceColumn;
     @FXML
-    private TableColumn<Position, String> quantityColumn;
+    private TableColumn<Position, Position> quantityColumn;
     @FXML
-    private TableColumn<Position, String> totalCostColumn;
+    private TableColumn<Position, Position> totalCostColumn;
     @FXML
-    private TableColumn<Position, String> profitLossColumn;
+    private TableColumn<Position, Position> profitLossColumn;
 
     private Timeline currentMarkerPriceRefreshTimeline;
 
@@ -124,11 +151,11 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     @FXML
     private TableColumn<InvestmentTransaction, String> txnAssetColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnQuantityColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnQuantityColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnUnitPriceColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnUnitPriceColumn;
     @FXML
-    private TableColumn<InvestmentTransaction, String> txnFeeColumn;
+    private TableColumn<InvestmentTransaction, InvestmentTransaction> txnFeeColumn;
     @FXML
     private TableColumn<InvestmentTransaction, String> txnNotesColumn;
 
@@ -168,7 +195,32 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     public void initialize() {
         setupPositionTable();
         setupHistoryTable();
+        setupPieToggle();
+        setupPerformanceChart();
         startPriceRefreshTimeline();
+    }
+
+    /**
+     * Adds the P/L and cost basis series to the chart, only once.
+     * At every refresh only their points change (see {@link #refreshPerformanceLineChart()}).
+     */
+    private void setupPerformanceChart() {
+        plSeries.setName("Total P/L");
+        costSeries.setName("Cost Basis");
+        performanceChart.getData().setAll(List.of(plSeries, costSeries));
+    }
+
+    /**
+     * Keeps one of the Value / Quantity buttons always selected, so one pie is always visible
+     * (the visibility of the pies is bound to the buttons in the FXML).
+     */
+    private void setupPieToggle() {
+        pieToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            // clicking again the selected button unselects it, so we select it back
+            if (newToggle == null && oldToggle != null) {
+                oldToggle.setSelected(true);
+            }
+        });
     }
 
     /**
@@ -178,57 +230,82 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         tickerColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().asset().getShortName()));
 
-        priceColumn.setCellValueFactory(cell -> {
-            final var position = cell.getValue();
-            final var unitCurrentMarketValue = position.currentMarketValue()
-                    .amount()
-                    .divide(position.quantity(), 2, RoundingMode.HALF_UP);
-            return new SimpleStringProperty(
-                    String.format(
-                            "%s %.2f (%s)",
-                            position.currentMarketValue().currency().getSymbol(),
-                            unitCurrentMarketValue,
-                            position.currentMarketValue().currency().getShortName()));
-        });
+        setupNumericColumn(priceColumn,
+                p -> AssetFormatter.ofAssetWithName(Asset.of(p.currentMarketValue().currency(), unitPrice(p))),
+                InvestmentsViewController::unitPrice,
+                false);
 
-        quantityColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                cell.getValue().quantity().stripTrailingZeros().toPlainString()));
+        setupNumericColumn(quantityColumn,
+                p -> p.quantity().stripTrailingZeros().toPlainString(),
+                Position::quantity,
+                false);
 
-        totalCostColumn.setCellValueFactory(cell -> {
-            final var totalCost = cell.getValue().getTotalCost();
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(totalCost)
-            );
-        });
+        setupNumericColumn(totalCostColumn,
+                p -> AssetFormatter.ofAssetWithName(p.getTotalCost()),
+                p -> p.getTotalCost().amount(),
+                false);
 
-        profitLossColumn.setCellValueFactory(cell -> {
-            final var decimals = cell.getValue().getTotalCost().currency().getDisplayDecimals();
-            final var pl = cell.getValue().getUnrealizedProfitLoss();
-            final var percent = cell.getValue().getUnrealizedProfitLossPercentage();
-            final var sign = pl.isNegative() ? "-" : "";
-            return new SimpleStringProperty(
-                    String.format(
-                            "%s %s%s (%+.2f%%)",
+        setupNumericColumn(profitLossColumn,
+                p -> {
+                    final var decimals = p.getTotalCost().currency().getDisplayDecimals();
+                    final var pl = p.getUnrealizedProfitLoss();
+                    // the amount has already its own "-", before it was added another one ("--0.01")
+                    return String.format(
+                            "%s %s (%+.2f%%)",
                             pl.currency().getSymbol(),
-                            sign,
                             pl.amount().setScale(decimals, RoundingMode.HALF_UP).toPlainString(),
-                            percent));
-        });
-        profitLossColumn.setCellFactory(col -> new TableCell<>() {
+                            p.getUnrealizedProfitLossPercentage());
+                },
+                p -> p.getUnrealizedProfitLoss().amount(),
+                true);
+    }
+
+    /**
+     * Returns the current price of one unit of the position.
+     *
+     * @param position the position
+     * @return market value divided by quantity, with the decimals of the price currency
+     */
+    private static BigDecimal unitPrice(final Position position) {
+        return position.currentMarketValue()
+                .amount()
+                .divide(position.quantity(),
+                        position.currentMarketValue().currency().getDisplayDecimals(),
+                        RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Sets up a column that shows a number as text but sorts by the number itself.
+     * If the column value is the text, the sort is alphabetical
+     * (e.g. "81738.77" goes before "709.98" because '8' is bigger than '7').
+     *
+     * @param <T>         the type of the table rows
+     * @param column      the column to set up
+     * @param toText      gives the text shown in the cell
+     * @param number      gives the number used for the sort
+     * @param colorBySign if {@code true} the text is green when the number is positive and red when negative
+     */
+    private static <T> void setupNumericColumn(
+            final TableColumn<T, T> column,
+            final Function<T, String> toText,
+            final Function<T, BigDecimal> number,
+            final boolean colorBySign) {
+        // the value of the cell is the whole row, so the comparator can take the number from it
+        column.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
+        column.setComparator(Comparator.comparing(number));
+        column.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(final String value, final boolean empty) {
-                super.updateItem(value, empty);
-                if (empty || value == null) {
+            protected void updateItem(final T item, final boolean empty) {
+                super.updateItem(item, empty);
+                // cells are reused for other rows, so we always remove the old color
+                getStyleClass().removeAll(PROFIT_STYLE, LOSS_STYLE);
+                if (empty || item == null) {
                     setText(null);
-                    setStyle("");
-                } else {
-                    setText(value);
-                    final var position = getTableView().getItems().get(getIndex());
-                    if (position.getUnrealizedProfitLoss().isNegative()) {
-                        setStyle("-fx-text-fill: #F44336;"); // rosso
-                    } else {
-                        setStyle("-fx-text-fill: #4CAF50;"); // verde
-                    }
+                    return;
+                }
+                setText(toText.apply(item));
+                if (colorBySign) {
+                    getStyleClass().add(number.apply(item).signum() < 0 ? LOSS_STYLE : PROFIT_STYLE);
                 }
             }
         });
@@ -242,43 +319,23 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                 cell.getValue().getDate().toString()));
         txnAssetColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().getAsset().currency().getShortName()));
-        txnQuantityColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                cell.getValue().getAsset().amount().stripTrailingZeros().toPlainString()));
-        txnQuantityColumn.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(final String value, final boolean empty) {
-                super.updateItem(value, empty);
-                if (empty || value == null) {
-                    setText(null);
-                    setStyle("");
-                    return;
-                } else {
-                    setText(value);
-                    final var txn = getTableView().getItems().get(getIndex());
-                    if (txn.getAsset().isNegative()) {
-                        setStyle("-fx-text-fill: #F44336;"); // rosso
-                    } else {
-                        setStyle("-fx-text-fill: #4CAF50;"); // verde
-                    }
-                }
-            }
-        });
-        txnUnitPriceColumn.setCellValueFactory(cell -> {
-            final var unitPrice = cell.getValue().getUnitPrice();
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(unitPrice)
-            );
-        });
 
-        txnFeeColumn.setCellValueFactory(cell -> {
-            final var fee = cell.getValue().getFee();
-            if (fee == null) {
-                return new SimpleStringProperty("-");
-            }
-            return new SimpleStringProperty(
-                    AssetFormatter.ofAssetWithName(fee)
-            );
-        });
+        setupNumericColumn(txnQuantityColumn,
+                t -> t.getAsset().amount().stripTrailingZeros().toPlainString(),
+                t -> t.getAsset().amount(),
+                true);
+
+        setupNumericColumn(txnUnitPriceColumn,
+                t -> AssetFormatter.ofAssetWithName(t.getUnitPrice()),
+                t -> t.getUnitPrice().amount(),
+                false);
+
+        // fee can be null, in the sort it counts as 0
+        setupNumericColumn(txnFeeColumn,
+                t -> t.getFee() == null ? "-" : AssetFormatter.ofAssetWithName(t.getFee()),
+                t -> t.getFee() == null ? BigDecimal.ZERO : t.getFee().amount(),
+                false);
+
         txnNotesColumn.setCellValueFactory(cell ->
                 new SimpleStringProperty(cell.getValue().getNotes()));
     }
@@ -292,21 +349,18 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         }
         final var account = investmentController.getCurrentInvestmentAccount().get();
 
-        final var plSeries = new XYChart.Series<String, Number>();
-        plSeries.setName("Total P/L");
-
-        final var costSeries = new XYChart.Series<String, Number>();
-        costSeries.setName("Cost Basis");
-
+        final List<XYChart.Data<String, Number>> plPoints = new ArrayList<>();
+        final List<XYChart.Data<String, Number>> costPoints = new ArrayList<>();
         snapshotService.getSnapshots(account.getId())
                 .forEach(snap -> {
                     final String date = snap.timestamp()
                             .format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"));
-                    plSeries.getData().add(new XYChart.Data<>(date, snap.totalPL()));
-                    costSeries.getData().add(new XYChart.Data<>(date, snap.costBasis()));
+                    plPoints.add(new XYChart.Data<>(date, snap.totalPL()));
+                    costPoints.add(new XYChart.Data<>(date, snap.costBasis()));
                 });
-        performanceChart.getData().clear();
-        performanceChart.getData().addAll(plSeries, costSeries);
+        // same series, only new points, so the colors stay the same
+        plSeries.getData().setAll(plPoints);
+        costSeries.getData().setAll(costPoints);
     }
 
     /**
@@ -315,20 +369,53 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * @param chart     the chart to update
      * @param positions the positions to render
      * @param sliceFunc maps a position to its pie slice
-     * @param title     chart title
+     * @param valueText  gives the value shown in the tooltip of the slice
      */
     private void refreshPie(
             final PieChart chart,
             final List<Position> positions,
             final Function<Position, PieChart.Data> sliceFunc,
-            final String title) {
+            final Function<Position, String> valueText) {
         if (positions.isEmpty()) {
             chart.getData().clear();
             return;
         }
         final var slices = positions.stream().map(sliceFunc).toList();
         chart.getData().setAll(slices);
-        chart.setTitle(title);
+        // the nodes of the slices exist only after they are added to the chart
+        final Map<String, String> colorByName = new HashMap<>();
+        for (int i = 0; i < slices.size(); i++) {
+            final String color = colorOf(positions.get(i).asset());
+            colorByName.put(slices.get(i).getName(), color);
+            slices.get(i).getNode().setStyle("-fx-pie-color: " + color + ";");
+
+            final Tooltip tooltip = new Tooltip(
+                    slices.get(i).getName() + "\n" + valueText.apply(positions.get(i)));
+            tooltip.setShowDelay(Duration.millis(TOOLTIP_DELAY_MILLIS));
+            Tooltip.install(slices.get(i).getNode(), tooltip);
+        }
+        // the dots of the legend are other nodes with the old default-colorN, so we color them too
+        chart.lookupAll(".chart-legend-item").forEach(node -> {
+            if (node instanceof Label item && item.getGraphic() != null
+                    && colorByName.containsKey(item.getText())) {
+                item.getGraphic().setStyle("-fx-pie-color: " + colorByName.get(item.getText()) + ";");
+            }
+        });
+    }
+
+    /**
+     * Returns the color of an asset in the pies, always the same for the same asset
+     * (also after a restart), so the user can recognize it at every refresh.
+     * JavaFX instead changes the colors at every refresh (the default-colorN counter never resets).
+     *
+     * @param asset the asset
+     * @return the css color of the asset
+     */
+    private String colorOf(final CurrencyUnit asset) {
+        final int index = investmentController.getAllTradeableAssets().indexOf(asset);
+        // an asset that is not in the list (should not happen) gets a color from its code
+        final int colorIndex = index >= 0 ? index : Math.floorMod(asset.getCode().hashCode(), ASSET_COLORS.size());
+        return ASSET_COLORS.get(colorIndex % ASSET_COLORS.size());
     }
 
     /**
@@ -340,33 +427,22 @@ public class InvestmentsViewController extends BaseViewController implements Sid
                 allocationPieChart,
                 positions,
                 p -> new PieChart.Data(p.asset().getShortName(), p.currentMarketValue().amount().doubleValue()),
-                "Allocation Pie");
+                p -> AssetFormatter.ofAsset(p.currentMarketValue()));
         refreshPie(
                 quantityPieChart,
                 positions,
                 p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()),
-                "Quantity Pie");
+                p -> p.quantity().stripTrailingZeros().toPlainString() + " " + p.asset().getShortName());
     }
 
     /**
-     * Reloads the positions table with the latest data from the controller.
-     */
-    private void refreshPositionTable() {
-        if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
-            return;
-        }
-
-        positionTableView.getItems().setAll(investmentController.getPositions());
-        positionTableView.refresh();
-    }
-
-    /**
-     * Starts (or restarts) the periodic timer that refreshes market prices in the position table.
+     * Starts (or restarts) the periodic timer that refreshes the market prices in the whole page.
+     * Before only the table was refreshed, so the pies, balance and best/worst stayed with the old prices.
      */
     private void startPriceRefreshTimeline() {
         if (currentMarkerPriceRefreshTimeline == null) {
             currentMarkerPriceRefreshTimeline = new Timeline(
-                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshPositionTable()));
+                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshMainPanel()));
         }
         currentMarkerPriceRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
         currentMarkerPriceRefreshTimeline.playFromStart();
@@ -404,10 +480,13 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     /** {@inheritDoc} */
     @Override
     public String getTotalAggregatedBalance() {
-        return String.format(
-                "%s %.2f",
-                investmentController.getAggregatedBalance().currency().getSymbol(),
-                investmentController.getAggregatedBalance().amount());
+        try {
+            return AssetFormatter.ofAsset(investmentController.getAggregatedBalance());
+        } catch (final IllegalArgumentException e) {
+            // the price service now throws if a price is missing (before it used 1 USD),
+            // the total in the sidebar is just not shown, the rest of the page still works
+            return NOT_AVAILABLE;
+        }
     }
 
     /**
@@ -432,7 +511,6 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         final TextInputDialog dialog = new TextInputDialog();
         dialog.initOwner(currentWalletName.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.initStyle(StageStyle.UNDECORATED);
         dialog.setWidth(400);
         dialog.setHeight(400);
         dialog.setResizable(false);
@@ -507,11 +585,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             addTransactionDialog = dialog;
             dialog.initOwner(addTransactionButton.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initStyle(StageStyle.UNDECORATED);
-            dialog.setScene(new Scene(root));
-            dialog.setWidth(ADD_TRANSACTION_DIALOG_WIN_WIDTH);
-            dialog.setHeight(ADD_TRANSACTION_DIALOG_WIN_HEIGHT);
+            dialog.setTitle("Add Transaction");
+            dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
             dialog.setResizable(false);
+            closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addTransactionController.dispose());
             dialog.showAndWait();
 
@@ -550,12 +627,12 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         walletBalance.setText(
                 AssetFormatter.ofAsset(investmentController.getCurrentBalance())
         );
-        allTimeProfitValue.setText(
-                AssetFormatter.ofAsset(investmentController.getCurrentAllTimeProfitLoss())
-        );
+        final Asset allTimeProfit = investmentController.getCurrentAllTimeProfitLoss();
+        allTimeProfitValue.setText(AssetFormatter.ofAsset(allTimeProfit));
         allTimeProfitPercentage.setText(
                 AssetFormatter.ofPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
         );
+        setProfitColor(allTimeProfit.isNegative(), allTimeProfitValue, allTimeProfitPercentage);
         costBasisValue.setText(
                 AssetFormatter.ofAsset(investmentController.getCurrentTotalCostBasis())
         );
@@ -569,13 +646,19 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             bestPerformerPositionPercentage.setText(
                     AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
             );
-        }, () -> bestPerformerPositionName.setText(NOT_AVAILABLE));
+            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+                    bestPerformerPositionValue, bestPerformerPositionPercentage);
+        }, () -> clearPerformer(bestPerformerPositionName, bestPerformerPositionValue,
+                bestPerformerPositionPercentage));
 
         investmentController.getWorstPerformer().ifPresentOrElse(p -> {
             worstPerformerPositionName.setText(p.asset().getShortName());
             worstPerformerPositionValue.setText(AssetFormatter.ofAsset(p.getUnrealizedProfitLoss()));
             worstPerformerPositionPercentage.setText(AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage()));
-        }, () -> worstPerformerPositionName.setText(NOT_AVAILABLE));
+            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+                    worstPerformerPositionValue, worstPerformerPositionPercentage);
+        }, () -> clearPerformer(worstPerformerPositionName, worstPerformerPositionValue,
+                worstPerformerPositionPercentage));
 
         refreshPieCharts();
         refreshPerformanceLineChart();
@@ -613,6 +696,22 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     }
 
     /**
+     * Closes the dialog when Esc is pressed, so it can be dismissed from the
+     * keyboard on every platform (e.g. tiling window managers without title bar).
+     * The close request is fired as for the title bar button, so the dialog's
+     * {@code onCloseRequest} handler still runs.
+     *
+     * @param dialog the dialog stage, with its scene already set
+     */
+    private static void closeOnEscape(final Stage dialog) {
+        dialog.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                dialog.fireEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSE_REQUEST));
+            }
+        });
+    }
+
+    /**
      * Resets every widget of the main panel to its empty state.
      * Used when the last investment account has been deleted, otherwise the
      * panel would keep showing the data of the removed account.
@@ -625,15 +724,41 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         costBasisValue.setText("");
         positionTableView.getItems().clear();
         investmentTransactionTableView.getItems().clear();
-        bestPerformerPositionName.setText(NOT_AVAILABLE);
-        bestPerformerPositionValue.setText("");
-        bestPerformerPositionPercentage.setText("");
-        worstPerformerPositionName.setText(NOT_AVAILABLE);
-        worstPerformerPositionValue.setText("");
-        worstPerformerPositionPercentage.setText("");
+        clearPerformer(bestPerformerPositionName, bestPerformerPositionValue, bestPerformerPositionPercentage);
+        clearPerformer(worstPerformerPositionName, worstPerformerPositionValue, worstPerformerPositionPercentage);
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
-        performanceChart.getData().clear();
+        plSeries.getData().clear();
+        costSeries.getData().clear();
+    }
+
+    /**
+     * Shows N/A in a best/worst performer card and empties its value and percentage,
+     * so the data of the previous wallet is not left on screen.
+     *
+     * @param name       the label with the asset name
+     * @param value      the label with the profit/loss value
+     * @param percentage the label with the profit/loss percentage
+     */
+    private static void clearPerformer(final Label name, final Label value, final Label percentage) {
+        name.setText(NOT_AVAILABLE);
+        value.setText("");
+        percentage.setText("");
+    }
+
+    /**
+     * Colors the given labels green for a profit or red for a loss,
+     * using the style classes of {@code investments.css}.
+     *
+     * @param loss   {@code true} if the value is a loss
+     * @param labels the labels to color
+     */
+    private static void setProfitColor(final boolean loss, final Label... labels) {
+        for (final Label label : labels) {
+            // remove the old one first, otherwise both classes stay on the label
+            label.getStyleClass().removeAll(PROFIT_STYLE, LOSS_STYLE);
+            label.getStyleClass().add(loss ? LOSS_STYLE : PROFIT_STYLE);
+        }
     }
 
     /** {@inheritDoc} */
@@ -652,11 +777,10 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             addNewWalletDialog = dialog;
             dialog.initOwner(investmentsVBoxPage.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.initStyle(StageStyle.UNDECORATED);
-            dialog.setScene(new Scene(root));
-            dialog.setWidth(ADD_NEW_WALLET_DIALOG_WIDTH);
-            dialog.setHeight(ADD_NEW_WALLET_DIALOG_HEIGHT);
+            dialog.setTitle("Add Wallet");
+            dialog.setScene(new Scene(root, ADD_NEW_WALLET_DIALOG_WIDTH, ADD_NEW_WALLET_DIALOG_HEIGHT));
             dialog.setResizable(false);
+            closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addNewWalletVC.dispose());
             dialog.showAndWait();
 

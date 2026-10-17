@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.main;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -49,6 +50,15 @@ public class SideBarViewController extends BaseViewController {
         navConverterItem.setOnAction(e -> navigationHandler.accept(AppContext.CONVERTER));
         navPortfolioItem.setOnAction(e -> navigationHandler.accept(AppContext.INVESTMENTS));
         navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+    }
+
+    /**
+     * Closes the application. {@link Platform#exit()} (unlike {@code System.exit})
+     * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
+     */
+    @FXML
+    private void handleCloseApp() {
+        Platform.exit();
     }
 
     /**
