@@ -458,12 +458,15 @@ public class DefaultInvestmentController implements InvestmentController {
                         date,
                         "Use " + cost + " from stablecoin position to buy " + quantity + " " + asset,
                         notes,
-                        Asset.of(
+                        // price of ONE stablecoin in the base currency of its account, before it was
+                        // the total cost of the order, so the realized P/L was huge (e.g. +16768 USDT)
+                        exchangeRateProvider.convert(
+                                BigDecimal.ONE,
                                 stableCoinSrc.stableCoin(),
-                                // exchangeRateProvider.convert(cost, stableCoinSrc.stableCoin()).amount()
-                                exchangeRateProvider.convert(cost.amount(), cost.currency(), stableCoinSrc.stableCoin()).getConvertedAmount()
-                        ),
-                        fee
+                                stableCoinSrc.account().getBaseCurrency()
+                        ).getAsset(),
+                        // the fee is already inside the cost, so here is zero (otherwise its counted 2 times)
+                        Asset.zero(fee.currency())
                 );
                 // Execute the stablecoin transaction on the source investment account
                 stableCoinSrc.account().addTransaction(investmentTransactionOut);
