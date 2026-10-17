@@ -537,12 +537,17 @@ public final class AddTransactionDialogViewController extends BaseViewController
         selectedAssetComboBox.setOnAction(event -> {
             final var selected = selectedAssetComboBox.getValue();
             if (selected != null) {
-                final var price = investmentController.getCurrentMarketPrice(selected);
-                pricePerAssetTextField.setText(
-                        price.amount()
-                                .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
-                                .toPlainString()
-                );
+                try {
+                    final var price = investmentController.getCurrentMarketPrice(selected);
+                    pricePerAssetTextField.setText(
+                            price.amount()
+                                    .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
+                                    .toPlainString()
+                    );
+                } catch (final IllegalArgumentException e) {
+                    // live price not available (api down or rate limit), the user writes it by hand
+                    pricePerAssetTextField.clear();
+                }
                 updateTotalSpent();
             }
         });

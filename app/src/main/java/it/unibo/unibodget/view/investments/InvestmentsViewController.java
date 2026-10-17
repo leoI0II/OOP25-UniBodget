@@ -405,10 +405,13 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     /** {@inheritDoc} */
     @Override
     public String getTotalAggregatedBalance() {
-        return String.format(
-                "%s %.2f",
-                investmentController.getAggregatedBalance().currency().getSymbol(),
-                investmentController.getAggregatedBalance().amount());
+        try {
+            return AssetFormatter.ofAsset(investmentController.getAggregatedBalance());
+        } catch (final IllegalArgumentException e) {
+            // the price service now throws if a price is missing (before it used 1 USD),
+            // the total in the sidebar is just not shown, the rest of the page still works
+            return NOT_AVAILABLE;
+        }
     }
 
     /**

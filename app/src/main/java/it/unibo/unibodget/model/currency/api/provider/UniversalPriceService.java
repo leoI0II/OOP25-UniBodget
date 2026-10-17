@@ -124,9 +124,12 @@ public class UniversalPriceService {
                 return cached.price();
             }
 
-            System.err.println("[CACHE] Fallback di emergenza 1.0 USD per "
-                    + key + " (API bloccata)");
-            return BigDecimal.ONE;
+            // before here it returned 1 USD, but a fake price is worse than an error:
+            // e.g. 3 BTC were valued 3 USD. with the exception the caller can use its own fallback
+            // (InvestmentAccount uses the average buy price of the position)
+            throw new IllegalArgumentException(
+                    "No price available for " + key + " (" + providerName + " not reachable)"
+            );
         }
 
         // Timestamp only after a successful request.
