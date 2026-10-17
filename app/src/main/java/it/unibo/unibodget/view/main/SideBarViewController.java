@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
+import javafx.stage.WindowEvent;
 
 /**
  * JavaFX controller for the sidebar view.
@@ -103,9 +104,20 @@ public class SideBarViewController extends BaseViewController {
 
     private Node createAddWalletTile() {
         final var btn = new Button("+ Add wallet");
-        btn.setMaxWidth(Double.MAX_VALUE);  // occupa tutta la larghezza
+        btn.setMaxWidth(Double.MAX_VALUE);  // on all length
         btn.setPrefHeight(ADD_WALLET_TILE_HEIGHT);
         btn.setOnAction(e -> handleAddWallet());
         return btn;
+    }
+
+    /**
+     * Closes the application through the JavaFX lifecycle.
+     */
+    @FXML
+    private void handleClose() {
+        final var window = walletList.getScene().getWindow();
+        window.fireEvent(
+            new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST)
+        );
     }
 }

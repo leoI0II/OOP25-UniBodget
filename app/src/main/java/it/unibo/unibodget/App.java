@@ -34,8 +34,6 @@ import javafx.stage.Stage;
  */
 public class App extends Application {
 
-    private static final int WINDOW_WIDTH = 900;
-    private static final int WINDOW_HEIGHT = 700;
     private static final String ALPHA_KEY = "B56AX33NF4F29HHZ";
 
     private CashAccountManager cashAccountManager;
@@ -116,11 +114,6 @@ public class App extends Application {
         final Node mainViewNode = mainViewPage.load();
         final HBox root = (HBox) mainViewNode;
 
-        /*final Scene scene = new Scene(
-                root,
-                settings.getWindowPrefs().getWidth(),
-                settings.getWindowPrefs().getHeight()
-        );*/
         final Scene scene = new Scene(root);
         ThemeManager.applyThemeToScene(scene);
 
