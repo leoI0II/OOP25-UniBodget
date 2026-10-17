@@ -72,6 +72,7 @@ class WalletTest {
                 account.getName(),
                 reloaded.getFirst().getName()
         );
+        assertEquals(account.getId(), reloaded.getFirst().getId());
     }
 
 }

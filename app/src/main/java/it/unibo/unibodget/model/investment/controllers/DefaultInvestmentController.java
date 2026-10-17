@@ -111,6 +111,22 @@ public class DefaultInvestmentController implements InvestmentController {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean renameWallet(final UUID walletId, final String newName) {
+        return investmentAccountService.renameWallet(walletId, newName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean removeWallet(final UUID walletId) {
+        return investmentAccountService.removeWallet(walletId);
+    }
+
+    /**
      * Helper method to retrieve the currently selected investment account or throw an exception if none is selected.
      *
      * @return the currently selected InvestmentAccount

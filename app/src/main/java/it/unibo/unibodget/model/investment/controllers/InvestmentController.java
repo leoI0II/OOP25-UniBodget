@@ -49,6 +49,25 @@ public interface InvestmentController {
     boolean selectWallet(UUID walletId);
 
     /**
+     * Renames the investment account identified by the given wallet ID.
+     *
+     * @param walletId the UUID of the wallet to rename
+     * @param newName  the new display name; must not be blank
+     * @return {@code true} if the wallet was found and renamed, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code newName} is blank
+     */
+    boolean renameWallet(UUID walletId, String newName);
+
+    /**
+     * Removes the investment account identified by the given wallet ID, together with its history.
+     * If it was the current account, the first remaining account (if any) becomes current.
+     *
+     * @param walletId the UUID of the wallet to remove
+     * @return {@code true} if the wallet was found and removed, {@code false} otherwise
+     */
+    boolean removeWallet(UUID walletId);
+
+    /**
      * Returns the aggregated balances across all investment accounts, grouped by currency.
      *
      * @return a map from {@link CurrencyUnit} to the total {@link Asset} balance in that currency

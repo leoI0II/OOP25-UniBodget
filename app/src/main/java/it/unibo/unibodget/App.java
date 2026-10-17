@@ -15,6 +15,7 @@ import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
+import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
@@ -34,39 +35,28 @@ import javafx.stage.Stage;
  */
 public class App extends Application {
 
-    private static final String ALPHA_KEY_VARIABLE = "ALPHA_VANTAGE_API_KEY";
-    private static final String DEFAULT_ALPHA_KEY = "B56AX33NF4F29HHZ";
-
-    private CashAccountManager cashAccountManager;
-    private InvestmentAccountManager investmentAccountManager;
-
-    private CashAccountService cashAccountsService;
-    private InvestmentAccountService investmentsService;
-
+    private WalletAutoSaver walletSaver;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
 
     /** {@inheritDoc} */
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        final String alphaKey = resolveAlphaKey();
-        System.setProperty(ALPHA_KEY_VARIABLE, alphaKey);
-        System.out.println(alphaKey);
-
         final UniversalPriceService priceService = new UniversalPriceService(
                 new ExchangeRateAPIImpl(),
                 new CoinGeckoPriceProvider(),
-                new AlphaPriceProvider(alphaKey)
+                new AlphaPriceProvider()
         );
 
         final BasicCurrencyConverter currencyConverter =
                 new BasicCurrencyConverter(priceService);
 
-        cashAccountManager = new CashAccountManager();
-        investmentAccountManager = new InvestmentAccountManager(currencyConverter);
+        final var cashAccountManager = new CashAccountManager();
+        final var investmentAccountManager =
+                new InvestmentAccountManager(currencyConverter);
 
-        cashAccountsService = new CashAccountService();
-        investmentsService = new InvestmentAccountService();
+        final var cashAccountsService = new CashAccountService();
+        final var investmentsService = new InvestmentAccountService();
 
         // Loads wallets before initializing controllers and views.
         final var loadedCashAccounts = cashAccountManager.loadAll();
@@ -74,6 +64,10 @@ public class App extends Application {
 
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
+
+        walletSaver = new WalletAutoSaver()
+                .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
+                .register(investmentsService::getWallets, investmentAccountManager::saveAll);
 
         final Settings settings = settingsController.getSettings();
         final var snapshotService = new CSVInvestmentsSnapshotService();
@@ -129,6 +123,7 @@ public class App extends Application {
         updateWindowProperty(primaryStage, settings);
 
         persistenceReady = true;
+        walletSaver.start();
     }
 
     /**
@@ -156,7 +151,7 @@ public class App extends Application {
     }
 
     /**
-     * Saves wallets and window preferences when the application stops.
+     * Stops automatic saving and persists wallets and window preferences.
      *
      * <p>Saving is skipped if application startup did not complete.
      */
@@ -170,10 +165,8 @@ public class App extends Application {
         RuntimeException failure = null;
 
         for (final Runnable save : new Runnable[] {
-                () -> saveWallets("Cash", () ->
-                        cashAccountManager.saveAll(cashAccountsService.getWallets())),
-                () -> saveWallets("Investment", () ->
-                        investmentAccountManager.saveAll(investmentsService.getWallets())),
+                walletSaver::stop,
+                walletSaver::saveAll,
                 () -> {
                     final WindowPreferences preferences =
                             settingsController.getSettings().getWindowPrefs();
@@ -199,34 +192,6 @@ public class App extends Application {
         if (failure != null) {
             throw failure;
         }
-    }
-
-    /**
-     * Executes a save operation and logs its outcome.
-     *
-     * @param type the wallet type
-     * @param action the save operation
-     */
-    private void saveWallets(final String type, final Runnable action) {
-        try {
-            action.run();
-            System.out.println("[PERSISTENCE] " + type + " wallets saved");
-        } catch (final RuntimeException ex) {
-            System.err.println("[PERSISTENCE] " + type + " wallet saving failed");
-            throw ex;
-        }
-    }
-
-    /**
-     * Reads the API key from the environment, falling back to the default key.
-     *
-     * @return the configured API key, or the default if unset or blank
-     */
-    private static String resolveAlphaKey() {
-        final String environmentKey = System.getenv(ALPHA_KEY_VARIABLE);
-        return environmentKey == null || environmentKey.isBlank()
-                ? DEFAULT_ALPHA_KEY
-                : environmentKey.strip();
     }
 
     /**

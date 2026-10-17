@@ -7,56 +7,80 @@ import it.unibo.unibodget.model.currency.CurrencyType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.math.BigDecimal;
 
 /**
  * Retrieves stock prices from Alpha Vantage.
  *
- * <p>
- * Prices are returned in USD and represent the market value
+ * <p>Prices are returned in USD and represent the market value
  * of a single stock share.
  */
 public class AlphaPriceProvider implements PriceProvider {
 
-    private static final String API_URL =
-        "https://www.alphavantage.co/query";
+    private static final String API_URL = "https://www.alphavantage.co/query";
+    private static final String ALPHA_KEY_VARIABLE = "ALPHA_VANTAGE_API_KEY";
+    private static final String DEFAULT_ALPHA_KEY = "B56AX33NF4F29HHZ";
 
     private final String apiKey;
     private final HttpClient client;
     private final ObjectMapper mapper;
 
     /**
-     * Costruttore di default che recupera la chiave API configurata
-     * all'avvio in System Property o variabile d'ambiente.
+     * Creates a provider using a system property, environment variable
+     * or the default API key, in that order.
      */
     public AlphaPriceProvider() {
-        this(System.getProperty("ALPHA_VANTAGE_API_KEY", System.getenv("ALPHA_VANTAGE_API_KEY")));
+        this(resolveAlphaKey());
     }
 
     /**
      * Creates a provider using the specified API key.
      *
      * @param apiKey Alpha Vantage API key
+     * @throws IllegalStateException if the key is null or blank
      */
     public AlphaPriceProvider(final String apiKey) {
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Alpha Vantage API key non configurata all'avvio.");
+            throw new IllegalStateException(
+                    "Alpha Vantage API key non configurata all'avvio."
+            );
         }
-        this.apiKey = apiKey;
+
+        this.apiKey = apiKey.strip();
         this.client = HttpClient.newHttpClient();
         this.mapper = new ObjectMapper();
+    }
+
+    /**
+     * Resolves the API key, ignoring null and blank configuration values.
+     *
+     * @return the first non-blank system property or environment value,
+     *         or the default API key
+     */
+    private static String resolveAlphaKey() {
+        final String propertyKey = System.getProperty(ALPHA_KEY_VARIABLE);
+        if (propertyKey != null && !propertyKey.isBlank()) {
+            return propertyKey.strip();
+        }
+
+        final String environmentKey = System.getenv(ALPHA_KEY_VARIABLE);
+        if (environmentKey != null && !environmentKey.isBlank()) {
+            return environmentKey.strip();
+        }
+
+        return DEFAULT_ALPHA_KEY;
     }
 
     /**
      * {@inheritDoc}
      *
      * <p>Requests the latest stock quote from Alpha Vantage.
-     * Returns {@link BigDecimal#ZERO} if the request or parsing fails,
-     * or if no valid price is available.</p>
+     * Returns zero if the request or parsing fails,
+     * or if no valid price is available.
      *
      * @param unit the stock whose price is requested
      * @return the USD price of one share, or zero if unavailable
@@ -65,37 +89,36 @@ public class AlphaPriceProvider implements PriceProvider {
      */
     @Override
     public BigDecimal getPriceInUSD(final CurrencyUnit unit) {
-
         if (unit.getType() != CurrencyType.STOCK) {
             throw new IllegalArgumentException(
-                "Alpha Vantage supports STOCK assets only."
+                    "Alpha Vantage supports STOCK assets only."
             );
         }
 
-        final String url =
-            API_URL
-            + "?function=GLOBAL_QUOTE"
-            + "&symbol="
-            + unit.getCode()
-            + "&apikey="
-            + apiKey;
+        final String url = API_URL
+                + "?function=GLOBAL_QUOTE"
+                + "&symbol="
+                + unit.getCode()
+                + "&apikey="
+                + apiKey;
 
         try {
-            final HttpRequest request =
-                HttpRequest.newBuilder()
+            final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .build();
 
-            final HttpResponse<String> response =
-                client.send(
+            final HttpResponse<String> response = client.send(
                     request,
                     HttpResponse.BodyHandlers.ofString()
-                );
+            );
 
             return parsePrice(response.body());
-
-        } catch (final IOException | InterruptedException e) {
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("[ALPHA] Richiesta interrotta.");
+            return BigDecimal.ZERO;
+        } catch (final IOException e) {
             System.err.println("[ALPHA] Errore di connessione: " + e.getMessage());
             return BigDecimal.ZERO;
         }
@@ -103,12 +126,13 @@ public class AlphaPriceProvider implements PriceProvider {
 
     /**
      * Extracts the stock price from the API response.
-     * Se l'API restituisce un rate-limit o un avviso, stampa il messaggio
-     * e restituisce 0.0 senza far crashare la GUI con un'eccezione non gestita.
      *
-     * @param json raw response
-     * @return stock price in USD, o 0.0 se non disponibile/in rate-limit
-     * @throws IOException if parsing fails
+     * <p>Returns zero if the response reports a rate limit or an error,
+     * or if the price is missing or invalid.
+     *
+     * @param json the raw API response
+     * @return the stock price in USD, or zero if unavailable
+     * @throws IOException if JSON parsing fails
      */
     protected BigDecimal parsePrice(final String json) throws IOException {
         final JsonNode root = mapper.readTree(json);
@@ -116,7 +140,6 @@ public class AlphaPriceProvider implements PriceProvider {
             return BigDecimal.ZERO;
         }
 
-        // Manage rate-limit / alert Alpha Vantage
         if (root.has("Note") || root.has("Information")) {
             final String limitNotice = root.has("Note")
                     ? root.path("Note").asText()
@@ -149,5 +172,4 @@ public class AlphaPriceProvider implements PriceProvider {
             return BigDecimal.ZERO;
         }
     }
-
 }

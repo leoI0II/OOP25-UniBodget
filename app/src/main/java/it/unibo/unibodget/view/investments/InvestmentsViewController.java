@@ -59,6 +59,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private static final int ADD_TRANSACTION_DIALOG_WIN_HEIGHT = 620;
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
+    private static final String NOT_AVAILABLE = "N/A";
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -440,14 +441,13 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         dialog.setHeaderText(null);
         dialog.setContentText("Enter new name:");
 
-        dialog.showAndWait().ifPresent(newName -> {
+        WalletRenamePrompt.ask(dialog, newName ->
             investmentController.getCurrentInvestmentAccount()
                     .ifPresent(w -> {
                         w.setName(newName);
                         currentWalletName.setText(newName);
                         sideBarViewController.refresh();
-                    });
-        });
+                    }));
     }
 
     /**
@@ -569,13 +569,13 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             bestPerformerPositionPercentage.setText(
                     AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
             );
-        }, () -> bestPerformerPositionName.setText("N/A"));
+        }, () -> bestPerformerPositionName.setText(NOT_AVAILABLE));
 
         investmentController.getWorstPerformer().ifPresentOrElse(p -> {
             worstPerformerPositionName.setText(p.asset().getShortName());
             worstPerformerPositionValue.setText(AssetFormatter.ofAsset(p.getUnrealizedProfitLoss()));
             worstPerformerPositionPercentage.setText(AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage()));
-        }, () -> worstPerformerPositionName.setText("N/A"));
+        }, () -> worstPerformerPositionName.setText(NOT_AVAILABLE));
 
         refreshPieCharts();
         refreshPerformanceLineChart();
@@ -588,6 +588,52 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         investmentController.selectWallet(id);
         changeCurrentWalletName();
         refreshMainPanel();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onRenameRequested(final UUID id, final String newName) {
+        investmentController.renameWallet(id, newName);
+        changeCurrentWalletName();
+        sideBarViewController.refresh();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onDeleteRequested(final UUID id) {
+        if (!investmentController.removeWallet(id)) {
+            return;
+        }
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
+            clearMainPanel();
+            sideBarViewController.refresh();
+        } else {
+            refreshMainPanel();
+        }
+    }
+
+    /**
+     * Resets every widget of the main panel to its empty state.
+     * Used when the last investment account has been deleted, otherwise the
+     * panel would keep showing the data of the removed account.
+     */
+    private void clearMainPanel() {
+        currentWalletName.setText("");
+        walletBalance.setText("");
+        allTimeProfitValue.setText("");
+        allTimeProfitPercentage.setText("");
+        costBasisValue.setText("");
+        positionTableView.getItems().clear();
+        investmentTransactionTableView.getItems().clear();
+        bestPerformerPositionName.setText(NOT_AVAILABLE);
+        bestPerformerPositionValue.setText("");
+        bestPerformerPositionPercentage.setText("");
+        worstPerformerPositionName.setText(NOT_AVAILABLE);
+        worstPerformerPositionValue.setText("");
+        worstPerformerPositionPercentage.setText("");
+        allocationPieChart.getData().clear();
+        quantityPieChart.getData().clear();
+        performanceChart.getData().clear();
     }
 
     /** {@inheritDoc} */
