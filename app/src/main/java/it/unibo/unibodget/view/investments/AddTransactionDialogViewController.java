@@ -131,6 +131,9 @@ public final class AddTransactionDialogViewController extends BaseViewController
         setupFeeTextField();
         setupNotesTextArea();
         setupTransactionTypeTabPane();
+        // before the toggle buttons, they fill the combo box (it was never called, so the accounts were
+        // shown with toString "CashAccount@..." and the total was not updated when changing the account)
+        setupPaymentSourceComboBox();
         setupPaymentSourceToggleButtons();
         setupTotalSpentValueLabel();
         setupAddTransactionButton();
