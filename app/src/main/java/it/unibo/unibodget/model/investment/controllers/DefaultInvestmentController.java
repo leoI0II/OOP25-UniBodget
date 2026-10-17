@@ -319,19 +319,39 @@ public class DefaultInvestmentController implements InvestmentController {
     private Optional<Asset> availableAsset(final PaymentSource paymentSource) {
         return switch (paymentSource) {
             case PaymentSource.CashAccountChannel cashSrc -> Optional.of(cashSrc.account().getBalance());
-            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> {
-                final var stableCoinPosition = stableCoinSrc.account().getPositions().stream()
-                        .filter(pos -> pos.asset().equals(stableCoinSrc.stableCoin()))
-                        .findFirst();
-                yield Optional.of(
-                        stableCoinPosition.map(p -> Asset.of(stableCoinSrc.stableCoin(), p.quantity()))
-                                .orElse(Asset.zero(stableCoinSrc.stableCoin()))
-                );
-            }
-            // If no payment source specified, available amount is considered zero for the purpose of cost comparison
-            case PaymentSource.NoPaymentChannel noSrc ->
-                    Optional.empty();
+            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> Optional.of(Asset.of(
+                    stableCoinSrc.stableCoin(),
+                    heldQuantity(stableCoinSrc.account(), stableCoinSrc.stableCoin())
+            ));
+            // no payment source, so there is no balance to check
+            case PaymentSource.NoPaymentChannel noSrc -> Optional.empty();
         };
+    }
+
+    /**
+     * Checks if the payment source has enough money to pay the given cost.
+     *
+     * @param paymentSource the channel used to pay
+     * @param cost          the cost of the order, in the currency of the payment source
+     * @return {@code true} if the available balance covers the cost, always {@code true} with no payment source
+     */
+    private boolean hasEnough(final PaymentSource paymentSource, final Asset cost) {
+        return availableAsset(paymentSource)
+                .map(available -> available.compareTo(cost) >= 0)
+                .orElse(true);
+    }
+
+    /**
+     * Returns how much of an asset an account holds.
+     *
+     * @param account the investment account
+     * @param asset   the asset to look for
+     * @return the quantity of the open position, or zero if there is no position on that asset
+     */
+    private static BigDecimal heldQuantity(final InvestmentAccount account, final CurrencyUnit asset) {
+        return account.getPositionForAsset(asset)
+                .map(Position::quantity)
+                .orElse(BigDecimal.ZERO);
     }
 
     /**
@@ -344,14 +364,7 @@ public class DefaultInvestmentController implements InvestmentController {
             final BigDecimal quantity,
             final Asset unitPrice,
             final Asset fee) {
-
-        final var estimatedCost = estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource);
-        final var availableOpt = availableAsset(paymentSource);
-        if (availableOpt.isEmpty()) {
-            return true; // means there is no payment source, so yes to transfer
-        }
-        final var available = availableOpt.get();
-        return available.compareTo(estimatedCost) >= 0;
+        return hasEnough(paymentSource, estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource));
     }
 
     /**
@@ -363,11 +376,10 @@ public class DefaultInvestmentController implements InvestmentController {
             final CurrencyUnit asset,
             final BigDecimal quantity
     ) {
-        final var position = src.getPositions().stream()
-                .filter(pos -> pos.asset().equals(asset))
-                .findFirst();
-
-        return position.isPresent() && position.get().quantity().compareTo(quantity) >= 0;
+        // without a position there is nothing to sell
+        return src.getPositionForAsset(asset)
+                .map(position -> position.quantity().compareTo(quantity) >= 0)
+                .orElse(false);
     }
 
     /**
@@ -380,30 +392,86 @@ public class DefaultInvestmentController implements InvestmentController {
             final CurrencyUnit asset,
             final BigDecimal quantity
     ) {
-        if (src.getId().equals(dst.getId())) {
-            return false; // Cannot transfer to the same account
-        }
-        final var position = src.getPositions().stream()
-                .filter(pos -> pos.asset().equals(asset))
-                .findFirst();
-
-        return position.isPresent() && position.get().quantity().compareTo(quantity) >= 0;
+        // cannot transfer to the same account, for the rest its like a sell
+        return !src.getId().equals(dst.getId()) && canSell(src, asset, quantity);
     }
 
-    private String getBuyOrderDescription(
+    /**
+     * Builds the description of a buy or sell order, e.g. "Buy 3 BTC @ ...".
+     *
+     * @param action    "Buy" or "Sell"
+     * @param quantity  number of units traded
+     * @param asset     the traded asset
+     * @param unitPrice price per unit
+     * @return the description of the order
+     */
+    private static String orderDescription(
+            final String action,
             final BigDecimal quantity,
             final CurrencyUnit asset,
             final Asset unitPrice
     ) {
-        return "Buy " + quantity + " " + asset + " @ " + unitPrice;
+        return action + " " + quantity + " " + asset + " @ " + unitPrice;
     }
 
-    private String getSellOrderDescription(
-            final BigDecimal quantity,
-            final CurrencyUnit asset,
-            final Asset unitPrice
+    /**
+     * Adds to a cash account the money that goes out for a buy or comes in from a sell.
+     *
+     * @param channel      the cash account used for the order
+     * @param signedAmount the money moved: negative goes out (buy), positive comes in (sell)
+     * @param category     the category of the cash transaction
+     * @param date         date of the order
+     * @param description  description of the cash transaction
+     * @param notes        notes of the order
+     * @return the cash transaction added to the account
+     */
+    private static CashTransaction moveCash(
+            final PaymentSource.CashAccountChannel channel,
+            final Asset signedAmount,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes
     ) {
-        return "Sell " + quantity + " " + asset + " @ " + unitPrice;
+        final var transaction = CashTransaction.of(signedAmount, category, date, description, notes);
+        channel.account().addTransaction(transaction);
+        return transaction;
+    }
+
+    /**
+     * Adds to a stablecoin position the coins used for a buy or received from a sell.
+     *
+     * @param channel        the stablecoin position used for the order
+     * @param signedQuantity coins moved, already in the stablecoin: negative go out (buy), positive come in (sell)
+     * @param date           date of the order
+     * @param description    description of the stablecoin transaction
+     * @param notes          notes of the order
+     * @return the investment transaction added to the account of the stablecoin
+     */
+    private InvestmentTransaction moveStableCoin(
+            final PaymentSource.StableCoinPositionChannel channel,
+            final BigDecimal signedQuantity,
+            final LocalDate date,
+            final String description,
+            final String notes
+    ) {
+        final var stableCoin = channel.stableCoin();
+        final var baseCurrency = channel.account().getBaseCurrency();
+        final var transaction = InvestmentTransaction.of(
+                Asset.of(stableCoin, signedQuantity),
+                // coins that go out are sold, coins that come in are bought
+                signedQuantity.signum() < 0 ? Category.INVESTMENT_SELL : Category.INVESTMENT_BUY,
+                date,
+                description,
+                notes,
+                // price of ONE stablecoin in the base currency of its account. before it was the total cost
+                // of the order (buy) or "1 USDT" also with an account in EUR (sell), so the P/L was wrong
+                exchangeRateProvider.convert(BigDecimal.ONE, stableCoin, baseCurrency).getAsset(),
+                // the fee is already in the main transaction of the order, so here is zero
+                Asset.zero(baseCurrency)
+        );
+        channel.account().addTransaction(transaction);
+        return transaction;
     }
 
     /**
@@ -421,60 +489,27 @@ public class DefaultInvestmentController implements InvestmentController {
             final String notes) {
 
         final var cost = estimateOrderCost(OrderType.BUY, asset, quantity, unitPrice, fee, paymentSource);
-
-        if (!canBuy(paymentSource, asset, quantity, unitPrice, fee)) {
+        if (!hasEnough(paymentSource, cost)) {
             final var available = availableAsset(paymentSource).orElse(Asset.zero(cost.currency()));
             return new OrderResult.InsufficientFunds(cost, available);
         }
 
-        final InvestmentTransaction investmentTransactionIn = InvestmentTransaction.of(
-                Asset.of(asset, quantity),
-                Category.INVESTMENT_BUY,
-                date,
-                getBuyOrderDescription(quantity, asset, unitPrice),
-                notes,
-                unitPrice,
-                fee
-        );
-        targetAccount.addTransaction(investmentTransactionIn);
+        final var description = orderDescription("Buy", quantity, asset, unitPrice);
+        final var buyTransaction = InvestmentTransaction.of(
+                Asset.of(asset, quantity), Category.INVESTMENT_BUY, date, description, notes, unitPrice, fee);
+        targetAccount.addTransaction(buyTransaction);
 
+        // the cost goes out of the payment source
+        final var costOut = Asset.of(cost.currency(), cost.amount().negate());
         return switch (paymentSource) {
-            case PaymentSource.CashAccountChannel cashSrc -> {
-                final var cashTransaction = CashTransaction.of(
-                        Asset.of(cost.currency(), cost.amount().negate()), // Cash outflow
-                        Category.INVESTMENT_BUY,
-                        date,
-                        getBuyOrderDescription(quantity, asset, unitPrice),
-                        notes
-                );
-                // Execute the cash transaction on the source cash account
-                cashSrc.account().addTransaction(cashTransaction);
-                yield new OrderResult.BuyWithCashSuccess(cashTransaction, investmentTransactionIn);
-            }
-            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> {
-                final var investmentTransactionOut = InvestmentTransaction.of(
-                        Asset.of(stableCoinSrc.stableCoin(), cost.amount().negate()), // Stablecoin outflow
-                        Category.INVESTMENT_SELL,
-                        date,
-                        "Use " + cost + " from stablecoin position to buy " + quantity + " " + asset,
-                        notes,
-                        // price of ONE stablecoin in the base currency of its account, before it was
-                        // the total cost of the order, so the realized P/L was huge (e.g. +16768 USDT)
-                        exchangeRateProvider.convert(
-                                BigDecimal.ONE,
-                                stableCoinSrc.stableCoin(),
-                                stableCoinSrc.account().getBaseCurrency()
-                        ).getAsset(),
-                        // the fee is already inside the cost, so here is zero (otherwise its counted 2 times)
-                        Asset.zero(fee.currency())
-                );
-                // Execute the stablecoin transaction on the source investment account
-                stableCoinSrc.account().addTransaction(investmentTransactionOut);
-                yield new OrderResult.BuyWithStablesSuccess(investmentTransactionOut, investmentTransactionIn);
-            }
-            case PaymentSource.NoPaymentChannel noSrc -> {
-                yield new OrderResult.BuyNoPaymentSuccess(investmentTransactionIn);
-            }
+            case PaymentSource.CashAccountChannel cashSrc -> new OrderResult.BuyWithCashSuccess(
+                    moveCash(cashSrc, costOut, Category.INVESTMENT_BUY, date, description, notes),
+                    buyTransaction);
+            case PaymentSource.StableCoinPositionChannel stableCoinSrc -> new OrderResult.BuyWithStablesSuccess(
+                    moveStableCoin(stableCoinSrc, costOut.amount(), date,
+                            "Use " + cost + " from stablecoin position to buy " + quantity + " " + asset, notes),
+                    buyTransaction);
+            case PaymentSource.NoPaymentChannel noSrc -> new OrderResult.BuyNoPaymentSuccess(buyTransaction);
         };
     }
 
@@ -493,65 +528,26 @@ public class DefaultInvestmentController implements InvestmentController {
             final String notes
     ) {
         if (!canSell(sourceAccount, asset, quantity)) {
-            final var availableQty = sourceAccount.getPositions().stream()
-                    .filter(pos -> pos.asset().equals(asset))
-                    .findFirst()
-                    .map(Position::quantity)
-                    .orElse(BigDecimal.ZERO);
-            return new OrderResult.InsufficientAssets(
-                    quantity,
-                    availableQty
-            );
+            return new OrderResult.InsufficientAssets(quantity, heldQuantity(sourceAccount, asset));
         }
 
-        final var proceeds = estimateOrderCost(
-                OrderType.SELL, asset, quantity, unitPrice, fee, cashFlowTarget
-        );
-
+        final var proceeds = estimateOrderCost(OrderType.SELL, asset, quantity, unitPrice, fee, cashFlowTarget);
         final var sellTransaction = InvestmentTransaction.of(
-                Asset.of(asset, quantity.negate()), // Asset outflow
-                Category.INVESTMENT_SELL,
-                date,
-                getSellOrderDescription(quantity, asset, unitPrice),
-                notes,
-                unitPrice,
-                fee
-        );
+                Asset.of(asset, quantity.negate()), Category.INVESTMENT_SELL, date,
+                orderDescription("Sell", quantity, asset, unitPrice), notes, unitPrice, fee);
         sourceAccount.addTransaction(sellTransaction);
 
+        // the proceeds go in the payment target
         return switch (cashFlowTarget) {
-            case PaymentSource.CashAccountChannel cashDst -> {
-                final var cashTransaction = CashTransaction.of(
-                        proceeds, // Cash inflow
-                        Category.INVESTMENT_SELL,
-                        date,
-                        "Proceeds from selling " + quantity + " " + asset,
-                        notes
-                );
-                cashDst.account().addTransaction(cashTransaction);
-                yield new OrderResult.SellWithCashSuccess(sellTransaction, cashTransaction);
-            }
-            case PaymentSource.StableCoinPositionChannel stableCoinDst -> {
-                final var stableCoinBuyTransaction = InvestmentTransaction.of(
-                        Asset.of(
-                                stableCoinDst.stableCoin(),
-                                // exchangeRateProvider.convert(proceeds, stableCoinDst.stableCoin()).amount()
-                                exchangeRateProvider.convert(proceeds.amount(), proceeds.currency(), stableCoinDst.stableCoin()).getConvertedAmount()
-                        ), // Stablecoin inflow
-                        Category.INVESTMENT_BUY,
-                        date,
-                        "Convert proceeds to " + stableCoinDst.stableCoin(),
-                        notes,
-                        Asset.of(stableCoinDst.stableCoin(), BigDecimal.ONE),   // 1:1 currently
-                        // No fee for the conversion transaction itself, fee is accounted in the sell transaction
-                        Asset.zero(stableCoinDst.stableCoin())
-                );
-                stableCoinDst.account().addTransaction(stableCoinBuyTransaction);
-                yield new OrderResult.SellWithStablesSuccess(sellTransaction, stableCoinBuyTransaction);
-            }
-            case PaymentSource.NoPaymentChannel noDst -> {
-                yield new OrderResult.SellNoPaymentSuccess(sellTransaction);
-            }
+            case PaymentSource.CashAccountChannel cashDst -> new OrderResult.SellWithCashSuccess(
+                    sellTransaction,
+                    moveCash(cashDst, proceeds, Category.INVESTMENT_SELL, date,
+                            "Proceeds from selling " + quantity + " " + asset, notes));
+            case PaymentSource.StableCoinPositionChannel stableCoinDst -> new OrderResult.SellWithStablesSuccess(
+                    sellTransaction,
+                    moveStableCoin(stableCoinDst, proceeds.amount(), date,
+                            "Convert proceeds to " + stableCoinDst.stableCoin(), notes));
+            case PaymentSource.NoPaymentChannel noDst -> new OrderResult.SellNoPaymentSuccess(sellTransaction);
         };
     }
 
@@ -568,13 +564,10 @@ public class DefaultInvestmentController implements InvestmentController {
             final String notes
     ) {
         if (!canTransfer(sourceAccount, targetAccount, asset, quantity)) {
-            final var available = sourceAccount.getPositionForAsset(asset)
-                    .map(Position::quantity)
-                    .orElse(BigDecimal.ZERO);
-            return new OrderResult.InsufficientAssets(quantity, available);
+            return new OrderResult.InsufficientAssets(quantity, heldQuantity(sourceAccount, asset));
         }
-        final var sourcePosition = sourceAccount.getPositionForAsset(asset).orElseThrow();
-        final var avgCost = sourcePosition.averageBasisCost();
+        // the coins move at the average cost, so the cost basis stays the same in the other account
+        final var avgCost = sourceAccount.getPositionForAsset(asset).orElseThrow().averageBasisCost();
 
         final var transferOutTransaction = InvestmentTransaction.of(
                 Asset.of(asset, quantity.negate()), // Asset outflow
@@ -592,7 +585,7 @@ public class DefaultInvestmentController implements InvestmentController {
                 date,
                 "Receive " + quantity + " " + asset + " from account " + sourceAccount.getName(),
                 notes,
-                avgCost, // No unit price for transfers
+                avgCost,
                 Asset.zero(asset)  // No fee for transfers in this implementation
         );
         targetAccount.addTransaction(transferInTransaction);

@@ -63,7 +63,10 @@ final class DefaultInvestmentControllerTest {
         "ETH->USD", new BigDecimal("4000"),
         "USDT->USD", BigDecimal.ONE,
         "USD->USDT", BigDecimal.ONE,
-        "USD->EUR", new BigDecimal("0.91")
+        "USD->EUR", new BigDecimal("0.91"),
+        "AAPL->EUR", new BigDecimal("136.5"),
+        "EUR->USDT", new BigDecimal("1.10"),
+        "USDT->EUR", new BigDecimal("0.91")
     );
 
     private static final CurrencyConverter MOCK_CONVERTER = (amount, from, to) -> {
@@ -440,6 +443,34 @@ final class DefaultInvestmentControllerTest {
             new BigDecimal("10745").stripTrailingZeros(),
             cashAccount.getBalance().amount().stripTrailingZeros()
         );
+    }
+
+    @Test
+    void testExecuteSellOrderToStableCoinUsesPriceInBaseCurrency() {
+        // account in EUR that holds 10 AAPL bought @ 100 EUR
+        final var eurAccount = new InvestmentAccount("EUR Portfolio", FiatCurrency.EUR, exchangeRateProvider);
+        eurAccount.addTransaction(InvestmentTransaction.of(
+            Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
+            Category.INVESTMENT_BUY, TODAY, "", "",
+            Asset.of(FiatCurrency.EUR, new BigDecimal("100")),
+            Asset.zero(FiatCurrency.EUR)
+        ));
+
+        // sell 2 AAPL @ 100 EUR -> 200 EUR = 220 USDT that go in the USDT position of the same account
+        final var result = controller.executeSellOrder(
+            eurAccount, new PaymentSource.StableCoinPositionChannel(eurAccount, CryptoCurrency.USDT),
+            StockMarketCurrency.AAPL, BigDecimal.TWO,
+            Asset.of(FiatCurrency.EUR, new BigDecimal("100")),
+            Asset.zero(FiatCurrency.EUR),
+            TODAY, ""
+        );
+
+        assertInstanceOf(OrderResult.SellWithStablesSuccess.class, result);
+        final var usdtIn = ((OrderResult.SellWithStablesSuccess) result).stablesAccount();
+        assertEquals(new BigDecimal("220").stripTrailingZeros(), usdtIn.getAsset().amount().stripTrailingZeros());
+        // the price of 1 usdt must be in the base currency of the account (EUR), not "1 USDT"
+        assertEquals(FiatCurrency.EUR, usdtIn.getUnitPrice().currency());
+        assertEquals(new BigDecimal("0.91").stripTrailingZeros(), usdtIn.getUnitPrice().amount().stripTrailingZeros());
     }
 
     @Test
