@@ -100,7 +100,7 @@ public class BankConverterWidgetFX {
                 final CurrencyUnit from = fromBox.getValue();
                 final CurrencyUnit to = toBox.getValue();
 
-                if (bank != null || from != null || to != null) {
+                if (bank != null && from != null && to != null) {
                     if (amount.signum() <= 0) {
                         resultLabel.setText("Insert value > 0");
                         return;
@@ -147,6 +147,7 @@ public class BankConverterWidgetFX {
 
         // Bank conversione label with front application
         final Label bankLabel = new Label("Bank conversion");
+        bankLabel.getProperties().put("converter-section-title", Boolean.TRUE);
         ThemeManager.applyFont(bankLabel);
 
         // Assemble UI

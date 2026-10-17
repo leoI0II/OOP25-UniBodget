@@ -1220,8 +1220,6 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private void applyTheme() {
         final Theme theme = ThemeManager.getTheme();
 
-        final String buttonHex = toRgbaCss(theme.getButtonColor());
-
         final String strongText = "white";
         final String mediumText = "rgba(255,255,255,0.88)";
         final String softText = "rgba(255,255,255,0.68)";

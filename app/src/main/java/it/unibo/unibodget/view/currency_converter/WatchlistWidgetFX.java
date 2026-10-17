@@ -39,6 +39,7 @@ public final class WatchlistWidgetFX {
         items.addAll(controller.getFavorites());
 
         final Label title = new Label("My Watchlist");
+        title.getProperties().put("converter-section-title", Boolean.TRUE);
         ThemeManager.applyFont(title);
 
         // Refresh highlighting when the converter selection changes

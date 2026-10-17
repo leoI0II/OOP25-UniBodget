@@ -329,6 +329,7 @@ public class ConverterWidgetFX {
 
         /* ---------- RESULT OUTPUT ---------- */
         final Label output = new Label("Waiting...");
+        output.getProperties().put("converter-result", Boolean.TRUE);
         output.setFont(resultFont);
         output.setTextFill(textColor);
         output.setWrapText(true);

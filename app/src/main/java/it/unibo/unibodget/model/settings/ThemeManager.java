@@ -7,55 +7,56 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import it.unibo.unibodget.model.utils.ARGBColor;
+
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBoxBase;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeView;
 
 /**
- * Manages the currently active {@link Theme} used by the application UI.
+ * Manages the active theme and updates registered scenes.
  *
- * <p>{@code ThemeManager} acts as a simple global holder for the selected theme.
- * It provides static methods to retrieve or update the active theme, ensuring
- * consistent visual settings across all UI components.</p>
- *
- * <p>The manager starts with {@link Theme#DEFAULT} unless changed explicitly
- * by the application (e.g., through user preferences).</p>
+ * <p>Font sizes remain defined by individual views, controls,
+ * FXML files or stylesheets.
  */
 public final class ThemeManager {
 
-    /**
-     * The theme currently in use by the application.
-     * Initialized to {@link Theme#DEFAULT}.
-     */
     private static Theme currentTheme = Theme.DEFAULT;
 
     private static final Set<Scene> SCENES =
             Collections.newSetFromMap(new WeakHashMap<>());
 
-    /** 
-     * Private constructor to prevent instantiation.
+    /**
+     * Prevents instantiation.
      */
     private ThemeManager() {
-
     }
 
     /**
-     * Returns the currently active theme.
+     * Returns the active theme.
      *
-     * @return the current theme
+     * @return the active theme
      */
     public static Theme getTheme() {
         return currentTheme;
     }
 
     /**
-     * Updates the currently active theme.
+     * Updates the theme and reapplies it to registered scenes.
      *
-     * @param theme the new theme (must not be null)
-     * @throws NullPointerException if {@code theme} is null
+     * @param theme the new theme
+     * @throws NullPointerException if the theme is null
      */
     public static void setTheme(final Theme theme) {
-        currentTheme = Objects.requireNonNull(theme);
+        currentTheme = Objects.requireNonNull(theme, "theme");
 
         for (final Scene scene : SCENES.toArray(new Scene[0])) {
             applyThemeToScene(scene);
@@ -63,17 +64,9 @@ public final class ThemeManager {
     }
 
     /**
-     * Applies the active theme to the given JavaFX {@link Scene}.
+     * Applies typography, backgrounds and label contrast to a scene.
      *
-     * <p>The method updates:</p>
-     * <ul>
-     *     <li>font family</li>
-     *     <li>font size</li>
-     *     <li>font weight (bold/normal)</li>
-     *     <li>background color</li>
-     * </ul>
-     *
-     * <p>Styles are applied directly to the root node using inline CSS.</p>
+     * <p>Existing font sizes are preserved.
      *
      * @param scene the scene to style
      */
@@ -90,17 +83,17 @@ public final class ThemeManager {
 
         System.out.println("[THEME] Applied: "
                 + currentTheme.getPrimaryColor().toHexString()
-                + ", font: " + currentTheme.getFontFamily()
-                + ", size: " + currentTheme.getFontSize());
+                + ", font: " + currentTheme.getFontFamily());
     }
 
     /**
-     * Recursively applies the active theme to the given JavaFX {@link Node} and its children.
-     * 
-     * @param node the JavaFX node to style
+     * Recursively applies the theme to a node and its children.
+     *
+     * @param node the node to style
      */
     private static void applyToTree(final Node node) {
         applyFont(node);
+        applyTextColor(node);
 
         if (node.getStyleClass().contains("theme-background")) {
             applyBackground(node);
@@ -122,32 +115,83 @@ public final class ThemeManager {
     }
 
     /**
-     * Applies the active theme font to the given JavaFX {@link Node}.
+     * Applies theme font family and weight while preserving font size.
      *
-     * <p>The method updates:</p>
-     * <ul>
-     *     <li>font family</li>
-     *     <li>font size</li>
-     *     <li>font weight (bold/normal)</li>
-     * </ul>
-     *
-     * <p>Font styles are applied directly to the node using inline CSS,
-     * preserving any existing styles.</p>
-     *
-     * @param node the JavaFX node to style
+     * @param node the node to style
      */
     public static void applyFont(final Node node) {
         Objects.requireNonNull(node, "node");
 
         final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-font-(?:family|size|weight)"
-                        + "\\s*:[^;]*(?:;|$)",
+                "(?i)-fx-font-(?:family|weight)\\s*:[^;]*(?:;|$)",
                 ""
         );
 
         node.setStyle(existingStyle + ";" + getFontStyle());
     }
 
+    /**
+     * Updates labels and checkboxes displayed on the theme background.
+     *
+     * @param node the node to style
+     */
+    private static void applyTextColor(final Node node) {
+        if (!(node instanceof Label) && !(node instanceof CheckBox)) {
+            return;
+        }
+
+        if (isInsideSurfaceControl(node)) {
+            return;
+        }
+
+        final ARGBColor color =
+                Theme.getReadableTextColor(currentTheme.getPrimaryColor());
+
+        final String existingStyle = node.getStyle().replaceAll(
+                "(?i)-fx-text-fill\\s*:[^;]*(?:;|$)",
+                ""
+        );
+
+        node.setStyle(existingStyle + ";" + String.format(
+                Locale.ROOT,
+                "-fx-text-fill: rgb(%d,%d,%d);",
+                color.red(),
+                color.green(),
+                color.blue()
+        ));
+    }
+
+    /**
+     * Checks whether a node belongs to a control with its own background.
+     *
+     * @param node the node to inspect
+     * @return true if an ancestor manages its own text contrast
+     */
+    private static boolean isInsideSurfaceControl(final Node node) {
+        Parent parent = node.getParent();
+
+        while (parent != null) {
+            if (parent instanceof ButtonBase
+                    || parent instanceof ComboBoxBase<?>
+                    || parent instanceof ListCell<?>
+                    || parent instanceof ListView<?>
+                    || parent instanceof TableView<?>
+                    || parent instanceof TreeView<?>
+                    || parent instanceof TitledPane) {
+                return true;
+            }
+
+            parent = parent.getParent();
+        }
+
+        return false;
+    }
+
+    /**
+     * Applies the active primary background color.
+     *
+     * @param node the node to style
+     */
     private static void applyBackground(final Node node) {
         final String existingStyle = node.getStyle().replaceAll(
                 "(?i)-fx-background-color\\s*:[^;]*(?:;|$)",
@@ -158,23 +202,26 @@ public final class ThemeManager {
     }
 
     /**
-     * Get the CSS style string for the font settings of the current theme.
-     * 
-     * @return the CSS style string for font family, size, and weight
+     * Returns font family and weight declarations for the active theme.
+     *
+     * @return CSS declarations without a font size
      */
     public static String getFontStyle() {
-        final Theme t = getTheme();
+        final Theme theme = getTheme();
 
-        return "-fx-font-family: '" + t.getFontFamily() + "';"
-                + "-fx-font-size: " + t.getFontSize() + "px;"
+        final String fontFamily = theme.getFontFamily()
+                .replace("\\", "\\\\")
+                .replace("'", "\\'");
+
+        return "-fx-font-family: '" + fontFamily + "';"
                 + "-fx-font-weight: "
-                + (t.isBoldText() ? "bold;" : "normal;");
+                + (theme.isBoldText() ? "bold;" : "normal;");
     }
 
     /**
-     * Gets the CSS style string for the primary background color of the current theme.
-     * 
-     * @return the CSS style string for the primary background color
+     * Returns the primary background color as CSS.
+     *
+     * @return the background color declaration
      */
     public static String getPrimaryBackgroundStyle() {
         final ARGBColor color = getTheme().getPrimaryColor();
@@ -188,5 +235,4 @@ public final class ThemeManager {
                 color.alpha() / 255.0
         );
     }
-    
 }
