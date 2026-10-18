@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -38,6 +39,7 @@ import it.unibo.unibodget.model.utils.event.CreateNewInvestmentWalletRequestedEv
 import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import it.unibo.unibodget.persistency.CsvExportFormat;
 
 /**
  * Default implementation of {@link InvestmentController}.
@@ -603,23 +605,44 @@ public class DefaultInvestmentController implements InvestmentController {
     @Override
     public ExportResult exportCurrentAccountData(final File file) {
         Objects.requireNonNull(file);
-        final var account = getCurrentAccountOrThrow();
-        final CSVFormat csvFormat = CSVFormat.DEFAULT.builder().build();
-        try (
-                FileWriter wr = new FileWriter(file);
-                CSVPrinter pr = new CSVPrinter(wr, csvFormat)
-        ) {
-            pr.printRecord("name", account.getName());
-            pr.printRecord("Currency", account.getBaseCurrency());
-            pr.printRecord("Balance", account.getBalance());
-            pr.printRecord("All time profit", account.getTotalProfitLoss());
-            pr.printRecord("Total cost basis", account.getTotalCostBasis());
 
-            pr.println();
-            pr.printRecord(
-                "Asset", "Quantity", "Avg Cost", "Market Value", "Unrealized P/L", "Unrealized P/L %");
+        final var account = getCurrentAccountOrThrow();
+
+        try (
+                FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+                CSVPrinter printer = new CSVPrinter(
+                        writer,
+                        CsvExportFormat.getFormat()
+                )
+        ) {
+            printer.printRecord(
+                "Name",
+                "Currency",
+                "Balance",
+                "All time profit",
+                "Total cost basis"
+            );
+
+            printer.printRecord(
+                account.getName(),
+                account.getBaseCurrency().getCode(),
+                account.getBalance().amount().toPlainString(),
+                account.getTotalProfitLoss().amount().toPlainString(),
+                account.getTotalCostBasis().amount().toPlainString()
+            );
+            printer.println();
+
+            printer.printRecord(
+                    "Asset",
+                    "Quantity",
+                    "Avg Cost",
+                    "Market Value",
+                    "Unrealized P/L",
+                    "Unrealized P/L %"
+            );
+
             for (final var position : account.getPositions()) {
-                pr.printRecord(
+                printer.printRecord(
                         position.asset(),
                         position.quantity(),
                         position.averageBasisCost(),
@@ -629,10 +652,19 @@ public class DefaultInvestmentController implements InvestmentController {
                 );
             }
 
-            pr.println();
-            pr.printRecord("Date", "Currency", "Quantity", "Unit Price", "Fee", "Note");
+            printer.println();
+
+            printer.printRecord(
+                    "Date",
+                    "Currency",
+                    "Quantity",
+                    "Unit Price",
+                    "Fee",
+                    "Note"
+            );
+
             for (final var transaction : account.getHistory().getTransactions()) {
-                pr.printRecord(
+                printer.printRecord(
                         transaction.getDate(),
                         transaction.getAsset().currency(),
                         transaction.getAsset().amount(),
@@ -642,11 +674,13 @@ public class DefaultInvestmentController implements InvestmentController {
                 );
             }
 
-            return new ExportResult.Success(file);
-
-        } catch (final IOException e) {
-            return new ExportResult.Error(e.getMessage());
+            // Completes writing before reporting success.
+            printer.flush();
+        } catch (final IOException exception) {
+            return new ExportResult.Error(exception.getMessage());
         }
+
+        return new ExportResult.Success(file);
     }
 
     /**

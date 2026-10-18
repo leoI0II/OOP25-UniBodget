@@ -1,7 +1,12 @@
 package it.unibo.unibodget.controller.dashboard.impl;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +16,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.apache.commons.csv.CSVPrinter;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
@@ -31,7 +38,11 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.CashTransactionFactory;
 import it.unibo.unibodget.model.utils.ARGBColor;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import it.unibo.unibodget.persistency.CsvExportFormat;
 import it.unibo.unibodget.view.dashboard.api.DashboardView;
 import it.unibo.unibodget.view.dashboard.api.DashboardViewActions;
 import it.unibo.unibodget.view.dashboard.impl.BaseCurrencyDialog;
@@ -61,6 +72,8 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionSec
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionTableViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.WalletSectionViewState;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
+import javafx.scene.control.Alert;
+import javafx.stage.FileChooser;
 
 /**
  * Default implementation of the dashboard controller.
@@ -202,11 +215,84 @@ public final class DefaultDashboardController implements DashboardViewActions {
     }
 
     /**
-     * {@inheritDoc}
+     * Exports all transactions of the selected wallet to a CSV file.
      */
     @Override
     public void onExportTransactionsRequested() {
-        // Export is not implemented in the provided project code.
+        final var selectedWallet = cashAccountService.getCurrentWallet();
+
+        if (selectedWallet.isEmpty()) {
+            view.showError("Select a wallet before exporting.");
+            return;
+        }
+
+        final var wallet = selectedWallet.get();
+
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export wallet transactions");
+
+        final String walletName = wallet.getName()
+                .replaceAll("[^\\p{L}\\p{N}._-]", "_");
+
+        fileChooser.setInitialFileName(walletName + "_transactions.csv");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "CSV files (*.csv)",
+                        "*.csv"
+                )
+        );
+
+        final File downloadsDirectory = new File(
+                System.getProperty("user.home"),
+                "Downloads"
+        );
+
+        if (downloadsDirectory.isDirectory()) {
+            fileChooser.setInitialDirectory(downloadsDirectory);
+        }
+
+        final File selectedFile = fileChooser.showSaveDialog(null);
+
+        if (selectedFile == null) {
+            return;
+        }
+
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                    selectedFile.toPath(),
+                    StandardCharsets.UTF_8
+                );
+                CSVPrinter printer = new CSVPrinter(
+                        writer,
+                        CsvExportFormat.getFormat()
+                )) {
+
+        printer.printRecord(
+            "Date",
+            "Description",
+            "Category",
+            "Currency",
+            "Amount",
+            "Friend"
+        );
+
+        for (final var transaction : wallet.getHistory().getTransactions()) {
+            printer.printRecord(
+                transaction.getDate(),
+                transaction.getDescription(),
+                transaction.getCategory().getName(),
+                transaction.getAsset().currency().getCode(),
+                transaction.getAsset().amount().toPlainString(),
+                transaction.getFriendName().orElse("")
+            );
+        }
+
+        } catch (final IOException exception) {
+            MessageBus.send(
+                new MainErrorNotificationEvent("Export failed: " + exception.getMessage())
+            );
+            return;
+        }
+        MessageBus.send(new MainInfoNotificationEvent("Export successful!"));
     }
 
     /**
