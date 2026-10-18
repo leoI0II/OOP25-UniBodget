@@ -11,5 +11,4 @@ class CategoryOriginTest {
         assertNotNull(CategoryOrigin.DEFAULT);
         assertNotNull(CategoryOrigin.CUSTOM);
     }
-
 }

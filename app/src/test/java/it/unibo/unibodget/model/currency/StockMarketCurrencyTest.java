@@ -16,5 +16,4 @@ class StockMarketCurrencyTest {
         assertEquals("Apple Inc.", c.getFullName());
         assertEquals("AAPL", c.getCode());
     }
-
 }

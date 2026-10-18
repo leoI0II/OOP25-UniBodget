@@ -2,11 +2,11 @@ package it.unibo.unibodget.model.settings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.utils.ARGBColor;
+import org.junit.jupiter.api.Test;
 
 class SettingsTest {
 
@@ -18,11 +18,9 @@ class SettingsTest {
     private static final int EXP_1920 = 1920;
 
     @Test
-    void shouldSaveAndReloadSettings() throws Exception {
+    void shouldSaveAndReloadSettings() {
         final Settings settings = new Settings();
-        settings.setTheme(
-            Theme.DEFAULT
-        );
+        settings.setTheme(Theme.DEFAULT);
         final SettingsManager manager = new SettingsManager();
         manager.saveCurrent(settings);
         final Settings loaded = manager.getCurrent();
@@ -30,21 +28,19 @@ class SettingsTest {
     }
 
     @Test
-    public void testSettingsPersistence() {
+    void testSettingsPersistence() {
         final SettingsManager mgr = new SettingsManager();
 
         final Settings s = mgr.getCurrent();
         s.setTheme(
-            new Theme(
-                TEST,
-                new ARGBColor(WHITE),
-                new ARGBColor(GREY),
-                new ARGBColor(BLACK),
-                "Arial",
-                16,
-                true
-            )
-        );
+                new Theme(
+                        TEST,
+                        new ARGBColor(WHITE),
+                        new ARGBColor(GREY),
+                        new ARGBColor(BLACK),
+                        "Arial",
+                        16,
+                        true));
         s.setBaseCurrency(FiatCurrency.USD.getShortName());
 
         mgr.saveCurrent(s);
@@ -61,10 +57,7 @@ class SettingsTest {
         settings.setBaseCurrency(FiatCurrency.USD.getShortName());
         mgr.saveCurrent(settings);
         final SettingsManager mgr2 = new SettingsManager();
-        assertEquals(
-            FiatCurrency.USD.getShortName(),
-            mgr2.getCurrent().getBaseCurrency()
-        );
+        assertEquals(FiatCurrency.USD.getShortName(), mgr2.getCurrent().getBaseCurrency());
     }
 
     @Test
@@ -78,13 +71,8 @@ class SettingsTest {
                         "Dark",
                         new ARGBColor(BLACK),
                         new ARGBColor("#222222"),
-                        new ARGBColor(WHITE)
-                )
-        );
-        assertEquals(
-                initialSize + 1,
-                settings.getPreferenceHistory().size()
-        );
+                        new ARGBColor(WHITE)));
+        assertEquals(initialSize + 1, settings.getPreferenceHistory().size());
     }
 
     @Test
@@ -97,39 +85,19 @@ class SettingsTest {
                         "Modified",
                         new ARGBColor(WHITE),
                         new ARGBColor(GREY),
-                        new ARGBColor(BLACK)
-                )
-        );
+                        new ARGBColor(BLACK)));
 
-        assertEquals(
-                Theme.DEFAULT.getName(),
-                original.getTheme().getName()
-        );
+        assertEquals(Theme.DEFAULT.getName(), original.getTheme().getName());
     }
 
     @Test
     void shouldStoreWindowPreferences() {
         final Settings settings = new Settings();
-        settings.setWindowPrefs(
-                new it.unibo.unibodget.model.settings.WindowPreferences(
-                        EXP_1920,
-                        EXP_1080,
-                        true
-                )
-        );
+        settings.setWindowPrefs(new WindowPreferences(EXP_1920, EXP_1080, true));
 
-        assertEquals(
-                EXP_1920,
-                settings.getWindowPrefs().getWidth()
-        );
-        assertEquals(
-                EXP_1080,
-                settings.getWindowPrefs().getHeight()
-        );
-        assertEquals(
-                true,
-                settings.getWindowPrefs().isMaximized()
-        );
+        assertEquals(EXP_1920, settings.getWindowPrefs().getWidth());
+        assertEquals(EXP_1080, settings.getWindowPrefs().getHeight());
+        assertTrue(settings.getWindowPrefs().isMaximized());
     }
 
     @Test
@@ -137,9 +105,6 @@ class SettingsTest {
         final SettingsManager mgr = new SettingsManager();
         final Settings snapshot = new Settings();
         mgr.appendToHistory(snapshot);
-        assertFalse(
-                snapshot.getPreferenceHistory().isEmpty()
-        );
+        assertFalse(snapshot.getPreferenceHistory().isEmpty());
     }
-
 }

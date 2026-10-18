@@ -2,13 +2,11 @@ package it.unibo.unibodget.model.transactions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.unibo.unibodget.model.categories.CategoryType;
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
-
-import it.unibo.unibodget.model.categories.CategoryType;
 
 class MonthlyStatisticsTest {
 
@@ -21,17 +19,16 @@ class MonthlyStatisticsTest {
     @Test
     void shouldStoreFieldsCorrectly() {
         final MonthlyStatistics.CategoryTotal ct =
-                new MonthlyStatistics.CategoryTotal(FOOD, 
-                                                    CategoryType.EXPENSE, 
-                                                    new BigDecimal(VAL_50));
+                new MonthlyStatistics.CategoryTotal(
+                        FOOD, CategoryType.EXPENSE, new BigDecimal(VAL_50));
 
-        final MonthlyStatistics stats = new MonthlyStatistics(
-                YearMonth.of(YEAR_2024, MONTH),
-                new BigDecimal(VAL_100),
-                new BigDecimal(VAL_50),
-                new BigDecimal(VAL_50),
-                List.of(ct)
-        );
+        final MonthlyStatistics stats =
+                new MonthlyStatistics(
+                        YearMonth.of(YEAR_2024, MONTH),
+                        new BigDecimal(VAL_100),
+                        new BigDecimal(VAL_50),
+                        new BigDecimal(VAL_50),
+                        List.of(ct));
 
         assertEquals(YearMonth.of(YEAR_2024, MONTH), stats.getMonth());
         assertEquals(new BigDecimal(VAL_100), stats.getTotalIncome());
@@ -40,5 +37,4 @@ class MonthlyStatisticsTest {
         assertEquals(1, stats.getCategoryTotals().size());
         assertEquals(ct, stats.getCategoryTotals().get(0));
     }
-
 }

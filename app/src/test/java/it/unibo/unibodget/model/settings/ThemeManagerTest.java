@@ -13,5 +13,4 @@ class ThemeManagerTest {
 
         assertEquals(t, ThemeManager.getTheme());
     }
-
 }

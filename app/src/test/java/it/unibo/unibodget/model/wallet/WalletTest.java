@@ -5,15 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class WalletTest {
 
@@ -21,13 +20,13 @@ class WalletTest {
     void shouldAddTransaction() {
         final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        final CashTransaction tx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, new java.math.BigDecimal("10")),
-                Category.FOOD,
-                LocalDate.now(),
-                "desc",
-                "notes"
-        );
+        final CashTransaction tx =
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, BigDecimal.TEN),
+                        Category.FOOD,
+                        LocalDate.now(),
+                        "desc",
+                        "notes");
 
         acc.addTransaction(tx);
 
@@ -38,13 +37,13 @@ class WalletTest {
     void shouldRejectZeroAmountTransaction() {
         final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        final CashTransaction zeroTx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, java.math.BigDecimal.ZERO),
-                Category.FOOD,
-                LocalDate.now(),
-                "desc",
-                "notes"
-        );
+        final CashTransaction zeroTx =
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
+                        Category.FOOD,
+                        LocalDate.now(),
+                        "desc",
+                        "notes");
 
         assertThrows(IllegalArgumentException.class, () -> acc.addTransaction(zeroTx));
     }
@@ -59,20 +58,11 @@ class WalletTest {
     @Test
     void shouldSaveAndReloadCashAccounts() {
         final CashAccountManager manager = new CashAccountManager();
-        final CashAccount account =
-                new CashAccount(
-                        "Wallet",
-                        FiatCurrency.EUR
-                );
+        final CashAccount account = new CashAccount("Wallet", FiatCurrency.EUR);
         manager.saveAll(List.of(account));
-        final List<CashAccount> reloaded =
-                manager.loadAll();
+        final List<CashAccount> reloaded = manager.loadAll();
         assertFalse(reloaded.isEmpty());
-        assertEquals(
-                account.getName(),
-                reloaded.getFirst().getName()
-        );
+        assertEquals(account.getName(), reloaded.getFirst().getName());
         assertEquals(account.getId(), reloaded.getFirst().getId());
     }
-
 }

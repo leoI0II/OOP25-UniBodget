@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
 class ExchangeRateAPIClientTest {
@@ -21,19 +20,18 @@ class ExchangeRateAPIClientTest {
     void shouldParseFrankfurterJsonCorrectly() {
         final ExchangeRateAPIClient client = new ExchangeRateAPIClient();
 
-        final String json = """
+        final String json =
+                """
             {"rates":{
                 "2024-01-01":{"USD":1.05},
                 "2024-01-02":{"USD":1.10}
             }}
             """;
 
-        final Map<LocalDate, Double> parsed =
-                client.parseFrankfurterJson(json, "USD");
+        final Map<LocalDate, Double> parsed = client.parseFrankfurterJson(json, "USD");
 
         assertEquals(EXPECTED_2, parsed.size());
         assertEquals(EXPECTED_1_05, parsed.get(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1)));
         assertEquals(EXPECTED_1_10, parsed.get(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_2)));
     }
-
 }

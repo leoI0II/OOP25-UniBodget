@@ -1,15 +1,9 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
@@ -17,32 +11,31 @@ import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.utils.ARGBColor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
 
-/**
- * Tests for {@link CashTransaction}.
- */
+/** Tests for {@link CashTransaction}. */
 class CashTransactionTest {
 
-        private static final String MARCO_P = "Marco";
-        private static final int Y_2026 = 2026;
-        private static final int M_5 = 5;
-        private static final int D_12 = 12;
+    private static final String MARCO_P = "Marco";
+    private static final int Y_2026 = 2026;
+    private static final int M_5 = 5;
+    private static final int D_12 = 12;
 
     @Test
     void shouldCreateStandardTransactionWithoutFriendLoanMetadata() {
-        final Category food = new Category(
-                "Food",
-                new ARGBColor(0xFFFF9800),
-                CategoryType.EXPENSE
-        );
+        final Category food = new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE);
 
-        final CashTransaction transaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
-                food,
-                LocalDate.of(Y_2026, M_5, D_12),
-                "Lunch",
-                "Lunch with friends"
-        );
+        final CashTransaction transaction =
+                new CashTransaction(
+                        Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
+                        food,
+                        LocalDate.of(Y_2026, M_5, D_12),
+                        "Lunch",
+                        "Lunch with friends");
 
         assertFalse(transaction.isFriendLoanTransaction());
         assertEquals(Optional.empty(), transaction.getFriendLoanId());
@@ -51,22 +44,19 @@ class CashTransactionTest {
 
     @Test
     void shouldCreateFriendLoanTransactionWithMetadata() {
-        final Category friendLoan = new Category(
-                "Friend loan",
-                new ARGBColor(0xFF9C27B0),
-                CategoryType.FRIEND_LOAN
-        );
+        final Category friendLoan =
+                new Category("Friend loan", new ARGBColor(0xFF9C27B0), CategoryType.FRIEND_LOAN);
         final UUID loanId = UUID.randomUUID();
 
-        final CashTransaction transaction = new CashTransaction(
-                Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                friendLoan,
-                LocalDate.of(Y_2026, M_5, D_12),
-                "Loan to " + MARCO_P,
-                "Temporary loan",
-                loanId,
-                MARCO_P
-        );
+        final CashTransaction transaction =
+                new CashTransaction(
+                        Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
+                        friendLoan,
+                        LocalDate.of(Y_2026, M_5, D_12),
+                        "Loan to " + MARCO_P,
+                        "Temporary loan",
+                        loanId,
+                        MARCO_P);
 
         assertTrue(transaction.isFriendLoanTransaction());
         assertEquals(Optional.of(loanId), transaction.getFriendLoanId());
@@ -75,45 +65,36 @@ class CashTransactionTest {
 
     @Test
     void shouldRejectFriendLoanMetadataForNonFriendLoanCategory() {
-        final Category food = new Category(
-                "Food",
-                new ARGBColor(0xFFFF9800),
-                CategoryType.EXPENSE
-        );
+        final Category food = new Category("Food", new ARGBColor(0xFFFF9800), CategoryType.EXPENSE);
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
-                        food,
-                        LocalDate.of(Y_2026, M_5, D_12),
-                        "Lunch",
-                        "Lunch with friends",
-                        UUID.randomUUID(),
-                        MARCO_P
-                )
-        );
+                () ->
+                        new CashTransaction(
+                                Asset.of(FiatCurrency.EUR, new BigDecimal("-20.00")),
+                                food,
+                                LocalDate.of(Y_2026, M_5, D_12),
+                                "Lunch",
+                                "Lunch with friends",
+                                UUID.randomUUID(),
+                                MARCO_P));
     }
 
     @Test
     void shouldRejectPartialFriendLoanMetadata() {
-        final Category friendLoan = new Category(
-                "Friend loan",
-                new ARGBColor(0xFF9C27B0),
-                CategoryType.FRIEND_LOAN
-        );
+        final Category friendLoan =
+                new Category("Friend loan", new ARGBColor(0xFF9C27B0), CategoryType.FRIEND_LOAN);
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new CashTransaction(
-                        Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-                        friendLoan,
-                        LocalDate.of(Y_2026, M_5, D_12),
-                        "Loan to " + MARCO_P,
-                        "Temporary loan",
-                        UUID.randomUUID(),
-                        null
-                )
-        );
+                () ->
+                        new CashTransaction(
+                                Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
+                                friendLoan,
+                                LocalDate.of(Y_2026, M_5, D_12),
+                                "Loan to " + MARCO_P,
+                                "Temporary loan",
+                                UUID.randomUUID(),
+                                null));
     }
 }

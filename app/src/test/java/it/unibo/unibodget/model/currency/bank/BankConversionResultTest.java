@@ -3,20 +3,19 @@ package it.unibo.unibodget.model.currency.bank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-
 import org.junit.jupiter.api.Test;
 
 class BankConversionResultTest {
 
     @Test
     void shouldStoreFieldsCorrectly() {
-        final BankConversionResult r = new BankConversionResult(
-                new BigDecimal("120"),
-                new BigDecimal("5"),
-                new BigDecimal("105"),
-                "EUR",
-                "USD"
-        );
+        final BankConversionResult r =
+                new BankConversionResult(
+                        new BigDecimal("120"),
+                        new BigDecimal("5"),
+                        new BigDecimal("105"),
+                        "EUR",
+                        "USD");
 
         assertEquals(new BigDecimal("120"), r.getConvertedAmount());
         assertEquals(new BigDecimal("5"), r.getCommission());
@@ -24,5 +23,4 @@ class BankConversionResultTest {
         assertEquals("EUR", r.getSourceCurrencyCode());
         assertEquals("USD", r.getTargetCurrencyCode());
     }
-
 }

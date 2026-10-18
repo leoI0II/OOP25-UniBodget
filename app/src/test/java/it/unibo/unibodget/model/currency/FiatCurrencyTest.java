@@ -16,5 +16,4 @@ class FiatCurrencyTest {
         assertEquals("Euro", c.getFullName());
         assertEquals("EUR", c.getCode());
     }
-
 }

@@ -33,5 +33,4 @@ class WindowPreferencesTest {
         assertEquals(HEIGHT_700, prefs.getHeight());
         assertTrue(prefs.isMaximized());
     }
-
 }

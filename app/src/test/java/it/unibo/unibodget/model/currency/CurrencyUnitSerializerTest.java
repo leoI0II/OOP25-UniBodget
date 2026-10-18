@@ -2,13 +2,11 @@ package it.unibo.unibodget.model.currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import java.io.IOException;
+import java.io.StringWriter;
+import org.junit.jupiter.api.Test;
 
 class CurrencyUnitSerializerTest {
 
@@ -23,5 +21,4 @@ class CurrencyUnitSerializerTest {
 
         assertEquals("\"EUR\"", writer.toString());
     }
-
 }

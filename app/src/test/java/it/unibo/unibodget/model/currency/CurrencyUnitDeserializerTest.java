@@ -2,12 +2,10 @@ package it.unibo.unibodget.model.currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 class CurrencyUnitDeserializerTest {
 
@@ -15,12 +13,10 @@ class CurrencyUnitDeserializerTest {
     void shouldDeserializeRegisteredCurrency() throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
 
-        try (JsonParser parser =
-                mapper.getFactory().createParser("\"EUR\"")) {
+        try (JsonParser parser = mapper.getFactory().createParser("\"EUR\"")) {
             parser.nextToken();
 
-            final CurrencyUnitDeserializer deserializer =
-                    new CurrencyUnitDeserializer();
+            final CurrencyUnitDeserializer deserializer = new CurrencyUnitDeserializer();
             final CurrencyUnit unit = deserializer.deserialize(parser, null);
 
             assertEquals(FiatCurrency.EUR, unit);

@@ -39,5 +39,4 @@ class SettingsManagerTest {
 
         assertEquals(before + 1, s.getPreferenceHistory().size());
     }
-
 }

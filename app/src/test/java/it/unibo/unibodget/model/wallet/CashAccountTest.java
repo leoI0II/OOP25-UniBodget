@@ -4,16 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import org.junit.jupiter.api.Test;
-
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
 
 class CashAccountTest {
 
@@ -25,21 +23,21 @@ class CashAccountTest {
     void shouldComputeBalanceCorrectly() {
         final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
-        acc.addTransaction(new CashTransaction(
-                new Asset(FiatCurrency.EUR, new BigDecimal("10")),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        ));
+        acc.addTransaction(
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, BigDecimal.TEN),
+                        Category.FOOD,
+                        LocalDate.now(),
+                        DESC,
+                        NOTES));
 
-        acc.addTransaction(new CashTransaction(
-                new Asset(FiatCurrency.EUR, new BigDecimal("5")),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        ));
+        acc.addTransaction(
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, new BigDecimal("5")),
+                        Category.FOOD,
+                        LocalDate.now(),
+                        DESC,
+                        NOTES));
 
         assertEquals(new BigDecimal("15"), acc.getBalance().amount());
     }
@@ -68,13 +66,13 @@ class CashAccountTest {
     void shouldRejectZeroAmountTransaction() {
         final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
-        final CashTransaction zeroTx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        );
+        final CashTransaction zeroTx =
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
+                        Category.FOOD,
+                        LocalDate.now(),
+                        DESC,
+                        NOTES);
 
         assertThrows(IllegalArgumentException.class, () -> acc.addTransaction(zeroTx));
     }
@@ -85,5 +83,4 @@ class CashAccountTest {
 
         assertTrue(acc.getName().startsWith("Cash Account"));
     }
-
 }

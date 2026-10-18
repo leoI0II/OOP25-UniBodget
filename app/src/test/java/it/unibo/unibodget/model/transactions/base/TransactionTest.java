@@ -3,17 +3,14 @@ package it.unibo.unibodget.model.transactions.base;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
 
 class TransactionTest {
 
@@ -35,19 +32,19 @@ class TransactionTest {
     }
 
     @Test
-    void shouldImplementEqualsAndHashCode() throws Exception {
+    void shouldImplementEqualsAndHashCode()
+            throws com.fasterxml.jackson.core.JsonProcessingException {
         final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
-        final CashTransaction original = new CashTransaction(
-                new Asset(FiatCurrency.EUR, BigDecimal.TEN),
-                Category.FOOD,
-                LocalDate.of(2026, 1, 1),
-                DESC,
-                NOTES
-        );
+        final CashTransaction original =
+                new CashTransaction(
+                        new Asset(FiatCurrency.EUR, BigDecimal.TEN),
+                        Category.FOOD,
+                        LocalDate.of(2026, 1, 1),
+                        DESC,
+                        NOTES);
 
         final String json = mapper.writeValueAsString(original);
-        final CashTransaction restored =
-                mapper.readValue(json, CashTransaction.class);
+        final CashTransaction restored = mapper.readValue(json, CashTransaction.class);
 
         assertEquals(original.getId(), restored.getId());
         assertEquals(original, restored);

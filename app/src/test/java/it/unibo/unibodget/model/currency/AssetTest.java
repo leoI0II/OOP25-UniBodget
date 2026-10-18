@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-
 import org.junit.jupiter.api.Test;
 
 class AssetTest {
 
-    private static final String VAL_2 = "2";
     private static final String VAL_5 = "5";
 
     @Test
@@ -50,7 +48,7 @@ class AssetTest {
 
     @Test
     void shouldMultiplyAssets() {
-        final Asset a1 = new Asset(FiatCurrency.EUR, new BigDecimal(VAL_2));
+        final Asset a1 = new Asset(FiatCurrency.EUR, BigDecimal.valueOf(2));
         final Asset a2 = new Asset(FiatCurrency.EUR, new BigDecimal("3"));
 
         assertEquals(new BigDecimal("6"), a1.multiply(a2).amount());
@@ -58,15 +56,15 @@ class AssetTest {
 
     @Test
     void shouldMultiplyByScalar() {
-        final Asset a = new Asset(FiatCurrency.EUR, new BigDecimal(VAL_2));
+        final Asset a = new Asset(FiatCurrency.EUR, BigDecimal.valueOf(2));
 
         assertEquals(new BigDecimal("6"), a.multiply(new BigDecimal("3")).amount());
     }
 
     @Test
     void shouldDivideAssets() {
-        final Asset a1 = new Asset(FiatCurrency.EUR, new BigDecimal("10"));
-        final Asset a2 = new Asset(FiatCurrency.EUR, new BigDecimal(VAL_2));
+        final Asset a1 = new Asset(FiatCurrency.EUR, BigDecimal.TEN);
+        final Asset a2 = new Asset(FiatCurrency.EUR, BigDecimal.valueOf(2));
 
         assertEquals(new BigDecimal("5"), a1.divide(a2).amount());
     }
@@ -81,7 +79,7 @@ class AssetTest {
     @Test
     void shouldCompareAssets() {
         final Asset a1 = new Asset(FiatCurrency.EUR, new BigDecimal(VAL_5));
-        final Asset a2 = new Asset(FiatCurrency.EUR, new BigDecimal("10"));
+        final Asset a2 = new Asset(FiatCurrency.EUR, BigDecimal.TEN);
 
         assertTrue(a1.compareTo(a2) < 0);
         assertTrue(a2.compareTo(a1) > 0);
@@ -99,5 +97,4 @@ class AssetTest {
         assertThrows(IllegalArgumentException.class, () -> a1.divide(a2));
         assertThrows(IllegalArgumentException.class, () -> a1.compareTo(a2));
     }
-
 }

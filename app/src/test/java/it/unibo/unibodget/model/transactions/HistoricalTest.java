@@ -4,15 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-
-import org.junit.jupiter.api.Test;
-
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import org.junit.jupiter.api.Test;
 
 class HistoricalTest {
 
@@ -22,8 +20,7 @@ class HistoricalTest {
                 Category.FOOD,
                 date,
                 desc,
-                "notes"
-        );
+                "notes");
     }
 
     @Test
@@ -73,5 +70,4 @@ class HistoricalTest {
         assertTrue(januaryList.contains(janTx));
         assertFalse(januaryList.contains(febTx));
     }
-
 }

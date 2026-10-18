@@ -2,9 +2,8 @@ package it.unibo.unibodget.model.settings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
-
 import it.unibo.unibodget.model.utils.ARGBColor;
+import org.junit.jupiter.api.Test;
 
 class ThemeTest {
 
@@ -26,8 +25,15 @@ class ThemeTest {
 
     @Test
     void shouldFallbackToDefaultFontSize() {
-        final Theme t = 
-            new Theme("X", ARGBColor.WHITE, ARGBColor.BLACK, ARGBColor.BLACK, FONT_ARIAL, -5, false);
+        final Theme t =
+                new Theme(
+                        "X",
+                        ARGBColor.WHITE,
+                        ARGBColor.BLACK,
+                        ARGBColor.BLACK,
+                        FONT_ARIAL,
+                        -5,
+                        false);
         assertEquals(Theme.DEFAULT.getFontSize(), t.getFontSize());
     }
 
@@ -48,5 +54,4 @@ class ThemeTest {
         assertEquals(t1, t2);
         assertEquals(t1.hashCode(), t2.hashCode());
     }
-
 }

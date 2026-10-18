@@ -1,75 +1,83 @@
-// package it.unibo.unibodget.model.dashboard.impl;
+package it.unibo.unibodget.model.dashboard.impl;
 
-// import java.math.BigDecimal;
-// import java.util.List;
-// import java.util.Map;
-// import java.util.UUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import org.junit.jupiter.api.Test;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-// import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
-// import it.unibo.unibodget.model.wallet.CashAccount;
+import org.junit.jupiter.api.Test;
 
-// /**
-//  * Tests for {@link DefaultDashboardSnapshot}.
-//  */
-// class DefaultDashboardSnapshotTest {
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.wallet.CashAccount;
 
-//     @Test
-//     void shouldExposeFriendLoanSummariesAndWalletInsightsAndKeepCollectionsImmutable() {
-//         final FriendLoanSummary summary = new FriendLoanSummary(
-//                 UUID.randomUUID(),
-//                 "Marco",
-//                 new BigDecimal("100.00"),
-//                 new BigDecimal("30.00"),
-//                 new BigDecimal("70.00")
-//         );
+/**
+ * Tests the collections exposed by {@link DefaultDashboardSnapshot}.
+ */
+final class DefaultDashboardSnapshotTest {
 
-//         final WalletInsight insight = new WalletInsight(
-//                 "Spending",
-//                 "You spent less than last month.",
-//                 InsightTrend.POSITIVE,
-//                 new BigDecimal("20.00"),
-//                 new BigDecimal("10.00")
-//         );
+    @Test
+    void shouldExposeFriendLoanSummariesAndWalletInsightsAndKeepCollectionsImmutable() {
+        final FriendLoanSummary summary = new FriendLoanSummary(
+                UUID.randomUUID(),
+                "Marco",
+                new BigDecimal("100.00"),
+                new BigDecimal("30.00"),
+                new BigDecimal("70.00")
+        );
 
-//         final DefaultDashboardSnapshot snapshot = new DefaultDashboardSnapshot(
-//                 "Main wallet",
-//                 "EUR",
-//                 new BigDecimal("1700.00"),
-//                 List.<AbstractTransaction>of(),
-//                 Map.of("Food", new BigDecimal("300.00")),
-//                 new BigDecimal("1000.00"),
-//                 new BigDecimal("0.80"),
-//                 null,
-//                 List.of(summary),
-//                 List.of(insight),
-//                 List.<CashAccount>of()
-//         );
+        final WalletInsight insight = new WalletInsight(
+                "Spending",
+                "You spent less than last month.",
+                InsightTrend.POSITIVE,
+                new BigDecimal("20.00"),
+                new BigDecimal("10.00")
+        );
 
-//         assertEquals(1, snapshot.getFriendLoanSummaries().size());
-//         assertEquals("Marco", snapshot.getFriendLoanSummaries().get(0).getFriendName());
+        final DefaultDashboardSnapshot snapshot = new DefaultDashboardSnapshot(
+                "Main wallet",
+                FiatCurrency.EUR.getCode(),
+                new BigDecimal("1700.00"),
+                List.of(),
+                Map.of("Food", new BigDecimal("300.00")),
+                new BigDecimal("1000.00"),
+                new BigDecimal("0.80"),
+                BudgetStatus.SAFE,
+                List.of(summary),
+                List.of(insight),
+                List.of()
+        );
 
-//         assertEquals(1, snapshot.getWalletInsights().size());
-//         assertEquals("Spending", snapshot.getWalletInsights().get(0).title());
+        assertEquals(1, snapshot.getFriendLoanSummaries().size());
+        assertEquals(summary, snapshot.getFriendLoanSummaries().get(0));
 
-//         assertEquals(0, snapshot.getAllWallets().size());
+        assertEquals(1, snapshot.getWalletInsights().size());
+        assertEquals(insight, snapshot.getWalletInsights().get(0));
 
-//         assertThrows(
-//                 UnsupportedOperationException.class,
-//                 () -> snapshot.getFriendLoanSummaries().add(summary)
-//         );
+        assertTrue(snapshot.getAllWallets().isEmpty());
 
-//         assertThrows(
-//                 UnsupportedOperationException.class,
-//                 () -> snapshot.getWalletInsights().add(insight)
-//         );
+        final List<FriendLoanSummary> summaries = snapshot.getFriendLoanSummaries();
+        final List<WalletInsight> insights = snapshot.getWalletInsights();
+        final List<CashAccount> wallets = snapshot.getAllWallets();
+        final CashAccount extraWallet = new CashAccount("Extra", FiatCurrency.EUR);
 
-//         assertThrows(
-//                 UnsupportedOperationException.class,
-//                 () -> snapshot.getAllWallets().add(new CashAccount("Extra", null))
-//         );
-//     }
-// }
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> summaries.add(summary)
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> insights.add(insight)
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> wallets.add(extraWallet)
+        );
+    }
+}

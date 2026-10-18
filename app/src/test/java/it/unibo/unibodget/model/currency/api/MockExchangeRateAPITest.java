@@ -3,13 +3,11 @@ package it.unibo.unibodget.model.currency.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import java.time.LocalDate;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 class MockExchangeRateAPITest {
 
@@ -41,7 +39,6 @@ class MockExchangeRateAPITest {
                 api.getHistoricalRates(FiatCurrency.EUR, FiatCurrency.USD, from, to);
 
         assertEquals(3, history.size());
-        assertTrue(history.values().stream().allMatch(v -> v == VAL_1_2));
+        assertTrue(history.values().stream().allMatch(v -> Double.compare(v, VAL_1_2) == 0));
     }
-
 }

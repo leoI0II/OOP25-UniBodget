@@ -2,13 +2,11 @@ package it.unibo.unibodget.persistency.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDate;
-
-import org.junit.jupiter.api.Test;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
 
 class LocalDateSerDesTest {
 
@@ -19,7 +17,7 @@ class LocalDateSerDesTest {
     private final ObjectMapper mapper = PersistenceJacksonConfig.mapper();
 
     @Test
-    void testSerialize() throws Exception {
+    void testSerialize() throws JsonProcessingException {
         final LocalDate date = LocalDate.of(YEAR_2024, MONTH_5, DAY_OF_M_17);
 
         final String json = mapper.writeValueAsString(date);
@@ -28,7 +26,7 @@ class LocalDateSerDesTest {
     }
 
     @Test
-    void testDeserialize() throws Exception {
+    void testDeserialize() throws JsonProcessingException {
         final LocalDate date = mapper.readValue("\"2024-05-17\"", LocalDate.class);
 
         assertEquals(LocalDate.of(YEAR_2024, MONTH_5, DAY_OF_M_17), date);
