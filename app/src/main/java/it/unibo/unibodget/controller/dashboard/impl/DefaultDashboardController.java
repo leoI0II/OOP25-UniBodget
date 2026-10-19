@@ -88,6 +88,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private static final int MAX_CATEGORY_ROWS = 4;
     private static final String DEFAULT_CATEGORY_COLOR = "#7F8CFF";
     private static final String DEFAULT_SORT_ORDER_LABEL = "Newest first";
+    private static final String ERR_UNABLE_TO_SWITCH_WALLET = "Unable to switch wallet.";
+    private static final String ERR_UNABLE_TO_CREATE_WALLET = "Unable to create wallet.";
+    private static final String ERR_UNABLE_TO_DELETE_TRANSACTION = "Unable to delete transaction.";
+    private static final String ERR_UNABLE_TO_CREATE_TRANSACTION = "Unable to create transaction.";
+    private static final String ERR_UNABLE_TO_EDIT_TRANSACTION = "Unable to edit transaction.";
 
     private final DashboardView view;
     private final DashboardFacade dashboardFacade;
@@ -183,10 +188,12 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         try {
             final boolean selected = cashAccountService.selectWallet(walletId);
             if (!selected) {
-                view.showError("Unable to switch wallet.");
+                view.showError(ERR_UNABLE_TO_SWITCH_WALLET);
+                MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_SWITCH_WALLET));
             }
         } catch (final IllegalArgumentException | IllegalStateException exception) {
-            view.showError("Unable to switch wallet.");
+            view.showError(ERR_UNABLE_TO_SWITCH_WALLET);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_SWITCH_WALLET));
         }
     }
 
@@ -307,9 +314,12 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             dialog.showAndWait().ifPresent(newWallet -> {
                 cashAccountService.addWallet(newWallet);
                 cashAccountService.selectWallet(newWallet.getId());
+                MessageBus.send(new MainInfoNotificationEvent(
+                        "Wallet '" + newWallet.getName() + "' created successfully!"));
             });
         } catch (final IllegalArgumentException | IllegalStateException exception) {
-            view.showError("Unable to create wallet.");
+            view.showError(ERR_UNABLE_TO_CREATE_WALLET);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_CREATE_WALLET));
         }
     }
 
@@ -324,8 +334,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     public void renameWallet(final UUID walletId, final String newName) {
         if (!cashAccountService.renameWallet(walletId, newName)) {
             view.showError("Unable to rename wallet: wallet not found.");
+            MessageBus.send(new MainErrorNotificationEvent("Unable to rename wallet: wallet not found."));
             return;
         }
+        MessageBus.send(new MainInfoNotificationEvent("Wallet renamed to '" + newName + "' successfully!"));
         refreshDashboard();
     }
 
@@ -339,8 +351,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     public void onDeleteWalletRequested(final UUID walletId) {
         if (!cashAccountService.removeWallet(walletId)) {
             view.showError("Unable to delete wallet: wallet not found.");
+            MessageBus.send(new MainErrorNotificationEvent("Unable to delete wallet: wallet not found."));
             return;
         }
+        MessageBus.send(new MainInfoNotificationEvent("Wallet deleted successfully!"));
         refreshDashboard();
     }
 
@@ -369,11 +383,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         openFriendLoans
                 );
                 cashAccountService.addTransaction(transaction);
+                MessageBus.send(new MainInfoNotificationEvent("Transaction added successfully!"));
             });
         } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
+            MessageBus.send(new MainErrorNotificationEvent(exception.getMessage()));
         } catch (final IllegalStateException exception) {
-            view.showError("Unable to create transaction.");
+            view.showError(ERR_UNABLE_TO_CREATE_TRANSACTION);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_CREATE_TRANSACTION));
         }
     }
 
@@ -415,11 +432,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         openFriendLoans
                 );
                 cashAccountService.replaceTransaction(originalTransaction, replacement);
+                MessageBus.send(new MainInfoNotificationEvent("Transaction updated successfully!"));
             });
         } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
+            MessageBus.send(new MainErrorNotificationEvent(exception.getMessage()));
         } catch (final IllegalStateException exception) {
-            view.showError("Unable to edit transaction.");
+            view.showError(ERR_UNABLE_TO_EDIT_TRANSACTION);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_EDIT_TRANSACTION));
         }
     }
 
@@ -435,12 +455,17 @@ public final class DefaultDashboardController implements DashboardViewActions, W
 
             final boolean removed = cashAccountService.removeTransaction(transactionToDelete);
             if (!removed) {
-                view.showError("Unable to delete transaction.");
+                view.showError(ERR_UNABLE_TO_DELETE_TRANSACTION);
+                MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_DELETE_TRANSACTION));
+            } else {
+                MessageBus.send(new MainInfoNotificationEvent("Transaction deleted successfully!"));
             }
         } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
+            MessageBus.send(new MainErrorNotificationEvent(exception.getMessage()));
         } catch (final IllegalStateException exception) {
-            view.showError("Unable to delete transaction.");
+            view.showError(ERR_UNABLE_TO_DELETE_TRANSACTION);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_DELETE_TRANSACTION));
         }
     }
 
@@ -450,6 +475,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     @Override
     public void onManageCategoriesRequested() {
         view.showError("Category management is not available yet.");
+        MessageBus.send(new MainErrorNotificationEvent("Category management is not available yet."));
     }
 
     /**
@@ -465,9 +491,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         request.warningThreshold()
                 ));
                 cashAccountService.notifyObservers();
+                MessageBus.send(new MainInfoNotificationEvent("Monthly budget updated successfully!"));
             });
         } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to update monthly budget.");
+            MessageBus.send(new MainErrorNotificationEvent("Unable to update monthly budget."));
         }
     }
 
@@ -490,9 +518,12 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     type
             );
             dashboardFacade.getCategoryCatalog().addCustomCategory(createdCategory);
+            MessageBus.send(new MainInfoNotificationEvent(
+                    "Category '" + createdCategory.getName() + "' created successfully!"));
             return Optional.of(createdCategory);
         } catch (final IllegalArgumentException | IllegalStateException exception) {
             view.showError("Unable to create category.");
+            MessageBus.send(new MainErrorNotificationEvent("Unable to create category."));
             return Optional.empty();
         }
     }
