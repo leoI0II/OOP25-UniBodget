@@ -8,6 +8,9 @@ import java.util.UUID;
 
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.WalletAddedEvent;
+import it.unibo.unibodget.model.utils.event.WalletDeletedEvent;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
 
 /**
@@ -69,6 +72,7 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
             currentWallet = wallet;
         }
         notifyObservers();
+        MessageBus.send(new WalletAddedEvent(wallet));
     }
 
     /**
@@ -91,8 +95,29 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         }
         if (removed) {
             notifyObservers();
+            MessageBus.send(new WalletDeletedEvent(walletToRemove.get()));
         }
         return removed;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The rename event is published by {@link AbstractWallet#setName(String)}.</p>
+     */
+    @Override
+    public boolean renameWallet(final UUID walletId, final String newName) {
+        final UUID nonNullWalletId = Objects.requireNonNull(walletId);
+        final Optional<W> wallet = wallets.stream()
+                .filter(w -> w.getId().equals(nonNullWalletId))
+                .findFirst();
+
+        if (wallet.isEmpty()) {
+            return false;
+        }
+        wallet.get().setName(newName);
+        notifyObservers();
+        return true;
     }
 
     /**
@@ -137,7 +162,6 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     @Override
     public boolean removeTransaction(final T transaction) {
         final boolean removed = getRequiredCurrentWallet()
-                .getHistory()
                 .removeTransaction(Objects.requireNonNull(transaction));
         if (removed) {
             notifyObservers();
@@ -151,7 +175,6 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     @Override
     public void replaceTransaction(final T oldTransaction, final T newTransaction) {
         final boolean replaced = getRequiredCurrentWallet()
-                .getHistory()
                 .replaceTransaction(
                         Objects.requireNonNull(oldTransaction),
                         Objects.requireNonNull(newTransaction));

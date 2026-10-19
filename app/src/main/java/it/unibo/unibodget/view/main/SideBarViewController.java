@@ -3,11 +3,17 @@ package it.unibo.unibodget.view.main;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
 /**
@@ -44,6 +50,15 @@ public class SideBarViewController extends BaseViewController {
         navConverterItem.setOnAction(e -> navigationHandler.accept(AppContext.CONVERTER));
         navPortfolioItem.setOnAction(e -> navigationHandler.accept(AppContext.INVESTMENTS));
         navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+    }
+
+    /**
+     * Closes the application. {@link Platform#exit()} (unlike {@code System.exit})
+     * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
+     */
+    @FXML
+    private void handleCloseApp() {
+        Platform.exit();
     }
 
     /**
@@ -93,10 +108,72 @@ public class SideBarViewController extends BaseViewController {
             tile.getStyleClass().add("wallet-panel-selected");
         }
         tile.setOnMouseClicked(event -> {
-            delegate.onItemSelected(item.id());
-            refresh();
+            if (event.getButton() == MouseButton.PRIMARY) {
+                delegate.onItemSelected(item.id());
+                refresh();
+            }
+        });
+        final ContextMenu contextMenu = createTileContextMenu(item);
+        tile.setOnContextMenuRequested(event -> {
+            contextMenu.show(tile, event.getScreenX(), event.getScreenY());
+            event.consume();
         });
         return tile;
+    }
+
+    /**
+     * Builds the right-click menu of a wallet tile (Edit / Delete).
+     * The dialogs live here so that every context (dashboard, portfolio) gets the same UI;
+     * the actual model change is delegated to the active {@link SideBarDelegate}.
+     *
+     * @param item the wallet tile the menu belongs to
+     * @return the context menu
+     */
+    private ContextMenu createTileContextMenu(final SideBarItem item) {
+        final MenuItem editItem = new MenuItem("Edit");
+        editItem.setOnAction(e -> requestRename(item));
+        final MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> requestDelete(item));
+        return new ContextMenu(editItem, deleteItem);
+    }
+
+    /**
+     * Asks the user for a new wallet name and forwards it to the delegate.
+     * If the delegate rejects the name, the error is shown and the dialog reopens.
+     *
+     * @param item the wallet to rename
+     */
+    private void requestRename(final SideBarItem item) {
+        final TextInputDialog dialog = new TextInputDialog(item.name());
+        dialog.initOwner(walletList.getScene().getWindow());
+        dialog.setTitle("Rename wallet");
+        dialog.setHeaderText("Rename \"" + item.name() + "\"");
+        dialog.setContentText("New name:");
+        WalletRenamePrompt.ask(dialog, name -> {
+            if (!name.equals(item.name())) {
+                delegate.onRenameRequested(item.id(), name);
+                refresh();
+            }
+        });
+    }
+
+    /**
+     * Asks for confirmation and forwards the deletion of a wallet to the delegate.
+     *
+     * @param item the wallet to delete
+     */
+    private void requestDelete(final SideBarItem item) {
+        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.initOwner(walletList.getScene().getWindow());
+        confirm.setTitle("Delete wallet");
+        confirm.setHeaderText("Delete \"" + item.name() + "\"?");
+        confirm.setContentText("The wallet and its whole transaction history will be permanently removed.");
+        confirm.showAndWait()
+                .filter(ButtonType.OK::equals)
+                .ifPresent(ok -> {
+                    delegate.onDeleteRequested(item.id());
+                    refresh();
+                });
     }
 
     private void handleAddWallet() {

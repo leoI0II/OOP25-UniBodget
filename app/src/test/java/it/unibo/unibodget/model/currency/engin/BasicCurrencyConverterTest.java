@@ -126,7 +126,7 @@ class BasicCurrencyConverterTest {
     }
 
     @Test
-    void shouldUseEmergencyFallbackWhenStockPriceIsInvalid() {
+    void shouldThrowWhenStockPriceIsInvalid() {
         final UniversalPriceService service = new UniversalPriceService(
                 new MockAPI(),
                 unit -> new BigDecimal("60000"),
@@ -136,15 +136,12 @@ class BasicCurrencyConverterTest {
         final BasicCurrencyConverter converter =
                 new BasicCurrencyConverter(service);
 
-        final CurrencyConversionResult result = converter.convert(
+        // no more fallback to 1 USD (it gave fake values, e.g. 3 BTC = 3 USD), the caller decides what to do
+        assertThrows(IllegalArgumentException.class, () -> converter.convert(
                 BigDecimal.TEN,
                 FiatCurrency.USD,
                 StockMarketCurrency.AAPL
-        );
-
-        // Emergency fallback: 1 stock share = 1 USD.
-        assertAmountEquals("10", result.getConvertedAmount());
-        assertAmountEquals("1", result.getAppliedRate());
+        ));
     }
 
     private static final class MockAPI implements ExchangeRateAPI {

@@ -209,6 +209,37 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     }
 
     /**
+     * Renames the cash wallet with the given identifier and refreshes the dashboard.
+     *
+     * @param walletId the wallet identifier
+     * @param newName  the new display name
+     * @throws IllegalArgumentException if the name breaks the wallet naming rules;
+     *                                  left to the caller, which asks the user again
+     */
+    public void renameWallet(final UUID walletId, final String newName) {
+        if (!cashAccountService.renameWallet(walletId, newName)) {
+            view.showError("Unable to rename wallet: wallet not found.");
+            return;
+        }
+        refreshDashboard();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Removes the cash wallet and its whole history. If it was the selected wallet,
+     * the first remaining one becomes current.</p>
+     */
+    @Override
+    public void onDeleteWalletRequested(final UUID walletId) {
+        if (!cashAccountService.removeWallet(walletId)) {
+            view.showError("Unable to delete wallet: wallet not found.");
+            return;
+        }
+        refreshDashboard();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

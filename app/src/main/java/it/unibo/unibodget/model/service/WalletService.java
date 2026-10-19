@@ -53,6 +53,16 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
     boolean removeWallet(UUID walletId);
 
     /**
+     * Renames the wallet with the given identifier.
+     *
+     * @param walletId the identifier of the wallet to rename
+     * @param newName  the new display name; must not be blank
+     * @return {@code true} if the wallet was found and renamed, {@code false} if no such wallet exists
+     * @throws IllegalArgumentException if {@code newName} is blank
+     */
+    boolean renameWallet(UUID walletId, String newName);
+
+    /**
      * Selects the wallet to be used as current dashboard context.
      *
      * @param walletId the identifier of the wallet to select
