@@ -449,17 +449,15 @@ public class DefaultInvestmentController implements InvestmentController {
                                         + " "
                                         + asset,
                                 notes,
-                                Asset.of(
-                                        stableCoinSrc.stableCoin(),
-                                        // exchangeRateProvider.convert(cost,
-                                        // stableCoinSrc.stableCoin()).amount()
-                                        exchangeRateProvider
-                                                .convert(
-                                                        cost.amount(),
-                                                        cost.currency(),
-                                                        stableCoinSrc.stableCoin())
-                                                .getConvertedAmount()),
-                                fee);
+                                // price of ONE stablecoin in base currency of account
+                                exchangeRateProvider
+                                        .convert(
+                                                BigDecimal.ONE,
+                                                stableCoinSrc.stableCoin(),
+                                                stableCoinSrc.account().getBaseCurrency())
+                                        .getAsset(),
+                                // fee is already inside cost, so here is zero
+                                Asset.zero(fee.currency()));
                 // Execute the stablecoin transaction on the source investment account
                 stableCoinSrc.account().addTransaction(investmentTransactionOut);
                 yield new OrderResult.BuyWithStablesSuccess(

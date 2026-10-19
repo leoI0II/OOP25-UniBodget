@@ -5,19 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyConversionResult;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
+import it.unibo.unibodget.model.investment.BalanceSnapshot;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
 import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
-import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
+import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
@@ -25,100 +34,92 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.Map;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
- * Tests investment account management and order execution using fixed rates.
+ * Tests for DefaultInvestmentController.
  *
- * <p>No external price services or network connections are used.
+ * <p>
+ * Fixed rates used (see {@link #RATES}):
+ * AAPL = $150, BTC = $50 000, ETH = $4 000, USDT = $1, USD→EUR = 0.91
  */
 final class DefaultInvestmentControllerTest {
 
-    private static final int RATE_SCALE = 20;
-    private static final int RESULT_SCALE = 10;
+    private static final String S_150 = "150";
+    private static final String S_50000 = "50000";
+    private static final String S_5 = "5";
+    private static final String OTHER = "Other";
+    private static final int I_5 = 5;
+    private static final int I_9 = 9;
 
-    private static final BigDecimal AAPL_PRICE = new BigDecimal("150");
-    private static final BigDecimal BTC_PRICE = new BigDecimal("50000");
-    private static final BigDecimal ETH_PRICE = new BigDecimal("4000");
-    private static final BigDecimal USD_TO_EUR = new BigDecimal("0.91");
-    private static final BigDecimal INITIAL_CASH = new BigDecimal("10000");
-    private static final BigDecimal ORDER_FEE = new BigDecimal("5");
-    private static final BigDecimal TWO_UNITS = BigDecimal.valueOf(2);
-    private static final BigDecimal FIVE_UNITS = new BigDecimal("5");
-    private static final BigDecimal NINE_UNITS = new BigDecimal("9");
-    private static final BigDecimal LARGE_QUANTITY = new BigDecimal("100");
-    private static final BigDecimal HALF_UNIT = new BigDecimal("0.5");
-    private static final BigDecimal STABLECOIN_QUANTITY = new BigDecimal("1000");
-    private static final BigDecimal PURCHASE_BASIS_PRICE = new BigDecimal("100");
+    private static final LocalDate TODAY = LocalDate.now();
 
-    private static final String OTHER_ACCOUNT_NAME = "Other";
-    private static final LocalDate TEST_DATE = LocalDate.of(2026, 1, 1);
+    // the old MockExchangeRateProvider in main is all commented, so the rates are here.
+    // the key is "FROM->TO" with the codes, because the settings give the base currency as a
+    // different object than FiatCurrency.EUR. a pair that is not here throws, like the real
+    // converter when a price is missing
+    private static final Map<String, BigDecimal> RATES = Map.of(
+        "AAPL->USD", new BigDecimal(S_150),
+        "BTC->USD", new BigDecimal("50000"),
+        "ETH->USD", new BigDecimal("4000"),
+        "USDT->USD", BigDecimal.ONE,
+        "USD->USDT", BigDecimal.ONE,
+        "USD->EUR", new BigDecimal("0.91")
+    );
 
-    /*
-     * Prices expressed in EUR. Using EUR as the reference preserves the
-     * exact USD-to-EUR rate without first approximating its reciprocal.
-     */
-    private static final Map<String, BigDecimal> REFERENCE_PRICES =
-            Map.of(
-                    FiatCurrency.EUR.getCode(),
-                    BigDecimal.ONE,
-                    FiatCurrency.USD.getCode(),
-                    USD_TO_EUR,
-                    StockMarketCurrency.AAPL.getCode(),
-                    AAPL_PRICE.multiply(USD_TO_EUR),
-                    CryptoCurrency.BTC.getCode(),
-                    BTC_PRICE.multiply(USD_TO_EUR),
-                    CryptoCurrency.ETH.getCode(),
-                    ETH_PRICE.multiply(USD_TO_EUR),
-                    CryptoCurrency.USDT.getCode(),
-                    USD_TO_EUR);
+    private static final CurrencyConverter MOCK_CONVERTER = (amount, from, to) -> {
+        if (from.getCode().equals(to.getCode())) {
+            return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
+        }
+        final BigDecimal rate = RATES.get(from.getCode() + "->" + to.getCode());
+        if (rate == null) {
+            throw new IllegalArgumentException("No mock rate for " + from.getCode() + " -> " + to.getCode());
+        }
+        return new CurrencyConversionResult(amount, from, to, rate, amount.multiply(rate));
+    };
+
+    // no csv files written during the tests
+    private static final InvestmentsSnapshotService NO_SNAPSHOTS = new InvestmentsSnapshotService() {
+        @Override
+        public void save(final UUID accountId, final BalanceSnapshot snapshot) {
+            // nothing to save
+        }
+
+        @Override
+        public List<BalanceSnapshot> getSnapshots(final UUID accountId) {
+            return List.of();
+        }
+    };
 
     private DefaultInvestmentController controller;
     private InvestmentAccount account;
     private CashAccount cashAccount;
-    private CurrencyConverter converter;
+    private CurrencyConverter exchangeRateProvider;
 
-    /** Creates independent accounts and services before each test. */
     @BeforeEach
     void setUp() {
-        converter = DefaultInvestmentControllerTest::convertAtFixedRate;
+        exchangeRateProvider = MOCK_CONVERTER;
 
-        account = new InvestmentAccount("Test Portfolio", FiatCurrency.USD, converter);
+        account = new InvestmentAccount("Test Portfolio", FiatCurrency.USD, exchangeRateProvider);
 
+        // Cash account funded with $10 000
         cashAccount = new CashAccount("Test Cash", FiatCurrency.USD);
-        cashAccount.addTransaction(
-                CashTransaction.of(
-                        Asset.of(FiatCurrency.USD, INITIAL_CASH),
-                        Category.SAVINGS,
-                        TEST_DATE,
-                        "Initial deposit",
-                        ""));
+        cashAccount.addTransaction(CashTransaction.of(
+            Asset.of(FiatCurrency.USD, new BigDecimal("10000")),
+            Category.SAVINGS, TODAY, "initial deposit", ""
+        ));
 
-        final InvestmentAccountService investmentService = new InvestmentAccountService();
-        investmentService.addWallet(account);
-        investmentService.selectWallet(account.getId());
-
-        final CashAccountService cashService = new CashAccountService();
-        cashService.addWallet(cashAccount);
-        cashService.selectWallet(cashAccount.getId());
-
-        final Settings settings = new Settings();
-        settings.setBaseCurrency(FiatCurrency.EUR.getCode());
-
-        controller =
-                new DefaultInvestmentController(
-                        investmentService,
-                        cashService,
-                        converter,
-                        settings,
-                        new CSVInvestmentsSnapshotService());
+        controller = new DefaultInvestmentController(
+            new InvestmentAccountService(account),
+            new CashAccountService(cashAccount),
+            exchangeRateProvider,
+            new Settings(),
+            NO_SNAPSHOTS
+        );
     }
+
+    // ------------------------------------------------------------------ //
+    //  Account management                                                  //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testGetAllInvestmentAccounts() {
@@ -140,34 +141,47 @@ final class DefaultInvestmentControllerTest {
         assertFalse(controller.selectWallet(UUID.randomUUID()));
     }
 
+    // ------------------------------------------------------------------ //
+    //  Balance queries                                                   //
+    // ------------------------------------------------------------------ //
+
     @Test
     void testGetCurrentBalanceEmptyAccount() {
-        assertAmountEquals(BigDecimal.ZERO, controller.getCurrentBalance().amount());
+        assertEquals(
+            BigDecimal.ZERO.stripTrailingZeros(),
+            controller.getCurrentBalance().amount().stripTrailingZeros()
+        );
     }
 
     @Test
     void testGetCurrentBalanceAfterBuy() {
-        buyAapl(BigDecimal.TEN, AAPL_PRICE);
-
-        assertAmountEquals(
-                AAPL_PRICE.multiply(BigDecimal.TEN), controller.getCurrentBalance().amount());
+        // 10 AAPL @ $150 market price -> balance = $1500
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
+        assertEquals(
+            new BigDecimal("1500").stripTrailingZeros(),
+            controller.getCurrentBalance().amount().stripTrailingZeros()
+        );
     }
 
     @Test
-    void testGetAggregatedBalanceInBaseCurrency() {
-        buyAapl(BigDecimal.TEN, AAPL_PRICE);
-
-        final Asset balance = controller.getAggregatedBalance();
-
-        assertEquals(FiatCurrency.EUR.getCode(), balance.currency().getCode());
-        assertAmountEquals(
-                AAPL_PRICE.multiply(BigDecimal.TEN).multiply(USD_TO_EUR), balance.amount());
+    void testGetAggregatedBalancesContainsBothCurrencies() {
+        // 10 AAPL -> USD balance $1500, EUR balance 1500 * 0.91 = $1365
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
+        final var balance = controller.getAggregatedBalance();
+        assertEquals(new Settings().getBaseCurrencyUnit(), balance.currency());
+        assertEquals(
+            new BigDecimal("1365").stripTrailingZeros(),
+            balance.amount().stripTrailingZeros()
+        );
     }
+
+    // ------------------------------------------------------------------ //
+    //  Asset queries                                                       //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testGetAllTradeableAssetsContainsCryptoAndStocks() {
         final var assets = controller.getAllTradeableAssets();
-
         assertFalse(assets.isEmpty());
         assertTrue(assets.contains(CryptoCurrency.BTC));
         assertTrue(assets.contains(CryptoCurrency.ETH));
@@ -181,10 +195,8 @@ final class DefaultInvestmentControllerTest {
 
     @Test
     void testGetAllOwnedAssetsAfterBuy() {
-        buyAapl(BigDecimal.TEN, AAPL_PRICE);
-
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
         final var owned = controller.getAllOwnedAssets();
-
         assertEquals(1, owned.size());
         assertTrue(owned.contains(StockMarketCurrency.AAPL));
     }
@@ -196,111 +208,108 @@ final class DefaultInvestmentControllerTest {
 
     @Test
     void testGetOwnedStableCoinsAfterBuyingUsdt() {
-        account.addTransaction(
-                InvestmentTransaction.of(
-                        Asset.of(CryptoCurrency.USDT, STABLECOIN_QUANTITY),
-                        Category.INVESTMENT_BUY,
-                        TEST_DATE,
-                        "",
-                        "",
-                        Asset.of(FiatCurrency.USD, BigDecimal.ONE),
-                        Asset.zero(FiatCurrency.USD)));
-
-        final var stableCoins = controller.getOwnedStableCoins();
-
-        assertEquals(1, stableCoins.size());
-        assertTrue(stableCoins.contains(CryptoCurrency.USDT));
+        account.addTransaction(InvestmentTransaction.of(
+            Asset.of(CryptoCurrency.USDT, new BigDecimal("1000")),
+            Category.INVESTMENT_BUY, TODAY, "", "",
+            Asset.of(FiatCurrency.USD, BigDecimal.ONE),
+            Asset.zero(FiatCurrency.USD)
+        ));
+        final var stables = controller.getOwnedStableCoins();
+        assertEquals(1, stables.size());
+        assertTrue(stables.contains(CryptoCurrency.USDT));
     }
+
+    // ------------------------------------------------------------------ //
+    //  Order cost estimation                                             //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testEstimateBuyOrderCostFromCash() {
-        final Asset cost =
-                controller.estimateOrderCost(
-                        OrderType.BUY,
-                        StockMarketCurrency.AAPL,
-                        TWO_UNITS,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.of(FiatCurrency.USD, ORDER_FEE),
-                        new PaymentSource.CashAccountChannel(cashAccount));
-
+        // 2 AAPL @ $150 + $5 fee = $305
+        final var cost = controller.estimateOrderCost(
+            OrderType.BUY, StockMarketCurrency.AAPL, BigDecimal.TWO,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            new PaymentSource.CashAccountChannel(cashAccount)
+        );
         assertEquals(FiatCurrency.USD, cost.currency());
-        assertAmountEquals(AAPL_PRICE.multiply(TWO_UNITS).add(ORDER_FEE), cost.amount());
+        assertEquals(new BigDecimal("305").stripTrailingZeros(), cost.amount().stripTrailingZeros());
     }
 
     @Test
     void testEstimateSellOrderCostFromCash() {
-        final Asset proceeds =
-                controller.estimateOrderCost(
-                        OrderType.SELL,
-                        StockMarketCurrency.AAPL,
-                        TWO_UNITS,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.of(FiatCurrency.USD, ORDER_FEE),
-                        new PaymentSource.CashAccountChannel(cashAccount));
-
+        // 2 AAPL @ $150 − $5 fee = $295 proceeds
+        final var proceeds = controller.estimateOrderCost(
+            OrderType.SELL, StockMarketCurrency.AAPL, BigDecimal.TWO,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            new PaymentSource.CashAccountChannel(cashAccount)
+        );
         assertEquals(FiatCurrency.USD, proceeds.currency());
-        assertAmountEquals(AAPL_PRICE.multiply(TWO_UNITS).subtract(ORDER_FEE), proceeds.amount());
+        assertEquals(new BigDecimal("295").stripTrailingZeros(), proceeds.amount().stripTrailingZeros());
     }
 
     @Test
     void testEstimateTransferOrderCostEqualsQuantity() {
-        final Asset cost =
-                controller.estimateOrderCost(
-                        OrderType.TRANSFER,
-                        CryptoCurrency.BTC,
-                        HALF_UNIT,
-                        Asset.zero(FiatCurrency.USD),
-                        Asset.zero(FiatCurrency.USD),
-                        new PaymentSource.NoPaymentChannel());
-
+        // Transfer cost = quantity of the asset, no currency conversion
+        final var cost = controller.estimateOrderCost(
+            OrderType.TRANSFER, CryptoCurrency.BTC, new BigDecimal("0.5"),
+            Asset.zero(FiatCurrency.USD), Asset.zero(FiatCurrency.USD),
+            new PaymentSource.NoPaymentChannel()
+        );
         assertEquals(CryptoCurrency.BTC, cost.currency());
-        assertAmountEquals(HALF_UNIT, cost.amount());
+        assertEquals(new BigDecimal("0.5").stripTrailingZeros(), cost.amount().stripTrailingZeros());
     }
+
+    // ------------------------------------------------------------------ //
+    //  canBuy                                                            //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testCanBuyWithSufficientCash() {
-        assertTrue(
-                controller.canBuy(
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        StockMarketCurrency.AAPL,
-                        BigDecimal.TEN,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.of(FiatCurrency.USD, ORDER_FEE)));
+        // $10 000 available; 10 AAPL @ $150 + $5 fee = $1 505
+        assertTrue(controller.canBuy(
+            new PaymentSource.CashAccountChannel(cashAccount),
+            StockMarketCurrency.AAPL, BigDecimal.TEN,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5))
+        ));
     }
 
     @Test
     void testCanBuyWithInsufficientCash() {
-        assertFalse(
-                controller.canBuy(
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        CryptoCurrency.BTC,
-                        LARGE_QUANTITY,
-                        Asset.of(FiatCurrency.USD, BTC_PRICE),
-                        Asset.zero(FiatCurrency.USD)));
+        // $10 000 available; 100 BTC @ $50 000 = $5 000 000
+        assertFalse(controller.canBuy(
+            new PaymentSource.CashAccountChannel(cashAccount),
+            CryptoCurrency.BTC, BigDecimal.valueOf(100),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
+            Asset.zero(FiatCurrency.USD)
+        ));
     }
 
     @Test
     void testCanBuyWithNoPaymentSourceAlwaysTrue() {
-        assertTrue(
-                controller.canBuy(
-                        new PaymentSource.NoPaymentChannel(),
-                        StockMarketCurrency.AAPL,
-                        BigDecimal.TEN,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.zero(FiatCurrency.USD)));
+        assertTrue(controller.canBuy(
+            new PaymentSource.NoPaymentChannel(),
+            StockMarketCurrency.AAPL, BigDecimal.TEN,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.zero(FiatCurrency.USD)
+        ));
     }
+
+    // ------------------------------------------------------------------ //
+    //  canSell                                                           //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testCanSellWithSufficientPosition() {
         buyBtc(BigDecimal.TEN);
-
         assertTrue(controller.canSell(account, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanSellWithInsufficientPosition() {
         buyBtc(BigDecimal.ONE);
-
         assertFalse(controller.canSell(account, CryptoCurrency.BTC, BigDecimal.TEN));
     }
 
@@ -309,256 +318,202 @@ final class DefaultInvestmentControllerTest {
         assertFalse(controller.canSell(account, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
+    // ------------------------------------------------------------------ //
+    //  canTransfer                                                       //
+    // ------------------------------------------------------------------ //
+
     @Test
     void testCanTransferToSameAccountReturnsFalse() {
         buyBtc(BigDecimal.ONE);
-
         assertFalse(controller.canTransfer(account, account, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanTransferBetweenDifferentAccountsWithSufficientPosition() {
         buyBtc(BigDecimal.TEN);
-
-        final InvestmentAccount other = createOtherAccount();
-
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
         assertTrue(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanTransferWithInsufficientPositionReturnsFalse() {
         buyBtc(BigDecimal.ONE);
-
-        final InvestmentAccount other = createOtherAccount();
-
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
         assertFalse(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.TEN));
     }
 
+    // ------------------------------------------------------------------ //
+    //  executeBuyOrder                                                    //
+    // ------------------------------------------------------------------ //
+
     @Test
     void testExecuteBuyOrderWithCashSuccess() {
-        final var result =
-                controller.executeBuyOrder(
-                        account,
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        StockMarketCurrency.AAPL,
-                        BigDecimal.TEN,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.of(FiatCurrency.USD, ORDER_FEE),
-                        TEST_DATE,
-                        "Buy AAPL");
-
+        // Buy 10 AAPL @ $150 + $5 fee = $1505 debited from cash
+        final var result = controller.executeBuyOrder(
+            account, new PaymentSource.CashAccountChannel(cashAccount),
+            StockMarketCurrency.AAPL, BigDecimal.TEN,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            TODAY, "buy 10 AAPL"
+        );
         assertInstanceOf(OrderResult.BuyWithCashSuccess.class, result);
-
-        assertAmountEquals(
-                BigDecimal.TEN,
-                account.getPositionForAsset(StockMarketCurrency.AAPL).orElseThrow().quantity());
-
-        final BigDecimal expectedCash =
-                INITIAL_CASH.subtract(AAPL_PRICE.multiply(BigDecimal.TEN).add(ORDER_FEE));
-
-        assertAmountEquals(expectedCash, cashAccount.getBalance().amount());
+        assertEquals(
+            BigDecimal.TEN.stripTrailingZeros(),
+            account.getPositionForAsset(StockMarketCurrency.AAPL).get().quantity().stripTrailingZeros()
+        );
+        // 10 000 − 1505 = 8495
+        assertEquals(
+            new BigDecimal("8495").stripTrailingZeros(),
+            cashAccount.getBalance().amount().stripTrailingZeros()
+        );
     }
 
     @Test
     void testExecuteBuyOrderWithInsufficientFundsReturnsError() {
-        final var result =
-                controller.executeBuyOrder(
-                        account,
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        CryptoCurrency.BTC,
-                        LARGE_QUANTITY,
-                        Asset.of(FiatCurrency.USD, BTC_PRICE),
-                        Asset.zero(FiatCurrency.USD),
-                        TEST_DATE,
-                        "");
-
+        final var result = controller.executeBuyOrder(
+            account, new PaymentSource.CashAccountChannel(cashAccount),
+            CryptoCurrency.BTC, BigDecimal.valueOf(100),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
+            Asset.zero(FiatCurrency.USD),
+            TODAY, ""
+        );
         assertInstanceOf(OrderResult.InsufficientFunds.class, result);
         assertTrue(account.getPositions().isEmpty());
-        assertAmountEquals(INITIAL_CASH, cashAccount.getBalance().amount());
     }
 
     @Test
+    void testExecuteBuyOrderWithStableCoinUsesUnitPriceOfOneCoin() {
+        // hold 1000 USDT bought @ $1
+        account.addTransaction(InvestmentTransaction.of(
+            Asset.of(CryptoCurrency.USDT, new BigDecimal("1000")),
+            Category.INVESTMENT_BUY, TODAY, "", "",
+            Asset.of(FiatCurrency.USD, BigDecimal.ONE),
+            Asset.zero(FiatCurrency.USD)
+        ));
+
+        // 2 AAPL @ $150 + $5 fee = 305 USDT paid from the USDT position
+        final var result = controller.executeBuyOrder(
+            account, new PaymentSource.StableCoinPositionChannel(account, CryptoCurrency.USDT),
+            StockMarketCurrency.AAPL, BigDecimal.TWO,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            TODAY, ""
+        );
+
+        assertInstanceOf(OrderResult.BuyWithStablesSuccess.class, result);
+        final var usdtOut = ((OrderResult.BuyWithStablesSuccess) result).stablesAccount();
+        // the price of ONE usdt, before it was the total cost (305) and the realized P/L got huge
+        assertEquals(BigDecimal.ONE.stripTrailingZeros(), usdtOut.getUnitPrice().amount().stripTrailingZeros());
+        assertEquals(FiatCurrency.USD, usdtOut.getUnitPrice().currency());
+        // the fee is already inside the 305, so not again on the usdt transaction
+        assertTrue(usdtOut.getFee().isZero());
+        assertEquals(
+            new BigDecimal("695").stripTrailingZeros(),
+            account.getPositionForAsset(CryptoCurrency.USDT).get().quantity().stripTrailingZeros()
+        );
+        // usdt bought @ 1 and used @ 1 -> no realized profit or loss
+        assertTrue(account.getRealizedProfitLoss().isZero());
+    }
+
+    // ------------------------------------------------------------------ //
+    //  executeSellOrder                                                  //
+    // ------------------------------------------------------------------ //
+
+    @Test
     void testExecuteSellOrderWithCashSuccess() {
-        buyAapl(BigDecimal.TEN, PURCHASE_BASIS_PRICE);
-
-        final var result =
-                controller.executeSellOrder(
-                        account,
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        StockMarketCurrency.AAPL,
-                        FIVE_UNITS,
-                        Asset.of(FiatCurrency.USD, AAPL_PRICE),
-                        Asset.of(FiatCurrency.USD, ORDER_FEE),
-                        TEST_DATE,
-                        "Partial sell");
-
+        // Hold 10 AAPL; sell 5 @ $150 − $5 fee = $745 credited to cash
+        buyAapl(BigDecimal.TEN, new BigDecimal("100"));
+        final var result = controller.executeSellOrder(
+            account, new PaymentSource.CashAccountChannel(cashAccount),
+            StockMarketCurrency.AAPL, BigDecimal.valueOf(5),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            TODAY, "partial sell"
+        );
         assertInstanceOf(OrderResult.SellWithCashSuccess.class, result);
-
-        assertAmountEquals(
-                FIVE_UNITS,
-                account.getPositionForAsset(StockMarketCurrency.AAPL).orElseThrow().quantity());
-
-        final BigDecimal expectedCash =
-                INITIAL_CASH.add(AAPL_PRICE.multiply(FIVE_UNITS).subtract(ORDER_FEE));
-
-        assertAmountEquals(expectedCash, cashAccount.getBalance().amount());
+        assertEquals(
+            BigDecimal.valueOf(I_5).stripTrailingZeros(),
+            account.getPositionForAsset(StockMarketCurrency.AAPL).get().quantity().stripTrailingZeros()
+        );
+        // 10 000 + 745 = 10 745
+        assertEquals(
+            new BigDecimal("10745").stripTrailingZeros(),
+            cashAccount.getBalance().amount().stripTrailingZeros()
+        );
     }
 
     @Test
     void testExecuteSellOrderWithNoPositionReturnsError() {
-        final var result =
-                controller.executeSellOrder(
-                        account,
-                        new PaymentSource.CashAccountChannel(cashAccount),
-                        CryptoCurrency.BTC,
-                        BigDecimal.ONE,
-                        Asset.of(FiatCurrency.USD, BTC_PRICE),
-                        Asset.zero(FiatCurrency.USD),
-                        TEST_DATE,
-                        "");
-
+        final var result = controller.executeSellOrder(
+            account, new PaymentSource.CashAccountChannel(cashAccount),
+            CryptoCurrency.BTC, BigDecimal.ONE,
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
+            Asset.zero(FiatCurrency.USD),
+            TODAY, ""
+        );
         assertInstanceOf(OrderResult.InsufficientAssets.class, result);
     }
+
+    // ------------------------------------------------------------------ //
+    //  executeTransferOrder                                               //
+    // ------------------------------------------------------------------ //
 
     @Test
     void testExecuteTransferOrderSuccess() {
         buyBtc(BigDecimal.TEN);
-
-        final InvestmentAccount other = createOtherAccount();
-
-        final var result =
-                controller.executeTransferOrder(
-                        account, other, CryptoCurrency.BTC, BigDecimal.ONE, TEST_DATE, "");
-
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var result = controller.executeTransferOrder(
+            account, other, CryptoCurrency.BTC, BigDecimal.ONE, TODAY, ""
+        );
         assertInstanceOf(OrderResult.TransferSuccess.class, result);
-
-        assertAmountEquals(
-                NINE_UNITS,
-                account.getPositionForAsset(CryptoCurrency.BTC).orElseThrow().quantity());
-
-        assertAmountEquals(
-                BigDecimal.ONE,
-                other.getPositionForAsset(CryptoCurrency.BTC).orElseThrow().quantity());
+        assertEquals(
+            BigDecimal.valueOf(I_9).stripTrailingZeros(),
+            account.getPositionForAsset(CryptoCurrency.BTC).get().quantity().stripTrailingZeros()
+        );
+        assertEquals(
+            BigDecimal.ONE.stripTrailingZeros(),
+            other.getPositionForAsset(CryptoCurrency.BTC).get().quantity().stripTrailingZeros()
+        );
     }
 
     @Test
     void testExecuteTransferOrderToSameAccountReturnsError() {
         buyBtc(BigDecimal.ONE);
-
-        final var result =
-                controller.executeTransferOrder(
-                        account, account, CryptoCurrency.BTC, BigDecimal.ONE, TEST_DATE, "");
-
+        final var result = controller.executeTransferOrder(
+            account, account, CryptoCurrency.BTC, BigDecimal.ONE, TODAY, ""
+        );
         assertInstanceOf(OrderResult.InsufficientAssets.class, result);
     }
 
     @Test
     void testExecuteTransferOrderWithInsufficientPositionReturnsError() {
         buyBtc(BigDecimal.ONE);
-
-        final InvestmentAccount other = createOtherAccount();
-
-        final var result =
-                controller.executeTransferOrder(
-                        account, other, CryptoCurrency.BTC, BigDecimal.TEN, TEST_DATE, "");
-
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var result = controller.executeTransferOrder(
+            account, other, CryptoCurrency.BTC, BigDecimal.TEN, TODAY, ""
+        );
         assertInstanceOf(OrderResult.InsufficientAssets.class, result);
     }
 
-    /**
-     * Converts an amount using deterministic reference prices.
-     *
-     * @param amount the amount to convert
-     * @param from the source currency
-     * @param to the target currency
-     * @return the conversion result
-     */
-    private static CurrencyConversionResult convertAtFixedRate(
-            final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to) {
+    // ------------------------------------------------------------------ //
+    //  Helpers                                                            //
+    // ------------------------------------------------------------------ //
 
-        if (from.getCode().equalsIgnoreCase(to.getCode())) {
-            return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
-        }
-
-        final BigDecimal rate =
-                referencePrice(from).divide(referencePrice(to), RATE_SCALE, RoundingMode.HALF_UP);
-
-        final BigDecimal convertedAmount =
-                amount.multiply(rate).setScale(RESULT_SCALE, RoundingMode.HALF_UP);
-
-        return new CurrencyConversionResult(amount, from, to, rate, convertedAmount);
-    }
-
-    /**
-     * Retrieves the reference price of a supported currency.
-     *
-     * @param currency the currency to price
-     * @return its price in the reference currency
-     */
-    private static BigDecimal referencePrice(final CurrencyUnit currency) {
-        final BigDecimal price = REFERENCE_PRICES.get(currency.getCode());
-
-        if (price == null) {
-            throw new IllegalArgumentException(
-                    "No test price configured for " + currency.getCode());
-        }
-
-        return price;
-    }
-
-    /**
-     * Compares monetary amounts independently of their scale.
-     *
-     * @param expected the expected amount
-     * @param actual the actual amount
-     */
-    private static void assertAmountEquals(final BigDecimal expected, final BigDecimal actual) {
-
-        assertEquals(expected.stripTrailingZeros(), actual.stripTrailingZeros());
-    }
-
-    /**
-     * Creates another account for transfer tests.
-     *
-     * @return an account using the same fixed-rate converter
-     */
-    private InvestmentAccount createOtherAccount() {
-        return new InvestmentAccount(OTHER_ACCOUNT_NAME, FiatCurrency.USD, converter);
-    }
-
-    /**
-     * Adds an AAPL purchase directly to the investment account.
-     *
-     * @param quantity the purchased quantity
-     * @param pricePerShare the purchase price per share
-     */
     private void buyAapl(final BigDecimal quantity, final BigDecimal pricePerShare) {
-
-        account.addTransaction(
-                InvestmentTransaction.of(
-                        Asset.of(StockMarketCurrency.AAPL, quantity),
-                        Category.INVESTMENT_BUY,
-                        TEST_DATE,
-                        "",
-                        "",
-                        Asset.of(FiatCurrency.USD, pricePerShare),
-                        Asset.zero(FiatCurrency.USD)));
+        account.addTransaction(InvestmentTransaction.of(
+            Asset.of(StockMarketCurrency.AAPL, quantity),
+            Category.INVESTMENT_BUY, TODAY, "", "",
+            Asset.of(FiatCurrency.USD, pricePerShare),
+            Asset.zero(FiatCurrency.USD)
+        ));
     }
 
-    /**
-     * Adds a BTC purchase directly to the investment account.
-     *
-     * @param quantity the purchased quantity
-     */
     private void buyBtc(final BigDecimal quantity) {
-        account.addTransaction(
-                InvestmentTransaction.of(
-                        Asset.of(CryptoCurrency.BTC, quantity),
-                        Category.INVESTMENT_BUY,
-                        TEST_DATE,
-                        "",
-                        "",
-                        Asset.of(FiatCurrency.USD, BTC_PRICE),
-                        Asset.zero(FiatCurrency.USD)));
+        account.addTransaction(InvestmentTransaction.of(
+            Asset.of(CryptoCurrency.BTC, quantity),
+            Category.INVESTMENT_BUY, TODAY, "", "",
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_50000)),
+            Asset.zero(FiatCurrency.USD)
+        ));
     }
 }

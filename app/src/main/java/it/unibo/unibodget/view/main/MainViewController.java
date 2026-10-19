@@ -17,9 +17,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -31,6 +35,8 @@ import javafx.stage.Window;
  */
 public final class MainViewController extends BaseViewController {
 
+    @FXML private SplitPane mainSplitPane;
+    @FXML private Region sideBar;
     @FXML private SideBarViewController sideBarController;
     @FXML private StackPane contentArea;
     private final InvestmentController investmentController;
@@ -100,12 +106,36 @@ public final class MainViewController extends BaseViewController {
     @FXML
     public void initialize() {
         sideBarController.setNavigationHandler(this::navigateTo);
+        setupResizableSideBar();
         showDashboard();
     }
 
     /**
-     * Handles a top-level navigation request coming from the shared sidebar menu. Loads the
-     * corresponding context into the content area.
+     * Lets the user resize the sidebar by dragging the divider, between its min and
+     * max width (set in {@code SideBarView.fxml}). When the window changes size, only
+     * the content area grows, the sidebar keeps its width.
+     */
+    private void setupResizableSideBar() {
+        // when the window is resized, the sidebar dont change its width
+        SplitPane.setResizableWithParent(sideBar, false);
+        // the divider position is a % of the total width (0.0 - 1.0), but the width is known
+        // only after the first layout, so we wait for it, put the sidebar at its pref width
+        // (pref / total, e.g. 200 / 1000 = 0.2) and then remove the listener, we need it only once
+        mainSplitPane.widthProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(final ObservableValue<? extends Number> obs,
+                                final Number oldWidth, final Number newWidth) {
+                if (newWidth.doubleValue() > 0) {
+                    mainSplitPane.setDividerPositions(sideBar.getPrefWidth() / newWidth.doubleValue());
+                    mainSplitPane.widthProperty().removeListener(this);
+                }
+            }
+        });
+    }
+
+    /**
+     * Handles a top-level navigation request coming from the shared sidebar menu.
+     * Loads the corresponding context into the content area.
      *
      * @param context the selected application context
      */

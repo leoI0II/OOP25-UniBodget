@@ -2,6 +2,7 @@ package it.unibo.unibodget.view.main;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -13,7 +14,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
-import javafx.stage.WindowEvent;
 
 /**
  * JavaFX controller for the sidebar view.
@@ -63,6 +63,15 @@ public class SideBarViewController extends BaseViewController {
         navConverterItem.setOnAction(e -> navigationHandler.accept(AppContext.CONVERTER));
         navPortfolioItem.setOnAction(e -> navigationHandler.accept(AppContext.INVESTMENTS));
         navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+    }
+
+    /**
+     * Closes the application. {@link Platform#exit()} (unlike {@code System.exit})
+     * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
+     */
+    @FXML
+    private void handleCloseApp() {
+        Platform.exit();
     }
 
     /**
@@ -191,12 +200,5 @@ public class SideBarViewController extends BaseViewController {
         btn.setPrefHeight(ADD_WALLET_TILE_HEIGHT);
         btn.setOnAction(e -> handleAddWallet());
         return btn;
-    }
-
-    /** Closes the application through the JavaFX lifecycle. */
-    @FXML
-    public void handleClose() {
-        final var window = walletList.getScene().getWindow();
-        window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 }

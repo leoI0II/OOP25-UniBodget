@@ -20,7 +20,13 @@ import java.util.Objects;
  *     currency
  */
 public record Position(
-        CurrencyUnit asset, BigDecimal quantity, Asset averageBasisCost, Asset currentMarketValue) {
+        CurrencyUnit asset,
+        BigDecimal quantity,
+        Asset averageBasisCost,
+        Asset currentMarketValue) {
+
+    private static final int PERCENTAGE_SCALE = 10;
+
     /**
      * Validates that none of the record components are null.
      *
@@ -64,7 +70,7 @@ public record Position(
         }
         return getUnrealizedProfitLoss()
                 .amount()
-                .divide(getTotalCost().amount(), 4, RoundingMode.HALF_UP)
+                .divide(getTotalCost().amount(), PERCENTAGE_SCALE, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
     }
 

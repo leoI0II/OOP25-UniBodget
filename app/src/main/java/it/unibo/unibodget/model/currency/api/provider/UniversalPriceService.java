@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.api.provider;
 
+import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPI;
@@ -8,13 +9,16 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Resolves asset prices in USD and caches stock and crypto prices. */
+/**
+ * Resolves asset prices in USD and caches stock and crypto prices.
+ */
 public class UniversalPriceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UniversalPriceService.class);
@@ -58,25 +62,34 @@ public class UniversalPriceService {
 
         return switch (unit.getType()) {
             case FIAT, CUSTOM -> resolveFiatPrice(unit);
-            case CRYPTO -> getCachedPrice(unit, cryptoProvider, "CoinGecko");
-            case STOCK -> getCachedPrice(unit, stockProvider, "Alpha Vantage");
+            case CRYPTO -> getCachedPrice(
+                    unit, cryptoProvider, "CoinGecko",
+                    unit instanceof CryptoCurrency ? List.of(CryptoCurrency.values()) : List.of(unit));
+            case STOCK -> getCachedPrice(
+                    unit, stockProvider, "Alpha Vantage", List.of(unit));
         };
     }
 
     /**
-     * Retrieves a cached price or fetches a new one after expiration. Failed requests and invalid
-     * prices are never cached.
+     * Retrieves a cached price or fetches a new one after expiration.
+     * Failed requests and invalid prices are never cached.
+     *
+     * <p>On a miss the prices of all the {@code batch} assets are requested together
+     * and all the valid ones are cached, not only the one asked.</p>
      *
      * @param unit the currency or asset
      * @param provider the price provider
      * @param providerName the name of the price provider for logging
+     * @param batch the list of assets to request in batch
      * @return the resolved USD price
      */
     private synchronized BigDecimal getCachedPrice(
-            final CurrencyUnit unit, final PriceProvider provider, final String providerName) {
+            final CurrencyUnit unit,
+            final PriceProvider provider,
+            final String providerName,
+            final List<? extends CurrencyUnit> batch) {
 
-        final String key = unit.getType().name() + ":" + unit.getCode().toUpperCase(Locale.ROOT);
-
+        final String key = cacheKey(unit);
         final CachedPrice cached = cachedPrices.get(key);
         final Instant now = Instant.now();
 
@@ -92,16 +105,25 @@ public class UniversalPriceService {
                 key,
                 providerName);
 
-        BigDecimal price;
+        Map<CurrencyUnit, BigDecimal> prices;
         try {
-            price = provider.getPriceInUSD(unit);
+            prices = provider.getPricesInUSD(batch);
         } catch (final IllegalArgumentException | IllegalStateException e) {
             LOGGER.error(
                     "[CACHE] Errore richiesta provider per {}: {}",
                     unit.getCode(),
                     e.getMessage());
-            price = BigDecimal.ZERO;
+            prices = Map.of();
         }
+
+        final Instant fetchedAt = Instant.now();
+        prices.forEach((asset, assetPrice) -> {
+            if (assetPrice != null && assetPrice.signum() > 0) {
+                cachedPrices.put(cacheKey(asset), new CachedPrice(assetPrice, fetchedAt));
+            }
+        });
+
+        final BigDecimal price = prices.get(unit);
 
         if (price == null || price.signum() <= 0) {
             if (cached != null) {
@@ -113,23 +135,32 @@ public class UniversalPriceService {
                 return cached.price();
             }
 
-            LOGGER.error(
-                    "[CACHE] Fallback di emergenza 1.0 USD per {} (API bloccata)", key);
-            return BigDecimal.ONE;
+            throw new IllegalArgumentException(
+                    "No price available for " + key + " (" + providerName + " not reachable)");
         }
 
-        // Timestamp only after a successful request.
-        final Instant fetchedAt = Instant.now();
-        cachedPrices.put(key, new CachedPrice(price, fetchedAt));
-
         LOGGER.debug(
-                "[CACHE] STORED {}: {}{} — expires at {}",
+                "[CACHE] STORED {} prices from {} ({}: {}{}) — expires at {}",
+                prices.size(),
+                providerName,
                 key,
                 price,
                 USD_SUFFIX,
                 fetchedAt.plus(CACHE_DURATION));
 
         return price;
+    }
+
+    /**
+     * Returns the cache key of an asset, e.g. {@code CRYPTO:BTC}.
+     *
+     * @param unit the currency unit
+     * @return the cache key string
+     */
+    private static String cacheKey(final CurrencyUnit unit) {
+        return unit.getType().name()
+                + ":"
+                + unit.getCode().toUpperCase(Locale.ROOT);
     }
 
     /**

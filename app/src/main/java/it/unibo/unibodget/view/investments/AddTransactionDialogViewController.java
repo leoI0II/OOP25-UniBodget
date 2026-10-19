@@ -34,8 +34,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 
 /**
  * Controller for the dialog window that allows the user to add a new investment transaction (e.g.,
@@ -529,33 +527,30 @@ public final class AddTransactionDialogViewController extends BaseViewController
                             }
                         });
         // asset selezionato
-        selectedAssetComboBox.setButtonCell(
-                new ListCell<>() {
-                    @Override
-                    protected void updateItem(final CurrencyUnit item, final boolean empty) {
-                        super.updateItem(item, empty);
-                        setText(empty || item == null ? "" : fmtComboBoxItemString(item));
-                    }
-                });
-        selectedAssetComboBox.setOnAction(
-                event -> {
-                    final var selected = selectedAssetComboBox.getValue();
-                    if (selected != null) {
-                        final var price = investmentController.getCurrentMarketPrice(selected);
-                        pricePerAssetTextField.setText(
-                                price.amount()
-                                        .setScale(
-                                                selected.getDisplayDecimals(), RoundingMode.HALF_UP)
-                                        .toPlainString());
-                        updateTotalSpent();
-                    }
-                });
-        selectedAssetComboBox
-                .valueProperty()
-                .addListener(
-                        (obs, old, newVal) -> {
-                            updateTotalSpent();
-                        });
+        selectedAssetComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(final CurrencyUnit item, final boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : fmtComboBoxItemString(item));
+            }
+        });
+        selectedAssetComboBox.setOnAction(event -> {
+            final var selected = selectedAssetComboBox.getValue();
+            if (selected != null) {
+                try {
+                    final var price = investmentController.getCurrentMarketPrice(selected);
+                    pricePerAssetTextField.setText(
+                            price.amount()
+                                    .setScale(selected.getDisplayDecimals(), RoundingMode.HALF_UP)
+                                    .toPlainString());
+                } catch (final IllegalArgumentException e) {
+                    // live price not available (api down or rate limit), the user writes it by hand
+                    pricePerAssetTextField.clear();
+                }
+                updateTotalSpent();
+            }
+        });
+        selectedAssetComboBox.valueProperty().addListener((obs, old, newVal) -> updateTotalSpent());
         // Pre-select the first asset in the list by default
         selectedAssetComboBox.setValue(investmentController.getAllTradeableAssets().getFirst());
     }
@@ -654,19 +649,5 @@ public final class AddTransactionDialogViewController extends BaseViewController
         transferNotesTextArea.setPromptText("Notes...");
         setupMaxQuantityButton(
                 transferMaxQuantityToggleButton, transferAssetComboBox, transferQuantityTextField);
-    }
-
-    /**
-     * Closes the dialog stage when triggered.
-     */
-    @FXML
-    public void handleCloseDialog() {
-        if (addTransactionButton.getScene() == null) {
-            return;
-        }
-        final Window window = addTransactionButton.getScene().getWindow();
-        if (window instanceof Stage stage) {
-            stage.close();
-        }
     }
 }
