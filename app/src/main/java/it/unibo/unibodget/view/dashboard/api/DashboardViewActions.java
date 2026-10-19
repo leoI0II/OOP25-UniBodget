@@ -51,6 +51,19 @@ public interface DashboardViewActions {
     void onCreateWalletRequested();
 
     /**
+     * Called when wallet deletion is requested.
+     *
+     * <p>
+     * This default implementation is intentionally empty to preserve backward
+     * compatibility with existing implementations. [web:477][web:617]
+     * </p>
+     *
+     * @param walletId the identifier of the wallet to delete
+     */
+    default void onDeleteWalletRequested(final UUID walletId) {
+    }
+
+    /**
      * Called when transaction creation is requested.
      */
     void onCreateTransactionRequested();
