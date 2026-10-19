@@ -83,10 +83,12 @@ public class SideBarViewController extends BaseViewController {
 
     private Node createTile(final SideBarItem item) {
         final var tile = new VBox();
-        tile.getChildren().addAll(
-                new Label(item.name()),
-                new Label(item.balance())
-        );
+        tile.getStyleClass().add("wallet-tile");
+        final var nameLabel = new Label(item.name());
+        nameLabel.getStyleClass().add("wallet-tile-name");
+        final var balanceLabel = new Label(item.balance());
+        balanceLabel.getStyleClass().add("wallet-tile-balance");
+        tile.getChildren().addAll(nameLabel, balanceLabel);
         if (item.selected()) {
             tile.getStyleClass().add("wallet-panel-selected");
         }
@@ -103,6 +105,7 @@ public class SideBarViewController extends BaseViewController {
 
     private Node createAddWalletTile() {
         final var btn = new Button("+ Add wallet");
+        btn.getStyleClass().add("button-secondary");
         btn.setMaxWidth(Double.MAX_VALUE);  // occupa tutta la larghezza
         btn.setPrefHeight(ADD_WALLET_TILE_HEIGHT);
         btn.setOnAction(e -> handleAddWallet());

@@ -167,7 +167,7 @@ public class ConverterWidgetFX {
         final Color buttonTextColor = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getButtonColor()));
 
         // Glass‑style background
-        final Color glassBase = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getPrimaryColor()));
+        final Color glassBase = theme.isDarkMode() ? Color.WHITE : Color.BLACK;
         final Color glassFill = new Color(glassBase.getRed(), 
                                         glassBase.getGreen(), 
                                         glassBase.getBlue(), 

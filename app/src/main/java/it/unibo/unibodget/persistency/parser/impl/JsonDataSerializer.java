@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * JSON serializer implementation used by UniBodget to convert domain model
@@ -102,6 +103,9 @@ public final class JsonDataSerializer<T> implements DataSerializer<T> {
         }
         if (value instanceof LocalDate d) {
             return quote + d.toString() + quote;
+        }
+        if (value instanceof UUID u) {
+            return quote + u.toString() + quote;
         }
         if (value instanceof BigDecimal bd) {
             return bd.toPlainString();

@@ -49,4 +49,42 @@ class ThemeTest {
         assertEquals(t1.hashCode(), t2.hashCode());
     }
 
+    @Test
+    void shouldRespectExplicitDarkModeRegardlessOfAccentColor() {
+        // Bright gold accent with explicit dark mode
+        final Theme darkGold = new Theme(
+                "Custom",
+                true,
+                new ARGBColor("#FFD700"),
+                new ARGBColor("#FFD700"),
+                ARGBColor.WHITE,
+                FONT_ARIAL,
+                FONT_14,
+                false
+        );
+        assertEquals(true, darkGold.isDarkMode());
+
+        // Deep navy accent with explicit light mode
+        final Theme lightNavy = new Theme(
+                "Custom",
+                false,
+                new ARGBColor("#0F172A"),
+                new ARGBColor("#0F172A"),
+                ARGBColor.BLACK,
+                FONT_ARIAL,
+                FONT_14,
+                false
+        );
+        assertEquals(false, lightNavy.isDarkMode());
+    }
+
+    @Test
+    void shouldFallbackToPresetNameIfDarkModeNull() {
+        final Theme darkNamed = new Theme("Dark", "#FFD700", "#FFD700");
+        final Theme lightNamed = new Theme("Light", "#0F172A", "#0F172A");
+
+        assertEquals(true, darkNamed.isDarkMode());
+        assertEquals(false, lightNamed.isDarkMode());
+    }
+
 }

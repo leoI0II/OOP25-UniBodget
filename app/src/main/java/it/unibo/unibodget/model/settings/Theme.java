@@ -32,20 +32,40 @@ public final class Theme {
     private static final String FONT_ARIAL = "Arial";
 
     /**
-     * The default theme used when no user preference is available.
+     * Predefined dark theme (UniBodget signature look).
      */
-    public static final Theme DEFAULT =
+    public static final Theme DARK =
             new Theme(
-                    "Light",
+                    "Dark",
+                    new ARGBColor(255, 14, 16, 27),
                     ARGBColor.WHITE,
-                    ARGBColor.LIGHT_GRAY,
-                    getReadableTextColor(ARGBColor.WHITE),
+                    ARGBColor.WHITE,
                     FONT_ARIAL,
                     FONT_14,
                     false
             );
 
+    /**
+     * Predefined light theme.
+     */
+    public static final Theme LIGHT =
+            new Theme(
+                    "Light",
+                    new ARGBColor(255, 245, 247, 251),
+                    new ARGBColor(255, 24, 27, 36),
+                    new ARGBColor(255, 24, 27, 36),
+                    FONT_ARIAL,
+                    FONT_14,
+                    false
+            );
+
+    /**
+     * The default theme used when no user preference is available.
+     */
+    public static final Theme DEFAULT = DARK;
+
     private final String name;
+    private final boolean darkMode;
     private final ARGBColor primaryColor;
     private final ARGBColor buttonColor;
     private final ARGBColor textColor;
@@ -56,13 +76,14 @@ public final class Theme {
     /**
      * Creates a new {@code Theme} with explicit values.
      *
-     * @param name        the theme name
-     * @param primaryColor the primary background color
+     * @param name         the theme name
+     * @param primaryColor the primary background or accent color
      * @param buttonColor  the button color
      * @param textColor    the text color
      * @param fontFamily   the font family
      * @param fontSize     the font size (must be positive)
      * @param boldText     whether bold text is enabled
+     * @param darkMode     whether dark mode is enabled (optional for backward compatibility)
      */
     @JsonCreator
     public Theme(
@@ -72,7 +93,8 @@ public final class Theme {
         @JsonProperty("textColor") final ARGBColor textColor,
         @JsonProperty("fontFamily") final String fontFamily,
         @JsonProperty("fontSize") final int fontSize,
-        @JsonProperty("boldText") final boolean boldText) {
+        @JsonProperty("boldText") final boolean boldText,
+        @JsonProperty("darkMode") final Boolean darkMode) {
 
         this.name = Objects.requireNonNull(name);
         this.primaryColor = Objects.requireNonNull(primaryColor);
@@ -81,9 +103,68 @@ public final class Theme {
         this.fontFamily = Objects.requireNonNull(fontFamily);
 
         // Fallback to default size if invalid
-        this.fontSize = fontSize > 0 ?fontSize : DEFAULT.fontSize;
-
+        this.fontSize = fontSize > 0 ? fontSize : DEFAULT.fontSize;
         this.boldText = boldText;
+
+        if (darkMode != null) {
+            this.darkMode = darkMode;
+        } else if ("Dark".equalsIgnoreCase(name)) {
+            this.darkMode = true;
+        } else if ("Light".equalsIgnoreCase(name)) {
+            this.darkMode = false;
+        } else {
+            final double luminance =
+                    0.299 * primaryColor.red()
+                    + 0.587 * primaryColor.green()
+                    + 0.114 * primaryColor.blue();
+            this.darkMode = luminance <= HALF;
+        }
+    }
+
+    /**
+     * Creates a new {@code Theme} with explicit dark mode and values.
+     *
+     * @param name         the theme name
+     * @param darkMode     whether dark mode is enabled
+     * @param primaryColor the primary accent color
+     * @param buttonColor  the button color
+     * @param textColor    the text color
+     * @param fontFamily   the font family
+     * @param fontSize     the font size (must be positive)
+     * @param boldText     whether bold text is enabled
+     */
+    public Theme(
+            final String name,
+            final boolean darkMode,
+            final ARGBColor primaryColor,
+            final ARGBColor buttonColor,
+            final ARGBColor textColor,
+            final String fontFamily,
+            final int fontSize,
+            final boolean boldText) {
+        this(name, primaryColor, buttonColor, textColor, fontFamily, fontSize, boldText, darkMode);
+    }
+
+    /**
+     * Creates a new {@code Theme} with explicit values.
+     *
+     * @param name         the theme name
+     * @param primaryColor the primary background color
+     * @param buttonColor  the button color
+     * @param textColor    the text color
+     * @param fontFamily   the font family
+     * @param fontSize     the font size (must be positive)
+     * @param boldText     whether bold text is enabled
+     */
+    public Theme(
+        final String name,
+        final ARGBColor primaryColor,
+        final ARGBColor buttonColor,
+        final ARGBColor textColor,
+        final String fontFamily,
+        final int fontSize,
+        final boolean boldText) {
+        this(name, primaryColor, buttonColor, textColor, fontFamily, fontSize, boldText, null);
     }
 
     /**
@@ -188,6 +269,16 @@ public final class Theme {
     }
 
     /**
+     * Determines whether this theme represents a dark theme.
+     *
+     * @return {@code true} if dark mode, {@code false} if light mode
+     */
+    @JsonProperty("darkMode")
+    public boolean isDarkMode() {
+        return darkMode;
+    }
+
+    /**
      * Computes whether black or white text provides better readability
      * on top of the given background color.
      *
@@ -207,6 +298,7 @@ public final class Theme {
     public String toString() {
         return "Theme{"
                 + "name='" + name + '\''
+                + ", darkMode=" + darkMode
                 + ", primaryColor=" + primaryColor
                 + ", buttonColor=" + buttonColor
                 + ", textColor=" + textColor
@@ -225,7 +317,8 @@ public final class Theme {
             return false;
         }
         final Theme theme = (Theme) o;
-        return fontSize == theme.fontSize
+        return darkMode == theme.darkMode
+                && fontSize == theme.fontSize
                 && boldText == theme.boldText
                 && Objects.equals(name, theme.name)
                 && Objects.equals(primaryColor, theme.primaryColor)
@@ -238,6 +331,7 @@ public final class Theme {
     public int hashCode() {
         return Objects.hash(
                 name,
+                darkMode,
                 primaryColor,
                 buttonColor,
                 textColor,

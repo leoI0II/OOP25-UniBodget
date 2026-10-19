@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
+<VBox minWidth="200.0" prefHeight="700.0" prefWidth="200.0" styleClass="sidebar" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
    <children>
       <HBox prefHeight="60.0" prefWidth="150.0" spacing="8.0">
          <children>
