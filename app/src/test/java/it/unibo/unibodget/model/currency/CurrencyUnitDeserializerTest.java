@@ -1,7 +1,7 @@
 package it.unibo.unibodget.model.currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class CurrencyUnitDeserializerTest {
 
     @Test
-    void shouldDeserializeToPlaceholder() throws IOException {
+    void shouldDeserializeRegisteredCurrency() throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonParser parser = mapper.getFactory().createParser("\"EUR\"");
 
@@ -22,7 +22,8 @@ class CurrencyUnitDeserializerTest {
         final CurrencyUnitDeserializer d = new CurrencyUnitDeserializer();
         final CurrencyUnit unit = d.deserialize(parser, null);
 
-        assertTrue(unit instanceof CurrencyPlaceholder);
+        assertNotNull(unit);
+        assertEquals(FiatCurrency.EUR, unit);
         assertEquals("EUR", unit.getCode());
     }
 

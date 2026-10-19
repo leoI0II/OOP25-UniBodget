@@ -84,9 +84,9 @@ public final class WatchlistWidgetFX {
             protected void updateItem(final WatchlistPair item, final boolean empty) {
                 super.updateItem(item, empty);
 
+                getStyleClass().remove("active-pair");
                 if (empty || item == null) {
                     setText(null);
-                    setStyle("");
                     return;
                 }
 
@@ -100,17 +100,14 @@ public final class WatchlistWidgetFX {
                         new WatchlistPair(currentFrom.getCode(), currentTo.getCode());
 
                     if (item.equals(currentPair)) {
-                        setStyle("-fx-background-color: #333333; -fx-text-fill: white;");
-                    } else {
-                        setStyle("");
+                        getStyleClass().add("active-pair");
                     }
-                } else {
-                    setStyle("");
                 }
                 ThemeManager.applyFont(this);
             }
         });
 
+        view.getStyleClass().add("card");
         view.getChildren().addAll(title, saveButton, listView);
     }
 

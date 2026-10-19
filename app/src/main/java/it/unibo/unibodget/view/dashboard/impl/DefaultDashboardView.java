@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -84,6 +85,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final String STYLE_TRANSPARENT_BG = "-fx-background-color: transparent;";
     private static final String ORDER_NEWEST_FIRST = "Newest first";
     private static final String COLOR_WHITE = "white";
+    private static final String COLOR_CHARCOAL_TEXT = "#1a1e28";
 
     /**
      * Preferred visible height for the scrollable insights area.
@@ -94,29 +96,24 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * Minimum visible height for the scrollable insights area.
      */
     private static final double INSIGHTS_MIN_VIEWPORT_HEIGHT = 180.0;
-
-    /**
-     * Horizontal padding used inside each insight card.
-     */
-    private static final double INSIGHT_CARD_HORIZONTAL_PADDING = 28.0;
-
-    private static final double BUDGET_CIRCLE_RADIUS = 46.0;
+    private static final double BUDGET_CIRCLE_RADIUS = 64.0;
+    private static final double BUDGET_CIRCLE_STROKE_WIDTH = 12.0;
     private static final int INSIGHTS_GAP = 12;
+    private static final int INSIGHTS_TILE_GAP = 6;
     private static final int ROOT_PADDING = 18;
     private static final double PREF_WIDTH = 1440.0;
     private static final double PREF_HEIGHT = 900.0;
     private static final double COL_PERCENT_FIRST = 46.0;
     private static final double COL_PERCENT_SECOND = 27.0;
     private static final double COL_PERCENT_THIRD = 27.0;
-    private static final double BUDGET_CONTENT_MIN_HEIGHT = 140.0;
+    private static final double BUDGET_CONTENT_MIN_HEIGHT = 160.0;
     private static final double CHART_HEIGHT = 170.0;
     private static final double CIRCLE_ROTATE_ANGLE = -90.0;
-    private static final double BUDGET_CIRCLE_BOX_SIZE = 120.0;
+    private static final double BUDGET_CIRCLE_BOX_SIZE = 150.0;
     private static final int CARD_PADDING = 18;
     private static final double MIN_PIE_SLICE_PERCENTAGE = 0.01;
     private static final double RANK_LABEL_MIN_WIDTH = 24.0;
     private static final double BUDGET_WARN_PERCENT = 80.0;
-    private static final int INSIGHT_CARD_PADDING = 14;
 
     private static final int FONT_SIZE_SMALL = 11;
     private static final int FONT_SIZE_MUTED = 12;
@@ -167,6 +164,9 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
     private final VBox insightsContainer;
     private final ScrollPane insightsScrollPane;
+    private final Label insightsCardTitleLabel;
+    private List<InsightCardViewState> currentInsights = List.of();
+    private ExpenseBreakdownCardViewState currentExpenseBreakdown;
 
     private final Label transactionSectionTitleLabel;
     private final Button createTransactionButton;
@@ -219,10 +219,12 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         this.insightsContainer = new VBox(INSIGHTS_GAP);
         this.insightsScrollPane = new ScrollPane(this.insightsContainer);
+        this.insightsCardTitleLabel = new Label("Active Wallet Insights");
 
         this.transactionSectionTitleLabel = new Label();
         this.createTransactionButton = new Button("+ New Transaction");
-        this.createTransactionButton.getStyleClass().add("button-primary");
+        this.createTransactionButton.getStyleClass().addAll("button-primary", "hero-transaction-button");
+        this.createTransactionButton.setFocusTraversable(false);
         this.exportCsvButton = new Button();
         this.exportCsvButton.getStyleClass().add(STYLE_BUTTON_SECONDARY);
         this.transactionTable = new TableView<>();
@@ -306,6 +308,37 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         cardsGrid.getColumnConstraints().addAll(firstColumn, secondColumn, thirdColumn);
 
+        this.balanceCardTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.balanceCardTitleLabel.setAlignment(Pos.CENTER);
+
+        this.ripartitionCardTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.ripartitionCardTitleLabel.setAlignment(Pos.CENTER);
+        this.ripartitionTotalLabel.setMaxWidth(Double.MAX_VALUE);
+        this.ripartitionTotalLabel.setAlignment(Pos.CENTER);
+
+        this.expenseCardTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.expenseCardTitleLabel.setAlignment(Pos.CENTER);
+        this.expenseTotalLabel.setMaxWidth(Double.MAX_VALUE);
+        this.expenseTotalLabel.setAlignment(Pos.CENTER);
+
+        this.budgetCardTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.budgetCardTitleLabel.setAlignment(Pos.CENTER);
+
+        this.friendLoanTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.friendLoanTitleLabel.setAlignment(Pos.CENTER);
+        this.friendLoanTotalLabel.setMaxWidth(Double.MAX_VALUE);
+        this.friendLoanTotalLabel.setAlignment(Pos.CENTER);
+        this.friendLoanMessageLabel.setMaxWidth(Double.MAX_VALUE);
+        this.friendLoanMessageLabel.setAlignment(Pos.CENTER);
+
+        this.insightsCardTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.insightsCardTitleLabel.setAlignment(Pos.CENTER);
+
+        this.transactionSectionTitleLabel.setMaxWidth(Double.MAX_VALUE);
+        this.transactionSectionTitleLabel.setAlignment(Pos.CENTER);
+
+        VBox.setMargin(this.createTransactionButton, new Insets(8, 0, 0, 0));
+
         final VBox balanceContentBox = new VBox(10,
                 this.balanceAmountLabel,
                 this.balanceCurrencyLabel,
@@ -335,12 +368,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         budgetTextBox.setAlignment(Pos.CENTER_LEFT);
         budgetTextBox.setFillWidth(true);
 
-        final Region budgetSpacer = new Region();
-        HBox.setHgrow(budgetSpacer, Priority.ALWAYS);
-
-        final HBox budgetContent = new HBox(20, createBudgetCircle(), budgetTextBox, budgetSpacer);
-        budgetContent.setAlignment(Pos.CENTER_LEFT);
+        final HBox budgetContent = new HBox(32, createBudgetCircle(), budgetTextBox);
+        budgetContent.setAlignment(Pos.CENTER);
         budgetContent.setMinHeight(BUDGET_CONTENT_MIN_HEIGHT);
+        VBox.setVgrow(budgetContent, Priority.ALWAYS);
 
         final VBox budgetCard = createCard(
                 this.budgetCardTitleLabel,
@@ -419,11 +450,11 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private Node createBudgetCircle() {
         this.budgetCircleTrack.setFill(Color.TRANSPARENT);
         this.budgetCircleTrack.setStroke(Color.web("rgba(255, 255, 255, 0.14)"));
-        this.budgetCircleTrack.setStrokeWidth(10);
+        this.budgetCircleTrack.setStrokeWidth(BUDGET_CIRCLE_STROKE_WIDTH);
 
         this.budgetCircleProgress.setFill(Color.TRANSPARENT);
         this.budgetCircleProgress.setStroke(Color.web("#7c5cff"));
-        this.budgetCircleProgress.setStrokeWidth(10);
+        this.budgetCircleProgress.setStrokeWidth(BUDGET_CIRCLE_STROKE_WIDTH);
         this.budgetCircleProgress.setStrokeLineCap(StrokeLineCap.ROUND);
         this.budgetCircleProgress.setRotate(CIRCLE_ROTATE_ANGLE);
 
@@ -449,9 +480,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * @return the configured card node
      */
     private VBox createInsightsCard() {
-        final Label title = new Label("Active Wallet Insights");
-        styleLabel(title, FONT_SIZE_BODY, true, "rgba(255,255,255,0.88)");
-        final VBox wrapper = createCard(title);
+        final VBox wrapper = createCard(this.insightsCardTitleLabel);
 
         this.insightsContainer.setFillWidth(true);
 
@@ -523,19 +552,11 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * @return the configured transaction card
      */
     private VBox createTransactionsCard() {
-        final HBox topBar = new HBox(12);
-        topBar.setAlignment(Pos.CENTER_LEFT);
-
-        final Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
         this.exportCsvButton.setFocusTraversable(false);
 
-        topBar.getChildren().addAll(
-                this.transactionSectionTitleLabel,
-                spacer,
-                this.exportCsvButton
-        );
+        final StackPane topBar = new StackPane(this.transactionSectionTitleLabel, this.exportCsvButton);
+        StackPane.setAlignment(this.transactionSectionTitleLabel, Pos.CENTER);
+        StackPane.setAlignment(this.exportCsvButton, Pos.CENTER_RIGHT);
 
         final Node filtersBar = createTransactionFiltersBar();
 
@@ -808,7 +829,9 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             this.ripartitionEmptyLabel.setVisible(true);
             this.ripartitionEmptyLabel.setManaged(true);
             this.ripartitionEmptyLabel.setText(state.emptyMessage());
-            styleLabel(this.ripartitionEmptyLabel, FONT_SIZE_MUTED, false, "rgba(255,255,255,0.55)");
+            final boolean dark = ThemeManager.isDarkMode();
+            final String emptyTextColor = dark ? "rgba(255,255,255,0.55)" : "rgba(26,30,40,0.55)";
+            styleLabel(this.ripartitionEmptyLabel, FONT_SIZE_MUTED, false, emptyTextColor);
             return;
         }
 
@@ -857,9 +880,24 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      *            the expense breakdown state
      */
     private void renderExpenseCard(final ExpenseBreakdownCardViewState state) {
+        this.currentExpenseBreakdown = state;
         this.expenseCardTitleLabel.setText(state.title());
         this.expenseTotalLabel.setText(state.totalExpenseText());
+        buildExpenseRows(state);
+    }
+
+    /**
+     * Builds and styles the category breakdown rows for top expenses.
+     *
+     * @param state the expense breakdown card view state
+     */
+    private void buildExpenseRows(final ExpenseBreakdownCardViewState state) {
         this.expenseBreakdownBox.getChildren().clear();
+
+        final boolean dark = ThemeManager.isDarkMode();
+        final String strongText = dark ? COLOR_WHITE : COLOR_CHARCOAL_TEXT;
+        final String mediumText = dark ? "rgba(255,255,255,0.70)" : "rgba(26,30,40,0.70)";
+        final String softText = dark ? "rgba(255,255,255,0.55)" : "rgba(26,30,40,0.55)";
 
         for (final CategoryBreakdownItemViewState item : state.categories()) {
             final HBox row = new HBox(10);
@@ -879,10 +917,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             final VBox rightBox = new VBox(2, amountLabel, percentageLabel);
             rightBox.setAlignment(Pos.CENTER_RIGHT);
 
-            styleLabel(rankLabel, FONT_SIZE_MUTED, true, "rgba(255,255,255,0.70)");
-            styleLabel(categoryLabel, FONT_SIZE_CAPTION, true, COLOR_WHITE);
-            styleLabel(amountLabel, FONT_SIZE_CAPTION, true, COLOR_WHITE);
-            styleLabel(percentageLabel, FONT_SIZE_SMALL, false, "rgba(255,255,255,0.55)");
+            styleLabel(rankLabel, FONT_SIZE_MUTED, true, mediumText);
+            styleLabel(categoryLabel, FONT_SIZE_CAPTION, true, strongText);
+            styleLabel(amountLabel, FONT_SIZE_CAPTION, true, strongText);
+            styleLabel(percentageLabel, FONT_SIZE_SMALL, false, softText);
 
             row.getChildren().addAll(rankLabel, dot, categoryLabel, spacer, rightBox);
             this.expenseBreakdownBox.getChildren().add(row);
@@ -936,9 +974,26 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      *            the dashboard state
      */
     private void renderInsights(final DashboardViewState state) {
+        if (Objects.equals(this.currentInsights, state.insightCards()) && !this.insightsContainer.getChildren().isEmpty()) {
+            return;
+        }
+        buildInsightTiles(state.insightCards());
+    }
+
+    /**
+     * Builds and styles individual insight cards inside the insights container.
+     *
+     * @param cards the list of insight card view states to render
+     */
+    private void buildInsightTiles(final List<InsightCardViewState> cards) {
+        this.currentInsights = List.copyOf(cards);
         this.insightsContainer.getChildren().clear();
 
-        for (final InsightCardViewState insight : state.insightCards()) {
+        final boolean dark = ThemeManager.isDarkMode();
+        final String titleColor = dark ? COLOR_WHITE : COLOR_CHARCOAL_TEXT;
+        final String messageColor = dark ? "rgba(255,255,255,0.85)" : "#334155";
+
+        for (final InsightCardViewState insight : cards) {
             final Label title = new Label(insight.title());
             final Label message = new Label(insight.message());
             final Label trend = new Label(insight.trend());
@@ -947,26 +1002,27 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             message.setWrapText(true);
             trend.setWrapText(true);
 
-            message.setMinHeight(Region.USE_PREF_SIZE);
+            title.setMaxWidth(Double.MAX_VALUE);
+            message.setMaxWidth(Double.MAX_VALUE);
+            trend.setMaxWidth(Double.MAX_VALUE);
 
-            final boolean dark = ThemeManager.isDarkMode();
-            styleLabel(title, FONT_SIZE_CAPTION, true, dark ? COLOR_WHITE : "#1a1e28");
-            styleLabel(message, FONT_SIZE_MUTED, false, dark ? "rgba(255,255,255,0.72)" : "rgba(26,30,40,0.70)");
-            styleLabel(trend, FONT_SIZE_SMALL, true, dark ? "rgba(120,190,255,0.90)" : "#1d6fc2");
+            styleLabel(title, FONT_SIZE_CAPTION, true, titleColor);
+            styleLabel(message, FONT_SIZE_MUTED, false, messageColor);
 
-            final VBox card = new VBox(8, title, message, trend);
-            card.getStyleClass().add(CARD_STYLE_CLASS);
-            card.setPadding(new Insets(INSIGHT_CARD_PADDING));
-            card.setFillWidth(true);
-            card.setMinWidth(0);
-            card.setMaxWidth(Double.MAX_VALUE);
-            card.setPrefHeight(Region.USE_COMPUTED_SIZE);
+            trend.getStyleClass().add("insight-trend");
+            if ("POSITIVE".equalsIgnoreCase(insight.trend())) {
+                trend.getStyleClass().add("insight-trend-positive");
+            } else if ("NEGATIVE".equalsIgnoreCase(insight.trend())) {
+                trend.getStyleClass().add("insight-trend-negative");
+            } else {
+                trend.getStyleClass().add("insight-trend-neutral");
+            }
 
-            title.maxWidthProperty().bind(card.widthProperty().subtract(INSIGHT_CARD_HORIZONTAL_PADDING));
-            message.maxWidthProperty().bind(card.widthProperty().subtract(INSIGHT_CARD_HORIZONTAL_PADDING));
-            trend.maxWidthProperty().bind(card.widthProperty().subtract(INSIGHT_CARD_HORIZONTAL_PADDING));
+            final VBox tile = new VBox(INSIGHTS_TILE_GAP, title, message, trend);
+            tile.getStyleClass().add("insight-tile");
+            tile.setFillWidth(true);
 
-            this.insightsContainer.getChildren().add(card);
+            this.insightsContainer.getChildren().add(tile);
         }
     }
 
@@ -1007,7 +1063,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final Theme theme = ThemeManager.getTheme();
         final boolean dark = theme.isDarkMode();
 
-        final String strongText = dark ? COLOR_WHITE : "#1a1e28";
+        final String strongText = dark ? COLOR_WHITE : COLOR_CHARCOAL_TEXT;
         final String mediumText = dark ? "rgba(255,255,255,0.88)" : "rgba(26,30,40,0.85)";
         final String softText = dark ? "rgba(255,255,255,0.68)" : "rgba(26,30,40,0.65)";
 
@@ -1035,13 +1091,26 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         styleLabel(this.budgetStatusLabel, FONT_SIZE_STATUS, true, strongText);
         styleLabel(this.budgetProgressLabel, FONT_SIZE_SUBTITLE, false, strongText);
         styleLabel(this.budgetThresholdLabel, FONT_SIZE_CAPTION, false, softText);
-        styleLabel(this.budgetCirclePercentageLabel, FONT_SIZE_TITLE_SM, true, strongText);
+        styleLabel(this.budgetCirclePercentageLabel, FONT_SIZE_STAT, true, strongText);
+        this.budgetCircleTrack.setStroke(dark ? Color.web("rgba(255, 255, 255, 0.14)") : Color.web("rgba(0, 0, 0, 0.08)"));
 
         styleLabel(this.friendLoanTitleLabel, FONT_SIZE_BODY, true, mediumText);
         styleLabel(this.friendLoanTotalLabel, FONT_SIZE_HEADER, true, strongText);
         styleLabel(this.friendLoanMessageLabel, FONT_SIZE_CAPTION, false, softText);
 
+        styleLabel(this.insightsCardTitleLabel, FONT_SIZE_BODY, true, mediumText);
+
         styleLabel(this.transactionSectionTitleLabel, FONT_SIZE_SUBTITLE, true, strongText);
+
+        styleLabel(this.ripartitionEmptyLabel, FONT_SIZE_MUTED, false, softText);
+
+        if (this.currentExpenseBreakdown != null) {
+            buildExpenseRows(this.currentExpenseBreakdown);
+        }
+
+        if (!this.currentInsights.isEmpty()) {
+            buildInsightTiles(this.currentInsights);
+        }
     }
 
     /**

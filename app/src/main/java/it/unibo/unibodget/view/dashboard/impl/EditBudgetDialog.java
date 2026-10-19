@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -35,6 +36,7 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
 
         setTitle("Edit Monthly Budget");
         setHeaderText("Update the monthly budget for the selected wallet");
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType saveButtonType = new ButtonType("Save", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +56,9 @@ class SafeFileOpenerTest {
         final Path tempFile = Files.createTempFile("notReadable", SUFF_TXT);
 
         // remove read permission
-        tempFile.toFile().setReadable(false);
+        final boolean changed = tempFile.toFile().setReadable(false);
+        assumeTrue(changed && !Files.isReadable(tempFile),
+                "File system does not support revoking read permissions");
 
         assertThrows(IOException.class, () -> opener.open(tempFile));
     }

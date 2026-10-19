@@ -20,9 +20,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- layout copied more or less from the CoinMarketCap portfolio page, styles in investments.css -->
+<!-- layout modeled after portfolio views, unified styles defined in /css/theme.css -->
 <!-- scroll pane so if the window is small the page scrolls instead of squeezing the charts -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="investments-scroll" stylesheets="@investments.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="investments-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
    <content>
       <VBox fx:id="investmentsVBoxPage" spacing="16.0" styleClass="investments-page">
          <children>

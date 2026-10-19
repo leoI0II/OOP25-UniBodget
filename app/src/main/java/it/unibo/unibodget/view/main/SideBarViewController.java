@@ -3,8 +3,10 @@ package it.unibo.unibodget.view.main;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -97,8 +99,9 @@ public class SideBarViewController extends BaseViewController {
     }
 
     private Node createTile(final SideBarItem item) {
-        final var tile = new VBox();
+        final var tile = new VBox(4);
         tile.getStyleClass().add("wallet-tile");
+        tile.setAlignment(Pos.CENTER_LEFT);
         final var nameLabel = new Label(item.name());
         nameLabel.getStyleClass().add("wallet-tile-name");
         final var balanceLabel = new Label(item.balance());
@@ -145,6 +148,7 @@ public class SideBarViewController extends BaseViewController {
      */
     private void requestRename(final SideBarItem item) {
         final TextInputDialog dialog = new TextInputDialog(item.name());
+        ThemeManager.applyThemeToDialog(dialog);
         dialog.initOwner(walletList.getScene().getWindow());
         dialog.setTitle("Rename wallet");
         dialog.setHeaderText("Rename \"" + item.name() + "\"");
@@ -164,6 +168,7 @@ public class SideBarViewController extends BaseViewController {
      */
     private void requestDelete(final SideBarItem item) {
         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        ThemeManager.applyThemeToDialog(confirm);
         confirm.initOwner(walletList.getScene().getWindow());
         confirm.setTitle("Delete wallet");
         confirm.setHeaderText("Delete \"" + item.name() + "\"?");

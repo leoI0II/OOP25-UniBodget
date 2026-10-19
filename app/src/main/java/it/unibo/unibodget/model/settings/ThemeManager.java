@@ -2,17 +2,17 @@ package it.unibo.unibodget.model.settings;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-import it.unibo.unibodget.model.utils.ARGBColor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 
 /**
  * Manages the currently active {@link Theme} used by the application UI.
@@ -131,12 +131,46 @@ public final class ThemeManager {
             root.applyCss();
             applyToTree(root);
         }
+    }
 
-        System.out.println("[THEME] Applied: "
-                + currentTheme.getPrimaryColor().toHexString()
-                + ", mode: " + (currentTheme.isDarkMode() ? "Dark" : "Light")
-                + ", font: " + currentTheme.getFontFamily()
-                + ", size: " + currentTheme.getFontSize());
+    /**
+     * Applies the active theme to the given JavaFX {@link Dialog}.
+     *
+     * <p>Configures the dialog pane stylesheets and theme mode class, and registers
+     * a hook to style the underlying scene when the dialog is shown.</p>
+     *
+     * @param dialog the dialog to style (must not be null)
+     */
+    public static void applyThemeToDialog(final Dialog<?> dialog) {
+        Objects.requireNonNull(dialog, "dialog");
+        final DialogPane dialogPane = dialog.getDialogPane();
+        if (dialogPane != null) {
+            final var stylesheetUrl = ThemeManager.class.getResource(THEME_CSS_PATH);
+            if (stylesheetUrl != null) {
+                final String ext = stylesheetUrl.toExternalForm();
+                if (!dialogPane.getStylesheets().contains(ext)) {
+                    dialogPane.getStylesheets().add(ext);
+                }
+            }
+            dialogPane.getStyleClass().removeAll("theme-dark", "theme-light");
+            dialogPane.getStyleClass().add(currentTheme.isDarkMode() ? "theme-dark" : "theme-light");
+            applyBackground(dialogPane);
+            applyToTree(dialogPane);
+
+            if (dialogPane.getScene() != null) {
+                applyThemeToScene(dialogPane.getScene());
+            }
+        }
+
+        final var existingOnShown = dialog.getOnShown();
+        dialog.setOnShown(event -> {
+            if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
+                applyThemeToScene(dialog.getDialogPane().getScene());
+            }
+            if (existingOnShown != null) {
+                existingOnShown.handle(event);
+            }
+        });
     }
 
     /**
@@ -194,12 +228,11 @@ public final class ThemeManager {
     }
 
     private static void applyBackground(final Node node) {
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-background-color\\s*:[^;]*(?:;|$)",
-                ""
-        );
+        final String existingStyle = node.getStyle()
+                .replaceAll("(?i)-fx-background-color\\s*:[^;]*(?:;|$)", "")
+                .replaceAll("(?i)-fx-accent\\s*:[^;]*(?:;|$)", "");
 
-        node.setStyle(existingStyle + ";" + getPrimaryBackgroundStyle());
+        node.setStyle(existingStyle + "; " + getPrimaryBackgroundStyle());
     }
 
     /**
@@ -226,34 +259,15 @@ public final class ThemeManager {
     }
 
     /**
-     * Gets the CSS style string for the primary background gradient of the current theme.
+     * Gets the CSS style string for the primary background of the current theme.
      * 
-     * @return the CSS style string for the background gradient
+     * @return the CSS style string for the solid background
      */
     public static String getPrimaryBackgroundStyle() {
-        final ARGBColor color = getTheme().getPrimaryColor();
-
         if (getTheme().isDarkMode()) {
-            return String.format(
-                    Locale.ROOT,
-                    "-fx-background-color: "
-                    + "linear-gradient(to bottom right, rgba(10,12,20,0.98), rgba(24,28,42,0.96)), "
-                    + "linear-gradient(to bottom right, rgba(%d,%d,%d,0.12), rgba(10,12,20,0.02));",
-                    color.red(),
-                    color.green(),
-                    color.blue()
-            );
+            return "-fx-background-color: #0b0e17;";
         }
-
-        return String.format(
-                Locale.ROOT,
-                "-fx-background-color: "
-                + "linear-gradient(to bottom right, #f6f8fb, #edf1f7), "
-                + "linear-gradient(to bottom right, rgba(%d,%d,%d,0.08), rgba(246,248,251,0.01));",
-                color.red(),
-                color.green(),
-                color.blue()
-        );
+        return "-fx-background-color: #f4f6fa;";
     }
 
     

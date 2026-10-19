@@ -13,6 +13,7 @@ import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -120,6 +121,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
         setTitle(editMode ? "Edit Transaction" : "Create Transaction");
         setHeaderText(editMode ? "Update transaction details" : "Insert transaction details");
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType confirmButtonType =
                 new ButtonType(editMode ? "Save" : "Create", ButtonData.OK_DONE);

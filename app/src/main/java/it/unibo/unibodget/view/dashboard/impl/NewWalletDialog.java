@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -32,6 +33,7 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
     public NewWalletDialog(final FiatCurrency defaultCurrency) {
         setTitle("Create New Wallet");
         setHeaderText("Insert wallet details");
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType createButtonType = new ButtonType("Create", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);

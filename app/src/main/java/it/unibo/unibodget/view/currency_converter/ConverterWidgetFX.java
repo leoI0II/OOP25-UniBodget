@@ -178,23 +178,14 @@ public class ConverterWidgetFX {
                                         0.07);
 
         /* ---------- CARD LAYOUT ---------- */
+        card.getStyleClass().add("card");
         card.setHgap(GRID_GAP);
         card.setVgap(GRID_GAP);
         card.setPadding(new Insets(CARD_PADDING));
-        card.setBackground(new Background(new BackgroundFill(glassFill, 
-                                                            new CornerRadii(CARD_CORNER_RADIUS), 
-                                                            Insets.EMPTY)));
-        card.setBorder(new Border(new BorderStroke(glassBorder, 
-                                                    BorderStrokeStyle.SOLID, 
-                                                    new CornerRadii(CARD_CORNER_RADIUS), 
-                                                    BorderWidths.DEFAULT)));
 
         /* ---------- AMOUNT FIELD ---------- */
         amountField.setPromptText("e.g. 10");
         amountField.setFont(font);
-        amountField.setStyle(
-        "-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8; -fx-text-fill: white;"
-        );
 
         /* ---------- CURRENCY BOXES ---------- */
         //final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
@@ -226,10 +217,6 @@ public class ConverterWidgetFX {
         /* ---------- SWAP BUTTON ---------- */
         final Button swapButton = new Button("⇅");
         swapButton.setFont(font);
-        swapButton.setTextFill(textColor);
-        swapButton.setBackground(new Background(new BackgroundFill(glassFill, 
-                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
-                                                                    Insets.EMPTY)));
 
         swapButton.setOnAction(e -> {
             final CurrencyUnit temp = fromBox.getValue();
@@ -240,10 +227,7 @@ public class ConverterWidgetFX {
         /* ---------- CONVERT BUTTON ---------- */
         final Button convertButton = new Button("Convert");
         convertButton.setFont(font);
-        convertButton.setBackground(new Background(new BackgroundFill(buttonColor, 
-                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
-                                                                    Insets.EMPTY)));
-        convertButton.setTextFill(buttonTextColor);
+        convertButton.getStyleClass().add("button-primary");
         convertButton.setMaxWidth(Double.MAX_VALUE);
         convertButton.setDisable(true);
 
@@ -251,7 +235,6 @@ public class ConverterWidgetFX {
         final TextField thresholdField = new TextField();
         thresholdField.setPromptText("Threshold (e.g. 1.10)");
         thresholdField.setFont(font);
-        thresholdField.setStyle(amountField.getStyle());
 
         final ComboBox<String> directionBox = 
             new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
@@ -420,9 +403,6 @@ public class ConverterWidgetFX {
      */
     private void configureCurrencyBox(final ComboBox<CurrencyUnit> box, final Font font) {
         box.setMaxWidth(Double.MAX_VALUE);
-        box.setStyle("-fx-font-size: "
-            + font.getSize()
-            + "px; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8;");
 
         box.setConverter(new StringConverter<>() {
             @Override 

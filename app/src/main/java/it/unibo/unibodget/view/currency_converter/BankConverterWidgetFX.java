@@ -150,6 +150,7 @@ public class BankConverterWidgetFX {
         ThemeManager.applyFont(bankLabel);
 
         // Assemble UI
+        view.getStyleClass().add("card");
         view.getChildren().addAll(
                 bankLabel,
                 bankBox,
@@ -184,6 +185,7 @@ public class BankConverterWidgetFX {
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        ThemeManager.applyThemeToDialog(dialog);
 
         // Convert dialog result into a Bank instance
         dialog.setResultConverter(button -> {

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxWidth="400.0" minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
+<VBox styleClass="sidebar" maxWidth="400.0" minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
    <children>
       <HBox prefHeight="60.0" prefWidth="150.0" spacing="8.0">
          <children>
@@ -21,7 +21,7 @@
                </font>
             </Button>
             <Region prefHeight="41.0" prefWidth="30.0" HBox.hgrow="ALWAYS" />
-            <MenuButton alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" stylesheets="@style.css" text="Menu">
+            <MenuButton alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" text="Menu">
                <items>
                   <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="Dashboard" />
                   <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="Converter" />

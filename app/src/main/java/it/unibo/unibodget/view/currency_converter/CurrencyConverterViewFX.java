@@ -164,14 +164,14 @@ public final class CurrencyConverterViewFX {
         root.setPadding(new Insets(ROOT_PADDING));
         root.setAlignment(Pos.TOP_LEFT);
 
-        /* -------------------- BACKGROUND GRADIENT -------------------- */
-        root.getStyleClass().add("theme-background");
+        /* -------------------- BACKGROUND -------------------- */
+        root.setStyle("-fx-background-color: transparent;");
 
         // Applies the theme when embedded in the main application scene.
         root.sceneProperty().addListener((observable, oldScene, newScene) -> {
-        if (newScene != null) {
+            if (newScene != null) {
                 ThemeManager.applyThemeToScene(newScene);
-        }
+            }
         });
 
         return root;

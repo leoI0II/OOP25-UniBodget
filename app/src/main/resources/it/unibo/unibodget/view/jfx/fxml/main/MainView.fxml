@@ -12,7 +12,6 @@
             fx:id="mainSplitPane"
             fx:controller="it.unibo.unibodget.view.main.MainViewController"
             styleClass="main-split-pane"
-            stylesheets="@style.css"
             prefHeight="700.0" prefWidth="900.0">
     <items>
         <fx:include fx:id="sideBar" source="/it/unibo/unibodget/view/jfx/fxml/main/SideBarView.fxml"/>  <!-- carica la side bar una volta sola per tutti i contesti -->

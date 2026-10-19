@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -46,6 +47,7 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
         setTitle("Create New Category");
         setHeaderText("Create a new " + formatCategoryType(fixedType) + " category");
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType createButtonType = new ButtonType("Create", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);

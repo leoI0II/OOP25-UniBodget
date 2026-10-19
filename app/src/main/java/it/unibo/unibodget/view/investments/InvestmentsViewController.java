@@ -12,8 +12,15 @@ import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
-import it.unibo.unibodget.view.main.*;
+import it.unibo.unibodget.view.main.AppContext;
+import it.unibo.unibodget.view.main.BaseViewController;
+import it.unibo.unibodget.view.main.SideBarDelegate;
+import it.unibo.unibodget.view.main.SideBarItem;
+import it.unibo.unibodget.view.main.SideBarViewController;
+import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.main.WalletRenamePrompt;
 import it.unibo.unibodget.view.utils.AssetFormatter;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import javafx.animation.KeyFrame;
@@ -509,6 +516,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         }
 
         final TextInputDialog dialog = new TextInputDialog();
+        ThemeManager.applyThemeToDialog(dialog);
         dialog.initOwner(currentWalletName.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setWidth(400);
@@ -587,6 +595,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Transaction");
             dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
+            ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addTransactionController.dispose());
@@ -748,7 +757,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
 
     /**
      * Colors the given labels green for a profit or red for a loss,
-     * using the style classes of {@code investments.css}.
+     * using the style classes of {@code theme.css}.
      *
      * @param loss   {@code true} if the value is a loss
      * @param labels the labels to color
@@ -779,6 +788,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Wallet");
             dialog.setScene(new Scene(root, ADD_NEW_WALLET_DIALOG_WIDTH, ADD_NEW_WALLET_DIALOG_HEIGHT));
+            ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addNewWalletVC.dispose());
