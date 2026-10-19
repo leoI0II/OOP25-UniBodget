@@ -610,7 +610,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
                 final Circle dot = new Circle(4, Color.web(item.categoryColorHex()));
                 final Label label = new Label(item.categoryText());
-                label.setStyle("-fx-text-fill: inherit;");
+                label.getStyleClass().add("category-cell-label");
 
                 final HBox box = new HBox(6, dot, label);
                 box.setAlignment(Pos.CENTER_LEFT);
@@ -1111,6 +1111,8 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         if (!this.currentInsights.isEmpty()) {
             buildInsightTiles(this.currentInsights);
         }
+
+        this.transactionTable.refresh();
     }
 
     /**

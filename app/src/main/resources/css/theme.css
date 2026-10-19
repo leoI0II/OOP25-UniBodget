@@ -460,7 +460,9 @@
     -fx-background-color: rgba(37, 99, 235, 0.20);
 }
 
-.theme-dark .table-view .table-cell {
+.theme-dark .table-view .table-cell,
+.theme-dark .table-view .table-cell .label,
+.theme-dark .category-cell-label {
     -fx-text-fill: #ffffff;
     -fx-alignment: CENTER_LEFT;
 }
@@ -516,7 +518,9 @@
     -fx-background-color: rgba(37, 99, 235, 0.10);
 }
 
-.theme-light .table-view .table-cell {
+.theme-light .table-view .table-cell,
+.theme-light .table-view .table-cell .label,
+.theme-light .category-cell-label {
     -fx-text-fill: #1a1e28;
     -fx-alignment: CENTER_LEFT;
 }
