@@ -1,12 +1,11 @@
 package it.unibo.unibodget.controller.currency_converter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
 import java.util.Set;
 
-/**
- * Controller responsible for managing the user's watchlist logic.
- */
+/** Controller responsible for managing the user's watchlist logic. */
 public final class WatchListController {
 
     private final WatchList model;
@@ -16,26 +15,26 @@ public final class WatchListController {
      *
      * @param model the watchlist model to operate on
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Controller manages domain watchlist entity")
     public WatchListController(final WatchList model) {
         this.model = model;
     }
 
     /**
      * Attempts to add a currency pair to the watchlist.
-     * 
+     *
      * @param pair the pair to add
      * @return true if the pair was added, false if it already existed
      */
     public boolean addPair(final WatchlistPair pair) {
-        if (pair == null) {
-            return false;
-        }
-        return model.add(pair);
+        return pair != null && model.add(pair);
     }
 
     /**
      * Removes a currency pair from the watchlist.
-     * 
+     *
      * @param pair the pair to remove
      */
     public void removePair(final WatchlistPair pair) {
@@ -44,7 +43,7 @@ public final class WatchListController {
 
     /**
      * Returns the current set of saved pairs.
-     * 
+     *
      * @return an unmodifiable set of WatchlistPair
      */
     public Set<WatchlistPair> getFavorites() {

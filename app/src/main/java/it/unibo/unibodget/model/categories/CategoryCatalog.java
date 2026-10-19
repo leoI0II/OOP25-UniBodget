@@ -1,51 +1,45 @@
 package it.unibo.unibodget.model.categories;
 
+import it.unibo.unibodget.model.utils.ARGBColor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import it.unibo.unibodget.model.utils.ARGBColor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Shared catalog of categories available across the application.
  *
- * <p>
- * The catalog contains:
- * </p>
+ * <p>The catalog contains:
+ *
  * <ul>
- * <li>built-in default categories, always present and always active,</li>
- * <li>user-defined custom categories, which can be added, renamed, recolored,
- * archived, and reactivated.</li>
+ *   <li>built-in default categories, always present and always active,
+ *   <li>user-defined custom categories, which can be added, renamed, recolored, archived, and
+ *       reactivated.
  * </ul>
  *
- * <p>
- * Custom categories are not hard-deleted by management operations. Instead,
- * they can be archived and later reactivated.
- * </p>
+ * <p>Custom categories are not hard-deleted by management operations. Instead, they can be archived
+ * and later reactivated.
  */
 public final class CategoryCatalog {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryCatalog.class);
+
     private final List<Category> customCategories;
 
-    /**
-     * Creates an empty catalog containing only built-in default categories.
-     */
+    /** Creates an empty catalog containing only built-in default categories. */
     public CategoryCatalog() {
         this.customCategories = new ArrayList<>();
         CategoryManager.init();
-        CategoryManager.getAll().stream()
-                .filter(Category::isCustom)
-                .forEach(customCategories::add);
+        CategoryManager.getAll().stream().filter(Category::isCustom).forEach(customCategories::add);
     }
 
     /**
      * Creates a catalog initialized with the given custom categories.
      *
-     * @param customCategories
-     *            the initial custom categories
-     * @throws NullPointerException
-     *             if {@code customCategories} is {@code null}
+     * @param customCategories the initial custom categories
+     * @throws NullPointerException if {@code customCategories} is {@code null}
      */
     public CategoryCatalog(final List<Category> customCategories) {
         Objects.requireNonNull(customCategories);
@@ -87,9 +81,7 @@ public final class CategoryCatalog {
      * @return an immutable list of active categories
      */
     public List<Category> getActiveCategories() {
-        return getAllCategories().stream()
-                .filter(Category::isActive)
-                .toList();
+        return getAllCategories().stream().filter(Category::isActive).toList();
     }
 
     /**
@@ -98,21 +90,16 @@ public final class CategoryCatalog {
      * @return an immutable list of archived custom categories
      */
     public List<Category> getArchivedCustomCategories() {
-        return customCategories.stream()
-                .filter(category -> !category.isActive())
-                .toList();
+        return customCategories.stream().filter(category -> !category.isActive()).toList();
     }
 
     /**
      * Finds a category by name, ignoring case.
      *
-     * @param categoryName
-     *            the name to search
+     * @param categoryName the name to search
      * @return the matching category, if present
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank
      */
     public Optional<Category> findByName(final String categoryName) {
         final String normalized = normalizeName(categoryName);
@@ -124,14 +111,10 @@ public final class CategoryCatalog {
     /**
      * Returns whether a category with the given name exists.
      *
-     * @param categoryName
-     *            the category name to search
-     * @return {@code true} if a category with that name exists, otherwise
-     *         {@code false}
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank
+     * @param categoryName the category name to search
+     * @return {@code true} if a category with that name exists, otherwise {@code false}
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank
      */
     public boolean existsByName(final String categoryName) {
         return findByName(categoryName).isPresent();
@@ -140,24 +123,22 @@ public final class CategoryCatalog {
     /**
      * Adds a custom category to the catalog.
      *
-     * @param category
-     *            the category to add
-     * @throws NullPointerException
-     *             if {@code category} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the category is not custom or if another category with the
-     *             same name already exists
+     * @param category the category to add
+     * @throws NullPointerException if {@code category} is {@code null}
+     * @throws IllegalArgumentException if the category is not custom or if another category with
+     *     the same name already exists
      */
     public void addCustomCategory(final Category category) {
         Objects.requireNonNull(category);
         if (!category.isCustom()) {
-            throw new IllegalArgumentException("Only custom categories can be added to the custom catalog.");
+            throw new IllegalArgumentException(
+                    "Only custom categories can be added to the custom catalog.");
         }
         if (existsByName(category.getName())) {
             throw new IllegalArgumentException("A category with the same name already exists.");
         }
         // Persist the new custom category using CategoryManager
-        System.out.println("Adding custom category: " + category);
+        LOGGER.debug("Adding custom category: {}", category);
         customCategories.add(category);
         CategoryManager.add(category);
     }
@@ -165,16 +146,11 @@ public final class CategoryCatalog {
     /**
      * Renames a custom category.
      *
-     * @param currentName
-     *            the current category name
-     * @param newName
-     *            the new category name
-     * @throws NullPointerException
-     *             if any argument is {@code null}
-     * @throws IllegalArgumentException
-     *             if either name is blank, if the target custom category does
-     *             not exist, or if another category with the new name already
-     *             exists
+     * @param currentName the current category name
+     * @param newName the new category name
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IllegalArgumentException if either name is blank, if the target custom category does
+     *     not exist, or if another category with the new name already exists
      */
     public void renameCustomCategory(final String currentName, final String newName) {
         final String normalizedCurrent = normalizeName(currentName);
@@ -190,15 +166,11 @@ public final class CategoryCatalog {
     /**
      * Recolors a custom category.
      *
-     * @param categoryName
-     *            the category name
-     * @param newColor
-     *            the new color
-     * @throws NullPointerException
-     *             if any argument is {@code null}
-     * @throws IllegalArgumentException
-     *             if the category name is blank or the custom category does not
-     *             exist
+     * @param categoryName the category name
+     * @param newColor the new color
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IllegalArgumentException if the category name is blank or the custom category does
+     *     not exist
      */
     public void recolorCustomCategory(final String categoryName, final ARGBColor newColor) {
         getCustomCategoryByName(categoryName).recolor(Objects.requireNonNull(newColor));
@@ -207,16 +179,13 @@ public final class CategoryCatalog {
     /**
      * Archives a custom category.
      *
-     * @param categoryName
-     *            the category name
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank or the custom category does
-     *             not exist
+     * @param categoryName the category name
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank or the custom category does
+     *     not exist
      */
     public void archiveCustomCategory(final String categoryName) {
-        //getCustomCategoryByName(categoryName).archive();
+        // getCustomCategoryByName(categoryName).archive();
         final Category category = getCustomCategoryByName(categoryName);
         category.archive();
         CategoryManager.saveAll();
@@ -225,16 +194,13 @@ public final class CategoryCatalog {
     /**
      * Reactivates a custom category.
      *
-     * @param categoryName
-     *            the category name
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank or the custom category does
-     *             not exist
+     * @param categoryName the category name
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank or the custom category does
+     *     not exist
      */
     public void reactivateCustomCategory(final String categoryName) {
-        //getCustomCategoryByName(categoryName).reactivate();
+        // getCustomCategoryByName(categoryName).reactivate();
         final Category category = getCustomCategoryByName(categoryName);
         category.reactivate();
         CategoryManager.saveAll();
@@ -243,33 +209,30 @@ public final class CategoryCatalog {
     /**
      * Returns a custom category by name.
      *
-     * @param categoryName
-     *            the category name
+     * @param categoryName the category name
      * @return the matching custom category
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank or the custom category does
-     *             not exist
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank or the custom category does
+     *     not exist
      */
     private Category getCustomCategoryByName(final String categoryName) {
         final String normalized = normalizeName(categoryName);
         return customCategories.stream()
                 .filter(c -> c.getName().equalsIgnoreCase(normalized))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Custom category not found: " + categoryName));
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "Custom category not found: " + categoryName));
     }
 
     /**
      * Validates and normalizes a category name.
      *
-     * @param categoryName
-     *            the raw category name
+     * @param categoryName the raw category name
      * @return the trimmed validated name
-     * @throws NullPointerException
-     *             if {@code categoryName} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code categoryName} is blank
+     * @throws NullPointerException if {@code categoryName} is {@code null}
+     * @throws IllegalArgumentException if {@code categoryName} is blank
      */
     private String normalizeName(final String categoryName) {
         Objects.requireNonNull(categoryName);

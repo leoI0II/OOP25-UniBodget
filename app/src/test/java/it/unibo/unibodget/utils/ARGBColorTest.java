@@ -1,4 +1,3 @@
-
 package it.unibo.unibodget.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -6,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.unibo.unibodget.model.utils.ARGBColor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import it.unibo.unibodget.model.utils.ARGBColor;
 
 class ARGBColorTest {
 
@@ -56,7 +54,8 @@ class ARGBColorTest {
     @Test
     void testRgbConstructorAddsFullAlpha() {
         final ARGBColor color = new ARGBColor(RGB_100, RGB_150, RGB_200);
-        assertEquals(ALPHA_FULL, color.alpha(), "Alpha should be 255 by default for RGB constructor");
+        assertEquals(
+                ALPHA_FULL, color.alpha(), "Alpha should be 255 by default for RGB constructor");
         assertEquals(100, color.red());
     }
 
@@ -93,43 +92,32 @@ class ARGBColorTest {
         assertEquals("#FFFF0000", red.toHexString());
     }
 
-    // 6. check if the class fails when components are out of bounds (less than 0 or greater than 255) 
+    // 6. check if the class fails when components are out of bounds (less than 0 or greater than
+    // 255)
     // and throws the correct exception with a clear message
     @ParameterizedTest
-    @CsvSource({
-        "-1, 0, 0, 0",
-        "256, 0, 0, 0",
-        "255, -10, 0, 0",
-        "255, 255, 256, 0"
-    })
+    @CsvSource({"-1, 0, 0, 0", "256, 0, 0, 0", "255, -10, 0, 0", "255, 255, 256, 0"})
     void testComponentOutOfBounds(final int a, final int r, final int g, final int b) {
-        final IllegalArgumentException thrown = assertThrows(
-            IllegalArgumentException.class,
-            () -> new ARGBColor(a, r, g, b)
-        );
+        final IllegalArgumentException thrown =
+                assertThrows(IllegalArgumentException.class, () -> new ARGBColor(a, r, g, b));
         assertTrue(thrown.getMessage().contains("must be between 0 and 255"));
     }
 
-    // 7. check if the hex string constructor fails 
+    // 7. check if the hex string constructor fails
     // when the string is not in the correct format (not 6 or 8 characters after removing #)
     @ParameterizedTest
     @ValueSource(strings = {"#12345", "1234567", "#FF", "", "#123456789"})
     void testInvalidHexLength(final String invalidHex) {
-        final IllegalArgumentException thrown = assertThrows(
-            IllegalArgumentException.class,
-            () -> new ARGBColor(invalidHex)
-        );
+        final IllegalArgumentException thrown =
+                assertThrows(IllegalArgumentException.class, () -> new ARGBColor(invalidHex));
         assertTrue(thrown.getMessage().contains("must be in the format #RRGGBB or #AARRGGBB"));
     }
 
-    // 8. check if the hex string constructor fails 
+    // 8. check if the hex string constructor fails
     // when the string contains invalid hexadecimal characters and throws the correct exception
     @Test
     void testInvalidHexCharacters() {
-        assertThrows(
-            NumberFormatException.class,
-            () -> new ARGBColor("#ZZZZZZ")
-        );
+        assertThrows(NumberFormatException.class, () -> new ARGBColor("#ZZZZZZ"));
     }
 
     // ==========================================

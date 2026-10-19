@@ -10,6 +10,7 @@ plugins {
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.danilopianini.gradle-java-qa") version "1.155.0"
+    id("com.diffplug.spotless") version "8.10.4"
 }
 
 repositories {
@@ -112,4 +113,14 @@ tasks.jar {
         "module-info.class",
         "META-INF/versions/**/module-info.class"
     )
+}
+
+spotless {
+    java {
+        target("src/**/*.java")
+
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }

@@ -136,4 +136,3 @@ public final class DefaultWalletInsightService implements WalletInsightService {
                 && transaction.getDate().getMonthValue() == month;
     }
 }
-

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +14,8 @@ class WatchListTest {
     private static final String USD = "USD";
 
     @BeforeEach
-    void resetWatchList() throws Exception {
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    void resetWatchList() throws NoSuchFieldException, IllegalAccessException {
         final Field loadedField = WatchList.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         ((Set<?>) loadedField.get(null)).clear();
@@ -55,5 +55,4 @@ class WatchListTest {
         assertTrue(wl.remove(p));
         assertFalse(wl.getFavorites().contains(p));
     }
-
 }

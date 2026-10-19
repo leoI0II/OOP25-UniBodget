@@ -26,5 +26,4 @@ class CryptoCurrencyTest {
         assertTrue(CryptoCurrency.USDT.isStableCoin());
         assertTrue(CryptoCurrency.USDC.isStableCoin());
     }
-
 }

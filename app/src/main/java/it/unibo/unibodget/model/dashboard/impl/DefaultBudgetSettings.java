@@ -41,7 +41,7 @@ public final class DefaultBudgetSettings implements BudgetSettings {
      * @throws IllegalArgumentException if limit is negative or threshold is outside [0, 1]
      */
     public DefaultBudgetSettings(
-        @JsonProperty("limitValue") final BigDecimal limitValue, 
+        @JsonProperty("limitValue") final BigDecimal limitValue,
         @JsonProperty("warningThreshold") final BigDecimal warningThreshold) {
         this.limitValue = Objects.requireNonNull(limitValue);
         if (limitValue.compareTo(BigDecimal.ZERO) < 0) {

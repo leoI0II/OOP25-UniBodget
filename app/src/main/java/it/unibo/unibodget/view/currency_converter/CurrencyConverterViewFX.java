@@ -42,14 +42,20 @@ public final class CurrencyConverterViewFX {
     private static final double ROOT_PADDING = 35;
 
     /**
+     * Window size and maximize preferences.
+     */
+    private static final WindowPreferences PREFS = new WindowPreferences();
+
+    /**
      * Shared controller injected via launchWith().
      */
     private static CurrencyConverterController sharedController;
 
     /**
-     * Window size and maximize preferences.
+     * Private constructor to prevent instantiation of utility class.
      */
-    private static final WindowPreferences PREFS = new WindowPreferences();
+    private CurrencyConverterViewFX() {
+    }
 
     /**
      * Launches the JavaFX application with a pre‑initialized controller.
@@ -145,7 +151,7 @@ public final class CurrencyConverterViewFX {
         showChartButton.setOnAction(e ->
                 CurrencyHistoryChartView.showInNewWindow(historyController)
         );
-        
+
         /* -------------------- TOP BAR -------------------- */
         final HBox topBar = new HBox(20);
         topBar.setAlignment(Pos.CENTER_LEFT);

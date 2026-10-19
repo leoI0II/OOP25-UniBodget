@@ -1,8 +1,6 @@
 package it.unibo.unibodget;
 
-/**
- * Entry point for launching the packaged application.
- */
+/** Entry point for launching the packaged application. */
 public final class Launcher {
 
     private Launcher() {

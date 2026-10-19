@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 
 /**
  * JavaFX widget that performs bank‑mediated currency conversions.
- * 
+ *
  * <p>
  * This component allows the user to:
  * <ul>
@@ -79,7 +79,7 @@ public class BankConverterWidgetFX {
 
         // Validation logic: enable button only when amount + bank are valid
         final Runnable validate = () -> {
-            final boolean emptyAmount = amountField.getText() == null 
+            final boolean emptyAmount = amountField.getText() == null
                 || amountField.getText().trim().isEmpty();
             calcBtn.setDisable(emptyAmount || bankBox.getValue() == null);
         };
@@ -108,9 +108,9 @@ public class BankConverterWidgetFX {
                     // Perform bank‑mediated conversion
                     final BankConversionService service = new BankConversionService(baseConverter);
                     final BankConversionResult res = service.convert(
-                        amount, 
-                        fromBox.getValue(), 
-                        toBox.getValue(), 
+                        amount,
+                        fromBox.getValue(),
+                        toBox.getValue(),
                         bank);
 
                     // Update UI
@@ -129,8 +129,8 @@ public class BankConverterWidgetFX {
                 resultLabel.setText("Conversion unavailable: " + ex.getMessage());
                 System.err.println("[BANK CONVERSION] Conversion failed");
                 ex.printStackTrace();
-            }  catch (final IllegalStateException ex) {
-                resultLabel.setText( "Price service unavailable. Please try again later." );
+            } catch (final IllegalStateException ex) {
+                resultLabel.setText("Price service unavailable. Please try again later.");
                 System.err.println("[BANK CONVERSION] Provider failed");
                 ex.printStackTrace();
             }
@@ -164,7 +164,7 @@ public class BankConverterWidgetFX {
 
     /**
      * Opens a dialog allowing the user to add a new bank with custom fees.
-     * 
+     *
      * <p>
      * The dialog validates fee values and updates both the controller and the UI.
      */

@@ -38,7 +38,12 @@ public class SideBarViewController extends BaseViewController {
     private Consumer<AppContext> navigationHandler = context -> { };
     private final ViewControllersFactory viewControllersFactory;
 
-    public SideBarViewController(ViewControllersFactory viewControllersFactory) {
+    /**
+     * Constructs a new SideBarViewController with the given factory.
+     *
+     * @param viewControllersFactory the factory used to create view controllers
+     */
+    public SideBarViewController(final ViewControllersFactory viewControllersFactory) {
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
     }
 

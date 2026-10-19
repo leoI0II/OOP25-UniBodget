@@ -26,11 +26,9 @@ import javafx.scene.control.DialogPane;
  */
 public final class ThemeManager {
 
-    /**
-     * The theme currently in use by the application.
-     * Initialized to {@link Theme#DEFAULT}.
-     */
-    private static Theme currentTheme = Theme.DEFAULT;
+    private static final String THEME_CSS_PATH = "/css/theme.css";
+    private static final String THEME_DARK = "theme-dark";
+    private static final String THEME_LIGHT = "theme-light";
 
     private static final Set<Scene> SCENES =
             Collections.newSetFromMap(new WeakHashMap<>());
@@ -38,7 +36,13 @@ public final class ThemeManager {
     private static final List<Consumer<Theme>> LISTENERS =
             new CopyOnWriteArrayList<>();
 
-    /** 
+    /**
+     * The theme currently in use by the application.
+     * Initialized to {@link Theme#DEFAULT}.
+     */
+    private static Theme currentTheme = Theme.DEFAULT;
+
+    /**
      * Private constructor to prevent instantiation.
      */
     private ThemeManager() {
@@ -91,11 +95,6 @@ public final class ThemeManager {
     }
 
     /**
-     * Stylesheet resource path for the unified application theme.
-     */
-    private static final String THEME_CSS_PATH = "/css/theme.css";
-
-    /**
      * Applies the active theme to the given JavaFX {@link Scene}.
      *
      * <p>The method updates:</p>
@@ -124,8 +123,8 @@ public final class ThemeManager {
 
         final Parent root = scene.getRoot();
         if (root != null) {
-            root.getStyleClass().removeAll("theme-dark", "theme-light");
-            root.getStyleClass().add(currentTheme.isDarkMode() ? "theme-dark" : "theme-light");
+            root.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
+            root.getStyleClass().add(currentTheme.isDarkMode() ? THEME_DARK : THEME_LIGHT);
 
             applyBackground(root);
             root.applyCss();
@@ -152,8 +151,8 @@ public final class ThemeManager {
                     dialogPane.getStylesheets().add(ext);
                 }
             }
-            dialogPane.getStyleClass().removeAll("theme-dark", "theme-light");
-            dialogPane.getStyleClass().add(currentTheme.isDarkMode() ? "theme-dark" : "theme-light");
+            dialogPane.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
+            dialogPane.getStyleClass().add(currentTheme.isDarkMode() ? THEME_DARK : THEME_LIGHT);
             applyBackground(dialogPane);
             applyToTree(dialogPane);
 
@@ -175,7 +174,7 @@ public final class ThemeManager {
 
     /**
      * Recursively applies the active theme to the given JavaFX {@link Node} and its children.
-     * 
+     *
      * @param node the JavaFX node to style
      */
     private static void applyToTree(final Node node) {
@@ -246,7 +245,7 @@ public final class ThemeManager {
 
     /**
      * Get the CSS style string for the font settings of the current theme.
-     * 
+     *
      * @return the CSS style string for font family, size, and weight
      */
     public static String getFontStyle() {
@@ -260,7 +259,7 @@ public final class ThemeManager {
 
     /**
      * Gets the CSS style string for the primary background of the current theme.
-     * 
+     *
      * @return the CSS style string for the solid background
      */
     public static String getPrimaryBackgroundStyle() {
@@ -269,6 +268,4 @@ public final class ThemeManager {
         }
         return "-fx-background-color: #f4f6fa;";
     }
-
-    
 }

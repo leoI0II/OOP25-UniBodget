@@ -3,12 +3,11 @@ package it.unibo.unibodget.model.currency;
 /**
  * Supported stock market instruments.
  *
- * <p>Each constant represents a publicly traded company, identified by its ticker symbol.
- * All stocks share the {@code "$"} display symbol and use 2 decimal places for display.</p>
+ * <p>Each constant represents a publicly traded company, identified by its ticker symbol. All
+ * stocks share the {@code "$"} display symbol and use 2 decimal places for display.
  */
 @SuppressWarnings("checkstyle:MultipleStringLiterals")
 public enum StockMarketCurrency implements CurrencyUnit {
-
     AAPL(CurrencySymbols.DOLLAR, "AAPL", "Apple Inc.", "AAPL"),
     MSFT(CurrencySymbols.DOLLAR, "MSFT", "Microsoft Corp.", "MSFT"),
     NVDA(CurrencySymbols.DOLLAR, "NVDA", "NVIDIA Corp.", "NVDA"),
@@ -17,7 +16,7 @@ public enum StockMarketCurrency implements CurrencyUnit {
     META(CurrencySymbols.DOLLAR, "META", "Meta Platforms Inc.", "META"),
     TSLA(CurrencySymbols.DOLLAR, "TSLA", "Tesla Inc.", "TSLA");
 
-    private final CurrencyType type = CurrencyType.STOCK;
+    private static final CurrencyType TYPE = CurrencyType.STOCK;
     private final String symbol;
     private final String shortName;
     private final String fullName;
@@ -26,17 +25,13 @@ public enum StockMarketCurrency implements CurrencyUnit {
     /**
      * Constructs a stock market currency definition.
      *
-     * @param symbol    the graphical symbol associated with the stock currency
+     * @param symbol the graphical symbol associated with the stock currency
      * @param shortName the short identifier or ticker used in trading contexts
-     * @param fullName  the full descriptive name of the company or traded asset
-     * @param code      the standardized code used internally or by external data providers
+     * @param fullName the full descriptive name of the company or traded asset
+     * @param code the standardized code used internally or by external data providers
      */
     StockMarketCurrency(
-            final String symbol,
-            final String shortName,
-            final String fullName,
-            final String code
-    ) {
+            final String symbol, final String shortName, final String fullName, final String code) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -46,7 +41,7 @@ public enum StockMarketCurrency implements CurrencyUnit {
     /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
-        return this.type;
+        return TYPE;
     }
 
     /** {@inheritDoc} */

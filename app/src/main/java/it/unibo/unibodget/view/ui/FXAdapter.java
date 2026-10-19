@@ -1,4 +1,4 @@
-package it.unibo.unibodget.view.UI;
+package it.unibo.unibodget.view.ui;
 
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.utils.ARGBColor;
@@ -7,16 +7,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 /**
- * Generic adapter that converts model-layer objects into JavaFX UI types.
- * This keeps the model free from UI dependencies.
+ * Generic adapter that converts model-layer objects into JavaFX UI types. This keeps the model free
+ * from UI dependencies.
  */
 public final class FXAdapter {
 
     private static final double FULL = 255.0;
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
+    /** Private constructor to prevent instantiation of this utility class. */
     private FXAdapter() {
         // utility class
     }
@@ -41,7 +39,6 @@ public final class FXAdapter {
         return Font.font(
                 theme.getFontFamily(),
                 theme.isBoldText() ? FontWeight.BOLD : FontWeight.NORMAL,
-                theme.getFontSize()
-        );
+                theme.getFontSize());
     }
 }

@@ -6,14 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class BankListTest {
 
     @BeforeEach
-    void resetBankList() throws Exception {
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    void resetBankList() throws NoSuchFieldException, IllegalAccessException {
         final Field loadedField = BankList.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
         final List<?> loadedList = (List<?>) loadedField.get(null);
@@ -25,7 +25,8 @@ class BankListTest {
     }
 
     @Test
-    void shouldLoadMockBanksIfJsonMissing() throws Exception {
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    void shouldLoadMockBanksIfJsonMissing() throws NoSuchFieldException, IllegalAccessException {
         final Field initField = BankList.class.getDeclaredField("initialized");
         initField.setAccessible(true);
         initField.set(null, false);
@@ -38,7 +39,7 @@ class BankListTest {
 
     @Test
     void shouldAddBank() {
-        final BankList list = new BankList(); 
+        final BankList list = new BankList();
         final Bank b = new Bank("NewBank", 1.0, 1.0);
 
         assertTrue(list.add(b));
@@ -51,7 +52,7 @@ class BankListTest {
 
         final Bank b = new Bank("NewBank", 1.0, 1.0);
 
-        assertTrue(list.add(b)); 
-        assertFalse(list.add(b)); 
+        assertTrue(list.add(b));
+        assertFalse(list.add(b));
     }
 }

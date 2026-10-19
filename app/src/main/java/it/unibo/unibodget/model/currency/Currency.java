@@ -1,27 +1,30 @@
 package it.unibo.unibodget.model.currency;
 
+import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-
-import it.unibo.unibodget.persistency.ModelFileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A currency loaded from external JSON configuration.
  *
- * <p>Unlike the enum-based currencies ({@link FiatCurrency}, {@link CryptoCurrency}),
- * this class supports dynamic currencies defined at runtime.</p>
+ * <p>Unlike the enum-based currencies ({@link FiatCurrency}, {@link CryptoCurrency}), this class
+ * supports dynamic currencies defined at runtime.
  */
 public final class Currency implements CurrencyUnit {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Currency.class);
     private static final Map<String, Currency> LOADED = new HashMap<>();
     private static boolean initialized;
 
     private static final Path PATH = Path.of("data/json/currency/Currencies.json");
-    private static final String RESOURCE = "/json/currency/Currencies.json"; 
+    private static final String RESOURCE = "/json/currency/Currencies.json";
 
     private CurrencyType type;
     private String symbol;
@@ -32,9 +35,8 @@ public final class Currency implements CurrencyUnit {
 
     /**
      * Empty constructor required for JSON deserialization via Jackson.
-     * 
-     * <p>
-     * Fields are populated automatically when mapping JSON nodes.
+     *
+     * <p>Fields are populated automatically when mapping JSON nodes.
      */
     public Currency() {
         // Prevent instantion
@@ -43,20 +45,18 @@ public final class Currency implements CurrencyUnit {
     /**
      * Creates a new dynamic currency instance.
      *
-     * @param type      the currency type; must not be {@code null}
-     * @param symbol    the graphical symbol; must not be {@code null}
+     * @param type the currency type; must not be {@code null}
+     * @param symbol the graphical symbol; must not be {@code null}
      * @param shortName the short identifier; must not be {@code null}
-     * @param fullName  the full descriptive name
-     * @param code      the standardized currency code; 
-     *                  must not be {@code null}
+     * @param fullName the full descriptive name
+     * @param code the standardized currency code; must not be {@code null}
      */
     public Currency(
             final CurrencyType type,
             final String symbol,
             final String shortName,
             final String fullName,
-            final String code
-    ) {
+            final String code) {
         this.type = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);
         this.shortName = Objects.requireNonNull(shortName);
@@ -67,21 +67,20 @@ public final class Currency implements CurrencyUnit {
     /**
      * Creates a new dynamic currency instance.
      *
-     * @param type      the currency type; must not be {@code null}
-     * @param symbol    the graphical symbol; must not be {@code null}
+     * @param type the currency type; must not be {@code null}
+     * @param symbol the graphical symbol; must not be {@code null}
      * @param shortName the short identifier; must not be {@code null}
-     * @param fullName  the full descriptive name
-     * @param code      the standardized currency code; 
-     *                  must not be {@code null}
-     * @param apiId     the api references, if it's stock market currency;
-     *                  must not be {@code null}
+     * @param fullName the full descriptive name
+     * @param code the standardized currency code; must not be {@code null}
+     * @param apiId the api references, if it's stock market currency; must not be {@code null}
      */
-    public Currency(final CurrencyType type,
-                    final String symbol,
-                    final String shortName,
-                    final String fullName,
-                    final String code,
-                    final String apiId) {
+    public Currency(
+            final CurrencyType type,
+            final String symbol,
+            final String shortName,
+            final String fullName,
+            final String code,
+            final String apiId) {
 
         this.type = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);
@@ -91,11 +90,6 @@ public final class Currency implements CurrencyUnit {
         this.apiId = apiId;
     }
 
-    /**
-     * Returns the currency type.
-     *
-     * @return the {@link CurrencyType} of this currency
-     */
     /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
@@ -127,19 +121,14 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Returns the external API identifier
-     * 
-     * @return api identifier or nothing. 
-     */    
+     * Returns the external API identifier.
+     *
+     * @return api identifier or nothing.
+     */
     public String getApiId() {
         return this.apiId;
     }
 
-    /**
-     * Returns a human-readable representation of the currency.
-     *
-     * @return a formatted string containing short name, symbol, and full name
-     */
     /** {@inheritDoc} */
     @Override
     public int getDisplayDecimals() {
@@ -172,36 +161,33 @@ public final class Currency implements CurrencyUnit {
     }
 
     /**
-     * Initializes the currency manager by loading all currency definitions
-     * from the JSON configuration file.
+     * Initializes the currency manager by loading all currency definitions from the JSON
+     * configuration file.
      *
-     * <p>
-     * The method parses the "currencies" array, stores each entry in an
-     * internal map keyed by its ISO code (upper‑case), and marks the manager
-     * as initialized. If loading fails, a RuntimeException is thrown.
+     * <p>The method parses the "currencies" array, stores each entry in an internal map keyed by
+     * its ISO code (upper‑case), and marks the manager as initialized. If loading fails, a
+     * RuntimeException is thrown.
      */
     public static void init() {
-        initialized = false;
         try {
             List<Currency> list;
-            try (ModelFileManager<Currency> mgr = new ModelFileManager<>(PATH, RESOURCE, Currency.class)) {
+            try (ModelFileManager<Currency> mgr =
+                    new ModelFileManager<>(PATH, RESOURCE, Currency.class)) {
                 mgr.open();
                 list = mgr.loadList("currencies");
             }
             if (list == null || list.isEmpty()) {
-                System.out.println("Currency JSON empty → using mock currencies");
+                LOGGER.debug("Currency JSON empty → using mock currencies");
                 list = generateMockCurrencies();
             }
             LOADED.clear();
-            list.forEach(c -> LOADED.put(c.getCode().toUpperCase(), c));
-            list.replaceAll(c -> LOADED.getOrDefault(c.getCode().toUpperCase(), c));
+            list.forEach(c -> LOADED.put(c.getCode().toUpperCase(Locale.ROOT), c));
+            list.replaceAll(c -> LOADED.getOrDefault(c.getCode().toUpperCase(Locale.ROOT), c));
             initialized = true;
         } catch (final IOException e) {
-            System.out.println("Currency JSON load failed → using mock currencies");
+            LOGGER.warn("Currency JSON load failed → using mock currencies", e);
             LOADED.clear();
-            generateMockCurrencies().forEach(
-                c -> LOADED.put(c.getCode().toUpperCase(), c)
-            );
+            generateMockCurrencies().forEach(c -> LOADED.put(c.getCode().toUpperCase(Locale.ROOT), c));
             initialized = true;
         }
     }
@@ -213,20 +199,17 @@ public final class Currency implements CurrencyUnit {
      */
     private static List<Currency> generateMockCurrencies() {
         return List.of(
-            new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR"),
-            new Currency(CurrencyType.FIAT, "$", "USD", "US Dollar", "USD"),
-            new Currency(CurrencyType.FIAT, "£", "GBP", "British Pound", "GBP"),
-            new Currency(CurrencyType.FIAT, "¥", "JPY", "Japanese Yen", "JPY"),
-            new Currency(CurrencyType.FIAT, "$", "CAD", "Canadian Dollar", "CAD")
-        );
+                new Currency(CurrencyType.FIAT, "€", "EUR", "Euro", "EUR"),
+                new Currency(CurrencyType.FIAT, "$", "USD", "US Dollar", "USD"),
+                new Currency(CurrencyType.FIAT, "£", "GBP", "British Pound", "GBP"),
+                new Currency(CurrencyType.FIAT, "¥", "JPY", "Japanese Yen", "JPY"),
+                new Currency(CurrencyType.FIAT, "$", "CAD", "Canadian Dollar", "CAD"));
     }
 
     /**
      * Returns all currencies loaded from the JSON file.
      *
-     * <p>
-     * If the manager is not yet initialized, the JSON file is parsed
-     * automatically.
+     * <p>If the manager is not yet initialized, the JSON file is parsed automatically.
      *
      * @return a collection of all available Currency instances
      */
@@ -240,9 +223,7 @@ public final class Currency implements CurrencyUnit {
     /**
      * Retrieves a currency by its ISO code (case‑insensitive).
      *
-     * <p>
-     * If the manager is not yet initialized, the JSON file is parsed
-     * automatically.
+     * <p>If the manager is not yet initialized, the JSON file is parsed automatically.
      *
      * @param code the ISO currency code; must not be null
      * @return the matching Currency, or null if no match exists
@@ -251,7 +232,6 @@ public final class Currency implements CurrencyUnit {
         if (!initialized) {
             init();
         }
-        return LOADED.get(code.toUpperCase());
+        return LOADED.get(code.toUpperCase(Locale.ROOT));
     }
-
 }

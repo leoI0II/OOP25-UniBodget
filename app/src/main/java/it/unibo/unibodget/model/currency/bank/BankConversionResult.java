@@ -4,24 +4,24 @@ import java.math.BigDecimal;
 
 /**
  * Represents the result of a bank‑mediated currency conversion.
- * 
- * <p>
- * A {@code BankConversionResult} contains three financial values:
+ *
+ * <p>A {@code BankConversionResult} contains three financial values:
+ *
  * <ul>
- *     <li><strong>convertedAmount</strong> — the amount received in the target currency</li>
- *     <li><strong>commission</strong> — the total fee charged by the bank, expressed in the source currency</li>
- *     <li><strong>totalCost</strong> — the full amount paid by the user in the source currency,
- *         including commission</li>
+ *   <li><strong>convertedAmount</strong> — the amount received in the target currency
+ *   <li><strong>commission</strong> — the total fee charged by the bank, expressed in the source
+ *       currency
+ *   <li><strong>totalCost</strong> — the full amount paid by the user in the source currency,
+ *       including commission
  * </ul>
- * 
- * <p>
- * Notes:
+ *
+ * <p>Notes:
+ *
  * <ul>
- *     <li>The converted amount is always expressed in the <em>target</em> currency.</li>
- *     <li>The commission and total cost are expressed in the <em>source</em> currency,
- *         because fees are applied before conversion.</li>
- *     <li>Currency codes are stored as strings to avoid coupling with higher‑level
- *         currency models.</li>
+ *   <li>The converted amount is always expressed in the <em>target</em> currency.
+ *   <li>The commission and total cost are expressed in the <em>source</em> currency, because fees
+ *       are applied before conversion.
+ *   <li>Currency codes are stored as strings to avoid coupling with higher‑level currency models.
  * </ul>
  */
 public final class BankConversionResult {
@@ -35,17 +35,18 @@ public final class BankConversionResult {
     /**
      * Creates a new {@code BankConversionResult}.
      *
-     * @param convertedAmount     the amount obtained after conversion, in the target currency
-     * @param commission          the total commission charged by the bank, in the source currency
-     * @param totalCost           the full cost paid by the user, in the source currency
-     * @param sourceCurrencyCode  the ISO currency code of the source currency (e.g., "EUR")
-     * @param targetCurrencyCode  the ISO currency code of the target currency (e.g., "USD")
+     * @param convertedAmount the amount obtained after conversion, in the target currency
+     * @param commission the total commission charged by the bank, in the source currency
+     * @param totalCost the full cost paid by the user, in the source currency
+     * @param sourceCurrencyCode the ISO currency code of the source currency (e.g., "EUR")
+     * @param targetCurrencyCode the ISO currency code of the target currency (e.g., "USD")
      */
-    public BankConversionResult(final BigDecimal convertedAmount,
-                                final BigDecimal commission,
-                                final BigDecimal totalCost,
-                                final String sourceCurrencyCode,
-                                final String targetCurrencyCode) {
+    public BankConversionResult(
+            final BigDecimal convertedAmount,
+            final BigDecimal commission,
+            final BigDecimal totalCost,
+            final String sourceCurrencyCode,
+            final String targetCurrencyCode) {
         this.convertedAmount = convertedAmount;
         this.commission = commission;
         this.totalCost = totalCost;

@@ -1,16 +1,13 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import java.math.BigDecimal;
+import org.junit.jupiter.api.Test;
 
-/**
- * Tests for {@link DefaultBudgetMonitor}.
- */
+/** Tests for {@link DefaultBudgetMonitor}. */
 class DefaultBudgetMonitorTest {
 
     private static final String S_1000 = "1000.00";

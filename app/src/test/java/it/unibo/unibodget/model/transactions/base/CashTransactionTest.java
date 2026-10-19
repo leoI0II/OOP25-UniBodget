@@ -16,17 +16,18 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 
 class CashTransactionTest {
 
-        private static final String DESC = "desc";
-        private static final String SHORT_DESCR = "d";
-        private static final String NOTES = "notes";
-        private static final String SHORT_NOTES = "n";
+    private static final int YEAR_2024 = 2024;
+    private static final String DESC = "desc";
+    private static final String SHORT_DESCR = "d";
+    private static final String NOTES = "notes";
+    private static final String SHORT_NOTES = "n";
 
     @Test
     void shouldCreateStandardTransaction() {
         final CashTransaction t = CashTransaction.builder()
                 .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
                 .category(Category.FOOD)
-                .date(LocalDate.of(2024, 1, 1))
+                .date(LocalDate.of(YEAR_2024, 1, 1))
                 .description(DESC)
                 .notes(NOTES)
                 .build();
@@ -43,7 +44,7 @@ class CashTransactionTest {
         final CashTransaction t = CashTransaction.builder()
                 .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
                 .category(Category.FRIEND_LOAN)
-                .date(LocalDate.of(2024, 1, 1))
+                .date(LocalDate.of(YEAR_2024, 1, 1))
                 .description(DESC)
                 .notes(NOTES)
                 .loanId(id)

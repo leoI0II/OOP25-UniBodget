@@ -2,16 +2,14 @@ package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Mock implementation of {@link ExchangeRateAPI} used for testing or offline mode.
- * This class returns fixed, hard-coded exchange rates and does not perform any
- * network communication.
+ * Mock implementation of {@link ExchangeRateAPI} used for testing or offline mode. This class
+ * returns fixed, hard-coded exchange rates and does not perform any network communication.
  */
 public class MockExchangeRateAPI implements ExchangeRateAPI {
 
@@ -31,22 +29,21 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
     }
 
     /**
-     * Returns a mock map of the latest exchange rates for the specified base currency.
-     * The returned rates are hardcoded and do not reflect real market data.
-     * 
+     * Returns a mock map of the latest exchange rates for the specified base currency. The returned
+     * rates are hardcoded and do not reflect real market data.
+     *
      * @param base the base currency for which to retrieve the latest rates
      * @return a map of target currencies to their mock exchange-rate values
      */
     @Override
     public Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
-        return mockRates;
+        return Map.copyOf(mockRates);
     }
 
     /**
-     * Returns a mock historical exchange-rate time-series for the specified currency pair
-     * over the given date range. The returned rates are constant and do not reflect
-     * real market data.
-     * 
+     * Returns a mock historical exchange-rate time-series for the specified currency pair over the
+     * given date range. The returned rates are constant and do not reflect real market data.
+     *
      * @param base the base currency for which to retrieve historical rates
      * @param target the target currency for which to retrieve historical rates
      * @param from the start date of the historical interval (inclusive)
@@ -54,8 +51,11 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
      * @return a map of dates to mock exchange-rate values
      */
     @Override
-    public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
-                                                    final LocalDate from, final LocalDate to) {
+    public Map<LocalDate, Double> getHistoricalRates(
+            final CurrencyUnit base,
+            final CurrencyUnit target,
+            final LocalDate from,
+            final LocalDate to) {
         final Map<LocalDate, Double> history = new HashMap<>();
 
         final double value = mockRates.getOrDefault(target, 1.0);
@@ -76,7 +76,8 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
      * @param to the end date of the historical interval (inclusive)
      * @return a map of dates to mock exchange-rate values
      */
-    public static Map<LocalDate, Double> generateMockHistory(final LocalDate from, final LocalDate to) {
+    public static Map<LocalDate, Double> generateMockHistory(
+            final LocalDate from, final LocalDate to) {
         final Map<LocalDate, Double> history = new TreeMap<>();
         LocalDate date = from;
         double baseValue = MEDIUM_VALUE; // medium value
@@ -91,9 +92,8 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
     }
 
     /**
-     * Generates a mock map of exchange rates for a given base currency.
-     * Each currency is assigned a random exchange rate between 0.5 and 1.5
-     * relative to the specified base currency.
+     * Generates a mock map of exchange rates for a given base currency. Each currency is assigned a
+     * random exchange rate between 0.5 and 1.5 relative to the specified base currency.
      *
      * @param base the base currency for which the mock rates are generated
      * @return a map of {@link CurrencyUnit} to mock exchange rates
@@ -105,15 +105,14 @@ public class MockExchangeRateAPI implements ExchangeRateAPI {
     }
 
     /**
-     * Generates a mock map of exchange rates for all available currencies.
-     * Each currency is assigned a random exchange rate between 0.5 and 1.5
-     * relative to a base currency (e.g., EUR).
+     * Generates a mock map of exchange rates for all available currencies. Each currency is
+     * assigned a random exchange rate between 0.5 and 1.5 relative to a base currency (e.g., EUR).
      *
      * @return a map of {@link CurrencyUnit} to mock exchange rates
      */
     public static Map<CurrencyUnit, Double> generateMockRatesFromCurrencies() {
         final Map<CurrencyUnit, Double> map = new HashMap<>();
-        //parsing from json
+        // parsing from json
         for (final var currency : Currency.all()) {
             final CurrencyUnit unit = CurrencyUnit.getByCode(currency.getCode());
             if (unit != null) {

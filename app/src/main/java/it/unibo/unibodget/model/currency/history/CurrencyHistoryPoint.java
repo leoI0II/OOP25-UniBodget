@@ -4,28 +4,25 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * Represents a single historical exchange‑rate value for a currency pair
- * on a specific date.
- * 
- * <p>
- * This class is an immutable value object used primarily to feed chart
- * components, statistical views, or any UI element that requires a
- * time‑series representation of currency movements.
- * 
- * <p>
- * Typical usage:
+ * Represents a single historical exchange‑rate value for a currency pair on a specific date.
+ *
+ * <p>This class is an immutable value object used primarily to feed chart components, statistical
+ * views, or any UI element that requires a time‑series representation of currency movements.
+ *
+ * <p>Typical usage:
+ *
  * <ul>
- *     <li>building line charts of exchange‑rate trends</li>
- *     <li>displaying historical data in tables or timelines</li>
- *     <li>feeding analytics modules that compute averages or volatility</li>
+ *   <li>building line charts of exchange‑rate trends
+ *   <li>displaying historical data in tables or timelines
+ *   <li>feeding analytics modules that compute averages or volatility
  * </ul>
- * 
- * <p>
- * Each instance stores:
+ *
+ * <p>Each instance stores:
+ *
  * <ul>
- *     <li>a {@link LocalDate} representing the day of the rate</li>
- *     <li>a {@code double} representing the exchange rate on that day
- *         (target currency per base currency)</li>
+ *   <li>a {@link LocalDate} representing the day of the rate
+ *   <li>a {@code double} representing the exchange rate on that day (target currency per base
+ *       currency)
  * </ul>
  */
 public final class CurrencyHistoryPoint {

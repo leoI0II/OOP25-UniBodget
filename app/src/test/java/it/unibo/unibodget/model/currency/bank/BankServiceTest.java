@@ -23,5 +23,4 @@ class BankServiceTest {
 
         assertTrue(service.loadBanks().contains(b));
     }
-
 }

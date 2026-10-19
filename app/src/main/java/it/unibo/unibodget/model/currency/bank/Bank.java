@@ -3,15 +3,13 @@ package it.unibo.unibodget.model.currency.bank;
 import java.util.Objects;
 
 /**
- * Represents a banking institution and its fee structure for currency conversion
- * operations. A {@code Bank} defines both a fixed commission and a percentage-based
- * commission, allowing conversion services to compute the total cost of exchanging
- * money through this institution.
- * 
- * <p>
- * Instances of this class are typically loaded from JSON configuration files
- * (e.g., user-defined bank lists), which is why a no-argument constructor is
- * provided for deserialization frameworks such as Jackson.
+ * Represents a banking institution and its fee structure for currency conversion operations. A
+ * {@code Bank} defines both a fixed commission and a percentage-based commission, allowing
+ * conversion services to compute the total cost of exchanging money through this institution.
+ *
+ * <p>Instances of this class are typically loaded from JSON configuration files (e.g., user-defined
+ * bank lists), which is why a no-argument constructor is provided for deserialization frameworks
+ * such as Jackson.
  */
 public final class Bank {
 
@@ -21,19 +19,18 @@ public final class Bank {
 
     /**
      * Empty constructor required for JSON deserialization (e.g., Jackson).
-     * 
-     * <p>
-     * Fields are expected to be populated via reflection after instantiation.
+     *
+     * <p>Fields are expected to be populated via reflection after instantiation.
      */
     public Bank() {
-
+        // default constructor for deserialization
     }
 
     /**
      * Creates a new {@code Bank} with the specified fee structure.
      *
-     * @param name          the name of the bank; must not be {@code null}
-     * @param fixedFee      the fixed commission fee applied to each conversion
+     * @param name the name of the bank; must not be {@code null}
+     * @param fixedFee the fixed commission fee applied to each conversion
      * @param percentageFee the percentage commission fee applied to the converted amount
      */
     public Bank(final String name, final double fixedFee, final double percentageFee) {
@@ -76,17 +73,15 @@ public final class Bank {
      */
     @Override
     public String toString() {
-        return String.format("%s (Fixed: %.2f - Calculated: %.2f %%)",
-                name, fixedFee, percentageFee);
+        return String.format(
+                "%s (Fixed: %.2f - Calculated: %.2f %%)", name, fixedFee, percentageFee);
     }
 
     /**
      * Compares this bank with another object for equality.
-     * 
-     * <p>
-     * Two banks are considered equal if they share the same name. Fee values
-     * are not considered in equality checks, allowing banks to be uniquely
-     * identified by name.
+     *
+     * <p>Two banks are considered equal if they share the same name. Fee values are not considered
+     * in equality checks, allowing banks to be uniquely identified by name.
      *
      * @param o the object to compare with
      * @return {@code true} if the other object represents a bank with the same name
@@ -105,10 +100,8 @@ public final class Bank {
 
     /**
      * Computes the hash code for this bank.
-     * 
-     * <p>
-     * The hash code is based solely on the bank name, consistent with
-     * {@link #equals(Object)}.
+     *
+     * <p>The hash code is based solely on the bank name, consistent with {@link #equals(Object)}.
      *
      * @return the hash code value
      */

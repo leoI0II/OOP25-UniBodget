@@ -20,9 +20,7 @@ class WatchlistPairTest {
 
     @Test
     void shouldRejectIdenticalCurrencies() {
-        assertThrows(IllegalArgumentException.class, () ->
-                new WatchlistPair(EUR, EUR)
-        );
+        assertThrows(IllegalArgumentException.class, () -> new WatchlistPair(EUR, EUR));
     }
 
     @Test
@@ -40,5 +38,4 @@ class WatchlistPairTest {
 
         assertEquals("EUR ➔ USD", p.toString());
     }
-
 }

@@ -10,12 +10,11 @@ import javafx.stage.Stage;
 /**
  * Utility class responsible for opening the standalone Settings window.
  *
- * <p>The window loads the user's saved {@link WindowPreferences},
- * applies the current theme, and attaches automatic listeners to
- * persist window size and maximization state whenever the user
- * resizes or toggles fullscreen.</p>
+ * <p>The window loads the user's saved {@link WindowPreferences}, applies the current theme, and
+ * attaches automatic listeners to persist window size and maximization state whenever the user
+ * resizes or toggles fullscreen.
  *
- * <p>This class is stateless and exposes only a single static method.</p>
+ * <p>This class is stateless and exposes only a single static method.
  */
 public final class SettingsViewManager {
 
@@ -26,13 +25,14 @@ public final class SettingsViewManager {
     /**
      * Opens the Settings window as a standalone JavaFX stage.
      *
-     * <p>Steps performed:</p>
+     * <p>Steps performed:
+     *
      * <ol>
-     *     <li>Create a new {@link SettingsController}</li>
-     *     <li>Load saved window preferences (size + maximized)</li>
-     *     <li>Create a {@link TabPane} containing the Settings tab</li>
-     *     <li>Apply theme to the scene</li>
-     *     <li>Attach listeners to persist window changes automatically</li>
+     *   <li>Create a new {@link SettingsController}
+     *   <li>Load saved window preferences (size + maximized)
+     *   <li>Create a {@link TabPane} containing the Settings tab
+     *   <li>Apply theme to the scene
+     *   <li>Attach listeners to persist window changes automatically
      * </ol>
      *
      * @param stage the stage to configure and display
@@ -47,16 +47,10 @@ public final class SettingsViewManager {
 
         // Build UI
         final TabPane pane = new TabPane();
-        pane.getTabs().add(
-                new SettingsTabFX(controller).create(stage)
-        );
+        pane.getTabs().add(new SettingsTabFX(controller).create(stage));
 
         // Create scene using saved width/height
-        final Scene scene = new Scene(
-                pane,
-                savedPrefs.getWidth(),
-                savedPrefs.getHeight()
-        );
+        final Scene scene = new Scene(pane, savedPrefs.getWidth(), savedPrefs.getHeight());
 
         stage.setScene(scene);
         stage.setTitle("Settings Manager");
@@ -72,35 +66,35 @@ public final class SettingsViewManager {
          * we persist the new values immediately.
          */
 
-        stage.widthProperty().addListener((obs, oldV, newV) -> {
-            controller.updateWindowPrefs(
-                    new WindowPreferences(
-                            stage.getWidth(),
-                            stage.getHeight(),
-                            stage.isMaximized()
-                    )
-            );
-        });
+        stage.widthProperty()
+                .addListener(
+                        (obs, oldV, newV) -> {
+                            controller.updateWindowPrefs(
+                                    new WindowPreferences(
+                                            stage.getWidth(),
+                                            stage.getHeight(),
+                                            stage.isMaximized()));
+                        });
 
-        stage.heightProperty().addListener((obs, oldV, newV) -> {
-            controller.updateWindowPrefs(
-                    new WindowPreferences(
-                            stage.getWidth(),
-                            stage.getHeight(),
-                            stage.isMaximized()
-                    )
-            );
-        });
+        stage.heightProperty()
+                .addListener(
+                        (obs, oldV, newV) -> {
+                            controller.updateWindowPrefs(
+                                    new WindowPreferences(
+                                            stage.getWidth(),
+                                            stage.getHeight(),
+                                            stage.isMaximized()));
+                        });
 
-        stage.maximizedProperty().addListener((obs, oldV, newV) -> {
-            controller.updateWindowPrefs(
-                    new WindowPreferences(
-                            stage.getWidth(),
-                            stage.getHeight(),
-                            stage.isMaximized()
-                    )
-            );
-        });
+        stage.maximizedProperty()
+                .addListener(
+                        (obs, oldV, newV) -> {
+                            controller.updateWindowPrefs(
+                                    new WindowPreferences(
+                                            stage.getWidth(),
+                                            stage.getHeight(),
+                                            stage.isMaximized()));
+                        });
 
         // Show the window
         stage.show();

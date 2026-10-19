@@ -1,12 +1,5 @@
 package it.unibo.unibodget.model.investment.controllers;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.ExportResult;
@@ -17,12 +10,18 @@ import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import java.io.File;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Controller interface for managing investment accounts, positions, and orders.
  *
- * <p>Provides read access to portfolio state (balances, positions, history) and
- * write operations for executing buy, sell, and transfer orders.
+ * <p>Provides read access to portfolio state (balances, positions, history) and write operations
+ * for executing buy, sell, and transfer orders.
  */
 public interface InvestmentController {
 
@@ -52,7 +51,7 @@ public interface InvestmentController {
      * Renames the investment account identified by the given wallet ID.
      *
      * @param walletId the UUID of the wallet to rename
-     * @param newName  the new display name; must not be blank
+     * @param newName the new display name; must not be blank
      * @return {@code true} if the wallet was found and renamed, {@code false} otherwise
      * @throws IllegalArgumentException if {@code newName} is blank
      */
@@ -89,7 +88,8 @@ public interface InvestmentController {
     Asset getCurrentAllTimeProfitLoss();
 
     /**
-     * Returns the all-time profit/loss of the current account as a percentage of the total cost basis.
+     * Returns the all-time profit/loss of the current account as a percentage of the total cost
+     * basis.
      *
      * @return the P/L percentage (e.g. 12.5 means +12.5%)
      */
@@ -125,14 +125,14 @@ public interface InvestmentController {
 
     /**
      * Returns the list of all assets currently held in the selected account.
-     * 
+     *
      * @return a list of {@link CurrencyUnit} instances representing owned assets
      */
     List<CurrencyUnit> getAllOwnedAssets();
 
     /**
      * Returns the list of stablecoins currently held in the selected account.
-     * 
+     *
      * @return a list of {@link CurrencyUnit} instances representing owned stablecoins
      */
     List<CurrencyUnit> getOwnedStableCoins();
@@ -155,138 +155,128 @@ public interface InvestmentController {
     /**
      * Estimates the total cost of an order without executing it.
      *
-     * @param orderType     the type of order (buy or sell)
-     * @param asset         the asset involved
-     * @param quantity      the number of units
-     * @param unitPrice     the price per unit
-     * @param fee           the transaction fee
+     * @param orderType the type of order (buy or sell)
+     * @param asset the asset involved
+     * @param quantity the number of units
+     * @param unitPrice the price per unit
+     * @param fee the transaction fee
      * @param paymentSource the source of funds for the order
      * @return the estimated total cost as an {@link Asset}
      */
     Asset estimateOrderCost(
-        OrderType orderType,
-        CurrencyUnit asset,
-        BigDecimal quantity,
-        Asset unitPrice,
-        Asset fee,
-        PaymentSource paymentSource
-    );
+            OrderType orderType,
+            CurrencyUnit asset,
+            BigDecimal quantity,
+            Asset unitPrice,
+            Asset fee,
+            PaymentSource paymentSource);
 
     /**
      * Checks whether the given payment source has sufficient funds to execute a buy order.
      *
      * @param paymentSource the source of funds
-     * @param asset         the asset to buy
-     * @param quantity      the number of units to buy
-     * @param unitPrice     the price per unit
-     * @param fee           the transaction fee
+     * @param asset the asset to buy
+     * @param quantity the number of units to buy
+     * @param unitPrice the price per unit
+     * @param fee the transaction fee
      * @return {@code true} if the buy can be executed, {@code false} if funds are insufficient
      */
     boolean canBuy(
-        PaymentSource paymentSource,
-        CurrencyUnit asset,
-        BigDecimal quantity,
-        Asset unitPrice,
-        Asset fee
-    );
+            PaymentSource paymentSource,
+            CurrencyUnit asset,
+            BigDecimal quantity,
+            Asset unitPrice,
+            Asset fee);
 
     /**
-     * Checks whether the source account holds enough of the given asset to sell the requested quantity.
+     * Checks whether the source account holds enough of the given asset to sell the requested
+     * quantity.
      *
-     * @param src      the account to sell from
-     * @param asset    the asset to sell
+     * @param src the account to sell from
+     * @param asset the asset to sell
      * @param quantity the number of units to sell
-     * @return {@code true} if the sell can be executed, {@code false} if the position is insufficient
+     * @return {@code true} if the sell can be executed, {@code false} if the position is
+     *     insufficient
      */
-    boolean canSell(
-        InvestmentAccount src,
-        CurrencyUnit asset,
-        BigDecimal quantity
-    );
+    boolean canSell(InvestmentAccount src, CurrencyUnit asset, BigDecimal quantity);
 
     /**
-     * Checks whether the source account holds enough of the given asset to transfer the requested quantity.
+     * Checks whether the source account holds enough of the given asset to transfer the requested
+     * quantity.
      *
-     * @param src      the account to transfer from
-     * @param dst      the account to transfer to
-     * @param asset    the asset to transfer
+     * @param src the account to transfer from
+     * @param dst the account to transfer to
+     * @param asset the asset to transfer
      * @param quantity the number of units to transfer
      * @return {@code true} if the transfer can be executed, {@code false} otherwise
      */
     boolean canTransfer(
-        InvestmentAccount src,
-        InvestmentAccount dst,
-        CurrencyUnit asset,
-        BigDecimal quantity
-    );
+            InvestmentAccount src, InvestmentAccount dst, CurrencyUnit asset, BigDecimal quantity);
 
     /**
      * Executes a buy order, recording the transaction in the target account.
      *
      * @param targetAccount the account to credit with the purchased asset
      * @param paymentSource the source of funds for the purchase
-     * @param asset         the asset to buy
-     * @param quantity      the number of units to buy
-     * @param unitPrice     the price per unit at execution time
-     * @param fee           the transaction fee
-     * @param date          the date of the order
-     * @param notes         optional notes
+     * @param asset the asset to buy
+     * @param quantity the number of units to buy
+     * @param unitPrice the price per unit at execution time
+     * @param fee the transaction fee
+     * @param date the date of the order
+     * @param notes optional notes
      * @return an {@link OrderResult} describing the outcome
      */
     OrderResult executeBuyOrder(
-        InvestmentAccount targetAccount,
-        PaymentSource paymentSource,
-        CurrencyUnit asset,
-        BigDecimal quantity,
-        Asset unitPrice,
-        Asset fee,
-        LocalDate date,
-        String notes
-    );
+            InvestmentAccount targetAccount,
+            PaymentSource paymentSource,
+            CurrencyUnit asset,
+            BigDecimal quantity,
+            Asset unitPrice,
+            Asset fee,
+            LocalDate date,
+            String notes);
 
     /**
      * Executes a sell order, recording the transaction in the source account.
      *
-     * @param sourceAccount     the account to debit the sold asset from
-     * @param cashFlowTarget    the target of the cash flow
-     * @param asset             the asset to sell
-     * @param quantity          the number of units to sell
-     * @param unitPrice         the price per unit at execution time
-     * @param fee               the transaction fee
-     * @param date              the date of the order
-     * @param notes             optional notes
+     * @param sourceAccount the account to debit the sold asset from
+     * @param cashFlowTarget the target of the cash flow
+     * @param asset the asset to sell
+     * @param quantity the number of units to sell
+     * @param unitPrice the price per unit at execution time
+     * @param fee the transaction fee
+     * @param date the date of the order
+     * @param notes optional notes
      * @return an {@link OrderResult} describing the outcome
      */
     OrderResult executeSellOrder(
-        InvestmentAccount sourceAccount,
-        PaymentSource cashFlowTarget,
-        CurrencyUnit asset,
-        BigDecimal quantity,
-        Asset unitPrice,
-        Asset fee,
-        LocalDate date,
-        String notes
-    );
+            InvestmentAccount sourceAccount,
+            PaymentSource cashFlowTarget,
+            CurrencyUnit asset,
+            BigDecimal quantity,
+            Asset unitPrice,
+            Asset fee,
+            LocalDate date,
+            String notes);
 
     /**
      * Executes a transfer of an asset between two investment accounts.
      *
      * @param sourceAccount the account to transfer from
      * @param targetAccount the account to transfer to
-     * @param asset         the asset to transfer
-     * @param quantity      the number of units to transfer
-     * @param date          the date of the transfer
-     * @param notes         optional notes
+     * @param asset the asset to transfer
+     * @param quantity the number of units to transfer
+     * @param date the date of the transfer
+     * @param notes optional notes
      * @return an {@link OrderResult} describing the outcome
      */
     OrderResult executeTransferOrder(
-        InvestmentAccount sourceAccount,
-        InvestmentAccount targetAccount,
-        CurrencyUnit asset,
-        BigDecimal quantity,
-        LocalDate date,
-        String notes
-    );
+            InvestmentAccount sourceAccount,
+            InvestmentAccount targetAccount,
+            CurrencyUnit asset,
+            BigDecimal quantity,
+            LocalDate date,
+            String notes);
 
     /**
      * Exports the current account's transaction data to an external format (e.g. CSV).
@@ -299,14 +289,16 @@ public interface InvestmentController {
     /**
      * Returns the best performing position based on unrealized Profit/Loss percentage.
      *
-     * @return an {@link Optional} containing the best performing {@link Position}, or empty if there are no positions
+     * @return an {@link Optional} containing the best performing {@link Position}, or empty if
+     *     there are no positions
      */
     Optional<Position> getBestPerformer();
 
     /**
      * Returns the worst performing position based on unrealized Profit/Loss percentage.
      *
-     * @return an {@link Optional} containing the worst performing {@link Position}, or empty if there are no positions
+     * @return an {@link Optional} containing the worst performing {@link Position}, or empty if
+     *     there are no positions
      */
     Optional<Position> getWorstPerformer();
 }

@@ -15,7 +15,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * JavaFX widget that displays and manages the user's currency watchlist.
- * 
+ *
  * <p>
  * Allows saving the currently selected currency pair from the converter,
  * highlighting the active pair, and restoring a saved pair via double‑click.

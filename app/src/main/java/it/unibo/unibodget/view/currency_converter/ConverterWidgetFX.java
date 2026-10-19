@@ -9,7 +9,7 @@ import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.alert.MarketAlert;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
-import it.unibo.unibodget.view.UI.FXAdapter;
+import it.unibo.unibodget.view.ui.FXAdapter;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,13 +21,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -40,7 +33,7 @@ import java.math.BigDecimal;
 
 /**
  * JavaFX widget representing the main currency converter tool.
- * 
+ *
  * <p>
  * This component allows the user to:
  * <ul>
@@ -90,31 +83,31 @@ public class ConverterWidgetFX {
         buildUI();
     }
 
-    /** 
+    /**
      * Return the amount input field.
-     * 
-     * @return the amount input field 
+     *
+     * @return the amount input field
      */
-    public TextField getAmountField() { 
-        return amountField; 
+    public TextField getAmountField() {
+        return amountField;
     }
 
-    /** 
+    /**
      * Return the ComboBox for the source currency.
-     * 
-     * @return the ComboBox for the source currency 
+     *
+     * @return the ComboBox for the source currency
      */
-    public ComboBox<CurrencyUnit> getFromBox() { 
-        return fromBox; 
+    public ComboBox<CurrencyUnit> getFromBox() {
+        return fromBox;
     }
 
-    /** 
+    /**
      * Return the ComboBox for the target currency.
-     * 
-     * @return the ComboBox for the target currency 
+     *
+     * @return the ComboBox for the target currency
      */
-    public ComboBox<CurrencyUnit> getToBox() { 
-        return toBox; 
+    public ComboBox<CurrencyUnit> getToBox() {
+        return toBox;
     }
 
     /**
@@ -131,20 +124,20 @@ public class ConverterWidgetFX {
         toBox.setValue(to);
     }
 
-    /** 
+    /**
      * Return the view type GridPane.
-     * 
-     * @return the root JavaFX node of this widget 
+     *
+     * @return the root JavaFX node of this widget
      */
-    public GridPane getView() { 
-        return card; 
+    public GridPane getView() {
+        return card;
     }
 
     /* =============== UI BUILDING LOGIC ==================== */
 
     /**
      * Builds the entire UI card.
-     * 
+     *
      * <p>
      * Including:
      * <ul>
@@ -161,21 +154,7 @@ public class ConverterWidgetFX {
         final Theme theme = ThemeManager.getTheme();
         final Font font = FXAdapter.toFXFont(theme);
         final Font resultFont = Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 10);
-
         final Color textColor = FXAdapter.toFXColor(theme.getTextColor());
-        final Color buttonColor = FXAdapter.toFXColor(theme.getButtonColor());
-        final Color buttonTextColor = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getButtonColor()));
-
-        // Glass‑style background
-        final Color glassBase = theme.isDarkMode() ? Color.WHITE : Color.BLACK;
-        final Color glassFill = new Color(glassBase.getRed(), 
-                                        glassBase.getGreen(), 
-                                        glassBase.getBlue(), 
-                                        0.045);
-        final Color glassBorder = new Color(glassBase.getRed(), 
-                                        glassBase.getGreen(), 
-                                        glassBase.getBlue(), 
-                                        0.07);
 
         /* ---------- CARD LAYOUT ---------- */
         card.getStyleClass().add("card");
@@ -236,7 +215,7 @@ public class ConverterWidgetFX {
         thresholdField.setPromptText("Threshold (e.g. 1.10)");
         thresholdField.setFont(font);
 
-        final ComboBox<String> directionBox = 
+        final ComboBox<String> directionBox =
             new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
         ThemeManager.applyFont(directionBox);
         directionBox.setValue("Above");
@@ -379,7 +358,7 @@ public class ConverterWidgetFX {
 
     /* ================== HELPER METHODS ==================== */
 
-    /** 
+    /**
      * Creates a muted label used for section headers.
      *
      * @param text the label text
@@ -395,9 +374,9 @@ public class ConverterWidgetFX {
         return l;
     }
 
-    /** 
-     * Configures a currency ComboBox with formatting and styling. 
-     * 
+    /**
+     * Configures a currency ComboBox with formatting and styling.
+     *
      * @param box the ComboBox to configure
      * @param font the font to use for the ComboBox items
      */
@@ -405,19 +384,19 @@ public class ConverterWidgetFX {
         box.setMaxWidth(Double.MAX_VALUE);
 
         box.setConverter(new StringConverter<>() {
-            @Override 
-            public String toString(final CurrencyUnit c) { 
-                return c == null ? "" : formatCurrency(c); 
+            @Override
+            public String toString(final CurrencyUnit c) {
+                return c == null ? "" : formatCurrency(c);
             }
 
-            @Override 
-            public CurrencyUnit fromString(final String s) { 
-                return null; 
+            @Override
+            public CurrencyUnit fromString(final String s) {
+                return null;
             }
         });
 
         box.setCellFactory(lv -> new ListCell<>() {
-            @Override 
+            @Override
             protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
@@ -425,7 +404,7 @@ public class ConverterWidgetFX {
         });
 
         box.setButtonCell(new ListCell<>() {
-            @Override 
+            @Override
             protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
@@ -433,9 +412,9 @@ public class ConverterWidgetFX {
         });
     }
 
-    /** 
-     * Formats a currency for display. 
-     * 
+    /**
+     * Formats a currency for display.
+     *
      * @param currency the currency to format
      * @return a string representation, e.g., "€ EUR" for Euro
      */
@@ -449,9 +428,9 @@ public class ConverterWidgetFX {
         return currency.getCode();
     }
 
-    /** 
-     * Parses a decimal number from user input. 
-     * 
+    /**
+     * Parses a decimal number from user input.
+     *
      * @param text the string to parse
      * @return the parsed BigDecimal or null if parsing fails
      */
@@ -465,5 +444,5 @@ public class ConverterWidgetFX {
             return null;
         }
     }
-    
+
 }

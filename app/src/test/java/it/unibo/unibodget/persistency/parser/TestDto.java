@@ -1,9 +1,6 @@
 package it.unibo.unibodget.persistency.parser;
 
-/**
- * Simple DTO used for testing parser functionality.
- * Contains a name and a numeric value.
- */
+/** Simple DTO used for testing parser functionality. Contains a name and a numeric value. */
 public final class TestDto {
 
     private String name;
@@ -11,19 +8,17 @@ public final class TestDto {
 
     /**
      * Default constructor required for parser tests and reflective instantiation.
-     * 
-     * <p>
-     * Creates an empty DTO with uninitialized fields.
-     * </p>
+     *
+     * <p>Creates an empty DTO with uninitialized fields.
      */
-    public TestDto() { 
-
+    public TestDto() {
+        // Intentionally empty for deserialization
     }
 
     /**
      * Creates a new TestDto with the given name and value.
      *
-     * @param name  the name to assign to this DTO
+     * @param name the name to assign to this DTO
      * @param value the numeric value to assign
      */
     public TestDto(final String name, final int value) {

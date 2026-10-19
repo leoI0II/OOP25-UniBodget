@@ -11,5 +11,4 @@ class CurrencyContextTest {
         CurrencyContext.setBase("USD");
         assertEquals("USD", CurrencyContext.getBase());
     }
-
 }

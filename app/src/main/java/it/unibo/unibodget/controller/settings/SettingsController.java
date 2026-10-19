@@ -1,7 +1,6 @@
 package it.unibo.unibodget.controller.settings;
 
-import java.util.List;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.settings.CurrencyContext;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsManager;
@@ -9,25 +8,22 @@ import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
+import java.util.List;
 
 /**
- * Controller responsible for managing {@link Settings} and coordinating
- * updates between the model layer and UI-level managers such as
- * {@link ThemeManager} and {@link CurrencyContext}.
+ * Controller responsible for managing {@link Settings} and coordinating updates between the model
+ * layer and UI-level managers such as {@link ThemeManager} and {@link CurrencyContext}.
  *
- * <p>
- * The controller exposes high-level operations for:
- * </p>
+ * <p>The controller exposes high-level operations for:
+ *
  * <ul>
- *     <li>changing the theme</li>
- *     <li>changing the base currency</li>
- *     <li>updating window preferences</li>
- *     <li>saving and restoring configurations</li>
+ *   <li>changing the theme
+ *   <li>changing the base currency
+ *   <li>updating window preferences
+ *   <li>saving and restoring configurations
  * </ul>
  *
- * <p>
- * All changes are persisted through {@link SettingsManager}.
- * </p>
+ * <p>All changes are persisted through {@link SettingsManager}.
  */
 public final class SettingsController {
 
@@ -35,35 +31,37 @@ public final class SettingsController {
     private Settings settings = manager.getCurrent();
 
     /**
-     * Initializes the controller by applying the current theme and base currency
-     * to the global managers.
+     * Initializes the controller by applying the current theme and base currency to the global
+     * managers.
      */
     public SettingsController() {
         ThemeManager.setTheme(settings.getTheme());
         CurrencyContext.setBase(settings.getBaseCurrency());
     }
 
-    /** 
+    /**
      * Return active settings.
-     * 
-     * @return the active settings instance 
+     *
+     * @return the active settings instance
      */
-    public Settings getSettings() { 
-        return settings; 
-    }
-
-    /** 
-     * Return all saved configuration.
-     * 
-     * @return all saved configuration snapshots 
-     */
-    public List<SettingsSnapshot> getAllSavedConfigurations() { 
-        return settings.getPreferenceHistory(); 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Controller exposes domain settings model")
+    public Settings getSettings() {
+        return settings;
     }
 
     /**
-     * Changes the theme, updates the global {@link ThemeManager},
-     * and persists the new settings.
+     * Return all saved configuration.
+     *
+     * @return all saved configuration snapshots
+     */
+    public List<SettingsSnapshot> getAllSavedConfigurations() {
+        return settings.getPreferenceHistory();
+    }
+
+    /**
+     * Changes the theme, updates the global {@link ThemeManager}, and persists the new settings.
      *
      * @param newTheme the theme to apply
      */
@@ -82,8 +80,7 @@ public final class SettingsController {
     }
 
     /**
-     * Changes the base currency, updates {@link CurrencyContext},
-     * and persists the new settings.
+     * Changes the base currency, updates {@link CurrencyContext}, and persists the new settings.
      *
      * @param newBase the new base currency code
      */
@@ -118,8 +115,8 @@ public final class SettingsController {
     }
 
     /**
-     * Saves the current configuration by adding a snapshot to history
-     * and persisting the updated settings.
+     * Saves the current configuration by adding a snapshot to history and persisting the updated
+     * settings.
      */
     public void saveConfiguration() {
         settings.setLastModified(java.time.LocalDate.now());
@@ -132,10 +129,8 @@ public final class SettingsController {
     /**
      * Applies a previously saved configuration snapshot.
      *
-     * <p>
-     * This replaces the current settings with the snapshot values,
-     * updates global managers, and persists the new state.
-     * </p>
+     * <p>This replaces the current settings with the snapshot values, updates global managers, and
+     * persists the new state.
      *
      * @param snap the snapshot to restore
      */
@@ -149,5 +144,4 @@ public final class SettingsController {
         // Persist restored configuration
         manager.saveCurrent(settings);
     }
-
 }

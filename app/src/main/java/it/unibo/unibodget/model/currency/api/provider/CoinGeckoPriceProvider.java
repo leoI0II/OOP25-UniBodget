@@ -2,10 +2,8 @@ package it.unibo.unibodget.model.currency.api.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -20,21 +18,16 @@ import java.util.stream.Collectors;
 /**
  * Retrieves cryptocurrency prices from CoinGecko.
  *
- * <p>
- * Prices are returned in USD and represent the market value
- * of a single cryptocurrency unit.
+ * <p>Prices are returned in USD and represent the market value of a single cryptocurrency unit.
  */
 public class CoinGeckoPriceProvider implements PriceProvider {
 
-    private static final String API_URL =
-        "https://api.coingecko.com/api/v3/simple/price";
+    private static final String API_URL = "https://api.coingecko.com/api/v3/simple/price";
 
     private final HttpClient client;
     private final ObjectMapper mapper;
 
-    /**
-     * Creates a new CoinGecko provider.
-     */
+    /** Creates a new CoinGecko provider. */
     public CoinGeckoPriceProvider() {
         this.client = HttpClient.newHttpClient();
         this.mapper = new ObjectMapper();
@@ -70,31 +63,19 @@ public class CoinGeckoPriceProvider implements PriceProvider {
                 .map(CoinGeckoPriceProvider::asCrypto)
                 .toList();
 
-        final String url =
-            API_URL
-            + "?ids="
-            + cryptos.stream()
-                    .map(CryptoCurrency::getApiId)
-                    .distinct()
-                    .collect(Collectors.joining(","))
-            + "&vs_currencies=usd";
+        final String url = API_URL
+                + "?ids="
+                + cryptos.stream()
+                        .map(CryptoCurrency::getApiId)
+                        .distinct()
+                        .collect(Collectors.joining(","))
+                + "&vs_currencies=usd";
 
         try {
-
-            final HttpRequest request =
-                HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .build();
-
+            final HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
             final HttpResponse<String> response =
-                client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-                );
-
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
             return parsePrices(response.body(), cryptos);
-
         } catch (final IOException e) {
             throw new IllegalStateException("Failed to retrieve CoinGecko data.", e);
         } catch (final InterruptedException e) {
@@ -132,7 +113,7 @@ public class CoinGeckoPriceProvider implements PriceProvider {
      * @throws IOException if parsing fails
      */
     protected Map<CurrencyUnit, BigDecimal> parsePrices(final String json, final List<CryptoCurrency> cryptos)
-        throws IOException {
+            throws IOException {
         final Map<CurrencyUnit, BigDecimal> prices = new HashMap<>();
         final JsonNode root = mapper.readTree(json);
         if (root == null) {
@@ -146,5 +127,4 @@ public class CoinGeckoPriceProvider implements PriceProvider {
         }
         return prices;
     }
-
 }

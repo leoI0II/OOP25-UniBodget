@@ -23,17 +23,11 @@ class SettingsSnapshotTest {
         final WindowPreferences prefs = new WindowPreferences(100, 200, true);
         final Theme theme = Theme.DEFAULT;
 
-        final SettingsSnapshot snap = new SettingsSnapshot(
-                theme,
-                "EUR",
-                prefs,
-                "2024-01-01T10:00"
-        );
+        final SettingsSnapshot snap = new SettingsSnapshot(theme, "EUR", prefs, "2024-01-01T10:00");
 
         assertEquals(theme, snap.getTheme());
         assertEquals("EUR", snap.getBaseCurrency());
         assertEquals(100, snap.getWindowPrefs().getWidth());
         assertEquals("2024-01-01T10:00", snap.getSavedAt());
     }
-
 }

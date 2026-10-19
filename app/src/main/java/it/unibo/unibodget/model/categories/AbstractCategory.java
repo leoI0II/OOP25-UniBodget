@@ -1,27 +1,20 @@
 package it.unibo.unibodget.model.categories;
 
-import java.util.Objects;
-
 import it.unibo.unibodget.model.utils.ARGBColor;
+import java.util.Objects;
 
 /**
  * Abstract base class for all category types.
  *
- * <p>
- * Defines the minimal shared structure for representing
- * a transaction category, consisting of:
- * - a readable name
- * - a color expressed as a HEX string
- * - a high-level type (income, expense, loan)
+ * <p>Defines the minimal shared structure for representing a transaction category, consisting of: -
+ * a readable name - a color expressed as a HEX string - a high-level type (income, expense, loan)
  *
- * <p>
- * Concrete implementations may represent:
- * - user‑defined categories loaded from JSON (see {@link Category})
- * - predefined categories exposed through an enum (see {@link CategoryPreset})
+ * <p>Concrete implementations may represent: - user‑defined categories loaded from JSON (see {@link
+ * Category}) - predefined categories exposed through an enum (see {@link CategoryPreset})
  *
- * <p>
- * This class behaves as a value object: equality is based on both name and color.
+ * <p>This class behaves as a value object: equality is based on both name and color.
  */
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class AbstractCategory {
 
     private String name;
@@ -31,13 +24,11 @@ public abstract class AbstractCategory {
     /**
      * Creates a new category base object.
      *
-     * @param name      the descriptive name of the category
-     * @param color     the color associated with the category
-     * @param type      the high-level classification of the category
+     * @param name the descriptive name of the category
+     * @param color the color associated with the category
+     * @param type the high-level classification of the category
      */
-    public AbstractCategory(final String name, 
-                        final ARGBColor color,
-                        final CategoryType type) {
+    public AbstractCategory(final String name, final ARGBColor color, final CategoryType type) {
         this.name = Objects.requireNonNull(name);
         this.color = Objects.requireNonNull(color);
         this.type = Objects.requireNonNull(type);
@@ -73,17 +64,12 @@ public abstract class AbstractCategory {
     /**
      * Updates the category name.
      *
-     * <p>
-     * This method is intentionally protected so that subclasses can enforce
-     * domain rules before exposing rename operations publicly.
-     * </p>
+     * <p>This method is intentionally protected so that subclasses can enforce domain rules before
+     * exposing rename operations publicly.
      *
-     * @param name
-     *            the new category name; must not be {@code null} or blank
-     * @throws NullPointerException
-     *             if {@code name} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code name} is blank
+     * @param name the new category name; must not be {@code null} or blank
+     * @throws NullPointerException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is blank
      */
     protected void setName(final String name) {
         this.name = requireValidName(name);
@@ -92,53 +78,45 @@ public abstract class AbstractCategory {
     /**
      * Updates the category color.
      *
-     * <p>
-     * This method is intentionally protected so that subclasses can enforce
-     * domain rules before exposing recolor operations publicly.
-     * </p>
+     * <p>This method is intentionally protected so that subclasses can enforce domain rules before
+     * exposing recolor operations publicly.
      *
-     * @param color
-     *            the new color; must not be {@code null}
-     * @throws NullPointerException
-     *             if {@code color} is {@code null}
+     * @param newColor the new color; must not be {@code null}
+     * @throws NullPointerException if {@code newColor} is {@code null}
      */
-    protected void setColorHex(final ARGBColor color) {
-        this.color = Objects.requireNonNull(color);
+    protected void setColorHex(final ARGBColor newColor) {
+        this.color = Objects.requireNonNull(newColor);
     }
 
     /**
      * Validates and normalizes a category name.
      *
-     * @param name
-     *            the raw category name
+     * @param name the raw category name
      * @return the trimmed validated name
-     * @throws NullPointerException
-     *             if {@code name} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code name} is blank
+     * @throws NullPointerException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is blank
      */
     private static String requireValidName(final String name) {
         Objects.requireNonNull(name);
-        final String normalized = name.trim();
-        if (normalized.isEmpty()) {
+        if (name.isBlank()) {
             throw new IllegalArgumentException("Category name cannot be blank.");
         }
-        return normalized;
+        return name.trim();
     }
 
-    // / ** Returns a string representation of the category.
-    //  *
-    //  * @return a readable string for the category
-    //  */
-
+    /**
+     * This implementation returns a string representation of the category.
+     *
+     * @return a readable string for the category
+     */
     @Override
     public String toString() {
-        return "Category{name='" 
-                + this.name 
-                + "', color='" 
-                + this.color.toHexString() 
-                + "', type='" 
-                + this.type 
+        return "Category{name='"
+                + this.name
+                + "', color='"
+                + this.color.toHexString()
+                + "', type='"
+                + this.type
                 + "'}";
     }
 
@@ -148,29 +126,7 @@ public abstract class AbstractCategory {
      * @param o the object to compare with
      * @return true if the objects are equal, false otherwise
      */
-    // @Override
-    // public String toString() {
-    //     return "Category{name='"
-    //             + this.name
-    //             + "', color='"
-    //             + this.color.toHexString()
-    //             + "', type='"
-    //             + this.type
-    //             + "'}";
-    // }
-
-    // @Override
-    // public boolean equals(final Object object) {
-    //     if (this == object) {
-    //         return true;
-    //     }
-    //     if (!(object instanceof BasicCategory other)) {
-    //         return false;
-    //     }
-    //     return this.name.equals(other.name)
-    //             && this.color.equals(other.color)
-    //             && this.type == other.type;
-    @Override 
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -191,5 +147,4 @@ public abstract class AbstractCategory {
     public int hashCode() {
         return Objects.hash(this.name, this.color, this.type);
     }
-
 }

@@ -14,6 +14,8 @@ class ThemeTest {
     private static final String TEST_A = "A";
     private static final String FONT_ARIAL = "Arial";
     private static final int FONT_14 = 14;
+    private static final String GOLD = "#FFD700";
+    private static final String NAVY = "#0F172A";
 
     @Test
     void shouldComputeReadableTextColor() {
@@ -26,7 +28,7 @@ class ThemeTest {
 
     @Test
     void shouldFallbackToDefaultFontSize() {
-        final Theme t = 
+        final Theme t =
             new Theme("X", ARGBColor.WHITE, ARGBColor.BLACK, ARGBColor.BLACK, FONT_ARIAL, -5, false);
         assertEquals(Theme.DEFAULT.getFontSize(), t.getFontSize());
     }
@@ -55,8 +57,8 @@ class ThemeTest {
         final Theme darkGold = new Theme(
                 "Custom",
                 true,
-                new ARGBColor("#FFD700"),
-                new ARGBColor("#FFD700"),
+                new ARGBColor(GOLD),
+                new ARGBColor(GOLD),
                 ARGBColor.WHITE,
                 FONT_ARIAL,
                 FONT_14,
@@ -68,8 +70,8 @@ class ThemeTest {
         final Theme lightNavy = new Theme(
                 "Custom",
                 false,
-                new ARGBColor("#0F172A"),
-                new ARGBColor("#0F172A"),
+                new ARGBColor(NAVY),
+                new ARGBColor(NAVY),
                 ARGBColor.BLACK,
                 FONT_ARIAL,
                 FONT_14,
@@ -80,8 +82,8 @@ class ThemeTest {
 
     @Test
     void shouldFallbackToPresetNameIfDarkModeNull() {
-        final Theme darkNamed = new Theme("Dark", "#FFD700", "#FFD700");
-        final Theme lightNamed = new Theme("Light", "#0F172A", "#0F172A");
+        final Theme darkNamed = new Theme("Dark", GOLD, GOLD);
+        final Theme lightNamed = new Theme("Light", NAVY, NAVY);
 
         assertEquals(true, darkNamed.isDarkMode());
         assertEquals(false, lightNamed.isDarkMode());

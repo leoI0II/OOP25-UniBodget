@@ -13,5 +13,4 @@ class CurrencyTypeTest {
         assertNotNull(CurrencyType.STOCK);
         assertNotNull(CurrencyType.CUSTOM);
     }
-
 }

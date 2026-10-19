@@ -40,5 +40,4 @@ class BankTest {
 
         assertNotEquals(b1, b2);
     }
-
 }

@@ -1,11 +1,14 @@
 package it.unibo.unibodget.view.currency_converter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.history.CurrencyHistoryPoint;
 import it.unibo.unibodget.model.settings.ThemeManager;
-
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -14,38 +17,37 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Standalone JavaFX view that displays historical exchange‑rate data
- * for a selected currency pair using a line chart.
- * 
- * <p>
- * This component:
+ * Standalone JavaFX view that displays historical exchange‑rate data for a selected currency pair
+ * using a line chart.
+ *
+ * <p>This component:
+ *
  * <ul>
- *     <li>owns its own currency selectors</li>
- *     <li>fetches historical data directly from {@link CurrencyConverterController}</li>
- *     <li>plots the last N days of exchange‑rate history</li>
- *     <li>optionally draws a threshold line for alert visualization</li>
+ *   <li>owns its own currency selectors
+ *   <li>fetches historical data directly from {@link CurrencyConverterController}
+ *   <li>plots the last N days of exchange‑rate history
+ *   <li>optionally draws a threshold line for alert visualization
  * </ul>
- * 
- * <p>
- * It is designed to be opened in a separate window via
- * {@link #showInNewWindow(CurrencyConverterController)}.
+ *
+ * <p>It is designed to be opened in a separate window via {@link
+ * #showInNewWindow(CurrencyConverterController)}.
  */
 public final class CurrencyHistoryChartView extends VBox {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyHistoryChartView.class);
 
     /* -------------------- CONSTANTS -------------------- */
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM-dd");
@@ -98,11 +100,8 @@ public final class CurrencyHistoryChartView extends VBox {
         ThemeManager.applyFont(thresholdField);
         ThemeManager.applyFont(loadButton);
 
-        final HBox controlsRow = new HBox(10,
-                fromLabel, fromBox,
-                toLabel, toBox,
-                thresholdField, loadButton
-        );
+        final HBox controlsRow =
+                new HBox(10, fromLabel, fromBox, toLabel, toBox, thresholdField, loadButton);
         controlsRow.setAlignment(Pos.CENTER_LEFT);
 
         getChildren().addAll(controlsRow, statusLabel, chart);
@@ -110,8 +109,8 @@ public final class CurrencyHistoryChartView extends VBox {
     }
 
     /**
-     * Opens this chart view inside a new standalone {@link Stage}.
-     * Useful for buttons in other widgets that want to show historical data.
+     * Opens this chart view inside a new standalone {@link Stage}. Useful for buttons in other
+     * widgets that want to show historical data.
      *
      * @param controller the controller providing history data
      * @return the created Stage
@@ -122,11 +121,7 @@ public final class CurrencyHistoryChartView extends VBox {
         final Stage stage = new Stage();
         stage.setTitle("Currency History - Live Data");
 
-        final Scene scene = new Scene(
-                view,
-                SCENE_WIDTH,
-                SCENE_HEIGHT
-        );
+        final Scene scene = new Scene(view, SCENE_WIDTH, SCENE_HEIGHT);
         ThemeManager.applyThemeToScene(scene);
         stage.setScene(scene);
 
@@ -137,8 +132,8 @@ public final class CurrencyHistoryChartView extends VBox {
     /* =============== UI CONFIGURATION ===================== */
 
     /**
-     * Configures the currency ComboBoxes to show only fiat currencies
-     * and display only their ISO code (EUR, USD, ...).
+     * Configures the currency ComboBoxes to show only fiat currencies and display only their ISO
+     * code (EUR, USD, ...).
      */
     private void configureCurrencyBoxes() {
         for (final CurrencyUnit unit : FiatCurrency.values()) {
@@ -151,17 +146,18 @@ public final class CurrencyHistoryChartView extends VBox {
         toBox.setValue(FiatCurrency.USD);
 
         // Converter that shows only currency code
-        final StringConverter<CurrencyUnit> codeOnly = new StringConverter<>() {
-            @Override
-            public String toString(final CurrencyUnit unit) {
-                return unit == null ? "" : unit.getCode();
-            }
+        final StringConverter<CurrencyUnit> codeOnly =
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final CurrencyUnit unit) {
+                        return unit == null ? "" : unit.getCode();
+                    }
 
-            @Override
-            public CurrencyUnit fromString(final String code) {
-                return null; // Not needed
-            }
-        };
+                    @Override
+                    public CurrencyUnit fromString(final String code) {
+                        return null; // Not needed
+                    }
+                };
 
         fromBox.setConverter(codeOnly);
         toBox.setConverter(codeOnly);
@@ -170,9 +166,9 @@ public final class CurrencyHistoryChartView extends VBox {
         toBox.setCellFactory(lv -> codeOnlyCell());
     }
 
-    /** 
-     * Creates a ListCell that displays only the currency code. 
-     * 
+    /**
+     * Creates a ListCell that displays only the currency code.
+     *
      * @return a ListCell for ComboBox items
      */
     private ListCell<CurrencyUnit> codeOnlyCell() {
@@ -186,9 +182,7 @@ public final class CurrencyHistoryChartView extends VBox {
         };
     }
 
-    /**
-     * Configures the line chart appearance and axes.
-     */
+    /** Configures the line chart appearance and axes. */
     private void configureChart() {
         xAxis.setLabel("Date");
         yAxis.setLabel("Rate");
@@ -204,8 +198,8 @@ public final class CurrencyHistoryChartView extends VBox {
     /* ================== LOAD & PLOT ======================= */
 
     /**
-     * Loads historical data for the selected currency pair and plots it.
-     * Also draws a threshold line if provided.
+     * Loads historical data for the selected currency pair and plots it. Also draws a threshold
+     * line if provided.
      */
     private void onLoad() {
         final CurrencyUnit from = fromBox.getValue();
@@ -224,8 +218,8 @@ public final class CurrencyHistoryChartView extends VBox {
         final List<CurrencyHistoryPoint> points =
                 controller.getHistoryPoints(from, to, fromDate, toDate);
 
-        points.forEach(p -> System.out.println(p.getDate() + " -> " + p.getRate()));
-        
+        points.forEach(p -> LOGGER.debug("{} -> {}", p.getDate(), p.getRate()));
+
         final Double threshold = parseThreshold(thresholdField.getText());
 
         plot(points, from.getCode() + " -> " + to.getCode(), threshold);
@@ -236,14 +230,14 @@ public final class CurrencyHistoryChartView extends VBox {
     /**
      * Plots the historical points on the chart and optionally draws a threshold line.
      *
-     * @param points     list of historical exchange‑rate points
+     * @param points list of historical exchange‑rate points
      * @param seriesName name of the main data series
-     * @param threshold  optional threshold value (null if not used)
+     * @param threshold optional threshold value (null if not used)
      */
     private void plot(
-        final List<CurrencyHistoryPoint> points, 
-        final String seriesName, 
-        final Double threshold) {
+            final List<CurrencyHistoryPoint> points,
+            final String seriesName,
+            final Double threshold) {
         chart.getData().clear();
 
         if (points == null || points.isEmpty()) {
@@ -255,10 +249,7 @@ public final class CurrencyHistoryChartView extends VBox {
         series.setName(seriesName);
 
         for (final CurrencyHistoryPoint p : points) {
-            series.getData().add(new XYChart.Data<>(
-                    p.getDate().format(DATE_FORMAT),
-                    p.getRate()
-            ));
+            series.getData().add(new XYChart.Data<>(p.getDate().format(DATE_FORMAT), p.getRate()));
         }
 
         chart.getData().add(series);
@@ -269,10 +260,9 @@ public final class CurrencyHistoryChartView extends VBox {
             thresholdSeries.setName("Threshold (" + threshold + ")");
 
             for (final CurrencyHistoryPoint p : points) {
-                thresholdSeries.getData().add(new XYChart.Data<>(
-                        p.getDate().format(DATE_FORMAT),
-                        threshold
-                ));
+                thresholdSeries
+                        .getData()
+                        .add(new XYChart.Data<>(p.getDate().format(DATE_FORMAT), threshold));
             }
 
             chart.getData().add(thresholdSeries);
@@ -286,12 +276,12 @@ public final class CurrencyHistoryChartView extends VBox {
         chart.applyCss();
 
         chart.lookupAll(".chart-legend-item-text")
-            .forEach(item -> {
-            ThemeManager.applyFont(item);
+                .forEach(
+                        item -> {
+                            ThemeManager.applyFont(item);
 
-            item.lookupAll("*")
-                    .forEach(ThemeManager::applyFont);
-        });
+                            item.lookupAll("*").forEach(ThemeManager::applyFont);
+                        });
     }
 
     /**
@@ -301,7 +291,7 @@ public final class CurrencyHistoryChartView extends VBox {
      * @return parsed double or null if invalid
      */
     private Double parseThreshold(final String text) {
-        if (text == null || text.trim().isEmpty()) {
+        if (text == null || text.isBlank()) {
             return null;
         }
         try {
@@ -311,13 +301,15 @@ public final class CurrencyHistoryChartView extends VBox {
         }
     }
 
-    /** 
+    /**
      * Returns the underlying chart node for embedding in other layouts.
-     * 
+     *
      * @return the underlying chart node
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "View exposes chart node")
     public Node getChartNode() {
         return chart;
     }
-    
 }

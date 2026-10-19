@@ -7,20 +7,20 @@ import java.math.BigDecimal;
 
 /**
  * Service responsible for performing a bank‑mediated currency conversion.
- * 
- * <p>
- * A {@code BankConversionService} combines:
+ *
+ * <p>A {@code BankConversionService} combines:
+ *
  * <ul>
- *     <li>a base currency conversion performed by {@link BasicCurrencyConverter}</li>
- *     <li>a commission calculation performed by {@link BankCalculator}</li>
+ *   <li>a base currency conversion performed by {@link BasicCurrencyConverter}
+ *   <li>a commission calculation performed by {@link BankCalculator}
  * </ul>
- * 
- * <p>
- * The result is returned as a {@link BankConversionResult}, containing:
+ *
+ * <p>The result is returned as a {@link BankConversionResult}, containing:
+ *
  * <ul>
- *     <li>the converted amount in the target currency</li>
- *     <li>the commission charged by the bank (source currency)</li>
- *     <li>the total cost paid by the user (source currency)</li>
+ *   <li>the converted amount in the target currency
+ *   <li>the commission charged by the bank (source currency)
+ *   <li>the total cost paid by the user (source currency)
  * </ul>
  */
 public class BankConversionService {
@@ -30,8 +30,8 @@ public class BankConversionService {
     /**
      * Creates a new {@code BankConversionService}.
      *
-     * @param converter the base currency converter used to compute the raw conversion;
-     *                  must not be {@code null}
+     * @param converter the base currency converter used to compute the raw conversion; must not be
+     *     {@code null}
      */
     public BankConversionService(final BasicCurrencyConverter converter) {
         this.converter = converter;
@@ -39,24 +39,28 @@ public class BankConversionService {
 
     /**
      * Performs a full bank‑mediated conversion.
-     * 
-     * <p>
-     * Steps:
+     *
+     * <p>Steps:
+     *
      * <ol>
-     *     <li>Convert the requested amount using the base converter.</li>
-     *     <li>Compute the bank commission using {@link BankCalculator}.</li>
-     *     <li>Compute the total cost paid by the user (amount + commission).</li>
-     *     <li>Return a {@link BankConversionResult} containing all values.</li>
+     *   <li>Convert the requested amount using the base converter.
+     *   <li>Compute the bank commission using {@link BankCalculator}.
+     *   <li>Compute the total cost paid by the user (amount + commission).
+     *   <li>Return a {@link BankConversionResult} containing all values.
      * </ol>
      *
      * @param amount the amount to convert, expressed in the source currency
-     * @param from   the source currency
-     * @param to     the target currency
-     * @param bank   the bank whose fee structure should be applied
-     * @return a {@link BankConversionResult} containing converted amount, commission, and total cost
+     * @param from the source currency
+     * @param to the target currency
+     * @param bank the bank whose fee structure should be applied
+     * @return a {@link BankConversionResult} containing converted amount, commission, and total
+     *     cost
      */
-    public BankConversionResult convert(final BigDecimal amount, final CurrencyUnit from, 
-                                        final CurrencyUnit to, final Bank bank) {
+    public BankConversionResult convert(
+            final BigDecimal amount,
+            final CurrencyUnit from,
+            final CurrencyUnit to,
+            final Bank bank) {
         final CurrencyConversionResult baseResult = converter.convert(amount, from, to);
         final BigDecimal commission = BankCalculator.calculateCommission(amount, bank);
         final BigDecimal totalCost = amount.add(commission);
@@ -66,7 +70,6 @@ public class BankConversionService {
                 commission,
                 totalCost,
                 from.getCode(),
-                to.getCode()
-        );
+                to.getCode());
     }
 }

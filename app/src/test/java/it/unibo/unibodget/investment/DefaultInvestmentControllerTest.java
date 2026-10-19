@@ -58,7 +58,7 @@ final class DefaultInvestmentControllerTest {
     // different object than FiatCurrency.EUR. a pair that is not here throws, like the real
     // converter when a price is missing
     private static final Map<String, BigDecimal> RATES = Map.of(
-        "AAPL->USD", new BigDecimal("150"),
+        "AAPL->USD", new BigDecimal(S_150),
         "BTC->USD", new BigDecimal("50000"),
         "ETH->USD", new BigDecimal("4000"),
         "USDT->USD", BigDecimal.ONE,
@@ -166,8 +166,8 @@ final class DefaultInvestmentControllerTest {
     @Test
     void testGetAggregatedBalancesContainsBothCurrencies() {
         // 10 AAPL -> USD balance $1500, EUR balance 1500 * 0.91 = $1365
-        buyAapl(BigDecimal.TEN, new BigDecimal("150"));
-        var balance = controller.getAggregatedBalance();
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
+        final var balance = controller.getAggregatedBalance();
         assertEquals(new Settings().getBaseCurrencyUnit(), balance.currency());
         assertEquals(
             new BigDecimal("1365").stripTrailingZeros(),
@@ -331,14 +331,14 @@ final class DefaultInvestmentControllerTest {
     @Test
     void testCanTransferBetweenDifferentAccountsWithSufficientPosition() {
         buyBtc(BigDecimal.TEN);
-        var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
         assertTrue(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.ONE));
     }
 
     @Test
     void testCanTransferWithInsufficientPositionReturnsFalse() {
         buyBtc(BigDecimal.ONE);
-        var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
         assertFalse(controller.canTransfer(account, other, CryptoCurrency.BTC, BigDecimal.TEN));
     }
 
@@ -461,8 +461,8 @@ final class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderSuccess() {
         buyBtc(BigDecimal.TEN);
-        var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
-        var result = controller.executeTransferOrder(
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.ONE, TODAY, ""
         );
         assertInstanceOf(OrderResult.TransferSuccess.class, result);
@@ -488,8 +488,8 @@ final class DefaultInvestmentControllerTest {
     @Test
     void testExecuteTransferOrderWithInsufficientPositionReturnsError() {
         buyBtc(BigDecimal.ONE);
-        var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
-        var result = controller.executeTransferOrder(
+        final var other = new InvestmentAccount(OTHER, FiatCurrency.USD, exchangeRateProvider);
+        final var result = controller.executeTransferOrder(
             account, other, CryptoCurrency.BTC, BigDecimal.TEN, TODAY, ""
         );
         assertInstanceOf(OrderResult.InsufficientAssets.class, result);

@@ -20,6 +20,10 @@ import it.unibo.unibodget.model.utils.ARGBColor;
  */
 class DefaultFriendLoanSummaryServiceTest {
 
+    private static final int YEAR = 2026;
+    private static final int MONTH = 5;
+    private static final String MARCO = "Marco";
+
     @Test
     void shouldSummarizeFriendLoansByLoanId() {
         final DefaultFriendLoanSummaryService service = new DefaultFriendLoanSummaryService();
@@ -36,27 +40,27 @@ class DefaultFriendLoanSummaryServiceTest {
         final CashTransaction marcoLoan = CashTransaction.builder()
                 .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
                 .category(friendLoanCategory)
-                .date(LocalDate.of(2026, 5, 1))
+                .date(LocalDate.of(YEAR, MONTH, 1))
                 .description("Loan to Marco")
                 .notes("Initial loan")
                 .loanId(marcoLoanId)
-                .friendName("Marco")
+                .friendName(MARCO)
                 .build();
 
         final CashTransaction marcoRepayment = CashTransaction.builder()
                 .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")))
                 .category(friendLoanCategory)
-                .date(LocalDate.of(2026, 5, 10))
+                .date(LocalDate.of(YEAR, MONTH, 10))
                 .description("Marco repayment")
                 .notes("Partial repayment")
                 .loanId(marcoLoanId)
-                .friendName("Marco")
+                .friendName(MARCO)
                 .build();
 
         final CashTransaction lucaLoan = CashTransaction.builder()
                 .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")))
                 .category(friendLoanCategory)
-                .date(LocalDate.of(2026, 5, 3))
+                .date(LocalDate.of(YEAR, MONTH, 3))
                 .description("Loan to Luca")
                 .notes("Short loan")
                 .loanId(lucaLoanId)
@@ -72,7 +76,7 @@ class DefaultFriendLoanSummaryServiceTest {
         final FriendLoanSummary first = result.get(0);
         final FriendLoanSummary second = result.get(1);
 
-        assertEquals("Marco", first.getFriendName());
+        assertEquals(MARCO, first.getFriendName());
         assertEquals(new BigDecimal("100.00"), first.getTotalGiven());
         assertEquals(new BigDecimal("30.00"), first.getTotalReceived());
         assertEquals(new BigDecimal("70.00"), first.getNetBalance());

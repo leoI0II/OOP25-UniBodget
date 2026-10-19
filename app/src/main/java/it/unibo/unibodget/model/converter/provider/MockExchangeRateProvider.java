@@ -63,7 +63,8 @@
 //     }
 
 //     @Override
-//     public CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit to) {
+//     public CurrencyConversionResult convert(BigDecimal amount, CurrencyUnit from, CurrencyUnit
+// to) {
 //         if (from.equals(to)) {
 //             return new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
 //         }

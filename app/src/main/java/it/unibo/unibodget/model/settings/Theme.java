@@ -205,67 +205,67 @@ public final class Theme {
         );
     }
 
-    /** 
+    /**
      * Return theme name.
-     * 
-     * @return the theme name 
+     *
+     * @return the theme name
      */
-    public String getName() { 
-        return name; 
+    public String getName() {
+        return name;
     }
 
-    /** 
+    /**
      * Return primary background color.
-     * 
+     *
      * @return the primary background color
      */
-    public ARGBColor getPrimaryColor() { 
-        return primaryColor; 
+    public ARGBColor getPrimaryColor() {
+        return primaryColor;
     }
 
-    /** 
+    /**
      * Return button color.
-     * 
-     * @return the button color 
+     *
+     * @return the button color
      */
-    public ARGBColor getButtonColor() { 
-        return buttonColor; 
+    public ARGBColor getButtonColor() {
+        return buttonColor;
     }
 
-    /** 
+    /**
      * Return text color.
-     * 
-     * @return the text color 
+     *
+     * @return the text color
      */
-    public ARGBColor getTextColor() { 
-        return textColor; 
+    public ARGBColor getTextColor() {
+        return textColor;
     }
 
-    /** 
+    /**
      * Return font family.
-     * 
-     * @return the font family 
+     *
+     * @return the font family
      */
-    public String getFontFamily() { 
-        return fontFamily; 
+    public String getFontFamily() {
+        return fontFamily;
     }
 
-    /** 
+    /**
      * Return font size.
-     * 
-     * @return the font size 
+     *
+     * @return the font size
      */
-    public int getFontSize() { 
-        return fontSize; 
+    public int getFontSize() {
+        return fontSize;
     }
 
-    /** 
+    /**
      * Return if the text is bold.
-     * 
-     * @return true if bold text is enabled 
+     *
+     * @return true if bold text is enabled
      */
-    public boolean isBoldText() { 
-        return boldText; 
+    public boolean isBoldText() {
+        return boldText;
     }
 
     /**

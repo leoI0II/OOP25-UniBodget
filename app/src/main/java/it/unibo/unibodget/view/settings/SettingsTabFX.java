@@ -1,7 +1,6 @@
 package it.unibo.unibodget.view.settings;
 
 import it.unibo.unibodget.controller.settings.SettingsController;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.stage.Stage;
@@ -9,9 +8,9 @@ import javafx.stage.Stage;
 /**
  * UI component that provides the "Settings" tab inside the main application.
  *
- * <p>The tab contains a single button that opens the settings popup
- * managed by {@link SettingsPopupFX}. This class acts as a lightweight
- * bridge between the controller and the JavaFX view layer.</p>
+ * <p>The tab contains a single button that opens the settings popup managed by {@link
+ * SettingsPopupFX}. This class acts as a lightweight bridge between the controller and the JavaFX
+ * view layer.
  */
 public final class SettingsTabFX {
 

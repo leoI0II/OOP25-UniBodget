@@ -1,27 +1,21 @@
 package it.unibo.unibodget.persistency.parser.impl;
 
-import java.io.IOException;
-import java.time.LocalDate;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * Custom Jackson deserializer for {@link LocalDate}.
  *
- * <p>
- * This deserializer converts ISO-8601 date strings (e.g., "2024-05-17")
- * into {@code LocalDate} instances. It is used by the persistence layer to
- * ensure that date values stored as strings in JSON files are correctly
- * reconstructed when loading application data.
- * </p>
+ * <p>This deserializer converts ISO-8601 date strings (e.g., "2024-05-17") into {@code LocalDate}
+ * instances. It is used by the persistence layer to ensure that date values stored as strings in
+ * JSON files are correctly reconstructed when loading application data.
  *
- * <p>
- * The expected input format is the default ISO representation produced by
- * {@code LocalDate.toString()}, which guarantees compatibility with the
- * corresponding {@code LocalDateSerializer}.
- * </p>
+ * <p>The expected input format is the default ISO representation produced by {@code
+ * LocalDate.toString()}, which guarantees compatibility with the corresponding {@code
+ * LocalDateSerializer}.
  */
 public final class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
 
@@ -38,5 +32,4 @@ public final class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
             throws IOException {
         return LocalDate.parse(parser.getValueAsString());
     }
-
 }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,8 @@ class CurrencyTest {
     private static final String CURR_USD = "USD";
 
     @BeforeEach
-    void resetCurrencyManager() throws Exception {
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    void resetCurrencyManager() throws NoSuchFieldException, IllegalAccessException {
         // 1. Ottieni il campo static final "loaded"
         final Field loadedField = Currency.class.getDeclaredField("LOADED");
         loadedField.setAccessible(true);
@@ -47,7 +47,8 @@ class CurrencyTest {
 
     @Test
     void shouldCreateDynamicCurrency() {
-        final Currency c = new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
+        final Currency c =
+                new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
 
         assertEquals(CURR_EUR, c.getCode());
         assertEquals(CURR_TEXT_EUR, c.getFullName());
@@ -56,13 +57,12 @@ class CurrencyTest {
 
     @Test
     void shouldCompareCurrenciesByCode() {
-        final Currency c1 = 
-            new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
-        final Currency c2 = 
-            new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
+        final Currency c1 =
+                new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
+        final Currency c2 =
+                new Currency(CurrencyType.FIAT, SYMB_EUR, CURR_EUR, CURR_TEXT_EUR, CURR_EUR);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());
     }
-
 }
