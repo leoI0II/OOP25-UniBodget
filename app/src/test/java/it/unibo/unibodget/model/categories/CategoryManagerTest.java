@@ -47,7 +47,7 @@ class CategoryManagerTest {
         CategoryManager.add(c);
 
         assertTrue(
-                CategoryManager.getAll().stream().anyMatch(cat -> cat.getName().equals(NEW_CAT)));
+                CategoryManager.getAll().stream().anyMatch(cat -> NEW_CAT.equals(cat.getName())));
     }
 
     @Test

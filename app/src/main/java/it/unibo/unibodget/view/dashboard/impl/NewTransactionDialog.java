@@ -1,5 +1,12 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryCatalog;
+import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -7,13 +14,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
-
-import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.categories.CategoryCatalog;
-import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -34,21 +34,19 @@ import javafx.util.StringConverter;
 /**
  * Dialog used to create or edit a {@link CashTransaction}.
  *
- * <p>
- * The dialog always returns a {@link NewTransactionRequest}, leaving the final
- * construction of the transaction entity to the controller.
- * </p>
+ * <p>The dialog always returns a {@link NewTransactionRequest}, leaving the final construction of
+ * the transaction entity to the controller.
  *
- * <p>
- * The dialog supports two modes:
- * </p>
+ * <p>The dialog supports two modes:
+ *
  * <ul>
- * <li>creation mode, when no existing transaction is provided,</li>
- * <li>edit mode, when an existing transaction is provided and all editable
- * fields are pre-filled.</li>
+ *   <li>creation mode, when no existing transaction is provided,
+ *   <li>edit mode, when an existing transaction is provided and all editable fields are pre-filled.
  * </ul>
  */
 public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
+
+    private static final int GRID_SPACING = 12;
 
     private final TextField descriptionField;
     private final TextField amountField;
@@ -69,39 +67,34 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     /**
      * Creates a dialog in creation mode.
      *
-     * @param walletCurrency
-     *            the currency of the current wallet; must not be {@code null}
-     * @param categoryCatalog
-     *            the available category catalog; must not be {@code null}
-     * @param openFriendLoans
-     *            the currently open friend loans; must not be {@code null}
-     * @param categoryCreator
-     *            callback used to create a new custom category; must not be
-     *            {@code null}
+     * @param walletCurrency the currency of the current wallet; must not be {@code null}
+     * @param categoryCatalog the available category catalog; must not be {@code null}
+     * @param openFriendLoans the currently open friend loans; must not be {@code null}
+     * @param categoryCreator callback used to create a new custom category; must not be {@code
+     *     null}
      */
     public NewTransactionDialog(
             final CurrencyUnit walletCurrency,
             final CategoryCatalog categoryCatalog,
             final List<FriendLoanSummary> openFriendLoans,
-            final BiFunction<NewCategoryRequest, CategoryType, Optional<Category>> categoryCreator) {
+            final BiFunction<NewCategoryRequest, CategoryType, Optional<Category>>
+                    categoryCreator) {
         this(walletCurrency, categoryCatalog, openFriendLoans, categoryCreator, null);
     }
 
     /**
      * Creates a dialog in creation or edit mode.
      *
-     * @param walletCurrency
-     *            the currency of the current wallet; must not be {@code null}
-     * @param categoryCatalog
-     *            the available category catalog; must not be {@code null}
-     * @param openFriendLoans
-     *            the currently open friend loans; must not be {@code null}
-     * @param categoryCreator
-     *            callback used to create a new custom category; must not be
-     *            {@code null}
-     * @param transactionToEdit
-     *            the transaction to edit, or {@code null} to create a new one
+     * @param walletCurrency the currency of the current wallet; must not be {@code null}
+     * @param categoryCatalog the available category catalog; must not be {@code null}
+     * @param openFriendLoans the currently open friend loans; must not be {@code null}
+     * @param categoryCreator callback used to create a new custom category; must not be {@code
+     *     null}
+     * @param transactionToEdit the transaction to edit, or {@code null} to create a new one
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dialog references shared category catalog")
     public NewTransactionDialog(
             final CurrencyUnit walletCurrency,
             final CategoryCatalog categoryCatalog,
@@ -130,7 +123,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         this.friendNameField = new TextField();
         this.friendLoanOperationBox = new ComboBox<>();
         this.existingFriendLoanBox = new ComboBox<>();
-        this.walletCurrencyLabel = new Label(String.valueOf(Objects.requireNonNull(walletCurrency)));
+        this.walletCurrencyLabel =
+                new Label(String.valueOf(Objects.requireNonNull(walletCurrency)));
 
         descriptionField.setPromptText("Description");
         amountField.setPromptText("Amount");
@@ -148,39 +142,54 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         transactionTypeBox.getSelectionModel().select(CategoryType.EXPENSE);
         updateCategoriesFor(transactionTypeBox.getValue());
 
-        transactionTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            updateCategoriesFor(newValue);
-            updateFriendLoanControls();
-        });
-        friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> updateFriendLoanControls());
+        transactionTypeBox
+                .valueProperty()
+                .addListener(
+                        (obs, oldValue, newValue) -> {
+                            updateCategoriesFor(newValue);
+                            updateFriendLoanControls();
+                        });
+        friendLoanOperationBox
+                .valueProperty()
+                .addListener((obs, oldValue, newValue) -> updateFriendLoanControls());
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
+        grid.setHgap(GRID_SPACING);
+        grid.setVgap(GRID_SPACING);
         grid.setPadding(new Insets(16));
 
         final HBox categoryRow = new HBox(8, categoryBox, newCategoryButton);
 
-        grid.add(new Label("Transaction type:"), 0, 0);
-        grid.add(transactionTypeBox, 1, 0);
-        grid.add(new Label("Category:"), 0, 1);
-        grid.add(categoryRow, 1, 1);
-        grid.add(new Label("Description:"), 0, 2);
-        grid.add(descriptionField, 1, 2);
-        grid.add(new Label("Amount:"), 0, 3);
-        grid.add(amountField, 1, 3);
-        grid.add(new Label("Wallet currency:"), 0, 4);
-        grid.add(walletCurrencyLabel, 1, 4);
-        grid.add(new Label("Date:"), 0, 5);
-        grid.add(datePicker, 1, 5);
-        grid.add(new Label("Friend loan mode:"), 0, 6);
-        grid.add(friendLoanOperationBox, 1, 6);
-        grid.add(new Label("Friend name:"), 0, 7);
-        grid.add(friendNameField, 1, 7);
-        grid.add(new Label("Existing loan:"), 0, 8);
-        grid.add(existingFriendLoanBox, 1, 8);
-        grid.add(new Label("Notes:"), 0, 9);
-        grid.add(notesArea, 1, 9);
+        int row = 0;
+        grid.add(new Label("Transaction type:"), 0, row);
+        grid.add(transactionTypeBox, 1, row);
+        row++;
+        grid.add(new Label("Category:"), 0, row);
+        grid.add(categoryRow, 1, row);
+        row++;
+        grid.add(new Label("Description:"), 0, row);
+        grid.add(descriptionField, 1, row);
+        row++;
+        grid.add(new Label("Amount:"), 0, row);
+        grid.add(amountField, 1, row);
+        row++;
+        grid.add(new Label("Wallet currency:"), 0, row);
+        grid.add(walletCurrencyLabel, 1, row);
+        row++;
+        grid.add(new Label("Date:"), 0, row);
+        grid.add(datePicker, 1, row);
+        row++;
+        grid.add(new Label("Friend loan mode:"), 0, row);
+        grid.add(friendLoanOperationBox, 1, row);
+        row++;
+        grid.add(new Label("Friend name:"), 0, row);
+        grid.add(friendNameField, 1, row);
+        row++;
+        grid.add(new Label("Existing loan:"), 0, row);
+        grid.add(existingFriendLoanBox, 1, row);
+        row++;
+        grid.add(new Label("Notes:"), 0, row);
+        grid.add(notesArea, 1, row);
 
         getDialogPane().setContent(grid);
 
@@ -198,158 +207,183 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         descriptionField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
         amountField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
         datePicker.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
-        transactionTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        transactionTypeBox
+                .valueProperty()
+                .addListener((obs, oldValue, newValue) -> validator.run());
         categoryBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
-        friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        friendLoanOperationBox
+                .valueProperty()
+                .addListener((obs, oldValue, newValue) -> validator.run());
         friendNameField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
-        existingFriendLoanBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        existingFriendLoanBox
+                .valueProperty()
+                .addListener((obs, oldValue, newValue) -> validator.run());
 
         validator.run();
 
-        setResultConverter(buttonType -> {
-            if (!Objects.equals(buttonType, confirmButtonType)) {
-                return null;
-            }
-            return buildRequest().orElse(null);
-        });
+        setResultConverter(
+                buttonType -> {
+                    if (!Objects.equals(buttonType, confirmButtonType)) {
+                        return null;
+                    }
+                    return buildRequest().orElse(null);
+                });
     }
 
-    /**
-     * Configures the transaction type combo box.
-     */
+    /** Configures the transaction type combo box. */
     private void configureTransactionTypeBox() {
-        transactionTypeBox.setItems(FXCollections.observableArrayList(
-                CategoryType.INCOME,
-                CategoryType.EXPENSE,
-                CategoryType.TRANSFER,
-                CategoryType.FRIEND_LOAN
-        ));
-        transactionTypeBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(final CategoryType type) {
-                return type == null ? "" : formatCategoryType(type);
-            }
+        transactionTypeBox.setItems(
+                FXCollections.observableArrayList(
+                        CategoryType.INCOME,
+                        CategoryType.EXPENSE,
+                        CategoryType.TRANSFER,
+                        CategoryType.FRIEND_LOAN));
+        transactionTypeBox.setConverter(
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final CategoryType type) {
+                        return type == null ? "" : formatCategoryType(type);
+                    }
 
-            @Override
-            public CategoryType fromString(final String string) {
-                return null;
-            }
-        });
-        transactionTypeBox.setCellFactory(listView -> createTextCell(transactionTypeBox.getConverter()::toString));
-        transactionTypeBox.setButtonCell(createTextCell(transactionTypeBox.getConverter()::toString));
+                    @Override
+                    public CategoryType fromString(final String string) {
+                        return null;
+                    }
+                });
+        transactionTypeBox.setCellFactory(
+                listView -> createTextCell(transactionTypeBox.getConverter()::toString));
+        transactionTypeBox.setButtonCell(
+                createTextCell(transactionTypeBox.getConverter()::toString));
         transactionTypeBox.setMaxWidth(Double.MAX_VALUE);
     }
 
-    /**
-     * Configures the category combo box.
-     */
+    /** Configures the category combo box. */
     private void configureCategoryBox() {
-        categoryBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(final Category category) {
-                return category == null ? "" : category.getName();
-            }
+        categoryBox.setConverter(
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final Category category) {
+                        return category == null ? "" : category.getName();
+                    }
 
-            @Override
-            public Category fromString(final String string) {
-                return null;
-            }
-        });
-        categoryBox.setCellFactory(listView -> createTextCell(categoryBox.getConverter()::toString));
+                    @Override
+                    public Category fromString(final String string) {
+                        return null;
+                    }
+                });
+        categoryBox.setCellFactory(
+                listView -> createTextCell(categoryBox.getConverter()::toString));
         categoryBox.setButtonCell(createTextCell(categoryBox.getConverter()::toString));
         categoryBox.setMaxWidth(Double.MAX_VALUE);
     }
 
-    /**
-     * Configures the friend-loan-specific combo boxes.
-     */
+    /** Configures the friend-loan-specific combo boxes. */
     private void configureFriendLoanBoxes() {
-        friendLoanOperationBox.setItems(FXCollections.observableArrayList(
-                FriendLoanOperation.NEW_LOAN,
-                FriendLoanOperation.REPAYMENT
-        ));
+        friendLoanOperationBox.setItems(
+                FXCollections.observableArrayList(
+                        FriendLoanOperation.NEW_LOAN, FriendLoanOperation.REPAYMENT));
         friendLoanOperationBox.getSelectionModel().select(FriendLoanOperation.NEW_LOAN);
-        friendLoanOperationBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(final FriendLoanOperation operation) {
-                if (operation == null) {
-                    return "";
-                }
-                return switch (operation) {
-                    case NEW_LOAN -> "New loan";
-                    case REPAYMENT -> "Repayment";
-                };
-            }
+        friendLoanOperationBox.setConverter(
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final FriendLoanOperation operation) {
+                        if (operation == null) {
+                            return "";
+                        }
+                        return switch (operation) {
+                            case NEW_LOAN -> "New loan";
+                            case REPAYMENT -> "Repayment";
+                        };
+                    }
 
-            @Override
-            public FriendLoanOperation fromString(final String string) {
-                return null;
-            }
-        });
-        friendLoanOperationBox.setCellFactory(listView -> createTextCell(friendLoanOperationBox.getConverter()::toString));
-        friendLoanOperationBox.setButtonCell(createTextCell(friendLoanOperationBox.getConverter()::toString));
+                    @Override
+                    public FriendLoanOperation fromString(final String string) {
+                        return null;
+                    }
+                });
+        friendLoanOperationBox.setCellFactory(
+                listView -> createTextCell(friendLoanOperationBox.getConverter()::toString));
+        friendLoanOperationBox.setButtonCell(
+                createTextCell(friendLoanOperationBox.getConverter()::toString));
         friendLoanOperationBox.setMaxWidth(Double.MAX_VALUE);
 
         existingFriendLoanBox.setItems(FXCollections.observableArrayList(openFriendLoans));
-        existingFriendLoanBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(final FriendLoanSummary summary) {
-                return summary == null
-                        ? ""
-                        : summary.getFriendName()
-                                + " - residual "
-                                + summary.getNetBalance().abs().stripTrailingZeros().toPlainString();
-            }
+        existingFriendLoanBox.setConverter(
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final FriendLoanSummary summary) {
+                        return summary == null
+                                ? ""
+                                : summary.getFriendName()
+                                        + " - residual "
+                                        + summary.getNetBalance()
+                                                .abs()
+                                                .stripTrailingZeros()
+                                                .toPlainString();
+                    }
 
-            @Override
-            public FriendLoanSummary fromString(final String string) {
-                return null;
-            }
-        });
-        existingFriendLoanBox.setCellFactory(listView -> createTextCell(existingFriendLoanBox.getConverter()::toString));
-        existingFriendLoanBox.setButtonCell(createTextCell(existingFriendLoanBox.getConverter()::toString));
+                    @Override
+                    public FriendLoanSummary fromString(final String string) {
+                        return null;
+                    }
+                });
+        existingFriendLoanBox.setCellFactory(
+                listView -> createTextCell(existingFriendLoanBox.getConverter()::toString));
+        existingFriendLoanBox.setButtonCell(
+                createTextCell(existingFriendLoanBox.getConverter()::toString));
         existingFriendLoanBox.setMaxWidth(Double.MAX_VALUE);
     }
 
     /**
      * Prefills the dialog from an existing transaction.
      *
-     * @param transaction
-     *            the transaction being edited
+     * @param transaction the transaction being edited
      */
     private void prefillFromTransaction(final CashTransaction transaction) {
         final CategoryType type = transaction.getCategory().getType();
 
         descriptionField.setText(transaction.getDescription());
-        amountField.setText(transaction.getAsset().amount().abs().stripTrailingZeros().toPlainString());
+        amountField.setText(
+                transaction.getAsset().amount().abs().stripTrailingZeros().toPlainString());
         datePicker.setValue(transaction.getDate());
         notesArea.setText(transaction.getNotes() == null ? "" : transaction.getNotes());
 
         transactionTypeBox.getSelectionModel().select(type);
         updateCategoriesFor(type);
 
-        categoryBox.getSelectionModel().select(
-                categoryBox.getItems().stream()
-                        .filter(category -> category.getName().equalsIgnoreCase(transaction.getCategory().getName()))
-                        .findFirst()
-                        .orElse(null)
-        );
+        categoryBox
+                .getSelectionModel()
+                .select(
+                        categoryBox.getItems().stream()
+                                .filter(
+                                        category ->
+                                                category.getName()
+                                                        .equalsIgnoreCase(
+                                                                transaction
+                                                                        .getCategory()
+                                                                        .getName()))
+                                .findFirst()
+                                .orElse(null));
 
         if (type == CategoryType.FRIEND_LOAN && transaction.isFriendLoanTransaction()) {
             final boolean repayment = transaction.getAsset().amount().signum() > 0;
-            friendLoanOperationBox.getSelectionModel().select(
-                    repayment ? FriendLoanOperation.REPAYMENT : FriendLoanOperation.NEW_LOAN
-            );
+            friendLoanOperationBox
+                    .getSelectionModel()
+                    .select(
+                            repayment
+                                    ? FriendLoanOperation.REPAYMENT
+                                    : FriendLoanOperation.NEW_LOAN);
             updateFriendLoanControls();
 
             if (repayment) {
                 final UUID loanId = transaction.getFriendLoanId().orElse(null);
-                existingFriendLoanBox.getSelectionModel().select(
-                        openFriendLoans.stream()
-                                .filter(summary -> summary.getFriendLoanId().equals(loanId))
-                                .findFirst()
-                                .orElse(null)
-                );
+                existingFriendLoanBox
+                        .getSelectionModel()
+                        .select(
+                                openFriendLoans.stream()
+                                        .filter(summary -> summary.getFriendLoanId().equals(loanId))
+                                        .findFirst()
+                                        .orElse(null));
             } else {
                 friendNameField.setText(transaction.getFriendName().orElse(""));
             }
@@ -359,8 +393,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     }
 
     /**
-     * Updates friend-loan controls according to the selected transaction type
-     * and selected friend-loan operation.
+     * Updates friend-loan controls according to the selected transaction type and selected
+     * friend-loan operation.
      */
     private void updateFriendLoanControls() {
         final boolean friendLoan = transactionTypeBox.getValue() == CategoryType.FRIEND_LOAN;
@@ -388,8 +422,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
      * @return {@code true} if the form is valid
      */
     private boolean isFormValid() {
-        final boolean hasDescription = descriptionField.getText() != null
-                && !descriptionField.getText().trim().isEmpty();
+        final boolean hasDescription =
+                descriptionField.getText() != null && !descriptionField.getText().trim().isEmpty();
         final BigDecimal amount = parseAmount(amountField.getText());
         final boolean validAmount = amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
         final boolean hasDate = datePicker.getValue() != null;
@@ -410,7 +444,9 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         return switch (operation) {
-            case NEW_LOAN -> friendNameField.getText() != null && !friendNameField.getText().trim().isEmpty();
+            case NEW_LOAN ->
+                    friendNameField.getText() != null
+                            && !friendNameField.getText().trim().isEmpty();
             case REPAYMENT -> existingFriendLoanBox.getValue() != null;
         };
     }
@@ -430,9 +466,10 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         final Category category = categoryBox.getValue();
         final LocalDate date = datePicker.getValue();
         final String description = descriptionField.getText().trim();
-        final String notes = notesArea.getText() == null || notesArea.getText().isBlank()
-                ? null
-                : notesArea.getText().trim();
+        final String notes =
+                notesArea.getText() == null || notesArea.getText().isBlank()
+                        ? null
+                        : notesArea.getText().trim();
 
         String friendName = null;
         FriendLoanOperation operation = null;
@@ -449,22 +486,20 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
             }
         }
 
-        return Optional.of(new NewTransactionRequest(
-                amount,
-                type,
-                category,
-                date,
-                description,
-                notes,
-                friendName,
-                operation,
-                existingFriendLoanId
-        ));
+        return Optional.of(
+                new NewTransactionRequest(
+                        amount,
+                        type,
+                        category,
+                        date,
+                        description,
+                        notes,
+                        friendName,
+                        operation,
+                        existingFriendLoanId));
     }
 
-    /**
-     * Opens the custom-category creation dialog.
-     */
+    /** Opens the custom-category creation dialog. */
     private void openNewCategoryDialog() {
         final CategoryType selectedType = transactionTypeBox.getValue();
         if (selectedType == null) {
@@ -472,32 +507,40 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         final NewCategoryDialog dialog = new NewCategoryDialog(selectedType);
-        dialog.showAndWait().ifPresent(request ->
-                categoryCreator.apply(request, selectedType).ifPresent(createdCategory -> {
-                    updateCategoriesFor(selectedType);
-                    categoryBox.getSelectionModel().select(createdCategory);
-                })
-        );
+        dialog.showAndWait()
+                .ifPresent(
+                        request ->
+                                categoryCreator
+                                        .apply(request, selectedType)
+                                        .ifPresent(
+                                                createdCategory -> {
+                                                    updateCategoriesFor(selectedType);
+                                                    categoryBox
+                                                            .getSelectionModel()
+                                                            .select(createdCategory);
+                                                }));
     }
 
     /**
-     * Refreshes the category combo box according to the selected transaction
-     * type.
+     * Refreshes the category combo box according to the selected transaction type.
      *
-     * @param selectedType
-     *            the selected transaction type
+     * @param selectedType the selected transaction type
      */
     private void updateCategoriesFor(final CategoryType selectedType) {
-        final List<Category> filteredCategories = categoryCatalog.getActiveCategories().stream()
-                .filter(category -> category.getType() == selectedType)
-                .toList();
+        final List<Category> filteredCategories =
+                categoryCatalog.getActiveCategories().stream()
+                        .filter(category -> category.getType() == selectedType)
+                        .toList();
 
         final Category previousSelection = categoryBox.getValue();
         categoryBox.setItems(FXCollections.observableArrayList(filteredCategories));
 
         if (previousSelection != null) {
             filteredCategories.stream()
-                    .filter(category -> category.getName().equalsIgnoreCase(previousSelection.getName()))
+                    .filter(
+                            category ->
+                                    category.getName()
+                                            .equalsIgnoreCase(previousSelection.getName()))
                     .findFirst()
                     .ifPresentOrElse(
                             category -> categoryBox.getSelectionModel().select(category),
@@ -507,8 +550,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
                                 } else {
                                     categoryBox.getSelectionModel().clearSelection();
                                 }
-                            }
-                    );
+                            });
         } else if (!filteredCategories.isEmpty()) {
             categoryBox.getSelectionModel().selectFirst();
         } else {
@@ -519,17 +561,16 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     /**
      * Parses a decimal amount from the given text.
      *
-     * @param text
-     *            the raw text
+     * @param text the raw text
      * @return the parsed amount, or {@code null} if parsing fails
      */
     private static BigDecimal parseAmount(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim());
-        } catch (NumberFormatException exception) {
+        } catch (final NumberFormatException exception) {
             return null;
         }
     }
@@ -537,8 +578,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     /**
      * Formats a category type for UI display.
      *
-     * @param type
-     *            the category type
+     * @param type the category type
      * @return the user-facing label
      */
     private static String formatCategoryType(final CategoryType type) {
@@ -553,13 +593,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     /**
      * Creates a text-only list cell using the given text mapper.
      *
-     * @param mapper
-     *            the text mapper
-     * @param <T>
-     *            the cell item type
+     * @param mapper the text mapper
+     * @param <T> the cell item type
      * @return a configured list cell
      */
-    private static <T> ListCell<T> createTextCell(final java.util.function.Function<T, String> mapper) {
+    private static <T> ListCell<T> createTextCell(
+            final java.util.function.Function<T, String> mapper) {
         return new ListCell<>() {
             @Override
             protected void updateItem(final T item, final boolean empty) {

@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.currency_converter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.bank.Bank;
@@ -7,6 +8,7 @@ import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import java.math.BigDecimal;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -16,21 +18,24 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JavaFX widget that performs bank‑mediated currency conversions.
- * 
- * <p>
- * This component allows the user to:
+ *
+ * <p>This component allows the user to:
+ *
  * <ul>
- *     <li>select a bank with its fee structure</li>
- *     <li>enter an amount and choose source/target currencies</li>
- *     <li>compute the converted amount, commission, and total cost</li>
- *     <li>add new banks dynamically through a dialog</li>
+ *   <li>select a bank with its fee structure
+ *   <li>enter an amount and choose source/target currencies
+ *   <li>compute the converted amount, commission, and total cost
+ *   <li>add new banks dynamically through a dialog
  * </ul>
  */
 public class BankConverterWidgetFX {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankConverterWidgetFX.class);
 
     /** Constants. */
     private static final double PERC = 50.0;
@@ -43,6 +48,7 @@ public class BankConverterWidgetFX {
 
     /** UI labels showing conversion results. */
     private final Label resultLabel = new Label("To be calculated...");
+
     private final Label detailsLabel = new Label("");
     private final Label convertedLabel = new Label("");
 
@@ -52,17 +58,21 @@ public class BankConverterWidgetFX {
     /**
      * Creates a new bank conversion widget.
      *
-     * @param controller     controller providing available banks and persistence
-     * @param amountField    text field containing the amount to convert
-     * @param fromBox        combo box for selecting the source currency
-     * @param toBox          combo box for selecting the target currency
-     * @param baseConverter  base converter used to compute raw currency conversion
+     * @param controller controller providing available banks and persistence
+     * @param amountField text field containing the amount to convert
+     * @param fromBox combo box for selecting the source currency
+     * @param toBox combo box for selecting the target currency
+     * @param baseConverter base converter used to compute raw currency conversion
      */
-    public BankConverterWidgetFX(final BankConversionController controller,
-                                 final TextField amountField,
-                                 final ComboBox<CurrencyUnit> fromBox,
-                                 final ComboBox<CurrencyUnit> toBox,
-                                 final BasicCurrencyConverter baseConverter) {
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of bank conversion controller")
+    public BankConverterWidgetFX(
+            final BankConversionController controller,
+            final TextField amountField,
+            final ComboBox<CurrencyUnit> fromBox,
+            final ComboBox<CurrencyUnit> toBox,
+            final BasicCurrencyConverter baseConverter) {
 
         this.controller = controller;
 
@@ -78,63 +88,67 @@ public class BankConverterWidgetFX {
         calcBtn.setDisable(true);
 
         // Validation logic: enable button only when amount + bank are valid
-        final Runnable validate = () -> {
-            final boolean emptyAmount = amountField.getText() == null 
-                || amountField.getText().trim().isEmpty();
-            calcBtn.setDisable(emptyAmount || bankBox.getValue() == null);
-        };
+        final Runnable validate =
+                () -> {
+                    final boolean emptyAmount =
+                            amountField.getText() == null || amountField.getText().trim().isEmpty();
+                    calcBtn.setDisable(emptyAmount || bankBox.getValue() == null);
+                };
 
         amountField.textProperty().addListener((obs, old, val) -> validate.run());
         bankBox.valueProperty().addListener((obs, old, val) -> validate.run());
 
         // Conversion action
-        calcBtn.setOnAction(e -> {
-            convertedLabel.setText("");
-            detailsLabel.setText("");
-            try {
-                //final BigDecimal amount = new BigDecimal(amountField.getText());
-                final BigDecimal amount = new BigDecimal(
-                    amountField.getText().trim().replace(',', '.')
-                );
-                final Bank bank = bankBox.getValue();
-                final CurrencyUnit from = fromBox.getValue();
-                final CurrencyUnit to = toBox.getValue();
+        calcBtn.setOnAction(
+                e -> {
+                    convertedLabel.setText("");
+                    detailsLabel.setText("");
+                    try {
+                        // final BigDecimal amount = new BigDecimal(amountField.getText());
+                        final BigDecimal amount =
+                                new BigDecimal(amountField.getText().trim().replace(',', '.'));
+                        final Bank bank = bankBox.getValue();
+                        final CurrencyUnit from = fromBox.getValue();
+                        final CurrencyUnit to = toBox.getValue();
 
-                if (bank != null && from != null && to != null) {
-                    if (amount.signum() <= 0) {
+                        if (bank != null && from != null && to != null) {
+                            if (amount.signum() <= 0) {
+                                resultLabel.setText("Insert value > 0");
+                                return;
+                            }
+                            // Perform bank‑mediated conversion
+                            final BankConversionService service =
+                                    new BankConversionService(baseConverter);
+                            final BankConversionResult res =
+                                    service.convert(
+                                            amount, fromBox.getValue(), toBox.getValue(), bank);
+
+                            // Update UI
+                            convertedLabel.setText(
+                                    "Converted: "
+                                            + res.getConvertedAmount().toPlainString()
+                                            + " "
+                                            + res.getTargetCurrencyCode());
+                            resultLabel.setText(
+                                    "Total cost: "
+                                            + res.getTotalCost().toPlainString()
+                                            + " "
+                                            + res.getSourceCurrencyCode());
+                            detailsLabel.setText("Fees: " + res.getCommission().toPlainString());
+
+                        } else {
+                            resultLabel.setText("Select a bank and currencies!");
+                        }
+                    } catch (final NumberFormatException ex) {
                         resultLabel.setText("Insert value > 0");
-                        return;
+                    } catch (final IllegalArgumentException ex) {
+                        resultLabel.setText("Conversion unavailable: " + ex.getMessage());
+                        LOGGER.error("[BANK CONVERSION] Conversion failed", ex);
+                    } catch (final IllegalStateException ex) {
+                        resultLabel.setText("Price service unavailable. Please try again later.");
+                        LOGGER.error("[BANK CONVERSION] Provider failed", ex);
                     }
-                    // Perform bank‑mediated conversion
-                    final BankConversionService service = new BankConversionService(baseConverter);
-                    final BankConversionResult res = service.convert(
-                        amount, 
-                        fromBox.getValue(), 
-                        toBox.getValue(), 
-                        bank);
-
-                    // Update UI
-                    convertedLabel.setText("Converted: "
-                        + res.getConvertedAmount().toPlainString() + " " + res.getTargetCurrencyCode());
-                    resultLabel.setText("Total cost: "
-                        + res.getTotalCost().toPlainString() + " " + res.getSourceCurrencyCode());
-                    detailsLabel.setText("Fees: " + res.getCommission().toPlainString());
-
-                } else {
-                    resultLabel.setText("Select a bank and currencies!");
-                }
-            } catch (final NumberFormatException ex) {
-                resultLabel.setText("Insert value > 0");
-            } catch (final IllegalArgumentException ex) {
-                resultLabel.setText("Conversion unavailable: " + ex.getMessage());
-                System.err.println("[BANK CONVERSION] Conversion failed");
-                ex.printStackTrace();
-            }  catch (final IllegalStateException ex) {
-                resultLabel.setText( "Price service unavailable. Please try again later." );
-                System.err.println("[BANK CONVERSION] Provider failed");
-                ex.printStackTrace();
-            }
-        });
+                });
 
         ThemeManager.applyFont(convertedLabel);
         ThemeManager.applyFont(resultLabel);
@@ -151,22 +165,21 @@ public class BankConverterWidgetFX {
         ThemeManager.applyFont(bankLabel);
 
         // Assemble UI
-        view.getChildren().addAll(
-                bankLabel,
-                bankBox,
-                addBankBtn,
-                calcBtn,
-                convertedLabel,
-                resultLabel,
-                detailsLabel
-        );
+        view.getChildren()
+                .addAll(
+                        bankLabel,
+                        bankBox,
+                        addBankBtn,
+                        calcBtn,
+                        convertedLabel,
+                        resultLabel,
+                        detailsLabel);
     }
 
     /**
      * Opens a dialog allowing the user to add a new bank with custom fees.
-     * 
-     * <p>
-     * The dialog validates fee values and updates both the controller and the UI.
+     *
+     * <p>The dialog validates fee values and updates both the controller and the UI.
      */
     private void openAddBankDialog() {
         final Dialog<Bank> dialog = new Dialog<>();
@@ -187,41 +200,43 @@ public class BankConverterWidgetFX {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         // Convert dialog result into a Bank instance
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    final double fixed = Double.parseDouble(fixedField.getText());
-                    final double percent = Double.parseDouble(percentField.getText());
+        dialog.setResultConverter(
+                button -> {
+                    if (button == ButtonType.OK) {
+                        try {
+                            final double fixed = Double.parseDouble(fixedField.getText());
+                            final double percent = Double.parseDouble(percentField.getText());
 
-                    // Basic validation: avoid unrealistic fees
-                    if (fixed <= PERC && percent <= PERC) {
-                        final Bank newBank = new Bank(nameField.getText(), fixed, percent);
+                            // Basic validation: avoid unrealistic fees
+                            if (fixed <= PERC && percent <= PERC) {
+                                final Bank newBank = new Bank(nameField.getText(), fixed, percent);
 
-                        // Persist and update UI
-                        controller.addBank(newBank);
-                        bankBox.getItems().add(newBank);
+                                // Persist and update UI
+                                controller.addBank(newBank);
+                                bankBox.getItems().add(newBank);
 
-                        return newBank;
+                                return newBank;
 
-                    } else {
-                        // Show validation error
-                        final Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Validation Error");
-                        alert.setHeaderText("Invalid Fees");
-                        alert.setContentText("The fixed and percentage fees cannot exceed 50%.");
-                        alert.showAndWait();
+                            } else {
+                                // Show validation error
+                                final Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Validation Error");
+                                alert.setHeaderText("Invalid Fees");
+                                alert.setContentText(
+                                        "The fixed and percentage fees cannot exceed 50%.");
+                                alert.showAndWait();
+                            }
+
+                        } catch (final IllegalArgumentException e) {
+                            // Show input error
+                            final Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Input Error");
+                            alert.setContentText("Please enter valid numbers in the fee fields.");
+                            alert.showAndWait();
+                        }
                     }
-
-                } catch (final IllegalArgumentException e) {
-                    // Show input error
-                    final Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Input Error");
-                    alert.setContentText("Please enter valid numbers in the fee fields.");
-                    alert.showAndWait();
-                }
-            }
-            return null;
-        });
+                    return null;
+                });
 
         dialog.showAndWait();
     }
@@ -231,8 +246,10 @@ public class BankConverterWidgetFX {
      *
      * @return the widget's {@link VBox} container
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Widget exposes root VBox view")
     public VBox getView() {
         return view;
     }
-
 }

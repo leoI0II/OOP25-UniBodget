@@ -1,12 +1,6 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
@@ -23,15 +17,19 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Default implementation of {@link DashboardFacade}.
  *
- * <p>
- * This class coordinates the services involved in the dashboard subsystem and
- * exposes a single method that returns a consistent snapshot of the current
- * dashboard state for the selected cash wallet.
- * </p>
+ * <p>This class coordinates the services involved in the dashboard subsystem and exposes a single
+ * method that returns a consistent snapshot of the current dashboard state for the selected cash
+ * wallet.
  */
 public final class DefaultDashboardFacade implements DashboardFacade {
 
@@ -47,15 +45,18 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     /**
      * Creates a new dashboard facade with the required collaborating services.
      *
-     * @param walletService the service exposing cash wallets and the current
-     * wallet history
+     * @param walletService the service exposing cash wallets and the current wallet history
      * @param categoryService the service exposing aggregated values by category
      * @param budgetMonitor the component evaluating the current budget status
-     * @param friendLoanSummaryService the service computing friend-loan
-     * summaries
+     * @param friendLoanSummaryService the service computing friend-loan summaries
      * @param walletInsightService the service computing dashboard insights
      * @param categoryCatalog the shared category catalog
+     * @param priceProvider the currency converter used for exchange rates
+     * @param settings the application settings
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of facade domain services and settings")
     public DefaultDashboardFacade(
             final CashAccountService walletService,
             final CategoryService categoryService,
@@ -64,8 +65,7 @@ public final class DefaultDashboardFacade implements DashboardFacade {
             final WalletInsightService walletInsightService,
             final CategoryCatalog categoryCatalog,
             final CurrencyConverter priceProvider,
-            final Settings settings
-    ) {
+            final Settings settings) {
         this.walletService = Objects.requireNonNull(walletService);
         this.categoryService = Objects.requireNonNull(categoryService);
         this.budgetMonitor = Objects.requireNonNull(budgetMonitor);
@@ -76,13 +76,16 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         this.settings = Objects.requireNonNull(settings);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public DashboardSnapshot loadDashboard() {
-        final CashAccount currentWallet = walletService.getCurrentWallet()
-                .orElseThrow(() -> new IllegalStateException("No wallet is currently selected."));
+        final CashAccount currentWallet =
+                walletService
+                        .getCurrentWallet()
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "No wallet is currently selected."));
 
         final List<CashTransaction> currentTransactions = walletService.getCurrentTransactions();
         categoryService.recomputeFromTransactions(currentTransactions);
@@ -91,30 +94,27 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         final List<CashAccount> allWallets = walletService.getWallets();
 
         final BigDecimal monthlyBudgetUsage = computeCurrentMonthBudgetUsage(currentTransactions);
-        final BudgetStatus budgetStatus
-                = budgetMonitor.getBudgetStatus(monthlyBudgetUsage, budgetSettings);
+        final BudgetStatus budgetStatus =
+                budgetMonitor.getBudgetStatus(monthlyBudgetUsage, budgetSettings);
 
-        final List<FriendLoanSummary> friendLoanSummaries
-                = friendLoanSummaryService.summarize(currentTransactions);
+        final List<FriendLoanSummary> friendLoanSummaries =
+                friendLoanSummaryService.summarize(currentTransactions);
 
-        final List<WalletInsight> walletInsights
-                = walletInsightService.computeInsights(currentTransactions);
+        final List<WalletInsight> walletInsights =
+                walletInsightService.computeInsights(currentTransactions);
 
         return new DefaultDashboardSnapshot(
                 currentWallet.getName(),
                 currentWallet.getBaseCurrency().toString(),
                 currentWallet.getBalance().amount(),
-                currentTransactions.stream()
-                        .map(AbstractTransaction.class::cast)
-                        .toList(),
+                currentTransactions.stream().map(AbstractTransaction.class::cast).toList(),
                 categoryService.getCategorySummaries(),
                 budgetSettings.getLimitValue(),
                 budgetSettings.getWarningThreshold(),
                 budgetStatus,
                 friendLoanSummaries,
                 walletInsights,
-                allWallets
-        );
+                allWallets);
     }
 
     @Override
@@ -127,14 +127,18 @@ public final class DefaultDashboardFacade implements DashboardFacade {
         return walletService.getCurrentWallet();
     }
 
-    public Optional<CashAccount> getCashAccountById(UUID id) {
-        return getAllCashAccounts().stream()
-                .filter(w -> w.getId().equals(id))
-                .findFirst();
+    /**
+     * Returns a cash account by its unique identifier.
+     *
+     * @param id the cash account identifier
+     * @return optional containing the account if found, or empty
+     */
+    public Optional<CashAccount> getCashAccountById(final UUID id) {
+        return getAllCashAccounts().stream().filter(w -> w.getId().equals(id)).findFirst();
     }
 
     @Override
-    public void selectWallet(UUID id) {
+    public void selectWallet(final UUID id) {
         walletService.selectWallet(id);
     }
 
@@ -142,14 +146,22 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     public Asset getAggregatedBalance() {
         return getAllCashAccounts().stream()
                 .map(CashAccount::getBalance)
-                .map(balance -> priceProvider.convert(balance.amount(), balance.currency(), settings.getBaseCurrencyUnit()).getAsset())
+                .map(
+                        balance ->
+                                priceProvider
+                                        .convert(
+                                                balance.amount(),
+                                                balance.currency(),
+                                                settings.getBaseCurrencyUnit())
+                                        .getAsset())
                 .reduce(Asset.zero(settings.getBaseCurrencyUnit()), Asset::add);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Facade exposes category catalog for category management")
     public CategoryCatalog getCategoryCatalog() {
         return categoryCatalog;
     }
@@ -157,11 +169,9 @@ public final class DefaultDashboardFacade implements DashboardFacade {
     /**
      * Computes the amount contributing to the current monthly budget.
      *
-     * <p>
-     * Only transactions in the current month and current year whose category
-     * type is {@link CategoryType#EXPENSE} or {@link CategoryType#FRIEND_LOAN}
-     * are counted. Each matching transaction contributes its absolute amount.
-     * </p>
+     * <p>Only transactions in the current month and current year whose category type is {@link
+     * CategoryType#EXPENSE} or {@link CategoryType#FRIEND_LOAN} are counted. Each matching
+     * transaction contributes its absolute amount.
      *
      * @param transactions the transactions to inspect
      * @return the total amount contributing to the current monthly budget
@@ -177,10 +187,11 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 .filter(transaction -> transaction.getAsset().amount() != null)
                 .filter(transaction -> transaction.getDate().getYear() == now.getYear())
                 .filter(transaction -> transaction.getDate().getMonth() == now.getMonth())
-                .filter(transaction -> {
-                    final CategoryType type = transaction.getCategory().getType();
-                    return type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN;
-                })
+                .filter(
+                        transaction -> {
+                            final CategoryType type = transaction.getCategory().getType();
+                            return type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN;
+                        })
                 .map(transaction -> transaction.getAsset().amount().abs())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

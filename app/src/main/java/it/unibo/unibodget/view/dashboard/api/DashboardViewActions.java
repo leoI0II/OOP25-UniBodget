@@ -1,37 +1,28 @@
 package it.unibo.unibodget.view.dashboard.api;
 
-import java.util.UUID;
-
 import it.unibo.unibodget.view.dashboard.state.DashboardDestination;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
+import java.util.UUID;
 
 /**
  * Action callbacks exposed by the dashboard controller to the dashboard view.
  *
- * <p>
- * The view must remain passive and delegate user interactions through this
- * interface. The controller implements this contract and decides how each user
- * action is handled.
- * </p>
+ * <p>The view must remain passive and delegate user interactions through this interface. The
+ * controller implements this contract and decides how each user action is handled.
  *
- * <p>
- * Default methods are used for newly introduced actions so that older view
- * implementations can remain source-compatible and binary-compatible without
- * being forced to implement every new callback immediately. [web:477][web:617]
- * </p>
+ * <p>Default methods are used for newly introduced actions so that older view implementations can
+ * remain source-compatible and binary-compatible without being forced to implement every new
+ * callback immediately. [web:477][web:617]
  */
 public interface DashboardViewActions {
 
-    /**
-     * Called when the dashboard view is shown and must load its initial data.
-     */
+    /** Called when the dashboard view is shown and must load its initial data. */
     void onViewOpened();
 
     /**
      * Called when a wallet is selected from the sidebar.
      *
-     * @param walletId the identifier of the selected wallet; must not be
-     * {@code null}
+     * @param walletId the identifier of the selected wallet; must not be {@code null}
      */
     void onWalletSelected(UUID walletId);
 
@@ -40,16 +31,14 @@ public interface DashboardViewActions {
      *
      * @param walletId the wallet identifier
      */
-    default void onEditWalletRequested(final UUID walletId) {
-    }
+    default void onEditWalletRequested(final UUID walletId) { }
 
     /**
      * Called when deleting a wallet is requested.
      *
      * @param walletId the wallet identifier
      */
-    default void onDeleteWalletRequested(final UUID walletId) {
-    }
+    default void onDeleteWalletRequested(final UUID walletId) { }
 
     /**
      * Called when navigation to a dashboard destination is requested.
@@ -58,9 +47,7 @@ public interface DashboardViewActions {
      */
     void onNavigationRequested(DashboardDestination destination);
 
-    /**
-     * Called when the settings area is requested directly.
-     */
+    /** Called when the settings area is requested directly. */
     void onSettingsRequested();
 
     /**
@@ -70,62 +57,43 @@ public interface DashboardViewActions {
      */
     void onTransactionFiltersChanged(TransactionFilterInput input);
 
-    /**
-     * Called when transaction export is requested.
-     */
+    /** Called when transaction export is requested. */
     void onExportTransactionsRequested();
 
-    /**
-     * Called when wallet creation is requested.
-     */
+    /** Called when wallet creation is requested. */
     void onCreateWalletRequested();
 
-    /**
-     * Called when transaction creation is requested.
-     */
+    /** Called when transaction creation is requested. */
     void onCreateTransactionRequested();
 
-    /**
-     * Called when budget editing is requested.
-     */
+    /** Called when budget editing is requested. */
     void onEditBudgetRequested();
 
     /**
      * Called when editing of a transaction row is requested.
      *
-     * <p>
-     * This default implementation is intentionally empty to preserve backward
-     * compatibility with existing implementations. [web:477][web:617]
-     * </p>
+     * <p>This default implementation is intentionally empty to preserve backward compatibility with
+     * existing implementations. [web:477][web:617]
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction represented by the selected row
      */
-    default void onEditTransactionRequested(final UUID transactionRowId) {
-    }
+    default void onEditTransactionRequested(final UUID transactionRowId) { }
 
     /**
      * Called when deletion of a transaction row is requested.
      *
-     * <p>
-     * This default implementation is intentionally empty to preserve backward
-     * compatibility with existing implementations. [web:477][web:617]
-     * </p>
+     * <p>This default implementation is intentionally empty to preserve backward compatibility with
+     * existing implementations. [web:477][web:617]
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction represented by the selected row
      */
-    default void onDeleteTransactionRequested(final UUID transactionRowId) {
-    }
+    default void onDeleteTransactionRequested(final UUID transactionRowId) { }
 
     /**
      * Called when category management is requested.
      *
-     * <p>
-     * This default implementation is intentionally empty to preserve backward
-     * compatibility with existing implementations. [web:477][web:617]
-     * </p>
+     * <p>This default implementation is intentionally empty to preserve backward compatibility with
+     * existing implementations. [web:477][web:617]
      */
-    default void onManageCategoriesRequested() {
-    }
+    default void onManageCategoriesRequested() { }
 }

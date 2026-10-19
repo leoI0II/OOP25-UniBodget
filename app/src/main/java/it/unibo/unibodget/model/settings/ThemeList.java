@@ -1,7 +1,6 @@
 package it.unibo.unibodget.model.settings;
 
 import it.unibo.unibodget.persistency.ModelFileManager;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,13 +10,12 @@ import java.util.List;
 /**
  * Loads and provides access to all available {@link Theme} instances.
  *
- * <p>The list of themes is loaded once from
- * <code>data/json/settings/Theme.json</code> and cached statically.
- * If the file is missing or invalid, the list falls back to
- * containing only {@link Theme#DEFAULT}.</p>
+ * <p>The list of themes is loaded once from <code>data/json/settings/Theme.json</code> and cached
+ * statically. If the file is missing or invalid, the list falls back to containing only {@link
+ * Theme#DEFAULT}.
  *
- * <p>This class is lightweight and stateless: it exposes only a
- * getter and performs initialization lazily on first construction.</p>
+ * <p>This class is lightweight and stateless: it exposes only a getter and performs initialization
+ * lazily on first construction.
  */
 public final class ThemeList {
 
@@ -29,9 +27,7 @@ public final class ThemeList {
     /** Cached list of loaded themes. */
     private static final List<Theme> LOADED = new ArrayList<>();
 
-    /**
-     * Creates a ThemeList and initializes the theme list if needed.
-     */
+    /** Creates a ThemeList and initializes the theme list if needed. */
     public ThemeList() {
         if (!initialized) {
             init();
@@ -50,15 +46,12 @@ public final class ThemeList {
     /**
      * Loads themes from disk using {@link ModelFileManager}.
      *
-     * <p>If loading fails or the file is empty, the list is replaced
-     * with a single default theme.</p>
+     * <p>If loading fails or the file is empty, the list is replaced with a single default theme.
      */
     private static void init() {
-        initialized = false;
         try {
             // Load Theme.json
-            final ModelFileManager<Theme> mgr =
-                    new ModelFileManager<>(PATH, RESOURCE, Theme.class);
+            final ModelFileManager<Theme> mgr = new ModelFileManager<>(PATH, RESOURCE, Theme.class);
             mgr.open();
 
             final var list = mgr.loadList("themes");
@@ -82,5 +75,4 @@ public final class ThemeList {
             initialized = true;
         }
     }
-
 }

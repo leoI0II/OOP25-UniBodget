@@ -7,8 +7,8 @@ import javafx.scene.control.ComboBox;
 /**
  * Factory class that creates a ComboBox for selecting a {@link Theme}.
  *
- * <p>The selector is populated with all themes provided by
- * {@link ThemeList}, including default and user‑defined themes.</p>
+ * <p>The selector is populated with all themes provided by {@link ThemeList}, including default and
+ * user‑defined themes.
  */
 public final class ThemeSelectorFX {
 

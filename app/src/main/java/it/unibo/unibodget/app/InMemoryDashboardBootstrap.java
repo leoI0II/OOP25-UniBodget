@@ -20,10 +20,9 @@ import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransactionFactory;
 import it.unibo.unibodget.view.dashboard.impl.DefaultDashboardView;
 
-
 /**
- * Bootstrap class wiring together the in-memory dashboard dependencies used by
- * the demo application.
+ * Bootstrap class wiring together the in-memory dashboard dependencies used by the demo
+ * application.
  */
 final class InMemoryDashboardBootstrap {
 
@@ -43,11 +42,12 @@ final class InMemoryDashboardBootstrap {
 
     /**
      * Creates and wires the in-memory dashboard application graph.
+     *
+     * @param currencyConverter the currency converter
+     * @param settings the application settings
      */
     private InMemoryDashboardBootstrap(
-            final CurrencyConverter currencyConverter,
-            final Settings settings
-    ) {
+            final CurrencyConverter currencyConverter, final Settings settings) {
         this.cashAccountService = new CashAccountService();
         this.categoryCatalog = new CategoryCatalog();
         this.categoryService = new DefaultCategoryService();
@@ -60,31 +60,29 @@ final class InMemoryDashboardBootstrap {
 
         ThemeManager.setTheme(settings.getTheme());
 
-        this.dashboardFacade = new DefaultDashboardFacade(
-                cashAccountService,
-                categoryService,
-                budgetMonitor,
-                friendLoanSummaryService,
-                walletInsightService,
-                categoryCatalog,
-                converter,
-                this.settings
-        );
+        this.dashboardFacade =
+                new DefaultDashboardFacade(
+                        cashAccountService,
+                        categoryService,
+                        budgetMonitor,
+                        friendLoanSummaryService,
+                        walletInsightService,
+                        categoryCatalog,
+                        converter,
+                        this.settings);
 
-        this.totalCashBalanceService = new DefaultTotalCashBalanceService(
-                cashAccountService,
-                converter
-        );
+        this.totalCashBalanceService =
+                new DefaultTotalCashBalanceService(cashAccountService, converter);
 
         this.dashboardView = new DefaultDashboardView();
-        this.dashboardController = new DefaultDashboardController(
-                dashboardView,
-                dashboardFacade,
-                cashAccountService,
-                totalCashBalanceService,
-                this.settings,
-                cashTransactionFactory
-        );
+        this.dashboardController =
+                new DefaultDashboardController(
+                        dashboardView,
+                        dashboardFacade,
+                        cashAccountService,
+                        totalCashBalanceService,
+                        this.settings,
+                        cashTransactionFactory);
 
         dashboardController.init();
     }
@@ -92,15 +90,13 @@ final class InMemoryDashboardBootstrap {
     /**
      * Creates the main application shell backed by the in-memory bootstrap.
      *
+     * @param currencyConverter the currency converter
+     * @param settings the application settings
      * @return the configured main shell
      */
     static MainAppShell createShell(
-            final CurrencyConverter currencyConverter,
-            final Settings settings
-    ) {
-        return new MainAppShell(new InMemoryDashboardBootstrap(
-                currencyConverter, settings
-        ));
+            final CurrencyConverter currencyConverter, final Settings settings) {
+        return new MainAppShell(new InMemoryDashboardBootstrap(currencyConverter, settings));
     }
 
     /**
@@ -113,11 +109,9 @@ final class InMemoryDashboardBootstrap {
     }
 
     /**
-     * Shows the correct initial screen depending on whether any wallet already
-     * exists.
+     * Shows the correct initial screen depending on whether any wallet already exists.
      *
-     * @param navigator
-     *            the application navigator
+     * @param navigator the application navigator
      */
     void showFirstBootIfNeeded(final AppNavigator navigator) {
         if (cashAccountService.getWallets().isEmpty()) {
@@ -130,14 +124,15 @@ final class InMemoryDashboardBootstrap {
     /**
      * Runs the first-boot wallet creation flow.
      *
-     * @param navigator
-     *            the application navigator
+     * @param navigator the application navigator
      */
     void runFirstBoot(final AppNavigator navigator) {
-        FirstBootDialogs.askWallet().ifPresent(wallet -> {
-            cashAccountService.addWallet(FirstBootDialogs.walletFrom(wallet));
-            navigator.showDashboard();
-        });
+        FirstBootDialogs.askWallet()
+                .ifPresent(
+                        wallet -> {
+                            cashAccountService.addWallet(FirstBootDialogs.walletFrom(wallet));
+                            navigator.showDashboard();
+                        });
 
         if (cashAccountService.getWallets().isEmpty()) {
             navigator.showMessage("No wallet created", "Create a wallet to continue.");

@@ -1,19 +1,16 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
-import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
-import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
-import it.unibo.unibodget.model.wallet.CashAccount;
-
-/**
- * Default immutable implementation of {@link DashboardSnapshot}.
- */
+/** Default immutable implementation of {@link DashboardSnapshot}. */
 public final class DefaultDashboardSnapshot implements DashboardSnapshot {
 
     private final String walletName;
@@ -31,26 +28,17 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     /**
      * Creates a new dashboard snapshot.
      *
-     * @param walletName
-     *            the name of the currently selected wallet
-     * @param walletCurrency
-     *            the textual representation of the wallet base currency
-     * @param totalBalance
-     *            the total balance shown in the dashboard
-     * @param recentTransactions
-     *            the recent transactions shown in the dashboard
-     * @param categorySummaries
-     *            the aggregated values by category
-     * @param budgetLimit
-     *            the configured budget limit of the current wallet
-     * @param warningThreshold
-     *            the configured warning threshold of the current wallet
-     * @param budgetStatus
-     *            the current budget status
-     * @param friendLoanSummaries
-     *            the friend-loan summaries associated with the current wallet
-     * @param walletInsights
-     *            the dashboard insights associated with the current wallet
+     * @param walletName the name of the currently selected wallet
+     * @param walletCurrency the textual representation of the wallet base currency
+     * @param totalBalance the total balance shown in the dashboard
+     * @param recentTransactions the recent transactions shown in the dashboard
+     * @param categorySummaries the aggregated values by category
+     * @param budgetLimit the configured budget limit of the current wallet
+     * @param warningThreshold the configured warning threshold of the current wallet
+     * @param budgetStatus the current budget status
+     * @param friendLoanSummaries the friend-loan summaries associated with the current wallet
+     * @param walletInsights the dashboard insights associated with the current wallet
+     * @param allWallets all cash accounts associated with the user
      */
     public DefaultDashboardSnapshot(
             final String walletName,

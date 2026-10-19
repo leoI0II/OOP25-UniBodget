@@ -1,18 +1,17 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
-
 import it.unibo.unibodget.model.dashboard.api.BudgetAlertStrategy;
 import it.unibo.unibodget.model.dashboard.api.BudgetMonitor;
 import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Objects;
 
 /**
- * Default implementation of {@link BudgetMonitor}. This implementation
- * delegates the evaluation of the budget state to one of three strategies
- * according to the ratio between the current value and the configured limit.
+ * Default implementation of {@link BudgetMonitor}. This implementation delegates the evaluation of
+ * the budget state to one of three strategies according to the ratio between the current value and
+ * the configured limit.
  */
 public final class DefaultBudgetMonitor implements BudgetMonitor {
 
@@ -22,9 +21,7 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
     private final BudgetAlertStrategy warningStrategy;
     private final BudgetAlertStrategy criticalStrategy;
 
-    /**
-     * Creates a monitor with default safe, warning, and critical strategies.
-     */
+    /** Creates a monitor with default safe, warning, and critical strategies. */
     public DefaultBudgetMonitor() {
         this(new SafeBudgetStrategy(), new WarningBudgetStrategy(), new CriticalBudgetStrategy());
     }
@@ -45,11 +42,10 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
         this.criticalStrategy = Objects.requireNonNull(criticalStrategy);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
-    public BudgetStatus getBudgetStatus(final BigDecimal currentValue, final BudgetSettings settings) {
+    public BudgetStatus getBudgetStatus(
+            final BigDecimal currentValue, final BudgetSettings settings) {
         Objects.requireNonNull(settings);
 
         final BigDecimal limitValue = settings.getLimitValue();

@@ -1,26 +1,24 @@
 package it.unibo.unibodget.model.transactions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
-
 /**
  * Represents an ordered collection of transactions.
  *
- * <p>
- * Acts as a historical ledger, storing a chronological list of
- * {@link AbstractTransaction} objects. It provides basic operations for:
+ * <p>Acts as a historical ledger, storing a chronological list of {@link AbstractTransaction}
+ * objects. It provides basic operations for:
+ *
  * <ul>
- * <li>adding a new transaction</li>
- * <li>removing or replacing an existing transaction</li>
- * <li>retrieving the full immutable history</li>
- * <li>clearing all recorded transactions</li>
+ *   <li>adding a new transaction
+ *   <li>removing or replacing an existing transaction
+ *   <li>retrieving the full immutable history
+ *   <li>clearing all recorded transactions
  * </ul>
  *
  * @param <T> the concrete transaction type stored in this ledger
@@ -30,9 +28,7 @@ public class Historical<T extends AbstractTransaction> {
     @JsonProperty("transactions")
     private final List<T> history;
 
-    /**
-     * Constructs an empty historical ledger.
-     */
+    /** Constructs an empty historical ledger. */
     public Historical() {
         this.history = new ArrayList<>();
     }
@@ -70,30 +66,24 @@ public class Historical<T extends AbstractTransaction> {
     /**
      * Removes a transaction from the ledger.
      *
-     * <p>
-     * Uses {@link Object#equals} to locate the transaction.
+     * <p>Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
-     * @return {@code true} if the transaction was found and removed,
-     * {@code false} otherwise
+     * @return {@code true} if the transaction was found and removed, {@code false} otherwise
      */
     public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
     /**
-     * Replaces an existing transaction with a new one, preserving its position
-     * in the ledger.
+     * Replaces an existing transaction with a new one, preserving its position in the ledger.
      *
-     * <p>
-     * Uses {@link Object#equals} to locate {@code oldTransaction}.
+     * <p>Uses {@link Object#equals} to locate {@code oldTransaction}.
      *
-     * @param oldTransaction the transaction to replace; must not be
-     * {@code null}
-     * @param newTransaction the replacement transaction; must not be
-     * {@code null}
-     * @return {@code true} if the replacement succeeded, {@code false} if
-     * {@code oldTransaction} was not found in the ledger
+     * @param oldTransaction the transaction to replace; must not be {@code null}
+     * @param newTransaction the replacement transaction; must not be {@code null}
+     * @return {@code true} if the replacement succeeded, {@code false} if {@code oldTransaction}
+     *     was not found in the ledger
      * @throws NullPointerException if either argument is {@code null}
      */
     public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
@@ -107,16 +97,12 @@ public class Historical<T extends AbstractTransaction> {
         return true;
     }
 
-    /**
-     * Removes all transactions from the ledger.
-     */
+    /** Removes all transactions from the ledger. */
     public void clear() {
         history.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -129,9 +115,7 @@ public class Historical<T extends AbstractTransaction> {
         return Objects.equals(history, other.history);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return Objects.hash(history);
@@ -141,8 +125,7 @@ public class Historical<T extends AbstractTransaction> {
      * Returns all transactions that occurred within the given calendar month.
      *
      * @param month the month to filter by
-     * @return an unmodifiable list of transactions that occurred in the
-     * specified month
+     * @return an unmodifiable list of transactions that occurred in the specified month
      */
     public List<T> filterByMonth(final YearMonth month) {
         Objects.requireNonNull(month, "month must not be null");
@@ -154,5 +137,4 @@ public class Historical<T extends AbstractTransaction> {
         }
         return Collections.unmodifiableList(filtered);
     }
-
 }

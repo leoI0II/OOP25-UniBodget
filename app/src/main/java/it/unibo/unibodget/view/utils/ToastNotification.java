@@ -9,14 +9,12 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 
 /**
- * Utility class for showing toast notifications in the bottom-right corner of a window.
- * Toasts appear with a fade-in animation, stay visible for a short duration, then fade out.
+ * Utility class for showing toast notifications in the bottom-right corner of a window. Toasts
+ * appear with a fade-in animation, stay visible for a short duration, then fade out.
  */
 public final class ToastNotification {
 
-    /**
-     * Semantic type of a toast notification, each carrying a background color.
-     */
+    /** Semantic type of a toast notification, each carrying a background color. */
     public enum Type {
         /** Operation completed successfully. */
         SUCCESS("#4CAF50"),
@@ -47,12 +45,14 @@ public final class ToastNotification {
     private static final double FADE_DURATION_MS = 300;
     private static final int MARGIN = 20;
 
-    private ToastNotification() { }
+    private ToastNotification() {
+        // utility class
+    }
 
     /**
      * Shows a success toast in the bottom-right corner of {@code window}.
      *
-     * @param window  the owner window
+     * @param window the owner window
      * @param message the text to display
      */
     public static void showSuccess(final Window window, final String message) {
@@ -62,7 +62,7 @@ public final class ToastNotification {
     /**
      * Shows an error toast in the bottom-right corner of {@code window}.
      *
-     * @param window  the owner window
+     * @param window the owner window
      * @param message the text to display
      */
     public static void showError(final Window window, final String message) {
@@ -72,7 +72,7 @@ public final class ToastNotification {
     /**
      * Shows a warning toast in the bottom-right corner of {@code window}.
      *
-     * @param window  the owner window
+     * @param window the owner window
      * @param message the text to display
      */
     public static void showWarning(final Window window, final String message) {
@@ -82,7 +82,7 @@ public final class ToastNotification {
     /**
      * Shows an info toast in the bottom-right corner of {@code window}.
      *
-     * @param window  the owner window
+     * @param window the owner window
      * @param message the text to display
      */
     public static void showInfo(final Window window, final String message) {
@@ -92,9 +92,9 @@ public final class ToastNotification {
     /**
      * Shows a toast with the default duration ({@value DEFAULT_DURATION_SECONDS} seconds).
      *
-     * @param window  the owner window
+     * @param window the owner window
      * @param message the text to display
-     * @param type    the semantic type controlling the background color
+     * @param type the semantic type controlling the background color
      */
     public static void show(final Window window, final String message, final Type type) {
         show(window, message, type, DEFAULT_DURATION_SECONDS);
@@ -103,29 +103,29 @@ public final class ToastNotification {
     /**
      * Shows a toast with a custom visible duration.
      *
-     * <p>The toast fades in, stays visible for {@code durationSeconds}, then fades out
-     * and hides itself automatically.</p>
+     * <p>The toast fades in, stays visible for {@code durationSeconds}, then fades out and hides
+     * itself automatically.
      *
-     * @param window          the owner window used to anchor the popup position
-     * @param message         the text to display
-     * @param type            the semantic type controlling the background color
+     * @param window the owner window used to anchor the popup position
+     * @param message the text to display
+     * @param type the semantic type controlling the background color
      * @param durationSeconds how long the toast stays fully visible before fading out
      */
     public static void show(
             final Window window,
             final String message,
             final Type type,
-            final double durationSeconds
-    ) {
+            final double durationSeconds) {
         final Label label = buildLabel(message, type);
         final Popup popup = new Popup();
         popup.getContent().add(label);
         popup.setAutoHide(true);
 
-        popup.setOnShown(e -> {
-            popup.setX(window.getX() + window.getWidth() - popup.getWidth() - MARGIN);
-            popup.setY(window.getY() + window.getHeight() - popup.getHeight() - MARGIN);
-        });
+        popup.setOnShown(
+                e -> {
+                    popup.setX(window.getX() + window.getWidth() - popup.getWidth() - MARGIN);
+                    popup.setY(window.getY() + window.getHeight() - popup.getHeight() - MARGIN);
+                });
 
         popup.show(window);
 
@@ -153,8 +153,7 @@ public final class ToastNotification {
                         + "-fx-padding: 12 16 12 16;"
                         + "-fx-background-radius: 8;"
                         + "-fx-font-size: 13;"
-                        + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);"
-        );
+                        + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);");
         return label;
     }
 }

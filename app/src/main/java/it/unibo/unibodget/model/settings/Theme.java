@@ -1,29 +1,26 @@
 package it.unibo.unibodget.model.settings;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.unibo.unibodget.model.utils.ARGBColor;
+import java.util.Objects;
 
 /**
  * Represents a visual theme used by the application's user interface.
  *
- * <p>
- * A {@code Theme} defines the core visual identity of the UI, including:</p>
+ * <p>A {@code Theme} defines the core visual identity of the UI, including:
+ *
  * <ul>
- *     <li>a human-readable name</li>
- *     <li>primary background color</li>
- *     <li>button color</li>
- *     <li>text color</li>
- *     <li>font family and size</li>
- *     <li>whether text is bold</li>
+ *   <li>a human-readable name
+ *   <li>primary background color
+ *   <li>button color
+ *   <li>text color
+ *   <li>font family and size
+ *   <li>whether text is bold
  * </ul>
  *
- * <p>
- * This class is part of the model layer and contains only theme data.
- * It does not depend on JavaFX or other UI-specific APIs.</p>
+ * <p>This class is part of the model layer and contains only theme data. It does not depend on
+ * JavaFX or other UI-specific APIs.
  */
 public final class Theme {
 
@@ -31,9 +28,7 @@ public final class Theme {
     private static final int FONT_14 = 14;
     private static final String FONT_ARIAL = "Arial";
 
-    /**
-     * The default theme used when no user preference is available.
-     */
+    /** The default theme used when no user preference is available. */
     public static final Theme DEFAULT =
             new Theme(
                     "Light",
@@ -42,8 +37,7 @@ public final class Theme {
                     getReadableTextColor(ARGBColor.WHITE),
                     FONT_ARIAL,
                     FONT_14,
-                    false
-            );
+                    false);
 
     private final String name;
     private final ARGBColor primaryColor;
@@ -56,23 +50,23 @@ public final class Theme {
     /**
      * Creates a new {@code Theme} with explicit values.
      *
-     * @param name        the theme name
+     * @param name the theme name
      * @param primaryColor the primary background color
-     * @param buttonColor  the button color
-     * @param textColor    the text color
-     * @param fontFamily   the font family
-     * @param fontSize     the font size (must be positive)
-     * @param boldText     whether bold text is enabled
+     * @param buttonColor the button color
+     * @param textColor the text color
+     * @param fontFamily the font family
+     * @param fontSize the font size (must be positive)
+     * @param boldText whether bold text is enabled
      */
     @JsonCreator
     public Theme(
-        @JsonProperty("name") final String name,
-        @JsonProperty("primaryColor") final ARGBColor primaryColor,
-        @JsonProperty("buttonColor") final ARGBColor buttonColor,
-        @JsonProperty("textColor") final ARGBColor textColor,
-        @JsonProperty("fontFamily") final String fontFamily,
-        @JsonProperty("fontSize") final int fontSize,
-        @JsonProperty("boldText") final boolean boldText) {
+            @JsonProperty("name") final String name,
+            @JsonProperty("primaryColor") final ARGBColor primaryColor,
+            @JsonProperty("buttonColor") final ARGBColor buttonColor,
+            @JsonProperty("textColor") final ARGBColor textColor,
+            @JsonProperty("fontFamily") final String fontFamily,
+            @JsonProperty("fontSize") final int fontSize,
+            @JsonProperty("boldText") final boolean boldText) {
 
         this.name = Objects.requireNonNull(name);
         this.primaryColor = Objects.requireNonNull(primaryColor);
@@ -81,35 +75,33 @@ public final class Theme {
         this.fontFamily = Objects.requireNonNull(fontFamily);
 
         // Fallback to default size if invalid
-        this.fontSize = fontSize > 0 ? fontSize : DEFAULT.fontSize;
+        this.fontSize = fontSize > 0 ? fontSize : FONT_14;
 
         this.boldText = boldText;
     }
 
     /**
-     * Creates a new {@code Theme} with explicit color values
-     * and default typography settings.
+     * Creates a new {@code Theme} with explicit color values and default typography settings.
      *
-     * @param name         the theme name
+     * @param name the theme name
      * @param primaryColor the primary background color
-     * @param buttonColor  the button color
-     * @param textColor    the text color
+     * @param buttonColor the button color
+     * @param textColor the text color
      */
     public Theme(
             final String name,
             final ARGBColor primaryColor,
             final ARGBColor buttonColor,
-            final ARGBColor textColor
-    ) {
+            final ARGBColor textColor) {
         this(name, primaryColor, buttonColor, textColor, FONT_ARIAL, FONT_14, false);
     }
 
     /**
-     * Creates a new {@code Theme} using HEX color strings.
-     * The text color is automatically computed for readability.
+     * Creates a new {@code Theme} using HEX color strings. The text color is automatically computed
+     * for readability.
      *
-     * @param name           the theme name
-     * @param hexColor       the primary background color in HEX format
+     * @param name the theme name
+     * @param hexColor the primary background color in HEX format
      * @param buttonHexColor the button color in HEX format
      */
     public Theme(final String name, final String hexColor, final String buttonHexColor) {
@@ -120,85 +112,81 @@ public final class Theme {
                 getReadableTextColor(new ARGBColor(hexColor)),
                 FONT_ARIAL,
                 FONT_14,
-                false
-        );
-    }
-
-    /** 
-     * Return theme name.
-     * 
-     * @return the theme name 
-     */
-    public String getName() { 
-        return name; 
-    }
-
-    /** 
-     * Return primary background color.
-     * 
-     * @return the primary background color
-     */
-    public ARGBColor getPrimaryColor() { 
-        return primaryColor; 
-    }
-
-    /** 
-     * Return button color.
-     * 
-     * @return the button color 
-     */
-    public ARGBColor getButtonColor() { 
-        return buttonColor; 
-    }
-
-    /** 
-     * Return text color.
-     * 
-     * @return the text color 
-     */
-    public ARGBColor getTextColor() { 
-        return textColor; 
-    }
-
-    /** 
-     * Return font family.
-     * 
-     * @return the font family 
-     */
-    public String getFontFamily() { 
-        return fontFamily; 
-    }
-
-    /** 
-     * Return font size.
-     * 
-     * @return the font size 
-     */
-    public int getFontSize() { 
-        return fontSize; 
-    }
-
-    /** 
-     * Return if the text is bold.
-     * 
-     * @return true if bold text is enabled 
-     */
-    public boolean isBoldText() { 
-        return boldText; 
+                false);
     }
 
     /**
-     * Computes whether black or white text provides better readability
-     * on top of the given background color.
+     * Return theme name.
+     *
+     * @return the theme name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Return primary background color.
+     *
+     * @return the primary background color
+     */
+    public ARGBColor getPrimaryColor() {
+        return primaryColor;
+    }
+
+    /**
+     * Return button color.
+     *
+     * @return the button color
+     */
+    public ARGBColor getButtonColor() {
+        return buttonColor;
+    }
+
+    /**
+     * Return text color.
+     *
+     * @return the text color
+     */
+    public ARGBColor getTextColor() {
+        return textColor;
+    }
+
+    /**
+     * Return font family.
+     *
+     * @return the font family
+     */
+    public String getFontFamily() {
+        return fontFamily;
+    }
+
+    /**
+     * Return font size.
+     *
+     * @return the font size
+     */
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    /**
+     * Return if the text is bold.
+     *
+     * @return true if bold text is enabled
+     */
+    public boolean isBoldText() {
+        return boldText;
+    }
+
+    /**
+     * Computes whether black or white text provides better readability on top of the given
+     * background color.
      *
      * @param color the background color to evaluate
      * @return black or white depending on luminance
      */
     public static ARGBColor getReadableTextColor(final ARGBColor color) {
-        final double luminance =
-                0.299 * color.red()
-                + 0.587 * color.green()
-                + 0.114 * color.blue();
+        final double luminance = 0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue();
 
         return luminance > HALF ? ARGBColor.BLACK : ARGBColor.WHITE;
     }
@@ -206,13 +194,22 @@ public final class Theme {
     @Override
     public String toString() {
         return "Theme{"
-                + "name='" + name + '\''
-                + ", primaryColor=" + primaryColor
-                + ", buttonColor=" + buttonColor
-                + ", textColor=" + textColor
-                + ", fontFamily='" + fontFamily + '\''
-                + ", fontSize=" + fontSize
-                + ", boldText=" + boldText
+                + "name='"
+                + name
+                + '\''
+                + ", primaryColor="
+                + primaryColor
+                + ", buttonColor="
+                + buttonColor
+                + ", textColor="
+                + textColor
+                + ", fontFamily='"
+                + fontFamily
+                + '\''
+                + ", fontSize="
+                + fontSize
+                + ", boldText="
+                + boldText
                 + '}';
     }
 
@@ -237,14 +234,6 @@ public final class Theme {
     @Override
     public int hashCode() {
         return Objects.hash(
-                name,
-                primaryColor,
-                buttonColor,
-                textColor,
-                fontFamily,
-                fontSize,
-                boldText
-        );
+                name, primaryColor, buttonColor, textColor, fontFamily, fontSize, boldText);
     }
-
 }

@@ -1,25 +1,22 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
-
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
 
 /**
  * Default implementation of {@link TransactionHistoryFilterService}.
  *
- * <p>
- * This implementation applies all active filters cumulatively and then
- * sorts the resulting list according to the specified sort order.
- * </p>
+ * <p>This implementation applies all active filters cumulatively and then sorts the resulting list
+ * according to the specified sort order.
  */
 public final class DefaultTransactionHistoryFilterService {
 
-    /**
-     * Creates a transaction history filter service.
-     */
+    /** Creates a transaction history filter service. */
     public DefaultTransactionHistoryFilterService() {
+        // default constructor
     }
 
     /**
@@ -30,8 +27,7 @@ public final class DefaultTransactionHistoryFilterService {
      * @return the filtered and sorted transactions
      */
     public List<CashTransaction> filter(
-            final List<CashTransaction> transactions,
-            final TransactionFilterCriteria criteria) {
+            final List<CashTransaction> transactions, final TransactionFilterCriteria criteria) {
         Objects.requireNonNull(transactions);
         Objects.requireNonNull(criteria);
 
@@ -46,81 +42,83 @@ public final class DefaultTransactionHistoryFilterService {
     }
 
     private boolean matchesCategoryName(
-            final CashTransaction transaction,
-            final TransactionFilterCriteria criteria) {
+            final CashTransaction transaction, final TransactionFilterCriteria criteria) {
         return criteria.getCategoryName()
-                .map(categoryName -> {
-                    final String normalizedFilter = categoryName.trim().toLowerCase();
-                    final String normalizedCategory = transaction.getCategory()
-                            .getName()
-                            .trim()
-                            .toLowerCase();
-                    return normalizedCategory.contains(normalizedFilter);
-                })
+                .map(
+                        categoryName -> {
+                            final String normalizedFilter =
+                                    categoryName.trim().toLowerCase(Locale.ROOT);
+                            final String normalizedCategory =
+                                    transaction
+                                            .getCategory()
+                                            .getName()
+                                            .trim()
+                                            .toLowerCase(Locale.ROOT);
+                            return normalizedCategory.contains(normalizedFilter);
+                        })
                 .orElse(true);
     }
 
     private boolean matchesCategoryType(
-            final CashTransaction transaction,
-            final TransactionFilterCriteria criteria) {
+            final CashTransaction transaction, final TransactionFilterCriteria criteria) {
         return criteria.getCategoryType()
                 .map(categoryType -> transaction.getCategory().getType() == categoryType)
                 .orElse(true);
     }
 
     private boolean matchesFromDate(
-            final CashTransaction transaction,
-            final TransactionFilterCriteria criteria) {
+            final CashTransaction transaction, final TransactionFilterCriteria criteria) {
         return criteria.getFromDate()
                 .map(fromDate -> !transaction.getDate().isBefore(fromDate))
                 .orElse(true);
     }
 
     private boolean matchesToDate(
-            final CashTransaction transaction,
-            final TransactionFilterCriteria criteria) {
+            final CashTransaction transaction, final TransactionFilterCriteria criteria) {
         return criteria.getToDate()
                 .map(toDate -> !transaction.getDate().isAfter(toDate))
                 .orElse(true);
     }
 
     private boolean matchesKeyword(
-            final CashTransaction transaction,
-            final TransactionFilterCriteria criteria) {
+            final CashTransaction transaction, final TransactionFilterCriteria criteria) {
         return criteria.getKeyword()
-                .map(keyword -> {
-                    final String normalizedKeyword = keyword.toLowerCase();
-                    final String description = transaction.getDescription() == null
-                            ? ""
-                            : transaction.getDescription().toLowerCase();
-                    final String notes = transaction.getNotes() == null
-                            ? ""
-                            : transaction.getNotes().toLowerCase();
-                    return description.contains(normalizedKeyword)
-                            || notes.contains(normalizedKeyword);
-                })
+                .map(
+                        keyword -> {
+                            final String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+                            final String description =
+                                    transaction.getDescription() == null
+                                            ? ""
+                                            : transaction
+                                                    .getDescription()
+                                                    .toLowerCase(Locale.ROOT);
+                            final String notes =
+                                    transaction.getNotes() == null
+                                            ? ""
+                                            : transaction.getNotes().toLowerCase(Locale.ROOT);
+                            return description.contains(normalizedKeyword)
+                                    || notes.contains(normalizedKeyword);
+                        })
                 .orElse(true);
     }
 
     private Comparator<CashTransaction> comparatorFor(final TransactionSortOrder sortOrder) {
-        final Comparator<CashTransaction> byDateAsc = Comparator
-                .comparing(CashTransaction::getDate)
-                .thenComparing(
-                        CashTransaction::getDescription,
-                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
-                )
-                .thenComparing(transaction -> transaction.getAsset().amount().abs());
+        final Comparator<CashTransaction> byDateAsc =
+                Comparator.comparing(CashTransaction::getDate)
+                        .thenComparing(
+                                CashTransaction::getDescription,
+                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+                        .thenComparing(transaction -> transaction.getAsset().amount().abs());
 
-        final Comparator<CashTransaction> byAmountDesc = Comparator
-                .comparing(
-                        (CashTransaction transaction) -> transaction.getAsset().amount().abs(),
-                        Comparator.reverseOrder()
-                )
-                .thenComparing(CashTransaction::getDate, Comparator.reverseOrder())
-                .thenComparing(
-                        CashTransaction::getDescription,
-                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
-                );
+        final Comparator<CashTransaction> byAmountDesc =
+                Comparator.comparing(
+                                (CashTransaction transaction) ->
+                                        transaction.getAsset().amount().abs(),
+                                Comparator.reverseOrder())
+                        .thenComparing(CashTransaction::getDate, Comparator.reverseOrder())
+                        .thenComparing(
+                                CashTransaction::getDescription,
+                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
 
         return switch (sortOrder) {
             case NEWEST_FIRST -> byDateAsc.reversed();
@@ -129,7 +127,7 @@ public final class DefaultTransactionHistoryFilterService {
         };
     }
 
-//     private String safeLowerCase(final String value) {
-//         return value == null ? "" : value.toLowerCase();
-//     }
+    //     private String safeLowerCase(final String value) {
+    //         return value == null ? "" : value.toLowerCase();
+    //     }
 }

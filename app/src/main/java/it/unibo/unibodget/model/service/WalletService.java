@@ -1,22 +1,19 @@
 package it.unibo.unibodget.model.service;
 
+import it.unibo.unibodget.model.dashboard.support.WalletObserver;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.AbstractWallet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import it.unibo.unibodget.model.dashboard.support.WalletObserver;
-import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
-import it.unibo.unibodget.model.wallet.AbstractWallet;
-
 /**
- * Service responsible for managing a collection of wallets and the transaction
- * history of the currently selected wallet.
+ * Service responsible for managing a collection of wallets and the transaction history of the
+ * currently selected wallet.
  *
- * <p>
- * The service exposes the available wallets, the currently selected wallet, and
- * the operations used to inspect and update the history of that wallet.
- * Registered {@link WalletObserver} instances are notified whenever the wallet
- * state changes.</p>
+ * <p>The service exposes the available wallets, the currently selected wallet, and the operations
+ * used to inspect and update the history of that wallet. Registered {@link WalletObserver}
+ * instances are notified whenever the wallet state changes.
  *
  * @param <T> the type of transaction managed by the wallets
  * @param <W> the concrete wallet type, must extend {@link AbstractWallet}
@@ -56,8 +53,9 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
      * Renames the wallet with the given identifier.
      *
      * @param walletId the identifier of the wallet to rename
-     * @param newName  the new display name; must not be blank
-     * @return {@code true} if the wallet was found and renamed, {@code false} if no such wallet exists
+     * @param newName the new display name; must not be blank
+     * @return {@code true} if the wallet was found and renamed, {@code false} if no such wallet
+     *     exists
      * @throws IllegalArgumentException if {@code newName} is blank
      */
     boolean renameWallet(UUID walletId, String newName);
@@ -88,8 +86,7 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
      * Removes a transaction from the current wallet history.
      *
      * @param transaction the transaction to remove
-     * @return {@code true} if the transaction was removed, {@code false}
-     * otherwise
+     * @return {@code true} if the transaction was removed, {@code false} otherwise
      */
     boolean removeTransaction(T transaction);
 
@@ -101,9 +98,7 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
      */
     void replaceTransaction(T oldTransaction, T newTransaction);
 
-    /**
-     * Removes all transactions from the current wallet history.
-     */
+    /** Removes all transactions from the current wallet history. */
     void clearCurrentWalletHistory();
 
     /**
@@ -120,8 +115,6 @@ public interface WalletService<T extends AbstractTransaction, W extends Abstract
      */
     void removeObserver(WalletObserver observer);
 
-    /**
-     * Notifies all registered observers that the wallet state has changed.
-     */
+    /** Notifies all registered observers that the wallet state has changed. */
     void notifyObservers();
 }

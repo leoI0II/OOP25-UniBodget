@@ -49,12 +49,12 @@ class CategoryTest {
 
     @Test
     void shouldNotArchiveDefaultCategory() {
-        assertThrows(IllegalStateException.class, () -> Category.FOOD.archive());
+        assertThrows(IllegalStateException.class, Category.FOOD::archive);
     }
 
     @Test
     void shouldNotReactivateDefaultCategory() {
-        assertThrows(IllegalStateException.class, () -> Category.FOOD.reactivate());
+        assertThrows(IllegalStateException.class, Category.FOOD::reactivate);
     }
 
     @Test

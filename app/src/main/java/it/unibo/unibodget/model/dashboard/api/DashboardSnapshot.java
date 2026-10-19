@@ -1,21 +1,18 @@
 package it.unibo.unibodget.model.dashboard.api;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
 import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Immutable snapshot of the information required by the dashboard view.
  *
- * <p>
- * A snapshot represents a coherent view of the currently selected wallet,
- * including identity, balance, recent transactions, category summaries, budget
- * configuration, and budget status.</p>
+ * <p>A snapshot represents a coherent view of the currently selected wallet, including identity,
+ * balance, recent transactions, category summaries, budget configuration, and budget status.
  */
 public interface DashboardSnapshot {
 
@@ -82,14 +79,18 @@ public interface DashboardSnapshot {
      */
     List<FriendLoanSummary> getFriendLoanSummaries();
 
+    /**
+     * Returns all cash accounts associated with the user.
+     *
+     * @return the list of all cash accounts
+     */
     List<CashAccount> getAllWallets();
 
     /**
      * Returns the wallet insights associated with the current wallet.
      *
-     * <p>
-     * This method is defined as a default method to preserve compatibility with
-     * existing implementations of the interface.</p>
+     * <p>This method is defined as a default method to preserve compatibility with existing
+     * implementations of the interface.
      *
      * @return the wallet insights, or an empty list when not available
      */

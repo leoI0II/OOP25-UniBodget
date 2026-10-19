@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.currency_converter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
@@ -15,12 +16,10 @@ import javafx.scene.layout.VBox;
 
 /**
  * JavaFX widget that displays and manages the user's currency watchlist.
- * 
- * <p>
- * Allows saving the currently selected currency pair from the converter,
- * highlighting the active pair, and restoring a saved pair via double‑click.
- * The widget delegates all modifications to the {@link WatchListController}
- * to keep the MVC separation clean.
+ *
+ * <p>Allows saving the currently selected currency pair from the converter, highlighting the active
+ * pair, and restoring a saved pair via double‑click. The widget delegates all modifications to the
+ * {@link WatchListController} to keep the MVC separation clean.
  */
 public final class WatchlistWidgetFX {
 
@@ -32,9 +31,10 @@ public final class WatchlistWidgetFX {
      * Creates the watchlist widget and binds it to the given controller and converter UI.
      *
      * @param controller the controller handling add/remove operations on the watchlist
-     * @param converter  the converter widget used to read and set the selected currencies
+     * @param converter the converter widget used to read and set the selected currencies
      */
-    public WatchlistWidgetFX(final WatchListController controller, final ConverterWidgetFX converter) {
+    public WatchlistWidgetFX(
+            final WatchListController controller, final ConverterWidgetFX converter) {
         listView.setItems(items);
         items.addAll(controller.getFavorites());
 
@@ -49,68 +49,78 @@ public final class WatchlistWidgetFX {
         // Save button: stores the current converter pair into the watchlist
         final Button saveButton = new Button("Save couple in watchlist");
         ThemeManager.applyFont(saveButton);
-        saveButton.setOnAction(e -> {
-            final String from = converter.getFromBox().getValue().getCode();
-            final String to = converter.getToBox().getValue().getCode();
+        saveButton.setOnAction(
+                e -> {
+                    final String from = converter.getFromBox().getValue().getCode();
+                    final String to = converter.getToBox().getValue().getCode();
 
-            if (from != null && to != null && !from.equals(to)) {
-                final WatchlistPair newPair = new WatchlistPair(from, to);
+                    if (from != null && to != null && !from.equals(to)) {
+                        final WatchlistPair newPair = new WatchlistPair(from, to);
 
-                if (controller.addPair(newPair)) {
-                    items.add(newPair);
-                } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Watchlist");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Already saved!");
-                    alert.showAndWait();
-                }
-                listView.refresh();
-            }
-        });
+                        if (controller.addPair(newPair)) {
+                            items.add(newPair);
+                        } else {
+                            final Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Watchlist");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Already saved!");
+                            alert.showAndWait();
+                        }
+                        listView.refresh();
+                    }
+                });
 
         // Double‑click on a saved pair: load it into the converter
-        listView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                final WatchlistPair selected = listView.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    converter.setCurrencies(selected.from(), selected.to());
-                }
-            }
-        });
+        listView.setOnMouseClicked(
+                event -> {
+                    if (event.getClickCount() == 2) {
+                        final WatchlistPair selected =
+                                listView.getSelectionModel().getSelectedItem();
+                        if (selected != null) {
+                            converter.setCurrencies(selected.from(), selected.to());
+                        }
+                    }
+                });
 
         // Custom cell: highlights the currently active pair
-        listView.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(final WatchlistPair item, final boolean empty) {
-                super.updateItem(item, empty);
+        listView.setCellFactory(
+                lv ->
+                        new ListCell<>() {
+                            @Override
+                            protected void updateItem(
+                                    final WatchlistPair item, final boolean empty) {
+                                super.updateItem(item, empty);
 
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                    return;
-                }
+                                if (empty || item == null) {
+                                    setText(null);
+                                    setStyle("");
+                                    return;
+                                }
 
-                setText(item.toString());
+                                setText(item.toString());
 
-                final CurrencyUnit currentFrom = converter.getFromBox().getValue();
-                final CurrencyUnit currentTo = converter.getToBox().getValue();
+                                final CurrencyUnit currentFrom = converter.getFromBox().getValue();
+                                final CurrencyUnit currentTo = converter.getToBox().getValue();
 
-                if (currentFrom != null && currentTo != null && !currentFrom.equals(currentTo)) {
-                    final WatchlistPair currentPair =
-                        new WatchlistPair(currentFrom.getCode(), currentTo.getCode());
+                                if (currentFrom != null
+                                        && currentTo != null
+                                        && !currentFrom.equals(currentTo)) {
+                                    final WatchlistPair currentPair =
+                                            new WatchlistPair(
+                                                    currentFrom.getCode(), currentTo.getCode());
 
-                    if (item.equals(currentPair)) {
-                        setStyle("-fx-background-color: #333333; -fx-text-fill: white;");
-                    } else {
-                        setStyle("");
-                    }
-                } else {
-                    setStyle("");
-                }
-                ThemeManager.applyFont(this);
-            }
-        });
+                                    if (item.equals(currentPair)) {
+                                        setStyle(
+                                                "-fx-background-color: #333333; -fx-text-fill: white;");
+                                    } else {
+                                        setStyle("");
+                                    }
+                                } else {
+                                    setStyle("");
+                                }
+                                ThemeManager.applyFont(this);
+                            }
+                        });
 
         view.getChildren().addAll(title, saveButton, listView);
     }
@@ -120,6 +130,9 @@ public final class WatchlistWidgetFX {
      *
      * @return the VBox containing the watchlist UI
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Widget exposes view node")
     public VBox getView() {
         return view;
     }

@@ -2,7 +2,6 @@ package it.unibo.unibodget.view.main;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -19,8 +18,8 @@ import javafx.stage.WindowEvent;
 /**
  * JavaFX controller for the sidebar view.
  *
- * <p>Renders the list of wallet tiles and the aggregated total balance label.
- * Delegates data retrieval and selection callbacks to a {@link SideBarDelegate}.</p>
+ * <p>Renders the list of wallet tiles and the aggregated total balance label. Delegates data
+ * retrieval and selection callbacks to a {@link SideBarDelegate}.
  */
 public class SideBarViewController extends BaseViewController {
 
@@ -36,13 +35,27 @@ public class SideBarViewController extends BaseViewController {
     private Consumer<AppContext> navigationHandler = context -> { };
     private final ViewControllersFactory viewControllersFactory;
 
-    public SideBarViewController(ViewControllersFactory viewControllersFactory) {
+    /**
+     * Constructs a sidebar view controller.
+     *
+     * @param viewControllersFactory the factory used to create view controllers
+     */
+    public SideBarViewController(final ViewControllersFactory viewControllersFactory) {
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
     }
 
     /**
-     * Called automatically by {@code FXMLLoader} after the FXML is loaded.
-     * Wires the navigation menu items to the top-level navigation handler.
+     * Returns the factory used to create view controllers.
+     *
+     * @return the view controllers factory
+     */
+    public ViewControllersFactory getViewControllersFactory() {
+        return viewControllersFactory;
+    }
+
+    /**
+     * Called automatically by {@code FXMLLoader} after the FXML is loaded. Wires the navigation
+     * menu items to the top-level navigation handler.
      */
     @FXML
     public void initialize() {
@@ -72,8 +85,8 @@ public class SideBarViewController extends BaseViewController {
     }
 
     /**
-     * Rebuilds the wallet tile list and updates the total balance label from the delegate.
-     * Does nothing if the delegate has not been set.
+     * Rebuilds the wallet tile list and updates the total balance label from the delegate. Does
+     * nothing if the delegate has not been set.
      */
     public void refresh() {
         if (delegate == null) {
@@ -89,31 +102,30 @@ public class SideBarViewController extends BaseViewController {
 
     private Node createTile(final SideBarItem item) {
         final var tile = new VBox();
-        tile.getChildren().addAll(
-                new Label(item.name()),
-                new Label(item.balance())
-        );
+        tile.getChildren().addAll(new Label(item.name()), new Label(item.balance()));
         if (item.selected()) {
             tile.getStyleClass().add("wallet-panel-selected");
         }
-        tile.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
-                delegate.onItemSelected(item.id());
-                refresh();
-            }
-        });
+        tile.setOnMouseClicked(
+                event -> {
+                    if (event.getButton() == MouseButton.PRIMARY) {
+                        delegate.onItemSelected(item.id());
+                        refresh();
+                    }
+                });
         final ContextMenu contextMenu = createTileContextMenu(item);
-        tile.setOnContextMenuRequested(event -> {
-            contextMenu.show(tile, event.getScreenX(), event.getScreenY());
-            event.consume();
-        });
+        tile.setOnContextMenuRequested(
+                event -> {
+                    contextMenu.show(tile, event.getScreenX(), event.getScreenY());
+                    event.consume();
+                });
         return tile;
     }
 
     /**
-     * Builds the right-click menu of a wallet tile (Edit / Delete).
-     * The dialogs live here so that every context (dashboard, portfolio) gets the same UI;
-     * the actual model change is delegated to the active {@link SideBarDelegate}.
+     * Builds the right-click menu of a wallet tile (Edit / Delete). The dialogs live here so that
+     * every context (dashboard, portfolio) gets the same UI; the actual model change is delegated
+     * to the active {@link SideBarDelegate}.
      *
      * @param item the wallet tile the menu belongs to
      * @return the context menu
@@ -127,8 +139,8 @@ public class SideBarViewController extends BaseViewController {
     }
 
     /**
-     * Asks the user for a new wallet name and forwards it to the delegate.
-     * If the delegate rejects the name, the error is shown and the dialog reopens.
+     * Asks the user for a new wallet name and forwards it to the delegate. If the delegate rejects
+     * the name, the error is shown and the dialog reopens.
      *
      * @param item the wallet to rename
      */
@@ -138,12 +150,14 @@ public class SideBarViewController extends BaseViewController {
         dialog.setTitle("Rename wallet");
         dialog.setHeaderText("Rename \"" + item.name() + "\"");
         dialog.setContentText("New name:");
-        WalletRenamePrompt.ask(dialog, name -> {
-            if (!name.equals(item.name())) {
-                delegate.onRenameRequested(item.id(), name);
-                refresh();
-            }
-        });
+        WalletRenamePrompt.ask(
+                dialog,
+                name -> {
+                    if (!name.equals(item.name())) {
+                        delegate.onRenameRequested(item.id(), name);
+                        refresh();
+                    }
+                });
     }
 
     /**
@@ -156,13 +170,15 @@ public class SideBarViewController extends BaseViewController {
         confirm.initOwner(walletList.getScene().getWindow());
         confirm.setTitle("Delete wallet");
         confirm.setHeaderText("Delete \"" + item.name() + "\"?");
-        confirm.setContentText("The wallet and its whole transaction history will be permanently removed.");
+        confirm.setContentText(
+                "The wallet and its whole transaction history will be permanently removed.");
         confirm.showAndWait()
                 .filter(ButtonType.OK::equals)
-                .ifPresent(ok -> {
-                    delegate.onDeleteRequested(item.id());
-                    refresh();
-                });
+                .ifPresent(
+                        ok -> {
+                            delegate.onDeleteRequested(item.id());
+                            refresh();
+                        });
     }
 
     private void handleAddWallet() {
@@ -171,20 +187,16 @@ public class SideBarViewController extends BaseViewController {
 
     private Node createAddWalletTile() {
         final var btn = new Button("+ Add wallet");
-        btn.setMaxWidth(Double.MAX_VALUE);  // on all length
+        btn.setMaxWidth(Double.MAX_VALUE); // on all length
         btn.setPrefHeight(ADD_WALLET_TILE_HEIGHT);
         btn.setOnAction(e -> handleAddWallet());
         return btn;
     }
 
-    /**
-     * Closes the application through the JavaFX lifecycle.
-     */
+    /** Closes the application through the JavaFX lifecycle. */
     @FXML
-    private void handleClose() {
+    public void handleClose() {
         final var window = walletList.getScene().getWindow();
-        window.fireEvent(
-            new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST)
-        );
+        window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 }

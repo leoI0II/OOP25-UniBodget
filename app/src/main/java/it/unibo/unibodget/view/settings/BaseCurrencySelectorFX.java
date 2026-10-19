@@ -5,11 +5,11 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 import javafx.scene.control.ComboBox;
 
 /**
- * Factory class for creating a ComboBox used to select the application's
- * base currency in the Settings view.
+ * Factory class for creating a ComboBox used to select the application's base currency in the
+ * Settings view.
  *
- * <p>The selector is populated with all currencies currently loaded
- * by the system via {@link Currency#all()}.</p>
+ * <p>The selector is populated with all currencies currently loaded by the system via {@link
+ * Currency#all()}.
  */
 public final class BaseCurrencySelectorFX {
 

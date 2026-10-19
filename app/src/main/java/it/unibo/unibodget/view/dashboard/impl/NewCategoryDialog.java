@@ -1,8 +1,7 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
-import java.util.Objects;
-
 import it.unibo.unibodget.model.categories.CategoryType;
+import java.util.Objects;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -18,14 +17,15 @@ import javafx.scene.paint.Color;
 /**
  * Dialog used to create a new custom category inside the transaction flow.
  *
- * <p>
- * The category type is fixed by the transaction flow that opened the dialog, so
- * the user only has to provide the category name and visually choose a color.
- * </p>
+ * <p>The category type is fixed by the transaction flow that opened the dialog, so the user only
+ * has to provide the category name and visually choose a color.
  */
 public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
     private static final String DEFAULT_COLOR = "#4F46E5";
+    private static final double PREVIEW_SIZE = 42.0;
+    private static final int GRID_SPACING = 12;
+    private static final double MAX_COLOR_VALUE = 255.0;
 
     private final TextField nameField;
     private final ColorPicker colorPicker;
@@ -35,8 +35,7 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
     /**
      * Creates a new dialog for custom-category creation.
      *
-     * @param fixedType
-     *            the category type imposed by the current transaction flow
+     * @param fixedType the category type imposed by the current transaction flow
      */
     public NewCategoryDialog(final CategoryType fixedType) {
         Objects.requireNonNull(fixedType, "fixedType must not be null");
@@ -54,16 +53,18 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
         nameField.setPromptText("Category name");
 
-        colorPreview.setMinSize(42, 42);
-        colorPreview.setPrefSize(42, 42);
-        colorPreview.setMaxSize(42, 42);
+        colorPreview.setMinSize(PREVIEW_SIZE, PREVIEW_SIZE);
+        colorPreview.setPrefSize(PREVIEW_SIZE, PREVIEW_SIZE);
+        colorPreview.setMaxSize(PREVIEW_SIZE, PREVIEW_SIZE);
         updateColorPreview(colorPicker.getValue());
 
-        colorPicker.valueProperty().addListener((obs, oldColor, newColor) -> updateColorPreview(newColor));
+        colorPicker
+                .valueProperty()
+                .addListener((obs, oldColor, newColor) -> updateColorPreview(newColor));
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
+        grid.setHgap(GRID_SPACING);
+        grid.setVgap(GRID_SPACING);
         grid.setPadding(new Insets(16));
 
         grid.add(new Label("Type:"), 0, 0);
@@ -86,37 +87,36 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
         final Node createButton = getDialogPane().lookupButton(createButtonType);
         createButton.setDisable(true);
 
-        nameField.textProperty().addListener((obs, oldValue, newValue) -> {
-            final boolean validName = newValue != null && !newValue.trim().isEmpty();
-            createButton.setDisable(!validName);
-        });
+        nameField
+                .textProperty()
+                .addListener(
+                        (obs, oldValue, newValue) -> {
+                            final boolean validName =
+                                    newValue != null && !newValue.trim().isEmpty();
+                            createButton.setDisable(!validName);
+                        });
 
-        setResultConverter(buttonType -> {
-            if (!Objects.equals(buttonType, createButtonType)) {
-                return null;
-            }
+        setResultConverter(
+                buttonType -> {
+                    if (!Objects.equals(buttonType, createButtonType)) {
+                        return null;
+                    }
 
-            final String name = nameField.getText() == null
-                    ? ""
-                    : nameField.getText().trim();
+                    final String name =
+                            nameField.getText() == null ? "" : nameField.getText().trim();
 
-            if (name.isEmpty()) {
-                return null;
-            }
+                    if (name.isEmpty()) {
+                        return null;
+                    }
 
-            return new NewCategoryRequest(
-                    name,
-                    toHexColor(colorPicker.getValue())
-            );
-        });
+                    return new NewCategoryRequest(name, toHexColor(colorPicker.getValue()));
+                });
     }
 
     /**
-     * Updates the visual preview and hexadecimal label using the currently
-     * selected color.
+     * Updates the visual preview and hexadecimal label using the currently selected color.
      *
-     * @param color
-     *            the selected JavaFX color
+     * @param color the selected JavaFX color
      */
     private void updateColorPreview(final Color color) {
         final String hexColor = toHexColor(color);
@@ -127,12 +127,13 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
     /**
      * Builds the style used to render the visual color preview.
      *
-     * @param hexColor
-     *            the selected color in hexadecimal format
+     * @param hexColor the selected color in hexadecimal format
      * @return the CSS style string for the preview node
      */
     private static String buildPreviewStyle(final String hexColor) {
-        return "-fx-background-color: " + hexColor + ";"
+        return "-fx-background-color: "
+                + hexColor
+                + ";"
                 + "-fx-background-radius: 10;"
                 + "-fx-border-color: rgba(255,255,255,0.25);"
                 + "-fx-border-radius: 10;"
@@ -142,22 +143,20 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
     /**
      * Converts a JavaFX color into the canonical {@code #RRGGBB} format.
      *
-     * @param color
-     *            the selected JavaFX color
+     * @param color the selected JavaFX color
      * @return the normalized hexadecimal RGB string
      */
     private static String toHexColor(final Color color) {
-        final int red = (int) Math.round(color.getRed() * 255);
-        final int green = (int) Math.round(color.getGreen() * 255);
-        final int blue = (int) Math.round(color.getBlue() * 255);
+        final long red = Math.round(color.getRed() * MAX_COLOR_VALUE);
+        final long green = Math.round(color.getGreen() * MAX_COLOR_VALUE);
+        final long blue = Math.round(color.getBlue() * MAX_COLOR_VALUE);
         return String.format("#%02X%02X%02X", red, green, blue);
     }
 
     /**
      * Formats a category type for UI display.
      *
-     * @param type
-     *            the type to format
+     * @param type the type to format
      * @return a user-friendly label
      */
     private static String formatCategoryType(final CategoryType type) {

@@ -1,23 +1,21 @@
 package it.unibo.unibodget.model.currency.api.provider;
 
+import it.unibo.unibodget.model.currency.CurrencyUnit;
 import java.math.BigDecimal;
 
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-
 /**
- * Defines a provider capable of retrieving the current market value
- * of a currency or asset expressed in United States Dollars (USD).
+ * Defines a provider capable of retrieving the current market value of a currency or asset
+ * expressed in United States Dollars (USD).
  *
- * <p>
- * Implementations may rely on different external services depending
- * on the asset type:
+ * <p>Implementations may rely on different external services depending on the asset type:
  *
  * <ul>
- *     <li>CoinGecko for cryptocurrencies</li>
- *     <li>Alpha Vantage for stocks</li>
- *     <li>Other providers for additional asset classes</li>
+ *   <li>CoinGecko for cryptocurrencies
+ *   <li>Alpha Vantage for stocks
+ *   <li>Other providers for additional asset classes
  * </ul>
  */
+@FunctionalInterface
 public interface PriceProvider {
 
     /**

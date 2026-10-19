@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link DefaultFriendLoanSummaryService}. */
 class DefaultFriendLoanSummaryServiceTest {
 
+    private static final String MARCO = "Marco";
+
     @Test
     void shouldSummarizeFriendLoansByLoanId() {
         final DefaultFriendLoanSummaryService service = new DefaultFriendLoanSummaryService();
@@ -35,7 +37,7 @@ class DefaultFriendLoanSummaryServiceTest {
                         "Loan to Marco",
                         "Initial loan",
                         marcoLoanId,
-                        "Marco");
+                        MARCO);
 
         final CashTransaction marcoRepayment =
                 new CashTransaction(
@@ -45,7 +47,7 @@ class DefaultFriendLoanSummaryServiceTest {
                         "Marco repayment",
                         "Partial repayment",
                         marcoLoanId,
-                        "Marco");
+                        MARCO);
 
         final CashTransaction lucaLoan =
                 new CashTransaction(
@@ -65,7 +67,7 @@ class DefaultFriendLoanSummaryServiceTest {
         final FriendLoanSummary first = result.get(0);
         final FriendLoanSummary second = result.get(1);
 
-        assertEquals("Marco", first.getFriendName());
+        assertEquals(MARCO, first.getFriendName());
         assertEquals(new BigDecimal("100.00"), first.getTotalGiven());
         assertEquals(new BigDecimal("30.00"), first.getTotalReceived());
         assertEquals(new BigDecimal("70.00"), first.getNetBalance());

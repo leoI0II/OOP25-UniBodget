@@ -1,12 +1,12 @@
 package it.unibo.unibodget.view.main;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.settings.SettingsController;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.view.investments.AddNewWalletDialogViewController;
 import it.unibo.unibodget.view.investments.AddTransactionDialogViewController;
 import it.unibo.unibodget.view.investments.InvestmentsViewController;
-
 import java.util.Objects;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Objects;
  * Controllers not explicitly handled here are instantiated via their no-arg constructor
  * through reflection.</p>
  */
-public class ViewControllersFactory {
+public final class ViewControllersFactory {
 
     private final InvestmentController investmentController;
     private final InvestmentsSnapshotService snapshotService;
@@ -34,6 +34,9 @@ public class ViewControllersFactory {
      * @param converterModule      the currency-converter view embedded as content in the shell
      * @param settingsController   the settings controller used to manage user preferences
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of controllers and services")
     public ViewControllersFactory(
             final InvestmentController investmentController,
             final InvestmentsSnapshotService snapshotService,
@@ -56,7 +59,7 @@ public class ViewControllersFactory {
      *
      * @param controllerClass the class of the controller to create
      * @return a fully initialised controller instance
-     * @throws RuntimeException if the class has no accessible no-arg constructor
+     * @throws IllegalStateException if the class has no accessible no-arg constructor
      */
     public Object create(final Class<?> controllerClass) {
         if (controllerClass == InvestmentsViewController.class) {
@@ -83,7 +86,7 @@ public class ViewControllersFactory {
         try {
             return controllerClass.getDeclaredConstructor().newInstance();
         } catch (final ReflectiveOperationException e) {
-            throw new RuntimeException("Cannot create controller: " + controllerClass, e);
+            throw new IllegalStateException("Cannot create controller: " + controllerClass, e);
         }
     }
 }

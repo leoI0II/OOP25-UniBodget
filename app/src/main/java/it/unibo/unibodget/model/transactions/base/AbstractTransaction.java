@@ -1,18 +1,19 @@
 package it.unibo.unibodget.model.transactions.base;
 
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.UUID;
 
-/*
+/**
+ * Abstract base class representing a generic financial transaction.
+ *
  * <p>Each transaction contains:
  * <ul>
  *   <li>an {@link Asset} describing the monetary value and currency</li>
@@ -29,8 +30,8 @@ import it.unibo.unibodget.model.currency.Asset;
     @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
     @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
 })
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
-
 
     private final UUID id;
     private final Asset asset;
@@ -42,25 +43,26 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
     /**
      * Creates a new {@code AbstractTransaction} with the given fields.
      *
-     * @param asset        the monetary value associated with the transaction;
-     *                     must not be {@code null}
-     * @param category     the category describing the nature of the transaction;
-     *                     must not be {@code null}
-     * @param date         the date on which the transaction occurred;
-     *                     must not be {@code null}
-     * @param description  a short human-readable description of the transaction;
-     *                     may be {@code null}
-     * @param notes        optional additional notes or comments; may be {@code null}
-     * @throws NullPointerException if {@code asset}, {@code category}, or {@code date} is {@code null}
+     * @param id the unique identifier of the transaction; must not be {@code null}
+     * @param asset the monetary value associated with the transaction; must not be {@code null}
+     * @param category the category describing the nature of the transaction; must not be {@code
+     *     null}
+     * @param date the date on which the transaction occurred; must not be {@code null}
+     * @param description a short human-readable description of the transaction; may be {@code null}
+     * @param notes optional additional notes or comments; may be {@code null}
+     * @throws NullPointerException if {@code asset}, {@code category}, or {@code date} is {@code
+     *     null}
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Transaction holds a domain category reference")
     public AbstractTransaction(
-        final UUID id,
-        final Asset asset,
-        final Category category,
-        final LocalDate date,
-        final String description,
-        final String notes
-    ) {
+            final UUID id,
+            final Asset asset,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes) {
         this.id = Objects.requireNonNull(id);
         this.asset = Objects.requireNonNull(asset);
         this.category = Objects.requireNonNull(category);
@@ -111,6 +113,9 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
      *
      * @return the {@link Category} describing the transaction type
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Returns domain category assigned to this transaction")
     public Category getCategory() {
         return category;
     }
@@ -153,11 +158,11 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
         }
         final AbstractTransaction other = (AbstractTransaction) o;
         return Objects.equals(id, other.id)
-            && Objects.equals(asset, other.asset)
-            && Objects.equals(category, other.category)
-            && Objects.equals(date, other.date)
-            && Objects.equals(description, other.description)
-            && Objects.equals(notes, other.notes);
+                && Objects.equals(asset, other.asset)
+                && Objects.equals(category, other.category)
+                && Objects.equals(date, other.date)
+                && Objects.equals(description, other.description)
+                && Objects.equals(notes, other.notes);
     }
 
     /** {@inheritDoc} */
@@ -169,13 +174,19 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "Transaction{id=" + id
-                + ", asset=" + asset
-                + ", category=" + category
-                + ", date=" + date
-                + ", description='" + description
+        return "Transaction{id="
+                + id
+                + ", asset="
+                + asset
+                + ", category="
+                + category
+                + ", date="
+                + date
+                + ", description='"
+                + description
                 + '\''
-                + ", notes='" + notes
+                + ", notes='"
+                + notes
                 + '\''
                 + '}';
     }

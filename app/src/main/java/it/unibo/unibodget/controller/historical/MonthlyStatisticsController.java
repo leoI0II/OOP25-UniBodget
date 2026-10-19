@@ -1,5 +1,12 @@
 package it.unibo.unibodget.controller.historical;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.transactions.Historical;
+import it.unibo.unibodget.model.transactions.MonthlyStatistics;
+import it.unibo.unibodget.model.transactions.MonthlyStatistics.CategoryTotal;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -7,29 +14,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.unibo.unibodget.model.categories.Category;
-import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.transactions.Historical;
-import it.unibo.unibodget.model.transactions.MonthlyStatistics;
-import it.unibo.unibodget.model.transactions.MonthlyStatistics.CategoryTotal;
-import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
-
 /**
- * Controller responsible for computing monthly financial statistics from a
- * historical transaction ledger.
- * 
- * <p>
- * All filtering, grouping, and aggregation logic is performed here. The view
- * layer receives only fully prepared {@link MonthlyStatistics} objects, ready
- * for chart rendering or summary display.
- * 
- * <p>
- * Assumptions:
- * 
+ * Controller responsible for computing monthly financial statistics from a historical transaction
+ * ledger.
+ *
+ * <p>All filtering, grouping, and aggregation logic is performed here. The view layer receives only
+ * fully prepared {@link MonthlyStatistics} objects, ready for chart rendering or summary display.
+ *
+ * <p>Assumptions:
+ *
  * <ul>
- *     <li>All transactions in the ledger use the same currency (e.g., the user's base currency).</li>
- *     <li>Category totals are computed directly from transaction amounts.</li>
- *     <li>Income and expense totals are computed using absolute values.</li>
+ *   <li>All transactions in the ledger use the same currency (e.g., the user's base currency).
+ *   <li>Category totals are computed directly from transaction amounts.
+ *   <li>Income and expense totals are computed using absolute values.
  * </ul>
  */
 public final class MonthlyStatisticsController {
@@ -39,36 +36,38 @@ public final class MonthlyStatisticsController {
     /**
      * Creates a new {@code MonthlyStatisticsController}.
      *
-     * @param historical the transaction ledger used to compute monthly statistics;
-     *                   must not be {@code null}
+     * @param historical the transaction ledger used to compute monthly statistics; must not be
+     *     {@code null}
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of transaction ledger")
     public MonthlyStatisticsController(final Historical<? extends AbstractTransaction> historical) {
         this.historical = historical;
     }
 
     /**
      * Computes aggregated financial statistics for the given month.
-     * 
-     * <p>
-     * The computation includes:
-     * 
+     *
+     * <p>The computation includes:
+     *
      * <ul>
-     *     <li>Filtering transactions belonging to the specified {@link YearMonth}</li>
-     *     <li>Summing amounts per category</li>
-     *     <li>Tracking category types (income/expense)</li>
-     *     <li>Computing total income, total expenses, and net balance</li>
-     *     <li>Producing a sorted list of {@link CategoryTotal} objects</li>
+     *   <li>Filtering transactions belonging to the specified {@link YearMonth}
+     *   <li>Summing amounts per category
+     *   <li>Tracking category types (income/expense)
+     *   <li>Computing total income, total expenses, and net balance
+     *   <li>Producing a sorted list of {@link CategoryTotal} objects
      * </ul>
-     * 
-     * <p>
-     * Category totals are sorted in descending order by absolute amount, so charts
-     * can display the most relevant categories first.
+     *
+     * <p>Category totals are sorted in descending order by absolute amount, so charts can display
+     * the most relevant categories first.
      *
      * @param month the month for which statistics should be computed; must not be {@code null}
      * @return a {@link MonthlyStatistics} instance containing all aggregated values
      */
     public MonthlyStatistics computeStatistics(final YearMonth month) {
-        final List<? extends AbstractTransaction> monthTransactions = historical.filterByMonth(month);
+        final List<? extends AbstractTransaction> monthTransactions =
+                historical.filterByMonth(month);
 
         final Map<String, BigDecimal> sumsByCategory = new LinkedHashMap<>();
         final Map<String, CategoryType> typeByCategory = new LinkedHashMap<>();

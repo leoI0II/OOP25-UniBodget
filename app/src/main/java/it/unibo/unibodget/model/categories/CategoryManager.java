@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.categories;
 
+import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -7,16 +8,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.unibo.unibodget.persistency.ModelFileManager;
-
 /**
  * Provides static access to all application categories.
- * 
- * <p>
- * CategoryManager handles loading, saving, and managing Category objects
- * stored in a JSON file. Categories are initialized on first use and kept
- * in memory for fast access. The class cannot be instantiated.
- * </p>
+ *
+ * <p>CategoryManager handles loading, saving, and managing Category objects stored in a JSON file.
+ * Categories are initialized on first use and kept in memory for fast access. The class cannot be
+ * instantiated.
  */
 public final class CategoryManager {
 
@@ -27,21 +24,18 @@ public final class CategoryManager {
     private static List<Category> loaded = new ArrayList<>();
     private static boolean initialized;
 
-    /*
-     * Prevents instantiation of the CategoryManager class.
-     */
+    /** Prevents instantiation of the CategoryManager class. */
     private CategoryManager() {
+        // utility class
     }
 
     /**
      * Initializes the category manager by loading categories from the JSON file.
-     * 
-     * <p>
-     * If the file is empty or cannot be loaded, default categories are generated.
-     * This method is called automatically on first access to the manager. 
+     *
+     * <p>If the file is empty or cannot be loaded, default categories are generated. This method is
+     * called automatically on first access to the manager.
      */
     public static void init() {
-        initialized = false;
         try {
             try (ModelFileManager<Category> mgr =
                     new ModelFileManager<>(PATH, RESOURCE, Category.class)) {
@@ -49,15 +43,14 @@ public final class CategoryManager {
                 loaded = new ArrayList<>(mgr.loadList("categories"));
             }
             if (loaded.isEmpty()) {
-                System.out.println("No categories found in file, loading default categories.");
+                LOGGER.log(Level.INFO, "No categories found in file, loading default categories.");
                 loaded.addAll(Category.getDefaultCategories());
                 saveAll();
             }
             initialized = true;
 
         } catch (final IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to load categories from file", e);
-            System.out.println("Unable to load categories from file, loading default categories.");
+            LOGGER.log(Level.WARNING, "Unable to load categories from file, loading default categories.", e);
             loaded.clear();
             loaded.addAll(Category.getDefaultCategories());
             initialized = true;
@@ -85,14 +78,10 @@ public final class CategoryManager {
         if (!initialized) {
             init();
         }
-        final boolean alreadyExists = loaded.stream()
-                .anyMatch(c ->
-                    c.getName().equalsIgnoreCase(category.getName())
-                );
+        final boolean alreadyExists =
+                loaded.stream().anyMatch(c -> c.getName().equalsIgnoreCase(category.getName()));
         if (alreadyExists) {
-            throw new IllegalArgumentException(
-                "Category already exists: " + category.getName()
-            );
+            throw new IllegalArgumentException("Category already exists: " + category.getName());
         }
         loaded.add(category);
         saveAll();
@@ -115,9 +104,7 @@ public final class CategoryManager {
         return removed;
     }
 
-    /**
-     * Saves all categories to the JSON file.
-     */
+    /** Saves all categories to the JSON file. */
     public static void saveAll() {
         try {
             try (ModelFileManager<Category> mgr =
@@ -127,13 +114,11 @@ public final class CategoryManager {
             }
 
         } catch (final IOException e) {
-            throw new RuntimeException("Unable to save categories", e);
+            throw new IllegalStateException("Unable to save categories", e);
         }
     }
 
-    /**
-     * Reloads all categories from the JSON file.
-     */
+    /** Reloads all categories from the JSON file. */
     public static void reload() {
         initialized = false;
         init();
@@ -150,9 +135,7 @@ public final class CategoryManager {
             init();
         }
 
-        return loaded.stream()
-                .filter(c -> c.getType() == type)
-                .toList();
+        return loaded.stream().filter(c -> c.getType() == type).toList();
     }
 
     /**
@@ -166,5 +149,4 @@ public final class CategoryManager {
         }
         saveAll();
     }
-
 }

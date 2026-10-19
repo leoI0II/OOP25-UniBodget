@@ -1,27 +1,22 @@
 package it.unibo.unibodget.model.dashboard.api;
 
-import java.util.List;
-
 import it.unibo.unibodget.model.dashboard.impl.WalletInsight;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import java.util.List;
 
 /**
- * Service responsible for computing high-level wallet insights
- * from a list of cash transactions.
+ * Service responsible for computing high-level wallet insights from a list of cash transactions.
  *
- * <p>
- * Insights are intended for dashboard presentation and provide
- * user-facing messages about monthly spending, income, and savings
- * trends.
- * </p>
+ * <p>Insights are intended for dashboard presentation and provide user-facing messages about
+ * monthly spending, income, and savings trends.
  */
+@FunctionalInterface
 public interface WalletInsightService {
 
     /**
      * Computes the wallet insights for the provided transactions.
      *
-     * @param transactions
-     *            the transactions to inspect; must not be null
+     * @param transactions the transactions to inspect; must not be null
      * @return the computed insights, in display order
      */
     List<WalletInsight> computeInsights(List<CashTransaction> transactions);

@@ -1,9 +1,8 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
-import java.util.Objects;
-
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import java.util.Objects;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -16,8 +15,18 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
+/**
+ * Dialog for creating a new cash account wallet.
+ */
 public final class NewWalletDialog extends Dialog<CashAccount> {
 
+    private static final int GRID_SPACING = 12;
+
+    /**
+     * Constructs a new wallet dialog.
+     *
+     * @param defaultCurrency the default currency preselected in the dialog
+     */
     public NewWalletDialog(final FiatCurrency defaultCurrency) {
         setTitle("Create New Wallet");
         setHeaderText("Insert wallet details");
@@ -28,43 +37,47 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
         final TextField walletNameField = new TextField();
         walletNameField.setPromptText("Wallet name");
 
-        final ComboBox<FiatCurrency> currencyBox = new ComboBox<>(
-                FXCollections.observableArrayList(FiatCurrency.values())
-        );
+        final ComboBox<FiatCurrency> currencyBox =
+                new ComboBox<>(FXCollections.observableArrayList(FiatCurrency.values()));
         currencyBox.setMaxWidth(Double.MAX_VALUE);
         currencyBox.getSelectionModel().select(defaultCurrency);
 
-        currencyBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(final FiatCurrency currency) {
-                return currency == null ? "" : formatCurrency(currency);
-            }
+        currencyBox.setConverter(
+                new StringConverter<>() {
+                    @Override
+                    public String toString(final FiatCurrency currency) {
+                        return currency == null ? "" : formatCurrency(currency);
+                    }
 
-            @Override
-            public FiatCurrency fromString(final String string) {
-                return null;
-            }
-        });
+                    @Override
+                    public FiatCurrency fromString(final String string) {
+                        return null;
+                    }
+                });
 
-        currencyBox.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(final FiatCurrency item, final boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatCurrency(item));
-            }
-        });
+        currencyBox.setCellFactory(
+                listView ->
+                        new ListCell<>() {
+                            @Override
+                            protected void updateItem(
+                                    final FiatCurrency item, final boolean empty) {
+                                super.updateItem(item, empty);
+                                setText(empty || item == null ? null : formatCurrency(item));
+                            }
+                        });
 
-        currencyBox.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(final FiatCurrency item, final boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatCurrency(item));
-            }
-        });
+        currencyBox.setButtonCell(
+                new ListCell<>() {
+                    @Override
+                    protected void updateItem(final FiatCurrency item, final boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty || item == null ? null : formatCurrency(item));
+                    }
+                });
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
+        grid.setHgap(GRID_SPACING);
+        grid.setVgap(GRID_SPACING);
         grid.setPadding(new Insets(16));
 
         grid.add(new Label("Wallet name:"), 0, 0);
@@ -77,24 +90,28 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
         final javafx.scene.Node createButton = getDialogPane().lookupButton(createButtonType);
         createButton.setDisable(true);
 
-        walletNameField.textProperty().addListener((obs, oldValue, newValue) -> {
-            createButton.setDisable(newValue == null || newValue.trim().isEmpty());
-        });
+        walletNameField
+                .textProperty()
+                .addListener(
+                        (obs, oldValue, newValue) -> {
+                            createButton.setDisable(newValue == null || newValue.trim().isEmpty());
+                        });
 
-        setResultConverter(buttonType -> {
-            if (!Objects.equals(buttonType, createButtonType)) {
-                return null;
-            }
+        setResultConverter(
+                buttonType -> {
+                    if (!Objects.equals(buttonType, createButtonType)) {
+                        return null;
+                    }
 
-            final String walletName = walletNameField.getText().trim();
-            final FiatCurrency selectedCurrency = currencyBox.getValue();
+                    final String walletName = walletNameField.getText().trim();
+                    final FiatCurrency selectedCurrency = currencyBox.getValue();
 
-            if (walletName.isEmpty() || selectedCurrency == null) {
-                return null;
-            }
+                    if (walletName.isEmpty() || selectedCurrency == null) {
+                        return null;
+                    }
 
-            return new CashAccount(walletName, selectedCurrency);
-        });
+                    return new CashAccount(walletName, selectedCurrency);
+                });
     }
 
     private static String formatCurrency(final FiatCurrency currency) {

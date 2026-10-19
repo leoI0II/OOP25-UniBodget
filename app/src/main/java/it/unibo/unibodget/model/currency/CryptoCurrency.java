@@ -2,18 +2,11 @@ package it.unibo.unibodget.model.currency;
 
 /**
  * Enum to represent cryptocurrencies.
- * 
- * <p>
- * Each enum constant defines:
- * - type (fixed to "Crypto")
- * - symbol
- * - short ISO name
- * - full name
- * - ISO code
- * - API identifier for price fetching
+ *
+ * <p>Each enum constant defines: - type (fixed to "Crypto") - symbol - short ISO name - full name -
+ * ISO code - API identifier for price fetching
  */
 public enum CryptoCurrency implements CurrencyUnit {
-
     BTC("₿", "BTC", "Bitcoin", "BTC", "bitcoin", false),
     ETH("Ξ", "ETH", "Ethereum", "ETH", "ethereum", false),
     SOL("◎", "SOL", "Solana", "SOL", "solana", false),
@@ -37,7 +30,7 @@ public enum CryptoCurrency implements CurrencyUnit {
     private static final int STABLE_DECIMALS = 2;
     private static final int DEFAULT_DECIMALS = 4;
 
-    private final CurrencyType type = CurrencyType.CRYPTO;
+    private static final CurrencyType TYPE = CurrencyType.CRYPTO;
     private final String symbol;
     private final String shortName;
     private final String fullName;
@@ -48,11 +41,11 @@ public enum CryptoCurrency implements CurrencyUnit {
     /**
      * Constructs a cryptocurrency definition.
      *
-     * @param symbol    the graphical symbol of the cryptocurrency (e.g., "₿", "Ξ")
+     * @param symbol the graphical symbol of the cryptocurrency (e.g., "₿", "Ξ")
      * @param shortName the short identifier or ticker (e.g., "BTC", "ETH")
-     * @param fullName  the full descriptive name of the cryptocurrency
-     * @param code      the standardized currency code (often equal to the ticker)
-     * @param apiId     the identifier used by external APIs or data providers
+     * @param fullName the full descriptive name of the cryptocurrency
+     * @param code the standardized currency code (often equal to the ticker)
+     * @param apiId the identifier used by external APIs or data providers
      * @param isStableCoin whether the cryptocurrency is a stablecoin (e.g., USDT)
      */
     CryptoCurrency(
@@ -61,8 +54,7 @@ public enum CryptoCurrency implements CurrencyUnit {
             final String fullName,
             final String code,
             final String apiId,
-            final boolean isStableCoin
-    ) {
+            final boolean isStableCoin) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -74,7 +66,7 @@ public enum CryptoCurrency implements CurrencyUnit {
     /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
-        return this.type;
+        return TYPE;
     }
 
     /** {@inheritDoc} */

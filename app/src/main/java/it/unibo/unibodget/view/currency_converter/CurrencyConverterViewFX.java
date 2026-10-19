@@ -9,7 +9,6 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -27,8 +26,7 @@ import javafx.stage.Stage;
 /**
  * Dashboard containing the converter, watchlist and bank conversion widgets.
  *
- * <p>Font sizes are local to this page. Font family and weight follow
- * the active theme.
+ * <p>Font sizes are local to this page. Font family and weight follow the active theme.
  */
 public final class CurrencyConverterViewFX {
 
@@ -49,11 +47,8 @@ public final class CurrencyConverterViewFX {
 
     private static final WindowPreferences PREFS = new WindowPreferences();
 
-    /**
-     * Prevents instantiation.
-     */
-    private CurrencyConverterViewFX() {
-    }
+    /** Prevents instantiation. */
+    private CurrencyConverterViewFX() { }
 
     /**
      * Opens the dashboard in a standalone window.
@@ -76,21 +71,24 @@ public final class CurrencyConverterViewFX {
         stage.setHeight(PREFS.getHeight());
         stage.setMaximized(PREFS.isMaximized());
 
-        stage.widthProperty().addListener((observable, oldValue, newValue) -> {
-            if (!stage.isMaximized()) {
-                PREFS.setWidth(newValue.doubleValue());
-            }
-        });
+        stage.widthProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            if (!stage.isMaximized()) {
+                                PREFS.setWidth(newValue.doubleValue());
+                            }
+                        });
 
-        stage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            if (!stage.isMaximized()) {
-                PREFS.setHeight(newValue.doubleValue());
-            }
-        });
+        stage.heightProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            if (!stage.isMaximized()) {
+                                PREFS.setHeight(newValue.doubleValue());
+                            }
+                        });
 
-        stage.maximizedProperty().addListener((observable, oldValue, newValue) ->
-                PREFS.setMaximized(newValue)
-        );
+        stage.maximizedProperty()
+                .addListener((observable, oldValue, newValue) -> PREFS.setMaximized(newValue));
 
         stage.show();
     }
@@ -105,18 +103,15 @@ public final class CurrencyConverterViewFX {
         final Label pageTitle = new Label("Currencies Converter Dashboard");
 
         final CurrencyAlertService alertService = new CurrencyAlertService();
-        final ConverterWidgetFX converterWidget =
-                new ConverterWidgetFX(controller, alertService);
+        final ConverterWidgetFX converterWidget = new ConverterWidgetFX(controller, alertService);
 
         final WatchList watchlistModel = new WatchList();
-        final WatchListController watchlistController =
-                new WatchListController(watchlistModel);
+        final WatchListController watchlistController = new WatchListController(watchlistModel);
 
         final WatchlistWidgetFX watchlistWidget =
                 new WatchlistWidgetFX(watchlistController, converterWidget);
 
-        final BankConversionController bankController =
-                new BankConversionController();
+        final BankConversionController bankController = new BankConversionController();
 
         final BankConverterWidgetFX bankConverterWidget =
                 new BankConverterWidgetFX(
@@ -124,42 +119,32 @@ public final class CurrencyConverterViewFX {
                         converterWidget.getAmountField(),
                         converterWidget.getFromBox(),
                         converterWidget.getToBox(),
-                        (BasicCurrencyConverter) controller.getConverter()
-                );
+                        (BasicCurrencyConverter) controller.getConverter());
 
         final Button showChartButton = new Button("Show Chart");
 
         final CurrencyConverterController historyController =
                 new CurrencyConverterController(
-                        new ExchangeRateAPIClient(),
-                        controller.getConverter()
-                );
+                        new ExchangeRateAPIClient(), controller.getConverter());
 
-        showChartButton.setOnAction(event -> {
-            final CurrencyHistoryChartView chartView =
-                    new CurrencyHistoryChartView(historyController);
+        showChartButton.setOnAction(
+                event -> {
+                    final CurrencyHistoryChartView chartView =
+                            new CurrencyHistoryChartView(historyController);
 
-            final Stage popup = new Stage();
-            popup.initOwner(showChartButton.getScene().getWindow());
-            popup.initModality(Modality.WINDOW_MODAL);
-            popup.setTitle("Currency History");
+                    final Stage popup = new Stage();
+                    popup.initOwner(showChartButton.getScene().getWindow());
+                    popup.initModality(Modality.WINDOW_MODAL);
+                    popup.setTitle("Currency History");
 
-            final Scene popupScene = new Scene(
-                    chartView,
-                    CHART_WIDTH,
-                    CHART_HEIGHT
-            );
+                    final Scene popupScene = new Scene(chartView, CHART_WIDTH, CHART_HEIGHT);
 
-            popup.setScene(popupScene);
-            ThemeManager.applyThemeToScene(popupScene);
-            popup.showAndWait();
-        });
+                    popup.setScene(popupScene);
+                    ThemeManager.applyThemeToScene(popupScene);
+                    popup.showAndWait();
+                });
 
-        final HBox topBar = new HBox(
-                TOP_BAR_SPACING,
-                pageTitle,
-                showChartButton
-        );
+        final HBox topBar = new HBox(TOP_BAR_SPACING, pageTitle, showChartButton);
         topBar.setAlignment(Pos.CENTER_LEFT);
 
         // Removes the converter's original card decoration.
@@ -172,12 +157,7 @@ public final class CurrencyConverterViewFX {
         final VBox watchlistCard = createCard(watchlistWidget.getView());
         final VBox bankCard = createCard(bankConverterWidget.getView());
 
-        final HBox contentRow = new HBox(
-                CONTENT_SPACING,
-                converterCard,
-                watchlistCard,
-                bankCard
-        );
+        final HBox contentRow = new HBox(CONTENT_SPACING, converterCard, watchlistCard, bankCard);
         contentRow.setAlignment(Pos.TOP_LEFT);
         contentRow.setFillHeight(true);
 
@@ -196,11 +176,13 @@ public final class CurrencyConverterViewFX {
         setFontSize(root, FONT_SIZE);
         applyPageFontSizes(root, pageTitle);
 
-        root.sceneProperty().addListener((observable, oldScene, newScene) -> {
-            if (newScene != null) {
-                ThemeManager.applyThemeToScene(newScene);
-            }
-        });
+        root.sceneProperty()
+                .addListener(
+                        (observable, oldScene, newScene) -> {
+                            if (newScene != null) {
+                                ThemeManager.applyThemeToScene(newScene);
+                            }
+                        });
 
         return root;
     }
@@ -220,11 +202,10 @@ public final class CurrencyConverterViewFX {
 
         card.setStyle(
                 "-fx-background-color: rgba(128,128,128,0.15);"
-                + "-fx-background-radius: 18;"
-                + "-fx-border-color: rgba(128,128,128,0.30);"
-                + "-fx-border-radius: 18;"
-                + "-fx-border-width: 1;"
-        );
+                        + "-fx-background-radius: 18;"
+                        + "-fx-border-color: rgba(128,128,128,0.30);"
+                        + "-fx-border-radius: 18;"
+                        + "-fx-border-width: 1;");
 
         VBox.setVgrow(content, Priority.ALWAYS);
         return card;
@@ -242,11 +223,9 @@ public final class CurrencyConverterViewFX {
 
             if (node == pageTitle) {
                 size = TITLE_FONT_SIZE;
-            } else if (Boolean.TRUE.equals(
-                    node.getProperties().get("converter-section-title"))) {
+            } else if (Boolean.TRUE.equals(node.getProperties().get("converter-section-title"))) {
                 size = SECTION_TITLE_FONT_SIZE;
-            } else if (Boolean.TRUE.equals(
-                    node.getProperties().get("converter-result"))) {
+            } else if (Boolean.TRUE.equals(node.getProperties().get("converter-result"))) {
                 size = RESULT_FONT_SIZE;
             } else {
                 size = FONT_SIZE;
@@ -273,10 +252,8 @@ public final class CurrencyConverterViewFX {
      * @param size the font size in pixels
      */
     private static void setFontSize(final Node node, final int size) {
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-font-size\\s*:[^;]*(?:;|$)",
-                ""
-        );
+        final String existingStyle =
+                node.getStyle().replaceAll("(?i)-fx-font-size\\s*:[^;]*(?:;|$)", "");
 
         node.setStyle(existingStyle + ";-fx-font-size: " + size + "px;");
     }

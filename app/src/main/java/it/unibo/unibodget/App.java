@@ -19,7 +19,7 @@ import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
-
+import java.util.List;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -30,11 +30,12 @@ import javafx.stage.Stage;
 /**
  * JavaFX application entry point for UniBodget.
  *
- * <p>Bootstraps services and controllers, loads the main view and
- * persists application data when the application stops.
+ * <p>Bootstraps services and controllers, loads the main view and persists application data when
+ * the application stops.
  */
-public class App extends Application {
+public final class App extends Application {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(App.class);
     private WalletAutoSaver walletSaver;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
@@ -42,18 +43,16 @@ public class App extends Application {
     /** {@inheritDoc} */
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        final UniversalPriceService priceService = new UniversalPriceService(
-                new ExchangeRateAPIImpl(),
-                new CoinGeckoPriceProvider(),
-                new AlphaPriceProvider()
-        );
+        final UniversalPriceService priceService =
+                new UniversalPriceService(
+                        new ExchangeRateAPIImpl(),
+                        new CoinGeckoPriceProvider(),
+                        new AlphaPriceProvider());
 
-        final BasicCurrencyConverter currencyConverter =
-                new BasicCurrencyConverter(priceService);
+        final BasicCurrencyConverter currencyConverter = new BasicCurrencyConverter(priceService);
 
         final var cashAccountManager = new CashAccountManager();
-        final var investmentAccountManager =
-                new InvestmentAccountManager(currencyConverter);
+        final var investmentAccountManager = new InvestmentAccountManager(currencyConverter);
 
         final var cashAccountsService = new CashAccountService();
         final var investmentsService = new InvestmentAccountService();
@@ -65,45 +64,42 @@ public class App extends Application {
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
 
-        walletSaver = new WalletAutoSaver()
-                .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
-                .register(investmentsService::getWallets, investmentAccountManager::saveAll);
+        walletSaver =
+                new WalletAutoSaver()
+                        .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
+                        .register(
+                                investmentsService::getWallets, investmentAccountManager::saveAll);
 
         final Settings settings = settingsController.getSettings();
         final var snapshotService = new CSVInvestmentsSnapshotService();
 
-        final var investmentsController = new DefaultInvestmentController(
-                investmentsService,
-                cashAccountsService,
-                currencyConverter,
-                settings,
-                snapshotService
-        );
+        final var investmentsController =
+                new DefaultInvestmentController(
+                        investmentsService,
+                        cashAccountsService,
+                        currencyConverter,
+                        settings,
+                        snapshotService);
 
-        final var dashboardModule = new DashboardModule(
-                currencyConverter,
-                settings,
-                cashAccountsService
-        );
+        final var dashboardModule =
+                new DashboardModule(currencyConverter, settings, cashAccountsService);
 
-        final var converterModule = new CurrencyConverterModule(
-                new ExchangeRateAPIImpl(),
-                currencyConverter
-        );
+        final var converterModule =
+                new CurrencyConverterModule(new ExchangeRateAPIImpl(), currencyConverter);
 
-        final FXMLLoader mainViewPage = new FXMLLoader(
-                getClass().getResource(
-                        "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"
-                )
-        );
+        final FXMLLoader mainViewPage =
+                new FXMLLoader(
+                        getClass()
+                                .getResource(
+                                        "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"));
 
-        final var factory = new ViewControllersFactory(
-                investmentsController,
-                snapshotService,
-                dashboardModule,
-                converterModule,
-                settingsController
-        );
+        final var factory =
+                new ViewControllersFactory(
+                        investmentsController,
+                        snapshotService,
+                        dashboardModule,
+                        converterModule,
+                        settingsController);
 
         mainViewPage.setControllerFactory(factory::create);
 
@@ -133,21 +129,30 @@ public class App extends Application {
      * @param settings the settings instance to update
      */
     private void updateWindowProperty(final Stage primaryStage, final Settings settings) {
-        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
-            if (!primaryStage.isMaximized()) {
-                settings.getWindowPrefs().setWidth(newValue.doubleValue());
-            }
-        });
+        primaryStage
+                .widthProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            if (!primaryStage.isMaximized()) {
+                                settings.getWindowPrefs().setWidth(newValue.doubleValue());
+                            }
+                        });
 
-        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            if (!primaryStage.isMaximized()) {
-                settings.getWindowPrefs().setHeight(newValue.doubleValue());
-            }
-        });
+        primaryStage
+                .heightProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            if (!primaryStage.isMaximized()) {
+                                settings.getWindowPrefs().setHeight(newValue.doubleValue());
+                            }
+                        });
 
-        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-            settings.getWindowPrefs().setMaximized(newValue);
-        });
+        primaryStage
+                .maximizedProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            settings.getWindowPrefs().setMaximized(newValue);
+                        });
     }
 
     /**
@@ -158,31 +163,31 @@ public class App extends Application {
     @Override
     public void stop() {
         if (!persistenceReady) {
-            System.out.println("[PERSISTENCE] Startup incomplete: saving skipped");
+            LOGGER.info("[PERSISTENCE] Startup incomplete: saving skipped");
             return;
         }
 
-        RuntimeException failure = null;
+        IllegalStateException failure = null;
 
-        for (final Runnable save : new Runnable[] {
-                walletSaver::stop,
-                walletSaver::saveAll,
-                () -> {
-                    final WindowPreferences preferences =
-                            settingsController.getSettings().getWindowPrefs();
+        for (final Runnable save
+                : List.<Runnable>of(
+                        walletSaver::stop,
+                        walletSaver::saveAll,
+                        () -> {
+                            final WindowPreferences preferences =
+                                    settingsController.getSettings().getWindowPrefs();
 
-                    settingsController.updateWindowPrefs(new WindowPreferences(
-                            preferences.getWidth(),
-                            preferences.getHeight(),
-                            preferences.isMaximized()
-                    ));
-                }
-        }) {
+                            settingsController.updateWindowPrefs(
+                                    new WindowPreferences(
+                                            preferences.getWidth(),
+                                            preferences.getHeight(),
+                                            preferences.isMaximized()));
+                        })) {
             try {
                 save.run();
-            } catch (final RuntimeException ex) {
+            } catch (final IllegalStateException | IllegalArgumentException ex) {
                 if (failure == null) {
-                    failure = ex;
+                    failure = new IllegalStateException("Shutdown failure", ex);
                 } else {
                     failure.addSuppressed(ex);
                 }

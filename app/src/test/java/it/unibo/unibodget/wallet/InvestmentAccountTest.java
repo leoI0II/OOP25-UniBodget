@@ -30,8 +30,8 @@ final class InvestmentAccountTest {
     private static final int RATE_SCALE = 20;
     private static final int TWO_POSITIONS = 2;
 
-    private static final BigDecimal TWO_UNITS = new BigDecimal("2");
-    private static final BigDecimal FIVE_UNITS = new BigDecimal("5");
+    private static final BigDecimal TWO_UNITS = BigDecimal.valueOf(2);
+    private static final BigDecimal FIVE_UNITS = BigDecimal.valueOf(5);
 
     private static final BigDecimal BTC_FIRST_PRICE = new BigDecimal("50000");
     private static final BigDecimal BTC_SECOND_PRICE = new BigDecimal("55000");

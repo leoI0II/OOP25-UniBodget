@@ -1,7 +1,6 @@
 package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -12,20 +11,21 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of {@link ExchangeRateAPI} that retrieves currency
- * exchange rates from the public <a href="https://open.er-api.com/">open.er-api.com</a>
- * service.
- * 
- * <p>
- * This implementation performs live HTTP requests using Java's
- * {@link HttpClient}, applies a simple in-memory caching strategy, and parses
- * the JSON response using lightweight string operations (no external JSON
- * libraries).
+ * Default implementation of {@link ExchangeRateAPI} that retrieves currency exchange rates from the
+ * public <a href="https://open.er-api.com/">open.er-api.com</a> service.
+ *
+ * <p>This implementation performs live HTTP requests using Java's {@link HttpClient}, applies a
+ * simple in-memory caching strategy, and parses the JSON response using lightweight string
+ * operations (no external JSON libraries).
  */
 public class ExchangeRateAPIImpl implements ExchangeRateAPI {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateAPIImpl.class);
+    private static final int HTTP_OK = 200;
     private static final int SECONDS_5 = 5;
 
     /** Duration for which fetched exchange rates remain valid in cache. */
@@ -46,11 +46,8 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /**
      * Returns the latest exchange rates relative to the given base currency.
      *
-     * <p>
-     * If cached data is still valid, it is returned immediately. Otherwise,
-     * a new request is sent to the external API.
-     * Preserves previous rates for the same base if the request fails.
-     * </p>
+     * <p>If cached data is still valid, it is returned immediately. Otherwise, a new request is
+     * sent to the external API. Preserves previous rates for the same base if the request fails.
      *
      * @param base the base currency for which rates should be retrieved
      * @return a map of currency units to their exchange rate relative to {@code base}
@@ -59,8 +56,9 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     public synchronized Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
         final boolean sameBase = base.getCode().equalsIgnoreCase(cachedBaseCode);
         // Reuse valid rates only when the base currency matches
-        if (sameBase && !cachedRates.isEmpty()
-            && Instant.now().isBefore(lastUpdate.plus(CACHE_DURATION))) {
+        if (sameBase
+                && !cachedRates.isEmpty()
+                && Instant.now().isBefore(lastUpdate.plus(CACHE_DURATION))) {
             return Map.copyOf(cachedRates);
         }
         // Fetch new rates and update the cache only if response with multiple currencies
@@ -73,29 +71,31 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
         }
         // Keep previous rates if the refresh fails
         if (sameBase && !cachedRates.isEmpty()) {
-            System.err.println("[FIAT CACHE] Request failed: using previous rates.");
+            LOGGER.warn("[FIAT CACHE] Request failed: using previous rates.");
             return Map.copyOf(cachedRates);
         }
-        System.err.println("[FIAT CACHE] No rates available for " + base.getCode());
+        LOGGER.warn("[FIAT CACHE] No rates available for {}", base.getCode());
         return Map.of();
     }
 
     /**
      * Returns historical exchange rates for the given currency pair.
      *
-     * <p>
-     * Since the external API does not support historical data, this method
-     * generates mock values for each date in the requested range.
+     * <p>Since the external API does not support historical data, this method generates mock values
+     * for each date in the requested range.
      *
-     * @param base   the base currency
+     * @param base the base currency
      * @param target the target currency
-     * @param from   start date (inclusive)
-     * @param to     end date (inclusive)
+     * @param from start date (inclusive)
+     * @param to end date (inclusive)
      * @return a map of dates to mock exchange rate values
      */
     @Override
-    public Map<LocalDate, Double> getHistoricalRates(final CurrencyUnit base, final CurrencyUnit target,
-                                                    final LocalDate from, final LocalDate to) {
+    public Map<LocalDate, Double> getHistoricalRates(
+            final CurrencyUnit base,
+            final CurrencyUnit target,
+            final LocalDate from,
+            final LocalDate to) {
         return generateMockHistory(from, to);
     }
 
@@ -109,16 +109,17 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
         final String url = "https://open.er-api.com/v6/latest/" + base.getCode();
 
         try {
-            final HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .timeout(Duration.ofSeconds(SECONDS_5))
-                    .GET()
-                    .build();
+            final HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .timeout(Duration.ofSeconds(SECONDS_5))
+                            .GET()
+                            .build();
 
             final HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HTTP_OK) {
                 // return an empty map
                 return Map.of();
             }
@@ -130,15 +131,14 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             return Map.of();
 
         } catch (final IOException e) {
-            // return an empty map
-            e.printStackTrace();
+            LOGGER.error("Failed to fetch rates from API", e);
             return Map.of();
         }
     }
 
     /**
-     * Extracts the {@code "rates"} object from the API JSON response using
-     * simple string operations.
+     * Extracts the {@code "rates"} object from the API JSON response using simple string
+     * operations.
      *
      * @param json the raw JSON response
      * @param base the base currency (added manually with value {@code 1.0})
@@ -152,8 +152,8 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             return result;
         }
 
-        final int braceOpen = json.indexOf("{", ratesStart);
-        if (braceOpen == -1) { 
+        final int braceOpen = json.indexOf('{', ratesStart);
+        if (braceOpen == -1) {
             return result;
         }
 
@@ -197,7 +197,8 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
                     final double value = Double.parseDouble(valueStr);
                     result.put(unit, value);
                 } catch (final NumberFormatException ignored) {
-                    System.out.println("Parse error in ExchangedRateAPIImpl: " + ignored.getMessage());
+                    LOGGER.debug(
+                            "Parse error in ExchangeRateAPIImpl: {}", ignored.getMessage());
                 }
             }
         }
@@ -210,13 +211,11 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /**
      * Generates mock historical exchange rate data for the given date range.
      *
-     * <p>
-     * Each date is assigned a pseudo-random value between 0.5 and 1.5.
-     * This method is used only because the external API does not provide
-     * historical data.
+     * <p>Each date is assigned a pseudo-random value between 0.5 and 1.5. This method is used only
+     * because the external API does not provide historical data.
      *
      * @param from start date (inclusive)
-     * @param to   end date (inclusive)
+     * @param to end date (inclusive)
      * @return a map of dates to generated mock values
      */
     private Map<LocalDate, Double> generateMockHistory(final LocalDate from, final LocalDate to) {

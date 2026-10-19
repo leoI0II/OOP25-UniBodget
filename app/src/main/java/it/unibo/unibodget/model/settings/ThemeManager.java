@@ -1,13 +1,11 @@
 package it.unibo.unibodget.model.settings;
 
+import it.unibo.unibodget.model.utils.ARGBColor;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import it.unibo.unibodget.model.utils.ARGBColor;
-
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,24 +18,27 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the active theme and updates registered scenes.
  *
- * <p>Font sizes remain defined by individual views, controls,
- * FXML files or stylesheets.
+ * <p>Font sizes remain defined by individual views, controls, FXML files or stylesheets.
  */
 public final class ThemeManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThemeManager.class);
+
     private static Theme currentTheme = Theme.DEFAULT;
 
-    private static final Set<Scene> SCENES =
-            Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Set<Scene> SCENES = Collections.newSetFromMap(new WeakHashMap<>());
 
-    /**
-     * Prevents instantiation.
-     */
+    private static final double MAX_COLOR_COMPONENT = 255.0;
+
+    /** Prevents instantiation. */
     private ThemeManager() {
+        // utility class
     }
 
     /**
@@ -81,9 +82,10 @@ public final class ThemeManager {
 
         applyToTree(scene.getRoot());
 
-        System.out.println("[THEME] Applied: "
-                + currentTheme.getPrimaryColor().toHexString()
-                + ", font: " + currentTheme.getFontFamily());
+        LOGGER.debug(
+                "[THEME] Applied: {}, font: {}",
+                currentTheme.getPrimaryColor().toHexString(),
+                currentTheme.getFontFamily());
     }
 
     /**
@@ -122,10 +124,8 @@ public final class ThemeManager {
     public static void applyFont(final Node node) {
         Objects.requireNonNull(node, "node");
 
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-font-(?:family|weight)\\s*:[^;]*(?:;|$)",
-                ""
-        );
+        final String existingStyle =
+                node.getStyle().replaceAll("(?i)-fx-font-(?:family|weight)\\s*:[^;]*(?:;|$)", "");
 
         node.setStyle(existingStyle + ";" + getFontStyle());
     }
@@ -144,21 +144,20 @@ public final class ThemeManager {
             return;
         }
 
-        final ARGBColor color =
-                Theme.getReadableTextColor(currentTheme.getPrimaryColor());
+        final ARGBColor color = Theme.getReadableTextColor(currentTheme.getPrimaryColor());
 
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-text-fill\\s*:[^;]*(?:;|$)",
-                ""
-        );
+        final String existingStyle =
+                node.getStyle().replaceAll("(?i)-fx-text-fill\\s*:[^;]*(?:;|$)", "");
 
-        node.setStyle(existingStyle + ";" + String.format(
-                Locale.ROOT,
-                "-fx-text-fill: rgb(%d,%d,%d);",
-                color.red(),
-                color.green(),
-                color.blue()
-        ));
+        node.setStyle(
+                existingStyle
+                        + ";"
+                        + String.format(
+                                Locale.ROOT,
+                                "-fx-text-fill: rgb(%d,%d,%d);",
+                                color.red(),
+                                color.green(),
+                                color.blue()));
     }
 
     /**
@@ -193,10 +192,8 @@ public final class ThemeManager {
      * @param node the node to style
      */
     private static void applyBackground(final Node node) {
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-background-color\\s*:[^;]*(?:;|$)",
-                ""
-        );
+        final String existingStyle =
+                node.getStyle().replaceAll("(?i)-fx-background-color\\s*:[^;]*(?:;|$)", "");
 
         node.setStyle(existingStyle + ";" + getPrimaryBackgroundStyle());
     }
@@ -209,11 +206,11 @@ public final class ThemeManager {
     public static String getFontStyle() {
         final Theme theme = getTheme();
 
-        final String fontFamily = theme.getFontFamily()
-                .replace("\\", "\\\\")
-                .replace("'", "\\'");
+        final String fontFamily = theme.getFontFamily().replace("\\", "\\\\").replace("'", "\\'");
 
-        return "-fx-font-family: '" + fontFamily + "';"
+        return "-fx-font-family: '"
+                + fontFamily
+                + "';"
                 + "-fx-font-weight: "
                 + (theme.isBoldText() ? "bold;" : "normal;");
     }
@@ -232,7 +229,6 @@ public final class ThemeManager {
                 color.red(),
                 color.green(),
                 color.blue(),
-                color.alpha() / 255.0
-        );
+                color.alpha() / MAX_COLOR_COMPONENT);
     }
 }

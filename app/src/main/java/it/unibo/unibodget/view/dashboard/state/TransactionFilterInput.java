@@ -18,5 +18,4 @@ public record TransactionFilterInput(
         LocalDate fromDate,
         LocalDate toDate,
         String keyword,
-        String sortOrder) {
-}
+        String sortOrder) { }

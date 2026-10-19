@@ -1,8 +1,5 @@
 package it.unibo.unibodget.view.settings;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import it.unibo.unibodget.controller.settings.SettingsController;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.settings.Settings;
@@ -10,6 +7,8 @@ import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.utils.ARGBColor;
+import java.util.Locale;
+import java.util.Objects;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -30,8 +29,8 @@ import javafx.stage.Stage;
 /**
  * Modal dialog for editing application settings.
  *
- * <p>Allows changing the primary color, font family, boldness and base
- * currency, and viewing previous configurations without selecting them.
+ * <p>Allows changing the primary color, font family, boldness and base currency, and viewing
+ * previous configurations without selecting them.
  */
 public final class SettingsPopupFX {
 
@@ -73,52 +72,59 @@ public final class SettingsPopupFX {
         historyList.setSelectionModel(null);
         historyList.setPlaceholder(new Label("No previous configurations"));
 
-        historyList.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(final String item, final boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setWrapText(true);
-                setStyle("-fx-cursor: default;");
-                ThemeManager.applyFont(this);
-            }
-        });
+        historyList.setCellFactory(
+                list ->
+                        new ListCell<>() {
+                            @Override
+                            protected void updateItem(final String item, final boolean empty) {
+                                super.updateItem(item, empty);
+                                setText(empty || item == null ? null : item);
+                                setWrapText(true);
+                                setStyle("-fx-cursor: default;");
+                                ThemeManager.applyFont(this);
+                            }
+                        });
 
-        for (final SettingsSnapshot snapshot
-                : controller.getAllSavedConfigurations()) {
+        for (final SettingsSnapshot snapshot : controller.getAllSavedConfigurations()) {
             final Theme savedTheme = snapshot.getTheme();
 
-            historyList.getItems().add(
-                    snapshot.getSavedAt()
-                    + "\nTheme: " + savedTheme.getName()
-                    + " · Background: " + savedTheme.getPrimaryColor().toHexString()
-                    + "\nButtons: " + savedTheme.getButtonColor().toHexString()
-                    + " · Text: " + savedTheme.getTextColor().toHexString()
-                    + "\nFont: " + savedTheme.getFontFamily()
-                    + " · Size: " + savedTheme.getFontSize()
-                    + " · Bold: " + savedTheme.isBoldText()
-                    + "\nBase currency: " + snapshot.getBaseCurrency()
-            );
+            historyList
+                    .getItems()
+                    .add(
+                            snapshot.getSavedAt()
+                                    + "\nTheme: "
+                                    + savedTheme.getName()
+                                    + " · Background: "
+                                    + savedTheme.getPrimaryColor().toHexString()
+                                    + "\nButtons: "
+                                    + savedTheme.getButtonColor().toHexString()
+                                    + " · Text: "
+                                    + savedTheme.getTextColor().toHexString()
+                                    + "\nFont: "
+                                    + savedTheme.getFontFamily()
+                                    + " · Size: "
+                                    + savedTheme.getFontSize()
+                                    + " · Bold: "
+                                    + savedTheme.isBoldText()
+                                    + "\nBase currency: "
+                                    + snapshot.getBaseCurrency());
         }
 
-        final TitledPane historyPane = new TitledPane(
-                "Previous configurations — read only",
-                historyList
-        );
+        final TitledPane historyPane =
+                new TitledPane("Previous configurations — read only", historyList);
         historyPane.setExpanded(false);
         historyPane.setAnimated(false);
 
         // Color selector: no separate HEX text field
         final ARGBColor currentColor = current.getTheme().getPrimaryColor();
 
-        final ColorPicker colorPicker = new ColorPicker(
-                Color.rgb(
-                        currentColor.red(),
-                        currentColor.green(),
-                        currentColor.blue(),
-                        currentColor.alpha() / (double) COLOR_COMPONENT_MAX
-                )
-        );
+        final ColorPicker colorPicker =
+                new ColorPicker(
+                        Color.rgb(
+                                currentColor.red(),
+                                currentColor.green(),
+                                currentColor.blue(),
+                                currentColor.alpha() / (double) COLOR_COMPONENT_MAX));
         colorPicker.setMaxWidth(Double.MAX_VALUE);
 
         // Font family selector
@@ -154,73 +160,72 @@ public final class SettingsPopupFX {
         grid.add(boldCheck, 1, 3);
         grid.addRow(4, new Label("Base currency:"), currencyBox);
 
-        final ButtonType saveButton = new ButtonType(
-                "Apply",
-                ButtonBar.ButtonData.OK_DONE
-        );
+        final ButtonType saveButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
 
-        dialog.getDialogPane().getButtonTypes().addAll(
-                saveButton,
-                ButtonType.CANCEL
-        );
+        dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
         dialog.getDialogPane().setContent(grid);
 
-        dialog.setResultConverter(button -> {
-            if (button == saveButton) {
-                final Color selectedColor = colorPicker.getValue();
+        dialog.setResultConverter(
+                button -> {
+                    if (button == saveButton) {
+                        final Color selectedColor = colorPicker.getValue();
 
-                final String selectedHex = String.format(
-                        Locale.ROOT,
-                        "#%02X%02X%02X%02X",
-                        Math.round(selectedColor.getOpacity() * COLOR_COMPONENT_MAX),
-                        Math.round(selectedColor.getRed() * COLOR_COMPONENT_MAX),
-                        Math.round(selectedColor.getGreen() * COLOR_COMPONENT_MAX),
-                        Math.round(selectedColor.getBlue() * COLOR_COMPONENT_MAX)
-                );
+                        final String selectedHex =
+                                String.format(
+                                        Locale.ROOT,
+                                        "#%02X%02X%02X%02X",
+                                        Math.round(
+                                                selectedColor.getOpacity() * COLOR_COMPONENT_MAX),
+                                        Math.round(selectedColor.getRed() * COLOR_COMPONENT_MAX),
+                                        Math.round(selectedColor.getGreen() * COLOR_COMPONENT_MAX),
+                                        Math.round(selectedColor.getBlue() * COLOR_COMPONENT_MAX));
 
-                final ARGBColor primaryColor = new ARGBColor(selectedHex);
+                        final ARGBColor primaryColor = new ARGBColor(selectedHex);
 
-                final Theme newTheme = new Theme(
-                        "Custom",
-                        primaryColor,
-                        current.getTheme().getButtonColor(),
-                        Theme.getReadableTextColor(primaryColor),
-                        fontBox.getValue(),
-                        current.getTheme().getFontSize(),
-                        boldCheck.isSelected()
-                );
+                        final Theme newTheme =
+                                new Theme(
+                                        "Custom",
+                                        primaryColor,
+                                        current.getTheme().getButtonColor(),
+                                        Theme.getReadableTextColor(primaryColor),
+                                        fontBox.getValue(),
+                                        current.getTheme().getFontSize(),
+                                        boldCheck.isSelected());
 
-                final String newCurrency = currencyBox.getValue().getCode();
+                        final String newCurrency = currencyBox.getValue().getCode();
 
-                final boolean unchanged =
-                        newTheme.equals(current.getTheme())
-                        && newCurrency.equals(current.getBaseCurrency());
+                        final boolean unchanged =
+                                newTheme.equals(current.getTheme())
+                                        && newCurrency.equals(current.getBaseCurrency());
 
-                if (!unchanged) {
-                    controller.changeTheme(newTheme);
-                    controller.changeBaseCurrency(newCurrency);
-                    controller.saveConfiguration();
+                        if (!unchanged) {
+                            controller.changeTheme(newTheme);
+                            controller.changeBaseCurrency(newCurrency);
+                            controller.saveConfiguration();
 
-                    ThemeManager.applyThemeToScene(owner.getScene());
-                }
-            }
+                            ThemeManager.applyThemeToScene(owner.getScene());
+                        }
+                    }
 
-            return null;
-        });
+                    return null;
+                });
 
-        dialog.setOnShown(event ->
-                ThemeManager.applyThemeToScene(
-                        dialog.getDialogPane().getScene()
-                )
-        );
+        dialog.setOnShown(
+                event -> ThemeManager.applyThemeToScene(dialog.getDialogPane().getScene()));
 
         // Resizes the dialog when the history is expanded or collapsed.
-        historyPane.expandedProperty().addListener((observable, oldValue, expanded) ->
-                Platform.runLater(() -> {
-                    dialog.getDialogPane().requestLayout();
-                    dialog.getDialogPane().getScene().getWindow().sizeToScene();
-                })
-        );
+        historyPane
+                .expandedProperty()
+                .addListener(
+                        (observable, oldValue, expanded) ->
+                                Platform.runLater(
+                                        () -> {
+                                            dialog.getDialogPane().requestLayout();
+                                            dialog.getDialogPane()
+                                                    .getScene()
+                                                    .getWindow()
+                                                    .sizeToScene();
+                                        }));
 
         dialog.showAndWait();
     }

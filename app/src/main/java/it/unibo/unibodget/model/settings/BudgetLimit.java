@@ -1,15 +1,12 @@
 package it.unibo.unibodget.model.settings;
 
-import java.util.Objects;
-
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import java.util.Objects;
 
 /**
  * Represents a single global budget limit chosen by the user.
  *
- * <p>
- * It contains only an amount and a currency.
- * UNUSED AT THE MOMENT
+ * <p>It contains only an amount and a currency. UNUSED AT THE MOMENT
  */
 public final class BudgetLimit {
 
@@ -19,7 +16,7 @@ public final class BudgetLimit {
     /**
      * Creates a new BudgetLimit with the given amount and currency.
      *
-     * @param amount   the numeric limit (must be >= 0)
+     * @param amount the numeric limit (must be >= 0)
      * @param currency the currency of the limit (not null)
      */
     public BudgetLimit(final double amount, final CurrencyUnit currency) {
@@ -83,8 +80,7 @@ public final class BudgetLimit {
             return false;
         }
         final BudgetLimit b = (BudgetLimit) o;
-        return Double.compare(b.amount, amount) == 0
-                && Objects.equals(currency, b.currency);
+        return Double.compare(b.amount, amount) == 0 && Objects.equals(currency, b.currency);
     }
 
     @Override
