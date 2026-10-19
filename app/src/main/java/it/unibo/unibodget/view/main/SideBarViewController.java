@@ -70,7 +70,7 @@ public class SideBarViewController extends BaseViewController {
      * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
      */
     @FXML
-    private void handleCloseApp() {
+    public void handleCloseApp() {
         Platform.exit();
     }
 

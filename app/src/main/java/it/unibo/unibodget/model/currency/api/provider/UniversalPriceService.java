@@ -108,7 +108,7 @@ public class UniversalPriceService {
         Map<CurrencyUnit, BigDecimal> prices;
         try {
             prices = provider.getPricesInUSD(batch);
-        } catch (final IllegalArgumentException | IllegalStateException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(
                     "[CACHE] Errore richiesta provider per {}: {}",
                     unit.getCode(),
