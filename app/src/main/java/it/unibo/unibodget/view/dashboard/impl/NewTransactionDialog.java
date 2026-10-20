@@ -169,23 +169,32 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
         int row = 0;
         grid.add(new Label("Transaction type:"), 0, row);
-        grid.add(transactionTypeBox, 1, row++);
+        grid.add(transactionTypeBox, 1, row);
+        row++;
         grid.add(new Label("Category:"), 0, row);
-        grid.add(categoryRow, 1, row++);
+        grid.add(categoryRow, 1, row);
+        row++;
         grid.add(new Label("Description:"), 0, row);
-        grid.add(descriptionField, 1, row++);
+        grid.add(descriptionField, 1, row);
+        row++;
         grid.add(new Label("Amount:"), 0, row);
-        grid.add(amountField, 1, row++);
+        grid.add(amountField, 1, row);
+        row++;
         grid.add(new Label("Wallet currency:"), 0, row);
-        grid.add(walletCurrencyLabel, 1, row++);
+        grid.add(walletCurrencyLabel, 1, row);
+        row++;
         grid.add(new Label("Date:"), 0, row);
-        grid.add(datePicker, 1, row++);
+        grid.add(datePicker, 1, row);
+        row++;
         grid.add(new Label("Friend loan mode:"), 0, row);
-        grid.add(friendLoanOperationBox, 1, row++);
+        grid.add(friendLoanOperationBox, 1, row);
+        row++;
         grid.add(new Label("Friend name:"), 0, row);
-        grid.add(friendNameField, 1, row++);
+        grid.add(friendNameField, 1, row);
+        row++;
         grid.add(new Label("Existing loan:"), 0, row);
-        grid.add(existingFriendLoanBox, 1, row++);
+        grid.add(existingFriendLoanBox, 1, row);
+        row++;
         grid.add(new Label("Notes:"), 0, row);
         grid.add(notesArea, 1, row);
 
@@ -532,7 +541,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
      */
     private static BigDecimal parseAmount(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim());

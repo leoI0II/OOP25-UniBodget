@@ -76,14 +76,14 @@ public final class SettingsPopupFX {
         historyArea.setPrefRowCount(HISTORY_ROW_COUNT);
         historyArea.setPrefWidth(HISTORY_PREF_WIDTH);
 
-        final StringBuilder historyText = new StringBuilder();
+        final StringBuilder historyText = new StringBuilder(128);
         for (final SettingsSnapshot snapshot : controller.getAllSavedConfigurations()) {
             historyText.append(snapshot.getSavedAt())
                     .append(" · ")
                     .append(snapshot.getTheme().isDarkMode() ? "Dark" : "Light")
                     .append(" · ")
                     .append(snapshot.getTheme().getFontFamily())
-                    .append(" ")
+                    .append(' ')
                     .append(snapshot.getTheme().getFontSize())
                     .append("pt · ")
                     .append(snapshot.getBaseCurrency())

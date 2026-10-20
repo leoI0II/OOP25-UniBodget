@@ -152,9 +152,9 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
      * @return the normalized hexadecimal RGB string
      */
     private static String toHexColor(final Color color) {
-        final int red = (int) Math.round(color.getRed() * 255);
-        final int green = (int) Math.round(color.getGreen() * 255);
-        final int blue = (int) Math.round(color.getBlue() * 255);
+        final long red = Math.round(color.getRed() * 255);
+        final long green = Math.round(color.getGreen() * 255);
+        final long blue = Math.round(color.getBlue() * 255);
         return String.format("#%02X%02X%02X", red, green, blue);
     }
 

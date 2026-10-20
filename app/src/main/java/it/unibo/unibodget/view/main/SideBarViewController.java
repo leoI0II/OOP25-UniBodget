@@ -48,6 +48,15 @@ public class SideBarViewController extends BaseViewController {
     }
 
     /**
+     * Returns the view controllers factory associated with this sidebar.
+     *
+     * @return the view controllers factory
+     */
+    public ViewControllersFactory getViewControllersFactory() {
+        return this.viewControllersFactory;
+    }
+
+    /**
      * Called automatically by {@code FXMLLoader} after the FXML is loaded.
      * Wires the navigation menu items to the top-level navigation handler.
      */
@@ -64,7 +73,7 @@ public class SideBarViewController extends BaseViewController {
      * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
      */
     @FXML
-    private void handleCloseApp() {
+    void handleCloseApp() {
         Platform.exit();
     }
 

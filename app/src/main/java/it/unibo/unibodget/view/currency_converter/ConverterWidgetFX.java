@@ -48,8 +48,6 @@ public class ConverterWidgetFX {
     /* -------------------- UI CONSTANTS -------------------- */
     private static final double GRID_GAP = 12;
     private static final double CARD_PADDING = 20;
-    private static final double CARD_CORNER_RADIUS = 18;
-    private static final double BUTTON_CORNER_RADIUS = 8;
     private static final double OPACITY = 0.7;
     private static final int COL_SPAN_2 = 2;
     private static final int ROW_SPAN_1 = 1;
@@ -179,13 +177,9 @@ public class ConverterWidgetFX {
 
         fromBox.setValue(Currency.get("EUR"));
         toBox.setValue(Currency.get("USD"));
-        System.out.println("FROM selected: " + fromBox.getValue().getClass());
-        System.out.println("FROM code: " + fromBox.getValue().getCode());
-        System.out.println("TO selected: " + toBox.getValue().getClass());
-        System.out.println("TO code: " + toBox.getValue().getCode());
 
-        configureCurrencyBox(fromBox, font);
-        configureCurrencyBox(toBox, font);
+        configureCurrencyBox(fromBox);
+        configureCurrencyBox(toBox);
 
         /* ---------- LABELS ---------- */
         final Label amountLabel = createMutedLabel("Amount", font, textColor);
@@ -285,13 +279,7 @@ public class ConverterWidgetFX {
             final BigDecimal result;
             // 3. convert
             try {
-                System.out.println("[VIEW] Starting conversion: "
-                        + amount + " " + from.getCode()
-                        + " -> " + to.getCode());
-
                 result = controller.convert(amount, from, to);
-
-                System.out.println("[VIEW] Conversion returned: " + result);
 
                 output.setFont(resultFont);
                 output.setText(result.toPlainString() + " " + to.getCode());
@@ -304,14 +292,11 @@ public class ConverterWidgetFX {
             } catch (final IllegalArgumentException | IllegalStateException ex) {
                 output.setFont(font);
                 output.setText("Conversione non disponibile. Riprova più tardi.");
-
-                System.out.println("[VIEW] Conversion failed: " + ex.getMessage());
                 return;
             }
 
             // 4. same currency
             if (from.getCode().equalsIgnoreCase(to.getCode())) {
-                System.out.println("[VIEW] Same currency: skipping alerts");
                 return;
             }
 
@@ -323,15 +308,11 @@ public class ConverterWidgetFX {
                         java.math.RoundingMode.HALF_UP
                 ).doubleValue();
 
-                System.out.println("[VIEW] Checking alerts at rate: " + rate);
-
                 new MarketAlert(this.alertService)
                         .checkAndShowAlerts(rate, from, to);
 
-                System.out.println("[VIEW] Alert check completed");
-
-            } catch (final IllegalArgumentException | IllegalStateException ex) {
-                System.out.println("[VIEW] Alert check failed: " + ex.getMessage());
+            } catch (final IllegalArgumentException | IllegalStateException ignored) {
+                // Alert failures are non-critical during conversion display.
             }
         });
 
@@ -378,9 +359,8 @@ public class ConverterWidgetFX {
      * Configures a currency ComboBox with formatting and styling.
      *
      * @param box the ComboBox to configure
-     * @param font the font to use for the ComboBox items
      */
-    private void configureCurrencyBox(final ComboBox<CurrencyUnit> box, final Font font) {
+    private void configureCurrencyBox(final ComboBox<CurrencyUnit> box) {
         box.setMaxWidth(Double.MAX_VALUE);
 
         box.setConverter(new StringConverter<>() {
@@ -436,7 +416,7 @@ public class ConverterWidgetFX {
      */
     private BigDecimal parseDecimal(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim().replace(',', '.'));

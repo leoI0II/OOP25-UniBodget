@@ -109,7 +109,7 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
      */
     private static BigDecimal parseDecimal(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim());

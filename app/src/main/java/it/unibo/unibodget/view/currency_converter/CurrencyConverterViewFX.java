@@ -47,11 +47,6 @@ public final class CurrencyConverterViewFX {
     private static final WindowPreferences PREFS = new WindowPreferences();
 
     /**
-     * Shared controller injected via launchWith().
-     */
-    private static CurrencyConverterController sharedController;
-
-    /**
      * Private constructor to prevent instantiation of utility class.
      */
     private CurrencyConverterViewFX() {
@@ -63,16 +58,12 @@ public final class CurrencyConverterViewFX {
      * @param controller the main currency converter controller
      */
     public static void launchWith(final CurrencyConverterController controller) {
-        sharedController = controller;
-        final Stage stage = new Stage();
-
-        //Application.launch(CurrencyConverterViewFX.class);
-
-        if (sharedController == null) {
+        if (controller == null) {
             throw new IllegalStateException("Controller not initialized. Use launchWith().");
         }
+        final Stage stage = new Stage();
 
-        final Parent root = buildContent(sharedController);
+        final Parent root = buildContent(controller);
 
         /* -------------------- WINDOW SETUP -------------------- */
         final Scene scene = new Scene(root);

@@ -17,6 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JavaFX widget that performs bank‑mediated currency conversions.
@@ -31,6 +33,8 @@ import java.math.BigDecimal;
  * </ul>
  */
 public class BankConverterWidgetFX {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankConverterWidgetFX.class);
 
     /** Constants. */
     private static final double PERC = 50.0;
@@ -127,12 +131,10 @@ public class BankConverterWidgetFX {
                 resultLabel.setText("Insert value > 0");
             } catch (final IllegalArgumentException ex) {
                 resultLabel.setText("Conversion unavailable: " + ex.getMessage());
-                System.err.println("[BANK CONVERSION] Conversion failed");
-                ex.printStackTrace();
+                LOGGER.warn("[BANK CONVERSION] Conversion failed: {}", ex.getMessage());
             } catch (final IllegalStateException ex) {
                 resultLabel.setText("Price service unavailable. Please try again later.");
-                System.err.println("[BANK CONVERSION] Provider failed");
-                ex.printStackTrace();
+                LOGGER.warn("[BANK CONVERSION] Provider failed: {}", ex.getMessage());
             }
         });
 
