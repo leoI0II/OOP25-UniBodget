@@ -1056,7 +1056,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         if (normalized == null) {
             return null;
         }
-        return CategoryType.valueOf(normalized.toUpperCase().replace(' ', '_'));
+        return CategoryType.valueOf(normalized.toUpperCase(java.util.Locale.ROOT).replace(' ', '_'));
     }
 
     /**
@@ -1072,7 +1072,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             return TransactionSortOrder.NEWEST_FIRST;
         }
 
-        return switch (normalized.toLowerCase()) {
+        return switch (normalized.toLowerCase(java.util.Locale.ROOT)) {
             case "newest first", "newest" -> TransactionSortOrder.NEWEST_FIRST;
             case "oldest first", "oldest" -> TransactionSortOrder.OLDEST_FIRST;
             case "highest amount", "highest amount first", "highest" ->

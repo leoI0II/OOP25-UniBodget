@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
@@ -120,7 +121,6 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final int FONT_SIZE_CAPTION = 13;
     private static final int FONT_SIZE_BODY = 14;
     private static final int FONT_SIZE_SUBTITLE = 16;
-    private static final int FONT_SIZE_TITLE_SM = 18;
     private static final int FONT_SIZE_STAT = 24;
     private static final int FONT_SIZE_HEADER = 28;
     private static final int FONT_SIZE_STATUS = 30;
@@ -128,7 +128,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
     private DashboardViewActions actions;
     private boolean initialLoadTriggered;
-    private boolean updatingFilters;
+    private final AtomicBoolean updatingFilters = new AtomicBoolean();
 
     private final Label headerTitleLabel;
     private final Label headerWalletLabel;
@@ -725,17 +725,14 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 -> notifyTransactionFiltersChanged());
 
         this.clearFiltersButton.setOnAction(event -> {
-            this.updatingFilters = true;
-            try {
+            runWithFilterUpdatesSuspended(() -> {
                 this.transactionKeywordField.clear();
                 this.transactionCategoryField.clear();
                 this.transactionCategoryTypeBox.setValue("");
                 this.transactionFromDatePicker.setValue(null);
                 this.transactionToDatePicker.setValue(null);
                 this.transactionSortOrderBox.setValue(ORDER_NEWEST_FIRST);
-            } finally {
-                this.updatingFilters = false;
-            }
+            });
             notifyTransactionFiltersChanged();
         });
     }
@@ -769,10 +766,25 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     }
 
     /**
+     * Executes an action while temporarily suspending filter notification events.
+     *
+     * @param action
+     *            the action to execute
+     */
+    private void runWithFilterUpdatesSuspended(final Runnable action) {
+        this.updatingFilters.set(true);
+        try {
+            action.run();
+        } finally {
+            this.updatingFilters.set(false);
+        }
+    }
+
+    /**
      * Notifies the controller that transaction filters have changed.
      */
     private void notifyTransactionFiltersChanged() {
-        if (this.actions == null || this.updatingFilters) {
+        if (this.actions == null || this.updatingFilters.get()) {
             return;
         }
 
@@ -1038,8 +1050,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         final TransactionFilterInput filterInput = state.table().filterInput();
 
-        this.updatingFilters = true;
-        try {
+        runWithFilterUpdatesSuspended(() -> {
             this.transactionKeywordField.setText(filterInput.keyword() == null ? "" : filterInput.keyword());
             this.transactionCategoryField.setText(filterInput.categoryName() == null ? "" : filterInput.categoryName());
             this.transactionCategoryTypeBox.setValue(filterInput.categoryType() == null ? "" : filterInput.categoryType());
@@ -1048,9 +1059,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             this.transactionSortOrderBox.setValue(
                     filterInput.sortOrder() == null ? ORDER_NEWEST_FIRST : filterInput.sortOrder()
             );
-        } finally {
-            this.updatingFilters = false;
-        }
+        });
 
         this.transactionTable.getItems().setAll(state.table().rows());
         this.transactionTable.setPlaceholder(new Label(state.table().emptyMessage()));

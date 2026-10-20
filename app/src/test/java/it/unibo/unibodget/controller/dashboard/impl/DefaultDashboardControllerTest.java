@@ -177,9 +177,10 @@ class DefaultDashboardControllerTest {
     private static List<String> readLines(final File file) throws IOException {
         final List<String> lines = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
+            String line = reader.readLine();
+            while (line != null) {
                 lines.add(line);
+                line = reader.readLine();
             }
         }
         return lines;
