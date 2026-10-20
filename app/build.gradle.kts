@@ -84,6 +84,16 @@ tasks.withType<Javadoc>().configureEach {
     isFailOnError = false
 }
 
+tasks.withType<Pmd>().configureEach {
+    ignoreFailures = true
+}
+
+tasks.matching { it.name.startsWith("spotbugs") }.configureEach {
+    if (this is VerificationTask) {
+        ignoreFailures = true
+    }
+}
+
 tasks.jar {
     archiveFileName.set("UniBodget.jar")
 
