@@ -77,6 +77,23 @@ public enum FiatCurrency implements CurrencyUnit {
         return 2;
     }
 
+    /**
+     * Resolves a {@link FiatCurrency} by its ISO code (case-insensitive).
+     *
+     * @param code the currency code (e.g., "USD", "EUR")
+     * @return the matching {@link FiatCurrency}, or {@link #EUR} if not found or code is null
+     */
+    public static FiatCurrency fromCode(final String code) {
+        if (code != null) {
+            for (final FiatCurrency fiat : values()) {
+                if (fiat.code.equalsIgnoreCase(code)) {
+                    return fiat;
+                }
+            }
+        }
+        return EUR;
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {

@@ -106,10 +106,7 @@ public final class SettingsPopupFX {
 
         final ComboBox<FiatCurrency> currencyBox = new ComboBox<>();
         currencyBox.getItems().addAll(FiatCurrency.values());
-        final FiatCurrency currentCurrency = current.getBaseCurrencyUnit() instanceof FiatCurrency fiat
-                ? fiat
-                : FiatCurrency.EUR;
-        currencyBox.setValue(currentCurrency);
+        currencyBox.setValue(FiatCurrency.fromCode(current.getBaseCurrency()));
 
         final GridPane grid = new GridPane();
         grid.setHgap(GRID_HGAP);

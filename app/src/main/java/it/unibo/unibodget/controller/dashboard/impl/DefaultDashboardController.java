@@ -306,10 +306,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     @Override
     public void onCreateWalletRequested() {
         try {
-            final FiatCurrency currentCurrency = settings.getBaseCurrencyUnit() instanceof FiatCurrency fiat
-                    ? fiat
-                    : FiatCurrency.EUR;
-
+            final FiatCurrency currentCurrency = FiatCurrency.fromCode(settings.getBaseCurrency());
             final NewWalletDialog dialog = new NewWalletDialog(currentCurrency);
             dialog.showAndWait().ifPresent(newWallet -> {
                 cashAccountService.addWallet(newWallet);
