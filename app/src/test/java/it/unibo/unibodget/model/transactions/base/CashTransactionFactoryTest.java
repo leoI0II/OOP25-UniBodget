@@ -271,4 +271,26 @@ class CashTransactionFactoryTest {
                 )
         );
     }
+
+    @Test
+    void shouldCreateFriendLoanDisbursementWithExplicitId() {
+        final UUID explicitLoanId = UUID.randomUUID();
+        final CashTransaction tx = factory.createFriendLoan(
+                AMOUNT_FIFTY,
+                FiatCurrency.EUR,
+                CategoryType.FRIEND_LOAN,
+                Category.FRIEND_LOAN,
+                SAMPLE_DATE,
+                DESC,
+                NOTES,
+                FRIEND_ALICE,
+                explicitLoanId
+        );
+
+        assertNotNull(tx);
+        assertEquals(SIGNED_AMOUNT_FIFTY, tx.getAsset().amount());
+        assertTrue(tx.isFriendLoanTransaction());
+        assertEquals(explicitLoanId, tx.getFriendLoanId().orElseThrow());
+        assertEquals(FRIEND_ALICE, tx.getFriendName().orElseThrow());
+    }
 }

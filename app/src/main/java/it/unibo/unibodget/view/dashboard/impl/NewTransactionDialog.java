@@ -61,7 +61,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
     private final ComboBox<CategoryType> transactionTypeBox;
     private final ComboBox<Category> categoryBox;
     private final TextArea notesArea;
-    private final TextField friendNameField;
+    private final ComboBox<String> friendNameBox;
     private final ComboBox<FriendLoanOperation> friendLoanOperationBox;
     private final ComboBox<FriendLoanSummary> existingFriendLoanBox;
     private final Label walletCurrencyLabel;
@@ -133,7 +133,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         this.transactionTypeBox = new ComboBox<>();
         this.categoryBox = new ComboBox<>();
         this.notesArea = new TextArea();
-        this.friendNameField = new TextField();
+        this.friendNameBox = new ComboBox<>();
+        this.friendNameBox.setEditable(true);
         this.friendLoanOperationBox = new ComboBox<>();
         this.existingFriendLoanBox = new ComboBox<>();
         this.walletCurrencyLabel = new Label(String.valueOf(Objects.requireNonNull(walletCurrency)));
@@ -142,7 +143,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         amountField.setPromptText("Amount");
         notesArea.setPromptText("Optional notes");
         notesArea.setPrefRowCount(3);
-        friendNameField.setPromptText("Friend name");
+        friendNameBox.setPromptText("Friend name");
+        friendNameBox.setMaxWidth(Double.MAX_VALUE);
 
         configureTransactionTypeBox();
         configureCategoryBox();
@@ -190,7 +192,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         grid.add(friendLoanOperationBox, 1, row);
         row++;
         grid.add(new Label("Friend name:"), 0, row);
-        grid.add(friendNameField, 1, row);
+        grid.add(friendNameBox, 1, row);
         row++;
         grid.add(new Label("Existing loan:"), 0, row);
         grid.add(existingFriendLoanBox, 1, row);
@@ -217,7 +219,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         transactionTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         categoryBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
-        friendNameField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        friendNameBox.getEditor().textProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        friendNameBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         existingFriendLoanBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
 
         validator.run();
@@ -325,6 +328,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         existingFriendLoanBox.setCellFactory(listView -> createTextCell(existingFriendLoanBox.getConverter()::toString));
         existingFriendLoanBox.setButtonCell(createTextCell(existingFriendLoanBox.getConverter()::toString));
         existingFriendLoanBox.setMaxWidth(Double.MAX_VALUE);
+
+        final List<String> existingFriends = openFriendLoans.stream()
+                .map(FriendLoanSummary::getFriendName)
+                .distinct()
+                .toList();
+        friendNameBox.setItems(FXCollections.observableArrayList(existingFriends));
     }
 
     /**
@@ -367,7 +376,9 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
                                 .orElse(null)
                 );
             } else {
-                friendNameField.setText(transaction.getFriendName().orElse(""));
+                final String friend = transaction.getFriendName().orElse("");
+                friendNameBox.getEditor().setText(friend);
+                friendNameBox.setValue(friend.isEmpty() ? null : friend);
             }
         } else {
             updateFriendLoanControls();
@@ -387,11 +398,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         final boolean newLoan = friendLoan && operation == FriendLoanOperation.NEW_LOAN;
         final boolean repayment = friendLoan && operation == FriendLoanOperation.REPAYMENT;
 
-        friendNameField.setDisable(!newLoan);
+        friendNameBox.setDisable(!newLoan);
         existingFriendLoanBox.setDisable(!repayment);
 
         if (!newLoan) {
-            friendNameField.clear();
+            friendNameBox.getEditor().clear();
+            friendNameBox.setValue(null);
         }
         if (!repayment) {
             existingFriendLoanBox.getSelectionModel().clearSelection();
@@ -426,9 +438,18 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         return switch (operation) {
-            case NEW_LOAN -> friendNameField.getText() != null && !friendNameField.getText().trim().isEmpty();
+            case NEW_LOAN -> !getEnteredFriendName().isBlank();
             case REPAYMENT -> existingFriendLoanBox.getValue() != null;
         };
+    }
+
+    private String getEnteredFriendName() {
+        final String editorText = friendNameBox.getEditor().getText();
+        if (editorText != null && !editorText.isBlank()) {
+            return editorText.trim();
+        }
+        final String value = friendNameBox.getValue();
+        return value == null ? "" : value.trim();
     }
 
     /**
@@ -457,7 +478,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         if (type == CategoryType.FRIEND_LOAN) {
             operation = friendLoanOperationBox.getValue();
             if (operation == FriendLoanOperation.NEW_LOAN) {
-                friendName = friendNameField.getText().trim();
+                friendName = getEnteredFriendName();
             } else {
                 final FriendLoanSummary selectedLoan = existingFriendLoanBox.getValue();
                 existingFriendLoanId = selectedLoan.getFriendLoanId();

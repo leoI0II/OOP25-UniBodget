@@ -127,6 +127,49 @@ public final class CashTransactionFactory {
             final String notes,
             final String friendName) {
 
+        return createFriendLoan(
+                unsignedAmount,
+                currency,
+                selectedType,
+                category,
+                date,
+                description,
+                notes,
+                friendName,
+                null
+        );
+    }
+
+    /**
+     * Creates a friend-loan transaction, optionally linked to an existing friend-loan identifier.
+     *
+     * <p>
+     * If {@code friendLoanId} is {@code null}, a new unique loan identifier is generated.
+     * If non-null, this disbursement is linked to that existing friend loan.
+     * </p>
+     *
+     * @param unsignedAmount the positive amount entered by the user
+     * @param currency the currency of the transaction
+     * @param selectedType the semantic type chosen by the user
+     * @param category the selected category
+     * @param date the transaction date
+     * @param description the transaction description
+     * @param notes optional notes, may be null
+     * @param friendName the related friend's name
+     * @param friendLoanId the optional identifier of an existing friend loan, or null
+     * @return a valid friend-loan disbursement transaction
+     */
+    public CashTransaction createFriendLoan(
+            final BigDecimal unsignedAmount,
+            final CurrencyUnit currency,
+            final CategoryType selectedType,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes,
+            final String friendName,
+            final UUID friendLoanId) {
+
         Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
         Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
         Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
@@ -143,6 +186,7 @@ public final class CashTransactionFactory {
         }
 
         final Asset asset = Asset.of(currency, unsignedAmount.abs().negate());
+        final UUID effectiveLoanId = friendLoanId != null ? friendLoanId : UUID.randomUUID();
 
         return CashTransaction.builder()
                 .asset(asset)
@@ -150,7 +194,7 @@ public final class CashTransactionFactory {
                 .date(date)
                 .description(description)
                 .notes(notes)
-                .friendLoan(UUID.randomUUID(), friendName)
+                .friendLoan(effectiveLoanId, friendName.trim())
                 .build();
     }
 

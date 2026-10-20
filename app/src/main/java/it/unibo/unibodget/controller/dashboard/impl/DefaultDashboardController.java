@@ -93,6 +93,8 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private static final String ERR_UNABLE_TO_DELETE_TRANSACTION = "Unable to delete transaction.";
     private static final String ERR_UNABLE_TO_CREATE_TRANSACTION = "Unable to create transaction.";
     private static final String ERR_UNABLE_TO_EDIT_TRANSACTION = "Unable to edit transaction.";
+    private static final String ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND =
+            "Unable to rename wallet: wallet not found.";
 
     private final DashboardView view;
     private final DashboardFacade dashboardFacade;
@@ -301,14 +303,44 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     }
 
     /**
+     * Checks whether a wallet with the given name and currency already exists.
+     *
+     * @param name the wallet name to check
+     * @param currency the wallet currency to check
+     * @param excludeWalletId optional wallet id to exclude from the check (e.g. during renaming), or null
+     * @return true if a duplicate wallet with identical name and currency exists
+     */
+    public boolean isWalletDuplicate(
+            final String name,
+            final CurrencyUnit currency,
+            final UUID excludeWalletId) {
+        if (name == null || currency == null) {
+            return false;
+        }
+        final String trimmed = name.trim();
+        return cashAccountService.getWallets().stream()
+                .filter(w -> excludeWalletId == null || !w.getId().equals(excludeWalletId))
+                .anyMatch(w -> w.getName().trim().equalsIgnoreCase(trimmed)
+                        && Objects.equals(w.getBaseCurrency(), currency));
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public void onCreateWalletRequested() {
         try {
             final FiatCurrency currentCurrency = FiatCurrency.fromCode(settings.getBaseCurrency());
-            final NewWalletDialog dialog = new NewWalletDialog(currentCurrency);
+            final List<CashAccount> existingWallets = cashAccountService.getWallets();
+            final NewWalletDialog dialog = new NewWalletDialog(currentCurrency, existingWallets);
             dialog.showAndWait().ifPresent(newWallet -> {
+                if (isWalletDuplicate(newWallet.getName(), newWallet.getBaseCurrency(), null)) {
+                    final String msg = "A wallet named '" + newWallet.getName() + "' with currency "
+                            + newWallet.getBaseCurrency().getShortName() + " already exists.";
+                    view.showError(msg);
+                    MessageBus.send(new MainErrorNotificationEvent(msg));
+                    return;
+                }
                 cashAccountService.addWallet(newWallet);
                 cashAccountService.selectWallet(newWallet.getId());
                 MessageBus.send(new MainInfoNotificationEvent(
@@ -329,9 +361,27 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      *                                  left to the caller, which asks the user again
      */
     public void renameWallet(final UUID walletId, final String newName) {
+        final Optional<CashAccount> target = cashAccountService.getWallets().stream()
+                .filter(w -> w.getId().equals(walletId))
+                .findFirst();
+        if (target.isEmpty()) {
+            view.showError(ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND));
+            return;
+        }
+
+        final CashAccount targetWallet = target.get();
+        if (isWalletDuplicate(newName, targetWallet.getBaseCurrency(), walletId)) {
+            final String msg = "A wallet named '" + (newName == null ? "" : newName.trim()) + "' with currency "
+                    + targetWallet.getBaseCurrency().getShortName() + " already exists.";
+            view.showError(msg);
+            MessageBus.send(new MainErrorNotificationEvent(msg));
+            return;
+        }
+
         if (!cashAccountService.renameWallet(walletId, newName)) {
-            view.showError("Unable to rename wallet: wallet not found.");
-            MessageBus.send(new MainErrorNotificationEvent("Unable to rename wallet: wallet not found."));
+            view.showError(ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND);
+            MessageBus.send(new MainErrorNotificationEvent(ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND));
             return;
         }
         MessageBus.send(new MainInfoNotificationEvent("Wallet renamed to '" + newName + "' successfully!"));
@@ -563,7 +613,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      *            currently open friend loans
      * @return the new transaction
      */
-    private CashTransaction toCashTransaction(
+    CashTransaction toCashTransaction(
             final NewTransactionRequest request,
             final CurrencyUnit walletCurrency,
             final List<FriendLoanSummary> openFriendLoans) {
@@ -587,6 +637,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 );
             }
 
+            final String requestedFriendName = request.friendName() == null ? "" : request.friendName().trim();
+            final Optional<FriendLoanSummary> existingLoan = openFriendLoans.stream()
+                    .filter(summary -> summary.getFriendName().trim().equalsIgnoreCase(requestedFriendName))
+                    .findFirst();
+
+            final UUID loanId = existingLoan.map(FriendLoanSummary::getFriendLoanId).orElse(null);
+            final String friendName = existingLoan.map(FriendLoanSummary::getFriendName).orElse(requestedFriendName);
+
             return this.cashTransactionFactory.createFriendLoan(
                     request.unsignedAmount(),
                     walletCurrency,
@@ -595,7 +653,8 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     request.date(),
                     request.description(),
                     request.notes(),
-                    request.friendName()
+                    friendName,
+                    loanId
             );
         }
 
