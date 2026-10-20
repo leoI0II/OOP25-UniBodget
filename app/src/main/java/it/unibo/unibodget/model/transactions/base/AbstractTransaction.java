@@ -31,6 +31,7 @@ import it.unibo.unibodget.model.currency.Asset;
     @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
     @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
 })
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
 
     private final UUID id;

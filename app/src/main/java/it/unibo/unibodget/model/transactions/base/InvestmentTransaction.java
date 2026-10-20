@@ -126,7 +126,11 @@ public final class InvestmentTransaction extends AbstractTransaction {
      */
     @Override
     public boolean equals(final Object o) {
-        return super.equals(o);
+        if (!super.equals(o)) {
+            return false;
+        }
+        final InvestmentTransaction that = (InvestmentTransaction) o;
+        return Objects.equals(unitPrice, that.unitPrice) && Objects.equals(fee, that.fee);
     }
 
     /**

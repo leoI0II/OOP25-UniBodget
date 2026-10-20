@@ -22,6 +22,7 @@ public final class DefaultTransactionHistoryFilterService {
      * Creates a transaction history filter service.
      */
     public DefaultTransactionHistoryFilterService() {
+        // Default constructor.
     }
 
     /**

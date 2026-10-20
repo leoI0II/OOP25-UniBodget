@@ -22,7 +22,7 @@ class WalletTest {
         final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
         final CashTransaction tx = CashTransaction.builder()
-                .asset(new Asset(FiatCurrency.EUR, new java.math.BigDecimal("10")))
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
                 .category(Category.FOOD)
                 .date(LocalDate.now())
                 .description("desc")

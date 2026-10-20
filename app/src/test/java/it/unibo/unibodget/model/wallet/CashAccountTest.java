@@ -26,7 +26,7 @@ class CashAccountTest {
         final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
         acc.addTransaction(CashTransaction.builder()
-                .asset(new Asset(FiatCurrency.EUR, new BigDecimal("10")))
+                .asset(new Asset(FiatCurrency.EUR, BigDecimal.TEN))
                 .category(Category.FOOD)
                 .date(LocalDate.now())
                 .description(DESC)

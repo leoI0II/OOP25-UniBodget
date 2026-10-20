@@ -37,26 +37,19 @@ class DefaultDashboardFacadeTest {
     private static final String MARCO_P = "Marco";
 
     private CashAccountService walletService;
-    private DefaultCategoryService categoryService;
-    private DefaultBudgetMonitor budgetMonitor;
-    private DefaultFriendLoanSummaryService friendLoanSummaryService;
-    private DefaultWalletInsightService walletInsightService;
-    private CategoryCatalog categoryCatalog;
-    private CurrencyConverter converter;
-    private Settings settings;
     private DefaultDashboardFacade dashboardFacade;
 
     @BeforeEach
     void setUp() {
         walletService = new CashAccountService();
-        categoryService = new DefaultCategoryService();
-        budgetMonitor = new DefaultBudgetMonitor();
-        friendLoanSummaryService = new DefaultFriendLoanSummaryService();
-        walletInsightService = new DefaultWalletInsightService();
-        categoryCatalog = new CategoryCatalog();
-        converter = (amount, from, to) ->
+        final DefaultCategoryService categoryService = new DefaultCategoryService();
+        final DefaultBudgetMonitor budgetMonitor = new DefaultBudgetMonitor();
+        final DefaultFriendLoanSummaryService friendLoanSummaryService = new DefaultFriendLoanSummaryService();
+        final DefaultWalletInsightService walletInsightService = new DefaultWalletInsightService();
+        final CategoryCatalog categoryCatalog = new CategoryCatalog();
+        final CurrencyConverter converter = (amount, from, to) ->
                 new CurrencyConversionResult(amount, from, to, BigDecimal.ONE, amount);
-        settings = new Settings();
+        final Settings settings = new Settings();
 
         dashboardFacade = new DefaultDashboardFacade(
                 walletService,

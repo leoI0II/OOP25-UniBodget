@@ -78,7 +78,6 @@ public final class CashTransaction extends AbstractTransaction {
 
         final boolean hasLoanId = friendLoanId != null;
         final boolean hasFriendName = friendName != null && !friendName.isBlank();
-        final boolean isFriendLoanCategory = category.getType() == CategoryType.FRIEND_LOAN;
 
         if (hasLoanId != hasFriendName) {
             throw new IllegalArgumentException(
@@ -86,6 +85,7 @@ public final class CashTransaction extends AbstractTransaction {
             );
         }
 
+        final boolean isFriendLoanCategory = category.getType() == CategoryType.FRIEND_LOAN;
         if (isFriendLoanCategory && !hasLoanId) {
             throw new IllegalArgumentException(
                     "FRIEND_LOAN transactions must provide both friendLoanId and friendName."
@@ -232,6 +232,7 @@ public final class CashTransaction extends AbstractTransaction {
          * Creates an empty builder.
          */
         public Builder() {
+            // Default constructor.
         }
 
         /**

@@ -1,6 +1,8 @@
 package it.unibo.unibodget.model.settings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +66,7 @@ class ThemeTest {
                 FONT_14,
                 false
         );
-        assertEquals(true, darkGold.isDarkMode());
+        assertTrue(darkGold.isDarkMode());
 
         // Deep navy accent with explicit light mode
         final Theme lightNavy = new Theme(
@@ -77,7 +79,7 @@ class ThemeTest {
                 FONT_14,
                 false
         );
-        assertEquals(false, lightNavy.isDarkMode());
+        assertFalse(lightNavy.isDarkMode());
     }
 
     @Test
@@ -85,8 +87,8 @@ class ThemeTest {
         final Theme darkNamed = new Theme("Dark", GOLD, GOLD);
         final Theme lightNamed = new Theme("Light", NAVY, NAVY);
 
-        assertEquals(true, darkNamed.isDarkMode());
-        assertEquals(false, lightNamed.isDarkMode());
+        assertTrue(darkNamed.isDarkMode());
+        assertFalse(lightNamed.isDarkMode());
     }
 
 }
