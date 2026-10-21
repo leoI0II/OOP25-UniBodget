@@ -157,6 +157,7 @@ public final class ThemeManager {
                     + currentTheme.getFontFamily() + CSS_QUOTE_SEMICOLON);
 
             applyBackground(root);
+            applyFont(root);
             root.applyCss();
             applyToTree(root);
         }
@@ -184,6 +185,7 @@ public final class ThemeManager {
             dialogPane.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
             dialogPane.getStyleClass().add(currentTheme.isDarkMode() ? THEME_DARK : THEME_LIGHT);
             applyBackground(dialogPane);
+            applyFont(dialogPane);
             applyToTree(dialogPane);
 
             if (dialogPane.getScene() != null) {
@@ -203,13 +205,11 @@ public final class ThemeManager {
     }
 
     /**
-     * Recursively applies the active theme to the given JavaFX {@link Node} and its children.
+     * Recursively applies theme background classes to the given JavaFX {@link Node} and its children.
      *
      * @param node the JavaFX node to style
      */
     private static void applyToTree(final Node node) {
-        applyFont(node);
-
         if (node.getStyleClass().contains("theme-background")) {
             applyBackground(node);
         }
