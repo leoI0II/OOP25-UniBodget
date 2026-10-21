@@ -15,6 +15,6 @@
             prefHeight="700.0" prefWidth="900.0">
     <items>
         <fx:include fx:id="sideBar" source="/it/unibo/unibodget/view/jfx/fxml/main/SideBarView.fxml"/>  <!-- carica la side bar una volta sola per tutti i contesti -->
-        <StackPane fx:id="contentArea"/> <!-- cambia il contenuto del contesto -->
+        <StackPane fx:id="contentArea" alignment="TOP_LEFT"/> <!-- cambia il contenuto del contesto -->
     </items>
 </SplitPane>

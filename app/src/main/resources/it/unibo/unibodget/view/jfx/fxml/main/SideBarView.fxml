@@ -40,7 +40,7 @@
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </padding>
       </HBox>
-      <ScrollPane fitToWidth="true" prefHeight="555.0" prefWidth="150.0" VBox.vgrow="ALWAYS">
+      <ScrollPane fitToWidth="true" minHeight="80.0" prefHeight="555.0" prefWidth="150.0" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="walletList" prefHeight="548.0" prefWidth="198.0" spacing="8.0">
                <padding>

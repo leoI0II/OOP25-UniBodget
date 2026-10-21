@@ -36,6 +36,7 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
 
         setTitle("Edit Monthly Budget");
         setHeaderText("Update the monthly budget for the selected wallet");
+        setResizable(true);
         ThemeManager.applyThemeToDialog(this);
 
         final ButtonType saveButtonType = new ButtonType("Save", ButtonData.OK_DONE);

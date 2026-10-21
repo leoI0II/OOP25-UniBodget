@@ -46,6 +46,7 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
             final List<CashAccount> existingWallets) {
         setTitle("Create New Wallet");
         setHeaderText("Insert wallet details");
+        setResizable(true);
         ThemeManager.applyThemeToDialog(this);
 
         final List<CashAccount> nonNullExisting =
