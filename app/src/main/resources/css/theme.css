@@ -615,27 +615,33 @@
     -fx-border-width: 2px;
 }
 
+.wallet-tile .wallet-tile-name,
 .wallet-tile-name {
     -fx-font-weight: bold;
     -fx-font-size: 14px;
 }
 
+.theme-dark .wallet-tile .wallet-tile-name,
 .theme-dark .wallet-tile-name {
     -fx-text-fill: #ffffff;
 }
 
+.theme-light .wallet-tile .wallet-tile-name,
 .theme-light .wallet-tile-name {
     -fx-text-fill: #1a1e28;
 }
 
+.wallet-tile .wallet-tile-balance,
 .wallet-tile-balance {
     -fx-font-size: 13px;
 }
 
+.theme-dark .wallet-tile .wallet-tile-balance,
 .theme-dark .wallet-tile-balance {
     -fx-text-fill: #94a3b8;
 }
 
+.theme-light .wallet-tile .wallet-tile-balance,
 .theme-light .wallet-tile-balance {
     -fx-text-fill: #64748b;
 }
@@ -645,7 +651,8 @@
     -fx-text-fill: #ffffff;
 }
 
-.theme-light .wallet-tile.wallet-panel-selected .wallet-tile-name {
+.theme-light .wallet-tile.wallet-panel-selected .wallet-tile-name,
+.theme-light .wallet-tile.wallet-panel-selected .wallet-tile-balance {
     -fx-text-fill: #2563eb;
 }
 
