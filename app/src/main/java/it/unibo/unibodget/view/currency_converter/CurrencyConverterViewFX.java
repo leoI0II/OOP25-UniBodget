@@ -40,6 +40,7 @@ import javafx.stage.Stage;
 public final class CurrencyConverterViewFX {
 
     private static final double ROOT_PADDING = 35;
+    private static final int TITLE_FONT_SIZE = 28;
 
     /**
      * Window size and maximize preferences.
@@ -97,6 +98,8 @@ public final class CurrencyConverterViewFX {
     public static Parent buildContent(final CurrencyConverterController controller) {
         /* -------------------- PAGE TITLE -------------------- */
         final Label pageTitle = new Label("Currencies Converter Dashboard");
+        pageTitle.getStyleClass().add("header-title");
+        pageTitle.setStyle("-fx-font-size: " + TITLE_FONT_SIZE + "px; -fx-font-weight: bold;");
         ThemeManager.applyFont(pageTitle);
 
         /* -------------------- WIDGET INSTANTIATION -------------------- */

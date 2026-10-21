@@ -172,6 +172,9 @@ public final class MainViewController extends BaseViewController {
         contentArea.getChildren().setAll(dashboardModule.getView());
         // Render the dashboard center with fresh data for this navigation.
         dashboardModule.getController().onViewOpened();
+        if (contentArea.getScene() != null) {
+            ThemeManager.applyThemeToScene(contentArea.getScene());
+        }
     }
 
     /**
@@ -270,6 +273,9 @@ public final class MainViewController extends BaseViewController {
                 });
 
         contentArea.getChildren().setAll(converterModule.getView());
+        if (contentArea.getScene() != null) {
+            ThemeManager.applyThemeToScene(contentArea.getScene());
+        }
     }
 
     /**

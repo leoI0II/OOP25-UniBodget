@@ -87,6 +87,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final String ORDER_NEWEST_FIRST = "Newest first";
     private static final String COLOR_WHITE = "white";
     private static final String COLOR_CHARCOAL_TEXT = "#1a1e28";
+    private static final String PROP_BOLD_BY_DEFAULT = "boldByDefault";
+    private static final String PROP_THEME_APPLIED_BOLD = "themeAppliedBold";
+    private static final String CSS_FONT_FAMILY_PREFIX = "-fx-font-family: '";
+    private static final String CSS_QUOTE_SEMICOLON = "';";
 
     /**
      * Preferred visible height for the scrollable insights area.
@@ -186,7 +190,9 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      */
     public DefaultDashboardView() {
         this.headerTitleLabel = new Label();
+        this.headerTitleLabel.getStyleClass().add("header-title");
         this.headerWalletLabel = new Label();
+        this.headerWalletLabel.getStyleClass().add("wallet-header");
         this.headerSubtitleLabel = new Label();
 
         this.balanceCardTitleLabel = new Label();
@@ -635,8 +641,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 }
 
                 final Label amountLabel = new Label(item.amountText());
+                amountLabel.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
                 amountLabel.setStyle(
                         "-fx-text-fill: " + (item.positiveAmount() ? "#5EDC90" : "#FF7B7B") + ";"
+                        + CSS_FONT_FAMILY_PREFIX + ThemeManager.getTheme().getFontFamily() + CSS_QUOTE_SEMICOLON
                         + "-fx-font-weight: bold;"
                 );
 
@@ -1078,8 +1086,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         setStyle(
                 STYLE_TRANSPARENT_BG
-                + "-fx-font-family: '" + theme.getFontFamily() + "';"
-                + "-fx-font-size: " + theme.getFontSize() + "px;"
+                + CSS_FONT_FAMILY_PREFIX + theme.getFontFamily() + CSS_QUOTE_SEMICOLON
         );
 
         styleLabel(this.headerTitleLabel, FONT_SIZE_HEADER, true, strongText);
@@ -1137,10 +1144,22 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      *            the CSS text color
      */
     private void styleLabel(final Label label, final int size, final boolean bold, final String color) {
+        if (bold) {
+            label.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
+        } else {
+            label.getProperties().remove(PROP_BOLD_BY_DEFAULT);
+        }
+        final boolean effectiveBold = bold || ThemeManager.getTheme().isBoldText();
+        if (effectiveBold && !bold) {
+            label.getProperties().put(PROP_THEME_APPLIED_BOLD, Boolean.TRUE);
+        } else if (!effectiveBold) {
+            label.getProperties().remove(PROP_THEME_APPLIED_BOLD);
+        }
         label.setStyle(
                 "-fx-text-fill: " + color + ";"
+                + CSS_FONT_FAMILY_PREFIX + ThemeManager.getTheme().getFontFamily() + CSS_QUOTE_SEMICOLON
                 + "-fx-font-size: " + size + "px;"
-                + "-fx-font-weight: " + (bold ? "bold" : "normal") + ";"
+                + "-fx-font-weight: " + (effectiveBold ? "bold" : "normal") + ";"
         );
     }
 

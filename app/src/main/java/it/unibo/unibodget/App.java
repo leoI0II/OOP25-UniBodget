@@ -20,6 +20,8 @@ import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
 import java.util.List;
+import java.util.Locale;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -202,6 +204,7 @@ public final class App extends Application {
      * @param args command-line arguments forwarded to JavaFX
      */
     public static void main(final String[] args) {
+        Locale.setDefault(Locale.ENGLISH);
         launch(args);
     }
 }

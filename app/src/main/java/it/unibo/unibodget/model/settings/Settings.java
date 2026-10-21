@@ -228,6 +228,10 @@ public final class Settings {
      */
     @JsonIgnore
     public CurrencyUnit getBaseCurrencyUnit() {
+        final CurrencyUnit unit = CurrencyUnit.getByCode(baseCurrency);
+        if (unit != null) {
+            return unit;
+        }
         return Currency.get(baseCurrency);
     }
 }

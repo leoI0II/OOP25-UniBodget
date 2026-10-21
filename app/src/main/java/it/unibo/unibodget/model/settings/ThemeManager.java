@@ -29,6 +29,29 @@ public final class ThemeManager {
     private static final String THEME_CSS_PATH = "/css/theme.css";
     private static final String THEME_DARK = "theme-dark";
     private static final String THEME_LIGHT = "theme-light";
+    private static final String PROP_THEME_APPLIED_BOLD = "themeAppliedBold";
+    private static final String CSS_QUOTE_SEMICOLON = "';";
+    private static final String CSS_FONT_FAMILY_PREFIX = "-fx-font-family: '";
+    private static final int MAX_PARENT_SEARCH_DEPTH = 3;
+
+    private static final Set<String> BOLD_STYLE_CLASSES = Set.of(
+            "wallet-tile-name",
+            "wallet-name",
+            "wallet-header",
+            "card-header",
+            "balance-big",
+            "stat-value",
+            "asset-name",
+            "stat-change",
+            "button-primary",
+            "primary-button",
+            "pill-toggle",
+            "toggle-button",
+            "column-header",
+            "tab-label",
+            "bold",
+            "header-title"
+    );
 
     private static final Set<Scene> SCENES =
             Collections.newSetFromMap(new WeakHashMap<>());
@@ -126,6 +149,13 @@ public final class ThemeManager {
             root.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
             root.getStyleClass().add(currentTheme.isDarkMode() ? THEME_DARK : THEME_LIGHT);
 
+            final String existingStyle = root.getStyle().replaceAll(
+                    "(?i)-fx-font-family\\s*:[^;]*(?:;|$)",
+                    ""
+            );
+            root.setStyle(existingStyle + "; " + CSS_FONT_FAMILY_PREFIX
+                    + currentTheme.getFontFamily() + CSS_QUOTE_SEMICOLON);
+
             applyBackground(root);
             root.applyCss();
             applyToTree(root);
@@ -200,13 +230,54 @@ public final class ThemeManager {
     }
 
     /**
+     * Checks if the given JavaFX node is designated as bold by default.
+     *
+     * @param node the node to check
+     * @return true if the node is bold by default, false otherwise
+     */
+    private static boolean isBoldByDefault(final Node node) {
+        if (Boolean.TRUE.equals(node.getProperties().get("boldByDefault"))) {
+            return true;
+        }
+        for (final String sc : node.getStyleClass()) {
+            if (BOLD_STYLE_CLASSES.contains(sc)) {
+                return true;
+            }
+        }
+        final String style = node.getStyle();
+        if (style != null && style.matches("(?i).*?-fx-font-weight\\s*:\\s*bold.*")) {
+            return !Boolean.TRUE.equals(node.getProperties().get(PROP_THEME_APPLIED_BOLD));
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given node or any of its direct ancestors is bold by default.
+     *
+     * @param node the node to inspect
+     * @return true if the node or an ancestor is bold by default
+     */
+    private static boolean isNodeOrParentBoldByDefault(final Node node) {
+        if (isBoldByDefault(node)) {
+            return true;
+        }
+        Node current = node.getParent();
+        for (int i = 0; i < MAX_PARENT_SEARCH_DEPTH && current != null; i++) {
+            if (isBoldByDefault(current)) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+
+    /**
      * Applies the active theme font to the given JavaFX {@link Node}.
      *
      * <p>The method updates:</p>
      * <ul>
      *     <li>font family</li>
-     *     <li>font size</li>
-     *     <li>font weight (bold/normal)</li>
+     *     <li>font weight, keeping nodes that are bold by default untouched</li>
      * </ul>
      *
      * <p>Font styles are applied directly to the node using inline CSS,
@@ -217,13 +288,27 @@ public final class ThemeManager {
     public static void applyFont(final Node node) {
         Objects.requireNonNull(node, "node");
 
+        final boolean boldDefault = isNodeOrParentBoldByDefault(node);
+        final boolean effectiveBold = boldDefault || currentTheme.isBoldText();
+
         final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-font-(?:family|size|weight)"
+                "(?i)-fx-font-(?:family|weight)"
                         + "\\s*:[^;]*(?:;|$)",
                 ""
         );
 
-        node.setStyle(existingStyle + ";" + getFontStyle());
+        final String familyStyle = CSS_FONT_FAMILY_PREFIX + currentTheme.getFontFamily() + CSS_QUOTE_SEMICOLON;
+
+        if (boldDefault) {
+            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: bold;");
+            node.getProperties().remove(PROP_THEME_APPLIED_BOLD);
+        } else if (effectiveBold) {
+            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: bold;");
+            node.getProperties().put(PROP_THEME_APPLIED_BOLD, Boolean.TRUE);
+        } else {
+            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: normal;");
+            node.getProperties().remove(PROP_THEME_APPLIED_BOLD);
+        }
     }
 
     private static void applyBackground(final Node node) {
@@ -246,13 +331,12 @@ public final class ThemeManager {
     /**
      * Get the CSS style string for the font settings of the current theme.
      *
-     * @return the CSS style string for font family, size, and weight
+     * @return the CSS style string for font family and weight
      */
     public static String getFontStyle() {
         final Theme t = getTheme();
 
         return "-fx-font-family: '" + t.getFontFamily() + "';"
-                + "-fx-font-size: " + t.getFontSize() + "px;"
                 + "-fx-font-weight: "
                 + (t.isBoldText() ? "bold;" : "normal;");
     }
