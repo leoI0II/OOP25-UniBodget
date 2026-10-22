@@ -570,19 +570,21 @@ public final class InvestmentsViewController extends BaseViewController implemen
         }
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-        final var window = currentWalletName.getScene().getWindow();
-        final var selectedFile = window instanceof Stage stage
-                ? fileChooser.showSaveDialog(stage)
+        final Window window = currentWalletName != null && currentWalletName.getScene() != null
+                ? currentWalletName.getScene().getWindow()
                 : null;
+        final File selectedFile = window instanceof Stage stage
+                ? fileChooser.showSaveDialog(stage)
+                : fileChooser.showSaveDialog(null);
         if (selectedFile == null) {
             return; // user pressed cancel
         }
 
         final var result = investmentController.exportCurrentAccountData(selectedFile);
         if (result instanceof ExportResult.Error error) {
-            MessageBus.send(new MainErrorNotificationEvent("Export failed: " + error.message()));
+            MessageBus.send(new MainErrorNotificationEvent("Failed to export investments data: " + error.message()));
         } else if (result instanceof ExportResult.Success) {
-            MessageBus.send(new MainInfoNotificationEvent("Export successful!"));
+            MessageBus.send(new MainInfoNotificationEvent("Investments data exported successfully!"));
         }
     }
 
