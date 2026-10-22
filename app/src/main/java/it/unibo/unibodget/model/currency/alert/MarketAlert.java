@@ -2,8 +2,10 @@ package it.unibo.unibodget.model.currency.alert;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import java.util.List;
 import javafx.scene.control.Alert;
+import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +60,20 @@ public final class MarketAlert {
      */
     public void checkAndShowAlerts(
             final double rate, final CurrencyUnit from, final CurrencyUnit to) {
+        checkAndShowAlerts(rate, from, to, null);
+    }
+
+    /**
+     * Checks the current exchange rate against all registered alerts and displays a warning dialog
+     * for each triggered alert, bound to the specified owner window.
+     *
+     * @param rate the current exchange rate to evaluate
+     * @param from the base currency of the rate being checked
+     * @param to the target currency of the rate being checked
+     * @param owner the owner window for the alert dialog, or {@code null}
+     */
+    public void checkAndShowAlerts(
+            final double rate, final CurrencyUnit from, final CurrencyUnit to, final Window owner) {
         final List<CurrencyAlert> triggered = alertService.checkAlerts(rate, from, to);
 
         for (final CurrencyAlert alert : triggered) {
@@ -76,6 +92,10 @@ public final class MarketAlert {
                     rate);
 
             final Alert dialog = new Alert(Alert.AlertType.WARNING);
+            if (owner != null) {
+                dialog.initOwner(owner);
+            }
+            ThemeManager.applyThemeToDialog(dialog);
             dialog.setTitle("Alert currency exchange");
             dialog.setHeaderText("Threshold exceeded for: " + alert.getTargetCurrency().getCode());
             dialog.setContentText("The current exchange rate " + rate + " has triggered an alert.");
