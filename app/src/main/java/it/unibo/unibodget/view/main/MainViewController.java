@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -106,8 +107,31 @@ public final class MainViewController extends BaseViewController {
     @FXML
     public void initialize() {
         sideBarController.setNavigationHandler(this::navigateTo);
+        sideBarController.setWidthAdjustmentHandler(this::adjustSideBarWidth);
         setupResizableSideBar();
         showDashboard();
+    }
+
+    /**
+     * Adjusts the sidebar width dynamically based on content requirements.
+     *
+     * @param targetWidth the desired width in pixels
+     */
+    private void adjustSideBarWidth(final double targetWidth) {
+        if (sideBar == null || mainSplitPane == null) {
+            return;
+        }
+        final double clampedWidth = Math.min(
+                SideBarViewController.MAX_SIDEBAR_WIDTH,
+                Math.max(SideBarViewController.MIN_SIDEBAR_WIDTH, targetWidth));
+        sideBar.setPrefWidth(clampedWidth);
+        sideBar.setMinWidth(clampedWidth);
+        Platform.runLater(() -> {
+            final double splitWidth = mainSplitPane.getWidth();
+            if (splitWidth > 0) {
+                mainSplitPane.setDividerPositions(clampedWidth / splitWidth);
+            }
+        });
     }
 
     /**
