@@ -30,6 +30,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 /**
@@ -509,6 +510,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         final NewCategoryDialog dialog = new NewCategoryDialog(selectedType);
+        final Window owner = getDialogPane().getScene() != null
+                ? getDialogPane().getScene().getWindow()
+                : null;
+        if (owner != null) {
+            dialog.initOwner(owner);
+        }
         dialog.showAndWait().ifPresent(request ->
                 categoryCreator.apply(request, selectedType).ifPresent(createdCategory -> {
                     updateCategoriesFor(selectedType);

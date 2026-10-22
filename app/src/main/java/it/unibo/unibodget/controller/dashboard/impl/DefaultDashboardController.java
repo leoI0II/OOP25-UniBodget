@@ -233,9 +233,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
 
-        final Window window = view instanceof Node node && node.getScene() != null
-                ? node.getScene().getWindow()
-                : null;
+        final Window window = getOwnerWindow();
         final File selectedFile = window instanceof Stage stage
                 ? fileChooser.showSaveDialog(stage)
                 : fileChooser.showSaveDialog(null);
@@ -333,6 +331,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             final FiatCurrency currentCurrency = FiatCurrency.fromCode(settings.getBaseCurrency());
             final List<CashAccount> existingWallets = cashAccountService.getWallets();
             final NewWalletDialog dialog = new NewWalletDialog(currentCurrency, existingWallets);
+            final Window owner = getOwnerWindow();
+            if (owner != null) {
+                dialog.initOwner(owner);
+            }
             dialog.showAndWait().ifPresent(newWallet -> {
                 if (isWalletDuplicate(newWallet.getName(), newWallet.getBaseCurrency(), null)) {
                     final String msg = "A wallet named '" + newWallet.getName() + "' with currency "
@@ -422,6 +424,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     this::createCustomCategory
             );
 
+            final Window owner = getOwnerWindow();
+            if (owner != null) {
+                dialog.initOwner(owner);
+            }
+
             dialog.showAndWait().ifPresent(request -> {
                 validateFriendLoanRequest(request, openFriendLoans);
                 final CashTransaction transaction = toCashTransaction(
@@ -469,6 +476,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     this::createCustomCategory,
                     originalTransaction
             );
+
+            final Window owner = getOwnerWindow();
+            if (owner != null) {
+                dialog.initOwner(owner);
+            }
 
             dialog.showAndWait().ifPresent(request -> {
                 validateFriendLoanRequest(request, openFriendLoans);
@@ -532,6 +544,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         try {
             final CashAccount currentWallet = getRequiredCurrentWallet();
             final EditBudgetDialog dialog = new EditBudgetDialog(currentWallet.getBudgetSettings());
+            final Window owner = getOwnerWindow();
+            if (owner != null) {
+                dialog.initOwner(owner);
+            }
             dialog.showAndWait().ifPresent(request -> {
                 currentWallet.setBudgetSettings(new DefaultBudgetSettings(
                         request.limitValue(),
@@ -1192,6 +1208,17 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 .filter(summary -> summary.getNetBalance() != null)
                 .filter(summary -> summary.getNetBalance().signum() > 0)
                 .toList();
+    }
+
+    /**
+     * Resolves the JavaFX window hosting the dashboard view, if attached to a scene.
+     *
+     * @return the host window, or {@code null} if unavailable
+     */
+    private Window getOwnerWindow() {
+        return view instanceof Node node && node.getScene() != null
+                ? node.getScene().getWindow()
+                : null;
     }
 
 }

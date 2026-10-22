@@ -18,13 +18,17 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +58,7 @@ public final class CurrencyHistoryChartView extends VBox {
     private static final int DEFAULT_HISTORY_DAYS = 30;
     private static final int SCENE_WIDTH = 900;
     private static final int SCENE_HEIGHT = 600;
+    private static final String POPUP_TITLE = "Currency History - Live Data";
 
     /* -------------------- CONTROLLER -------------------- */
     private final CurrencyConverterController controller;
@@ -109,6 +114,32 @@ public final class CurrencyHistoryChartView extends VBox {
     }
 
     /**
+     * Opens this chart view inside a modal dialog popup attached to the given owner window.
+     *
+     * @param owner the parent window that owns this dialog, or {@code null}
+     * @param controller the controller providing history data
+     * @return the created Dialog
+     */
+    public static Dialog<Void> showAsPopup(final Window owner, final CurrencyConverterController controller) {
+        final CurrencyHistoryChartView view = new CurrencyHistoryChartView(controller);
+        view.setPrefSize(SCENE_WIDTH, SCENE_HEIGHT);
+
+        final Dialog<Void> dialog = new Dialog<>();
+        if (owner != null) {
+            dialog.initOwner(owner);
+        }
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle(POPUP_TITLE);
+        dialog.setResizable(true);
+        dialog.getDialogPane().setContent(view);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        ThemeManager.applyThemeToDialog(dialog);
+
+        dialog.show();
+        return dialog;
+    }
+
+    /**
      * Opens this chart view inside a new standalone {@link Stage}. Useful for buttons in other
      * widgets that want to show historical data.
      *
@@ -119,7 +150,7 @@ public final class CurrencyHistoryChartView extends VBox {
         final CurrencyHistoryChartView view = new CurrencyHistoryChartView(controller);
 
         final Stage stage = new Stage();
-        stage.setTitle("Currency History - Live Data");
+        stage.setTitle(POPUP_TITLE);
 
         final Scene scene = new Scene(view, SCENE_WIDTH, SCENE_HEIGHT);
         ThemeManager.applyThemeToScene(scene);
