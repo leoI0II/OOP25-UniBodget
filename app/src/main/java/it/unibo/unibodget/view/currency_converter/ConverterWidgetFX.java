@@ -12,6 +12,7 @@ import it.unibo.unibodget.model.currency.alert.MarketAlert;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.view.ui.FXAdapter;
+import it.unibo.unibodget.view.utils.DialogHelper;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -19,7 +20,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -151,18 +151,12 @@ public final class ConverterWidgetFX {
                     .distinct()
                     .collect(Collectors.joining(", "));
 
-            final Alert alert = new Alert(Alert.AlertType.WARNING);
-            if (card.getScene() != null) {
-                alert.initOwner(card.getScene().getWindow());
-            }
-            ThemeManager.applyThemeToDialog(alert);
-            alert.setTitle("Watchlist");
-            alert.setHeaderText("Couple not available");
-            alert.setContentText(
+            DialogHelper.showWarning(
+                    card,
+                    "Watchlist",
+                    "Couple not available",
                     "Currency not available: " + missingCodes
-                    + ".\nThe current selection has not been modified."
-            );
-            alert.showAndWait();
+                            + ".\nThe current selection has not been modified.");
             return;
         }
 
@@ -347,9 +341,7 @@ public final class ConverterWidgetFX {
                         java.math.RoundingMode.HALF_UP
                 ).doubleValue();
 
-                final Window owner = card.getScene() != null
-                        ? card.getScene().getWindow()
-                        : null;
+                final Window owner = DialogHelper.findWindow(card).orElse(null);
                 new MarketAlert(this.alertService)
                         .checkAndShowAlerts(rate, from, to, owner);
 

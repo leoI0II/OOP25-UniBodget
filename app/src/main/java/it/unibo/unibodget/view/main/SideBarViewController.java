@@ -4,13 +4,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -30,17 +29,9 @@ import javafx.scene.text.Text;
  */
 public class SideBarViewController extends BaseViewController {
 
-    /**
-     * Minimum width for the sidebar in pixels.
-     */
-    public static final double MIN_SIDEBAR_WIDTH = 200.0;
-
-    /**
-     * Maximum width for the sidebar in pixels.
-     */
-    public static final double MAX_SIDEBAR_WIDTH = 400.0;
-
     private static final int ADD_WALLET_TILE_HEIGHT = 50;
+    protected static final double MIN_SIDEBAR_WIDTH = 200.0;
+    protected static final double MAX_SIDEBAR_WIDTH = 400.0;
     private static final double TOTAL_BALANCE_HORIZONTAL_PADDING = 36.0;
     private static final double TOTAL_FONT_SIZE = 22.0;
 
@@ -236,18 +227,15 @@ public class SideBarViewController extends BaseViewController {
      * @param item the wallet to delete
      */
     private void requestDelete(final SideBarItem item) {
-        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        ThemeManager.applyThemeToDialog(confirm);
-        confirm.initOwner(walletList.getScene().getWindow());
-        confirm.setTitle("Delete wallet");
-        confirm.setHeaderText("Delete \"" + item.name() + "\"?");
-        confirm.setContentText("The wallet and its whole transaction history will be permanently removed.");
-        confirm.showAndWait()
-                .filter(ButtonType.OK::equals)
-                .ifPresent(ok -> {
-                    delegate.onDeleteRequested(item.id());
-                    refresh();
-                });
+        final boolean confirmed = DialogHelper.showConfirmation(
+                walletList,
+                "Delete wallet",
+                "Delete \"" + item.name() + "\"?",
+                "The wallet and its whole transaction history will be permanently removed.");
+        if (confirmed) {
+            delegate.onDeleteRequested(item.id());
+            refresh();
+        }
     }
 
     private void handleAddWallet() {
@@ -306,4 +294,5 @@ public class SideBarViewController extends BaseViewController {
         final double needed = textWidth + TOTAL_BALANCE_HORIZONTAL_PADDING;
         return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, needed));
     }
+
 }

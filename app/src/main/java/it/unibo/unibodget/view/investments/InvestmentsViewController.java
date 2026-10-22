@@ -23,6 +23,7 @@ import it.unibo.unibodget.view.main.SideBarViewController;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
 import it.unibo.unibodget.view.main.WalletRenamePrompt;
 import it.unibo.unibodget.view.utils.AssetFormatter;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import it.unibo.unibodget.view.utils.ToastNotification;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import javafx.animation.KeyFrame;
@@ -58,7 +60,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -557,30 +558,15 @@ public final class InvestmentsViewController extends BaseViewController implemen
         }
 
         final var account = investmentController.getCurrentInvestmentAccount().get();
-
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV investments data");
-
-        final var accountName = account.getName().replaceAll("\\s+", "_");
-        fileChooser.setInitialFileName(accountName + "_investments_data.csv");
-
-        final var downloadsDir = new File(System.getProperty("user.home"), "Downloads");
-        if (downloadsDir.exists()) {
-            fileChooser.setInitialDirectory(downloadsDir);
-        }
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-        final Window window = currentWalletName != null && currentWalletName.getScene() != null
-                ? currentWalletName.getScene().getWindow()
-                : null;
-        final File selectedFile = window instanceof Stage stage
-                ? fileChooser.showSaveDialog(stage)
-                : fileChooser.showSaveDialog(null);
-        if (selectedFile == null) {
+        final Optional<File> fileOpt = DialogHelper.showSaveCsvDialog(
+                currentWalletName,
+                "Export CSV investments data",
+                account.getName() + "_investments_data");
+        if (fileOpt.isEmpty()) {
             return; // user pressed cancel
         }
 
-        final var result = investmentController.exportCurrentAccountData(selectedFile);
+        final var result = investmentController.exportCurrentAccountData(fileOpt.get());
         if (result instanceof ExportResult.Error error) {
             MessageBus.send(new MainErrorNotificationEvent("Failed to export investments data: " + error.message()));
         } else if (result instanceof ExportResult.Success) {

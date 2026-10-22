@@ -1,8 +1,8 @@
 package it.unibo.unibodget.view.main;
 
+import it.unibo.unibodget.view.utils.DialogHelper;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
 /**
@@ -44,11 +44,10 @@ public final class WalletRenamePrompt {
     }
 
     private static void showInvalidName(final TextInputDialog dialog, final String message) {
-        final Alert error = new Alert(Alert.AlertType.ERROR);
-        error.initOwner(dialog.getOwner());
-        error.setTitle("Invalid name");
-        error.setHeaderText("Invalid wallet name");
-        error.setContentText(message + "\nPlease try again.");
-        error.showAndWait();
+        DialogHelper.showError(
+                dialog.getOwner(),
+                "Invalid name",
+                "Invalid wallet name",
+                message + "\nPlease try again.");
     }
 }

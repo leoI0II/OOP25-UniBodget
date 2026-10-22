@@ -4,10 +4,10 @@ import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -65,15 +65,7 @@ public final class WatchlistWidgetFX {
                 if (controller.addPair(newPair)) {
                     items.add(newPair);
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    if (listView.getScene() != null && listView.getScene().getWindow() != null) {
-                        alert.initOwner(listView.getScene().getWindow());
-                    }
-                    ThemeManager.applyThemeToDialog(alert);
-                    alert.setTitle("Watchlist");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Already saved!");
-                    alert.showAndWait();
+                    DialogHelper.showInfo(listView, "Watchlist", null, "Already saved!");
                 }
                 listView.refresh();
             }
@@ -130,4 +122,5 @@ public final class WatchlistWidgetFX {
     public VBox getView() {
         return view;
     }
+
 }

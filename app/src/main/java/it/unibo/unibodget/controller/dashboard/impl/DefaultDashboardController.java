@@ -48,6 +48,7 @@ import it.unibo.unibodget.view.dashboard.impl.NewCategoryRequest;
 import it.unibo.unibodget.view.dashboard.impl.NewTransactionDialog;
 import it.unibo.unibodget.view.dashboard.impl.NewTransactionRequest;
 import it.unibo.unibodget.view.dashboard.impl.NewWalletDialog;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.BalanceCardViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.BudgetCardViewState;
@@ -63,8 +64,6 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionTab
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 
 /**
@@ -220,29 +219,15 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         }
 
         final CashAccount wallet = walletOpt.get();
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV transactions data");
-
-        final String safeWalletName = wallet.getName().replaceAll("\\s+", "_");
-        fileChooser.setInitialFileName(safeWalletName + "_transactions.csv");
-
-        final File downloadsDir = new File(System.getProperty("user.home"), "Downloads");
-        if (downloadsDir.exists()) {
-            fileChooser.setInitialDirectory(downloadsDir);
-        }
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-
-        final Window window = getOwnerWindow();
-        final File selectedFile = window instanceof Stage stage
-                ? fileChooser.showSaveDialog(stage)
-                : fileChooser.showSaveDialog(null);
-
-        if (selectedFile == null) {
+        final Optional<File> fileOpt = DialogHelper.showSaveCsvDialog(
+                getOwnerWindow(),
+                "Export CSV transactions data",
+                wallet.getName() + "_transactions");
+        if (fileOpt.isEmpty()) {
             return;
         }
 
-        final boolean success = exportTransactionsToCsv(selectedFile, wallet);
+        final boolean success = exportTransactionsToCsv(fileOpt.get(), wallet);
         if (success) {
             MessageBus.send(new MainInfoNotificationEvent("Transactions exported successfully!"));
         } else {
@@ -1216,8 +1201,8 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * @return the host window, or {@code null} if unavailable
      */
     private Window getOwnerWindow() {
-        return view instanceof Node node && node.getScene() != null
-                ? node.getScene().getWindow()
+        return view instanceof Node node
+                ? DialogHelper.findWindow(node).orElse(null)
                 : null;
     }
 

@@ -7,11 +7,11 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -115,9 +115,7 @@ public final class SettingsPopupFX {
                 return;
             }
             if (newVal != null && !isCurrencyAvailable(newVal.getCode())) {
-                final Window win = dialog.getDialogPane().getScene() != null
-                        ? dialog.getDialogPane().getScene().getWindow()
-                        : owner;
+                final Window win = DialogHelper.findWindow(dialog.getDialogPane()).orElse(owner);
                 showCurrencyNotAvailableAlert(win, newVal.getCode());
                 currencyChangeBlocked.set(true);
                 final FiatCurrency revertTo = oldVal != null
@@ -152,9 +150,7 @@ public final class SettingsPopupFX {
                 if (selected == null || !isCurrencyAvailable(selected.getCode())) {
                     event.consume();
                     final String code = selected == null ? "" : selected.getCode();
-                    final Window win = dialog.getDialogPane().getScene() != null
-                            ? dialog.getDialogPane().getScene().getWindow()
-                            : owner;
+                    final Window win = DialogHelper.findWindow(dialog.getDialogPane()).orElse(owner);
                     showCurrencyNotAvailableAlert(win, code);
                     currencyBox.setValue(FiatCurrency.fromCode(current.getBaseCurrency()));
                 }
@@ -210,18 +206,13 @@ public final class SettingsPopupFX {
      * @param code the unavailable currency code
      */
     private static void showCurrencyNotAvailableAlert(final Window ownerWindow, final String code) {
-        final Alert alert = new Alert(Alert.AlertType.WARNING);
-        if (ownerWindow != null) {
-            alert.initOwner(ownerWindow);
-        }
-        alert.setTitle("Settings");
-        alert.setHeaderText("Currency not available");
-        alert.setContentText(
+        DialogHelper.showWarning(
+                ownerWindow,
+                "Settings",
+                "Currency not available",
                 "Currency not available: " + code
                 + ".\nThe current selection has not been modified."
         );
-        ThemeManager.applyThemeToDialog(alert);
-        alert.showAndWait();
     }
 
     /**
