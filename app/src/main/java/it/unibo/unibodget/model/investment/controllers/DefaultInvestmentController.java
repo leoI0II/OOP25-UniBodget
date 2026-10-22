@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -46,6 +47,18 @@ import org.apache.commons.csv.CSVPrinter;
  * the injected services.
  */
 public class DefaultInvestmentController implements InvestmentController {
+
+    private static final String CSV_COL_CURRENCY = "Currency";
+    private static final String CSV_COL_WALLET = "Wallet";
+    private static final String CSV_COL_ASSET = "Asset";
+    private static final String CSV_COL_QUANTITY = "Quantity";
+    private static final String CSV_COL_DATE = "Date";
+    private static final String CSV_COL_NOTES = "Notes";
+    private static final String CSV_COL_DESCRIPTION = "Description";
+    private static final String CSV_COL_CATEGORY = "Category";
+    private static final String CSV_COL_TYPE = "Type";
+    private static final String CSV_COL_FEE = "Fee";
+    private static final String CSV_ZERO_FEE = "0.00";
 
     private final InvestmentAccountService investmentAccountService;
     private final CashAccountService cashAccountService;
@@ -382,12 +395,14 @@ public class DefaultInvestmentController implements InvestmentController {
 
     private String getBuyOrderDescription(
             final BigDecimal quantity, final CurrencyUnit asset, final Asset unitPrice) {
-        return "Buy " + quantity + " " + asset + " @ " + unitPrice;
+        return "Buy " + quantity.stripTrailingZeros().toPlainString() + " " + asset.getCode()
+                + " @ " + formatAssetAmount(unitPrice) + " " + unitPrice.currency().getCode();
     }
 
     private String getSellOrderDescription(
             final BigDecimal quantity, final CurrencyUnit asset, final Asset unitPrice) {
-        return "Sell " + quantity + " " + asset + " @ " + unitPrice;
+        return "Sell " + quantity.stripTrailingZeros().toPlainString() + " " + asset.getCode()
+                + " @ " + formatAssetAmount(unitPrice) + " " + unitPrice.currency().getCode();
     }
 
     /** {@inheritDoc} */
@@ -624,47 +639,48 @@ public class DefaultInvestmentController implements InvestmentController {
 
         try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
                 CSVPrinter printer = new CSVPrinter(writer, CsvExportFormat.getFormat())) {
-            printer.printRecord(
-                    "Name", "Currency", "Balance", "All time profit", "Total cost basis");
+            final String baseCurrency = account.getBaseCurrency().getCode();
 
             printer.printRecord(
-                    account.getName(),
-                    account.getBaseCurrency().getCode(),
-                    account.getBalance().amount().toPlainString(),
-                    account.getTotalProfitLoss().amount().toPlainString(),
-                    account.getTotalCostBasis().amount().toPlainString());
-            printer.println();
-
-            printer.printRecord(
-                    "Asset",
-                    "Quantity",
-                    "Avg Cost",
-                    "Market Value",
-                    "Unrealized P/L",
-                    "Unrealized P/L %");
-
-            for (final var position : account.getPositions()) {
-                printer.printRecord(
-                        position.asset(),
-                        position.quantity(),
-                        position.averageBasisCost(),
-                        position.currentMarketValue(),
-                        position.getUnrealizedProfitLoss(),
-                        position.getUnrealizedProfitLossPercentage());
-            }
-
-            printer.println();
-
-            printer.printRecord("Date", "Currency", "Quantity", "Unit Price", "Fee", "Note");
+                    CSV_COL_WALLET,
+                    CSV_COL_CURRENCY,
+                    CSV_COL_DATE,
+                    CSV_COL_DESCRIPTION,
+                    CSV_COL_CATEGORY,
+                    CSV_COL_TYPE,
+                    CSV_COL_ASSET,
+                    CSV_COL_QUANTITY,
+                    "Unit Price",
+                    CSV_COL_FEE,
+                    CSV_COL_NOTES);
 
             for (final var transaction : account.getHistory().getTransactions()) {
+                final String feeStr = transaction.getFee() != null
+                        ? formatAssetAmount(transaction.getFee())
+                        : CSV_ZERO_FEE;
+                final String categoryName = transaction.getCategory() != null
+                        ? transaction.getCategory().getName()
+                        : "";
+                final String categoryType = transaction.getCategory() != null
+                        && transaction.getCategory().getType() != null
+                        ? transaction.getCategory().getType().name()
+                        : "";
+                final String notes = transaction.getNotes() != null
+                        ? transaction.getNotes()
+                        : "";
+
                 printer.printRecord(
-                        transaction.getDate(),
-                        transaction.getAsset().currency(),
-                        transaction.getAsset().amount(),
-                        transaction.getUnitPrice(),
-                        transaction.getFee(),
-                        transaction.getNotes());
+                        account.getName(),
+                        baseCurrency,
+                        transaction.getDate().toString(),
+                        transaction.getDescription() != null ? transaction.getDescription() : "",
+                        categoryName,
+                        categoryType,
+                        transaction.getAsset().currency().getCode(),
+                        transaction.getAsset().amount().stripTrailingZeros().toPlainString(),
+                        formatAssetAmount(transaction.getUnitPrice()),
+                        feeStr,
+                        notes);
             }
 
             // Completes writing before reporting success.
@@ -688,5 +704,19 @@ public class DefaultInvestmentController implements InvestmentController {
     public Optional<Position> getWorstPerformer() {
         return getPositions().stream()
                 .min(Comparator.comparing(Position::getUnrealizedProfitLossPercentage));
+    }
+
+    /**
+     * Formats an asset amount using the currency's display decimals.
+     *
+     * @param asset the asset to format
+     * @return the formatted numeric string
+     */
+    private static String formatAssetAmount(final Asset asset) {
+        if (asset == null) {
+            return "";
+        }
+        final int decimals = asset.currency().getDisplayDecimals();
+        return asset.amount().setScale(decimals, RoundingMode.HALF_UP).toPlainString();
     }
 }
