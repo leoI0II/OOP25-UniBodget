@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import it.unibo.unibodget.model.investment.BalanceSnapshot;
+import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
@@ -495,6 +497,25 @@ final class DefaultInvestmentControllerTest {
         assertInstanceOf(OrderResult.InsufficientAssets.class, result);
     }
 
+    @Test
+    void testExportCurrentAccountData() throws java.io.IOException {
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_150));
+        final File tempFile = File.createTempFile("portfolio_test", ".csv");
+        tempFile.deleteOnExit();
+
+        final var result = controller.exportCurrentAccountData(tempFile);
+        assertInstanceOf(ExportResult.Success.class, result);
+        assertTrue(tempFile.exists());
+        assertTrue(tempFile.length() > 0);
+
+        final List<String> lines = java.nio.file.Files.readAllLines(
+                tempFile.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+        assertFalse(lines.isEmpty());
+        assertEquals("Wallet;Currency;Date;Description;Category;Type;Asset;Quantity;Unit Price;Fee;Notes", lines.get(0));
+        assertTrue(lines.stream().anyMatch(line -> line.contains(
+                "USD;" + TODAY + ";;Investment Buy;EXPENSE;AAPL;10;150.00;0.00;")));
+    }
+
     // ------------------------------------------------------------------ //
     //  Helpers                                                            //
     // ------------------------------------------------------------------ //
@@ -516,4 +537,5 @@ final class DefaultInvestmentControllerTest {
             Asset.zero(FiatCurrency.USD)
         ));
     }
+
 }
