@@ -29,13 +29,16 @@ import javafx.scene.text.Text;
  */
 public class SideBarViewController extends BaseViewController {
 
+    /** Minimum sidebar width allowed in pixels. */
+    public static final double MIN_SIDEBAR_WIDTH = 200.0;
+
+    /** Maximum sidebar width allowed in pixels. */
+    public static final double MAX_SIDEBAR_WIDTH = 400.0;
+
     private static final int ADD_WALLET_TILE_HEIGHT = 50;
-    protected static final double MIN_SIDEBAR_WIDTH = 200.0;
-    protected static final double MAX_SIDEBAR_WIDTH = 400.0;
     private static final double TOTAL_BALANCE_HORIZONTAL_PADDING = 36.0;
     private static final double TOTAL_FONT_SIZE = 22.0;
 
-    @FXML private Button closeButton;
     @FXML private MenuButton menuButton;
     @FXML private VBox walletList;
     @FXML private Label totalTitleLabel;
@@ -92,9 +95,6 @@ public class SideBarViewController extends BaseViewController {
     }
 
     private void applyThemeAndRefresh() {
-        if (closeButton != null) {
-            ThemeManager.applyFont(closeButton);
-        }
         if (menuButton != null) {
             ThemeManager.applyFont(menuButton);
         }
@@ -108,15 +108,6 @@ public class SideBarViewController extends BaseViewController {
         if (totalBalanceLabel != null) {
             updateWidthForTotal(totalBalanceLabel.getText());
         }
-    }
-
-    /**
-     * Closes the application. {@link Platform#exit()} (unlike {@code System.exit})
-     * lets JavaFX call {@code App.stop()}, so wallets and window preferences are saved.
-     */
-    @FXML
-    void handleCloseApp() {
-        Platform.exit();
     }
 
     /**

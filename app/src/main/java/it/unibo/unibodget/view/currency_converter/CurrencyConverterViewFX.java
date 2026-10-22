@@ -19,6 +19,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -154,11 +156,22 @@ public final class CurrencyConverterViewFX {
         /* -------------------- TOP BAR -------------------- */
         final HBox topBar = new HBox(20);
         topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.getChildren().addAll(pageTitle, showChartButton);
+
+        final Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
+        final Button closeButton = new Button("Close");
+        closeButton.getStyleClass().add("secondary-button");
+        closeButton.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6px 14px;");
+        closeButton.setOnAction(e -> Platform.exit());
+        ThemeManager.applyFont(closeButton);
+
+        topBar.getChildren().addAll(pageTitle, showChartButton, topSpacer, closeButton);
 
         ThemeManager.addListener(t -> Platform.runLater(() -> {
             ThemeManager.applyFont(pageTitle);
             ThemeManager.applyFont(showChartButton);
+            ThemeManager.applyFont(closeButton);
         }));
 
         /* -------------------- MAIN CONTENT -------------------- */

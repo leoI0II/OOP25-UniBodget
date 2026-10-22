@@ -297,7 +297,15 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final VBox centerContent = new VBox(ROOT_PADDING);
         centerContent.setPadding(new Insets(4, 0, 0, 0));
 
-        final VBox headerBox = new VBox(4, this.headerTitleLabel, this.headerWalletLabel, this.headerSubtitleLabel);
+        final VBox headerTextBox = new VBox(4, this.headerTitleLabel, this.headerWalletLabel, this.headerSubtitleLabel);
+        final Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+        final Button closeButton = new Button("Close");
+        closeButton.getStyleClass().add("secondary-button");
+        closeButton.setStyle("-fx-font-size: 12px; -fx-padding: 4px 10px;");
+        closeButton.setOnAction(e -> Platform.exit());
+        final HBox headerBar = new HBox(12, headerTextBox, headerSpacer, closeButton);
+        headerBar.setAlignment(Pos.TOP_LEFT);
 
         final GridPane cardsGrid = new GridPane();
         cardsGrid.setHgap(16);
@@ -402,7 +410,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final VBox transactionsCard = createTransactionsCard();
         VBox.setVgrow(transactionsCard, Priority.ALWAYS);
 
-        centerContent.getChildren().addAll(headerBox, cardsGrid, transactionsCard);
+        centerContent.getChildren().addAll(headerBar, cardsGrid, transactionsCard);
         VBox.setVgrow(cardsGrid, Priority.NEVER);
         VBox.setVgrow(centerContent, Priority.ALWAYS);
 

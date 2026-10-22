@@ -34,7 +34,7 @@ public final class DialogHelper {
 
     /**
      * Displays a themed alert modal of the given type to the specified owner window.
-     * 
+     *
      * @param ownerWindow the parent window, or null if none
      * @param type        the type of alert (e.g., WARNING, ERROR, INFORMATION)
      * @param title       the alert dialog title

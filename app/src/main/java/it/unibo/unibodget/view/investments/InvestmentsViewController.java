@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -101,6 +102,8 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private Window addNewWalletDialog;
 
     private SideBarViewController sideBarViewController;
+    @FXML
+    private Button closeButton;
     @FXML
     private Button addTransactionButton;
     private Window addTransactionDialog;
@@ -572,6 +575,14 @@ public final class InvestmentsViewController extends BaseViewController implemen
         } else if (result instanceof ExportResult.Success) {
             MessageBus.send(new MainInfoNotificationEvent("Investments data exported successfully!"));
         }
+    }
+
+    /**
+     * Closes the application when the close button is clicked.
+     */
+    @FXML
+    public void handleCloseApp() {
+        Platform.exit();
     }
 
     /**

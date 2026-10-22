@@ -39,8 +39,21 @@
                         <Label fx:id="walletBalance" styleClass="balance-big" text="\$00.00" />
                      </children>
                   </VBox>
-                  <Button fx:id="addTransactionButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" styleClass="primary-button" text="+ Add transaction" />
-                  <Button fx:id="exportToCSVBtn" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" styleClass="secondary-button" text="Export CSV" />
+                  <VBox alignment="TOP_RIGHT" spacing="8.0">
+                     <children>
+                        <HBox alignment="TOP_RIGHT">
+                           <children>
+                              <Button fx:id="closeButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleCloseApp" styleClass="secondary-button" text="Close" style="-fx-font-size: 12px; -fx-padding: 4px 10px;" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                           <children>
+                              <Button fx:id="addTransactionButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" styleClass="primary-button" text="+ Add transaction" />
+                              <Button fx:id="exportToCSVBtn" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" styleClass="secondary-button" text="Export CSV" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
                </children>
             </HBox>
             <!-- charts: performance big on the left, allocation pies on the right -->
