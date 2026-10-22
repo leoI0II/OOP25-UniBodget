@@ -214,10 +214,7 @@
          </children>
       </VBox>
 
-      <Button fx:id="addTransactionButton" styleClass="button-primary" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="39.0" prefWidth="530.0" text="Add Transaction" VBox.vgrow="ALWAYS">
-         <font>
-            <Font name="FantasqueSansM Nerd Font Regular" size="20.0" />
-         </font>
+      <Button fx:id="addTransactionButton" styleClass="button-primary" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="39.0" prefWidth="530.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Add Transaction" VBox.vgrow="ALWAYS">
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </padding>
