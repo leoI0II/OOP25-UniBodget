@@ -11,6 +11,7 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -20,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 /**
  * Main dashboard screen for all currency‑related operations.
@@ -142,14 +144,22 @@ public final class CurrencyConverterViewFX {
                         controller.getConverter()
                 );
 
-        showChartButton.setOnAction(e ->
-                CurrencyHistoryChartView.showInNewWindow(historyController)
-        );
+        showChartButton.setOnAction(e -> {
+            final Window owner = showChartButton.getScene() != null
+                    ? showChartButton.getScene().getWindow()
+                    : null;
+            CurrencyHistoryChartView.showAsPopup(owner, historyController);
+        });
 
         /* -------------------- TOP BAR -------------------- */
         final HBox topBar = new HBox(20);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.getChildren().addAll(pageTitle, showChartButton);
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(pageTitle);
+            ThemeManager.applyFont(showChartButton);
+        }));
 
         /* -------------------- MAIN CONTENT -------------------- */
         final HBox contentRow = new HBox(25);

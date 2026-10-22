@@ -4,6 +4,7 @@ import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
@@ -48,6 +49,12 @@ public final class WatchlistWidgetFX {
         // Save button: stores the current converter pair into the watchlist
         final Button saveButton = new Button("Save couple in watchlist");
         ThemeManager.applyFont(saveButton);
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(title);
+            ThemeManager.applyFont(saveButton);
+            listView.refresh();
+        }));
         saveButton.setOnAction(e -> {
             final String from = converter.getFromBox().getValue().getCode();
             final String to = converter.getToBox().getValue().getCode();
@@ -59,6 +66,10 @@ public final class WatchlistWidgetFX {
                     items.add(newPair);
                 } else {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    if (listView.getScene() != null && listView.getScene().getWindow() != null) {
+                        alert.initOwner(listView.getScene().getWindow());
+                    }
+                    ThemeManager.applyThemeToDialog(alert);
                     alert.setTitle("Watchlist");
                     alert.setHeaderText(null);
                     alert.setContentText("Already saved!");

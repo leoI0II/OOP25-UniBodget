@@ -7,6 +7,7 @@ import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -162,6 +163,16 @@ public class BankConverterWidgetFX {
                 resultLabel,
                 detailsLabel
         );
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(bankBox);
+            ThemeManager.applyFont(calcBtn);
+            ThemeManager.applyFont(convertedLabel);
+            ThemeManager.applyFont(resultLabel);
+            ThemeManager.applyFont(detailsLabel);
+            ThemeManager.applyFont(addBankBtn);
+            ThemeManager.applyFont(bankLabel);
+        }));
     }
 
     /**
@@ -172,6 +183,9 @@ public class BankConverterWidgetFX {
      */
     private void openAddBankDialog() {
         final Dialog<Bank> dialog = new Dialog<>();
+        if (view.getScene() != null && view.getScene().getWindow() != null) {
+            dialog.initOwner(view.getScene().getWindow());
+        }
         dialog.setTitle("Add new bank");
 
         // Input fields
@@ -209,6 +223,10 @@ public class BankConverterWidgetFX {
                     } else {
                         // Show validation error
                         final Alert alert = new Alert(Alert.AlertType.ERROR);
+                        if (dialog.getDialogPane().getScene() != null) {
+                            alert.initOwner(dialog.getDialogPane().getScene().getWindow());
+                        }
+                        ThemeManager.applyThemeToDialog(alert);
                         alert.setTitle("Validation Error");
                         alert.setHeaderText("Invalid Fees");
                         alert.setContentText("The fixed and percentage fees cannot exceed 50%.");
@@ -218,6 +236,10 @@ public class BankConverterWidgetFX {
                 } catch (final IllegalArgumentException e) {
                     // Show input error
                     final Alert alert = new Alert(Alert.AlertType.WARNING);
+                    if (dialog.getDialogPane().getScene() != null) {
+                        alert.initOwner(dialog.getDialogPane().getScene().getWindow());
+                    }
+                    ThemeManager.applyThemeToDialog(alert);
                     alert.setTitle("Input Error");
                     alert.setContentText("Please enter valid numbers in the fee fields.");
                     alert.showAndWait();
