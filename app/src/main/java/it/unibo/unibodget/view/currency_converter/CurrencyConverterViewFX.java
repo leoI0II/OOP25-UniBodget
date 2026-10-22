@@ -18,6 +18,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -175,7 +177,7 @@ public final class CurrencyConverterViewFX {
         }));
 
         /* -------------------- MAIN CONTENT -------------------- */
-        final HBox contentRow = new HBox(25);
+        final FlowPane contentRow = new FlowPane(20, 20);
         contentRow.setAlignment(Pos.TOP_LEFT);
         contentRow.getChildren().addAll(
                 converterWidget.getView(),
@@ -190,14 +192,22 @@ public final class CurrencyConverterViewFX {
         /* -------------------- BACKGROUND -------------------- */
         root.setStyle("-fx-background-color: transparent;");
 
+        final ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("converter-scroll");
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+
         // Applies the theme when embedded in the main application scene.
-        root.sceneProperty().addListener((observable, oldScene, newScene) -> {
+        scrollPane.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene != null) {
                 ThemeManager.applyThemeToScene(newScene);
             }
         });
 
-        return root;
+        return scrollPane;
     }
 
 }

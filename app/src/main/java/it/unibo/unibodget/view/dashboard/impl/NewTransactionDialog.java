@@ -122,6 +122,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
         setTitle(editMode ? "Edit Transaction" : "Create Transaction");
         setHeaderText(editMode ? "Update transaction details" : "Insert transaction details");
+        setResizable(true);
         ThemeManager.applyThemeToDialog(this);
 
         final ButtonType confirmButtonType =

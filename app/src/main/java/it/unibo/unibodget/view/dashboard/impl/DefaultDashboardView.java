@@ -45,6 +45,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -91,31 +92,38 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final String PROP_THEME_APPLIED_BOLD = "themeAppliedBold";
     private static final String CSS_FONT_FAMILY_PREFIX = "-fx-font-family: '";
     private static final String CSS_QUOTE_SEMICOLON = "';";
+    private static final String CSS_FONT_SIZE_PREFIX = "-fx-font-size: ";
+    private static final String CSS_PX_SEMICOLON = "px;";
 
     /**
      * Preferred visible height for the scrollable insights area.
      */
-    private static final double INSIGHTS_VIEWPORT_HEIGHT = 220.0;
+    private static final double INSIGHTS_VIEWPORT_HEIGHT = 115.0;
 
     /**
      * Minimum visible height for the scrollable insights area.
      */
-    private static final double INSIGHTS_MIN_VIEWPORT_HEIGHT = 180.0;
-    private static final double BUDGET_CIRCLE_RADIUS = 64.0;
-    private static final double BUDGET_CIRCLE_STROKE_WIDTH = 12.0;
-    private static final int INSIGHTS_GAP = 12;
-    private static final int INSIGHTS_TILE_GAP = 6;
-    private static final int ROOT_PADDING = 18;
-    private static final double PREF_WIDTH = 1440.0;
-    private static final double PREF_HEIGHT = 900.0;
-    private static final double COL_PERCENT_FIRST = 46.0;
-    private static final double COL_PERCENT_SECOND = 27.0;
-    private static final double COL_PERCENT_THIRD = 27.0;
-    private static final double BUDGET_CONTENT_MIN_HEIGHT = 160.0;
-    private static final double CHART_HEIGHT = 170.0;
+    private static final double INSIGHTS_MIN_VIEWPORT_HEIGHT = 75.0;
+    private static final double BUDGET_CIRCLE_RADIUS = 42.0;
+    private static final double BUDGET_CIRCLE_STROKE_WIDTH = 9.0;
+    private static final int INSIGHTS_GAP = 8;
+    private static final int INSIGHTS_TILE_GAP = 4;
+    private static final int ROOT_PADDING = 14;
+    private static final double TABLE_MIN_HEIGHT = 110.0;
+    private static final double TABLE_PREF_HEIGHT = 220.0;
+    private static final double BUDGET_SPACING = 10.0;
+    private static final double COL_PERCENT_FIRST = 44.0;
+    private static final double COL_PERCENT_SECOND = 26.0;
+    private static final double COL_PERCENT_THIRD = 30.0;
+    private static final double COL_FIRST_MIN_WIDTH = 270.0;
+    private static final double COL_SECOND_MIN_WIDTH = 160.0;
+    private static final double COL_THIRD_MIN_WIDTH = 190.0;
+    private static final double BUDGET_TEXT_MIN_WIDTH = 120.0;
+    private static final double BUDGET_CONTENT_MIN_HEIGHT = 110.0;
+    private static final double CHART_HEIGHT = 135.0;
     private static final double CIRCLE_ROTATE_ANGLE = -90.0;
-    private static final double BUDGET_CIRCLE_BOX_SIZE = 150.0;
-    private static final int CARD_PADDING = 18;
+    private static final double BUDGET_CIRCLE_BOX_SIZE = 100.0;
+    private static final int CARD_PADDING = 14;
     private static final double MIN_PIE_SLICE_PERCENTAGE = 0.01;
     private static final double RANK_LABEL_MIN_WIDTH = 24.0;
     private static final double BUDGET_WARN_PERCENT = 80.0;
@@ -127,7 +135,6 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final int FONT_SIZE_SUBTITLE = 16;
     private static final int FONT_SIZE_STAT = 24;
     private static final int FONT_SIZE_HEADER = 28;
-    private static final int FONT_SIZE_STATUS = 30;
     private static final int FONT_SIZE_HERO = 42;
 
     private DashboardViewActions actions;
@@ -292,10 +299,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      */
     private void buildLayout() {
         setPadding(new Insets(ROOT_PADDING));
-        setPrefSize(PREF_WIDTH, PREF_HEIGHT);
 
         final VBox centerContent = new VBox(ROOT_PADDING);
         centerContent.setPadding(new Insets(4, 0, 0, 0));
+        centerContent.setFillWidth(true);
 
         final VBox headerTextBox = new VBox(4, this.headerTitleLabel, this.headerWalletLabel, this.headerSubtitleLabel);
         final Region headerSpacer = new Region();
@@ -313,12 +320,18 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         final ColumnConstraints firstColumn = new ColumnConstraints();
         firstColumn.setPercentWidth(COL_PERCENT_FIRST);
+        firstColumn.setMinWidth(COL_FIRST_MIN_WIDTH);
+        firstColumn.setHgrow(Priority.ALWAYS);
 
         final ColumnConstraints secondColumn = new ColumnConstraints();
         secondColumn.setPercentWidth(COL_PERCENT_SECOND);
+        secondColumn.setMinWidth(COL_SECOND_MIN_WIDTH);
+        secondColumn.setHgrow(Priority.ALWAYS);
 
         final ColumnConstraints thirdColumn = new ColumnConstraints();
         thirdColumn.setPercentWidth(COL_PERCENT_THIRD);
+        thirdColumn.setMinWidth(COL_THIRD_MIN_WIDTH);
+        thirdColumn.setHgrow(Priority.ALWAYS);
 
         cardsGrid.getColumnConstraints().addAll(firstColumn, secondColumn, thirdColumn);
 
@@ -367,13 +380,16 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 balanceContentBox
         );
         balanceCard.setAlignment(Pos.TOP_LEFT);
-        VBox.setVgrow(balanceContentBox, Priority.ALWAYS);
 
         final VBox ripartitionCard = createRipartitionCard();
         final VBox expenseCard = createExpenseCard();
 
+        this.budgetStatusLabel.setWrapText(true);
+        this.budgetProgressLabel.setWrapText(true);
+        this.budgetThresholdLabel.setWrapText(true);
+
         final VBox budgetTextBox = new VBox(
-                8,
+                6,
                 this.budgetStatusLabel,
                 this.budgetProgressLabel,
                 this.budgetThresholdLabel,
@@ -381,9 +397,11 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         );
         budgetTextBox.setAlignment(Pos.CENTER_LEFT);
         budgetTextBox.setFillWidth(true);
+        budgetTextBox.setMinWidth(BUDGET_TEXT_MIN_WIDTH);
+        HBox.setHgrow(budgetTextBox, Priority.ALWAYS);
 
-        final HBox budgetContent = new HBox(32, createBudgetCircle(), budgetTextBox);
-        budgetContent.setAlignment(Pos.CENTER);
+        final HBox budgetContent = new HBox(BUDGET_SPACING, createBudgetCircle(), budgetTextBox);
+        budgetContent.setAlignment(Pos.CENTER_LEFT);
         budgetContent.setMinHeight(BUDGET_CONTENT_MIN_HEIGHT);
         VBox.setVgrow(budgetContent, Priority.ALWAYS);
 
@@ -400,6 +418,19 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         final VBox insightsCard = createInsightsCard();
 
+        GridPane.setHgrow(balanceCard, Priority.ALWAYS);
+        GridPane.setVgrow(balanceCard, Priority.ALWAYS);
+        GridPane.setHgrow(ripartitionCard, Priority.ALWAYS);
+        GridPane.setVgrow(ripartitionCard, Priority.ALWAYS);
+        GridPane.setHgrow(expenseCard, Priority.ALWAYS);
+        GridPane.setVgrow(expenseCard, Priority.ALWAYS);
+        GridPane.setHgrow(budgetCard, Priority.ALWAYS);
+        GridPane.setVgrow(budgetCard, Priority.ALWAYS);
+        GridPane.setHgrow(friendLoanCard, Priority.ALWAYS);
+        GridPane.setVgrow(friendLoanCard, Priority.ALWAYS);
+        GridPane.setHgrow(insightsCard, Priority.ALWAYS);
+        GridPane.setVgrow(insightsCard, Priority.ALWAYS);
+
         cardsGrid.add(balanceCard, 0, 0);
         cardsGrid.add(ripartitionCard, 1, 0);
         cardsGrid.add(expenseCard, 2, 0);
@@ -414,7 +445,17 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         VBox.setVgrow(cardsGrid, Priority.NEVER);
         VBox.setVgrow(centerContent, Priority.ALWAYS);
 
-        setCenter(centerContent);
+        final ScrollPane rootScrollPane = new ScrollPane(centerContent);
+        rootScrollPane.setFitToWidth(true);
+        rootScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        rootScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        rootScrollPane.setStyle(
+                STYLE_TRANSPARENT_BG
+                + "-fx-background: transparent;"
+                + "-fx-border-color: transparent;"
+        );
+        setCenter(rootScrollPane);
+
     }
 
     /**
@@ -510,6 +551,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 + "-fx-background: transparent;"
                 + "-fx-border-color: transparent;"
         );
+        VBox.setVgrow(this.insightsScrollPane, Priority.ALWAYS);
 
         wrapper.getChildren().add(this.insightsScrollPane);
         return wrapper;
@@ -546,7 +588,8 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             this.transactionSortOrderBox.setValue(ORDER_NEWEST_FIRST);
         }
 
-        final HBox filtersBar = new HBox(
+        final FlowPane filtersBar = new FlowPane(
+                10,
                 10,
                 this.transactionKeywordField,
                 this.transactionCategoryField,
@@ -577,6 +620,8 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final VBox card = createCard(topBar, filtersBar);
         VBox.setVgrow(this.transactionTable, Priority.ALWAYS);
         this.transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        this.transactionTable.setMinHeight(TABLE_MIN_HEIGHT);
+        this.transactionTable.setPrefHeight(TABLE_PREF_HEIGHT);
         card.getChildren().add(this.transactionTable);
         return card;
     }
@@ -608,8 +653,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         dateColumn.setCellValueFactory(cell
                 -> new ReadOnlyStringWrapper(cell.getValue().dateText()));
 
-        final TableColumn<TransactionRowViewState, TransactionRowViewState> categoryColumn
-                = new TableColumn<>("Category");
+        final TableColumn<TransactionRowViewState, TransactionRowViewState> categoryColumn = new TableColumn<>("Category");
         categoryColumn.setCellValueFactory(cell
                 -> new ReadOnlyObjectWrapper<>(cell.getValue()));
         categoryColumn.setCellFactory(column -> new TableCell<>() {
@@ -634,8 +678,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             }
         });
 
-        final TableColumn<TransactionRowViewState, TransactionRowViewState> amountColumn
-                = new TableColumn<>("Amount");
+        final TableColumn<TransactionRowViewState, TransactionRowViewState> amountColumn = new TableColumn<>("Amount");
         amountColumn.setCellValueFactory(cell
                 -> new ReadOnlyObjectWrapper<>(cell.getValue()));
         amountColumn.setCellFactory(column -> new TableCell<>() {
@@ -727,18 +770,18 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             }
         });
 
-        this.transactionKeywordField.textProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
-        this.transactionCategoryField.textProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
-        this.transactionCategoryTypeBox.valueProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
-        this.transactionFromDatePicker.valueProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
-        this.transactionToDatePicker.valueProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
-        this.transactionSortOrderBox.valueProperty().addListener((obs, oldValue, newValue)
-                -> notifyTransactionFiltersChanged());
+        this.transactionKeywordField.textProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
+        this.transactionCategoryField.textProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
+        this.transactionCategoryTypeBox.valueProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
+        this.transactionFromDatePicker.valueProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
+        this.transactionToDatePicker.valueProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
+        this.transactionSortOrderBox.valueProperty()
+                .addListener((obs, oldValue, newValue) -> notifyTransactionFiltersChanged());
 
         this.clearFiltersButton.setOnAction(event -> {
             runWithFilterUpdatesSuspended(() -> {
@@ -871,9 +914,9 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         this.ripartitionChart.setData(FXCollections.observableArrayList(
                 state.categories().stream()
                         .map(item -> new PieChart.Data(
-                        item.categoryName(),
-                        Math.max(item.percentageValue(), MIN_PIE_SLICE_PERCENTAGE)
-                ))
+                                item.categoryName(),
+                                Math.max(item.percentageValue(), MIN_PIE_SLICE_PERCENTAGE)
+                        ))
                         .toList()
         ));
 
@@ -944,6 +987,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
             final VBox rightBox = new VBox(2, amountLabel, percentageLabel);
             rightBox.setAlignment(Pos.CENTER_RIGHT);
+            rightBox.setMinWidth(Region.USE_PREF_SIZE);
 
             styleLabel(rankLabel, FONT_SIZE_MUTED, true, mediumText);
             styleLabel(categoryLabel, FONT_SIZE_CAPTION, true, strongText);
@@ -1001,6 +1045,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * @param state
      *            the dashboard state
      */
+
     private void renderInsights(final DashboardViewState state) {
         if (Objects.equals(this.currentInsights, state.insightCards()) && !this.insightsContainer.getChildren().isEmpty()) {
             return;
@@ -1020,6 +1065,15 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final boolean dark = ThemeManager.isDarkMode();
         final String titleColor = dark ? COLOR_WHITE : COLOR_CHARCOAL_TEXT;
         final String messageColor = dark ? "rgba(255,255,255,0.85)" : "#334155";
+
+        if (cards.isEmpty()) {
+            final Label emptyLabel = new Label("No active insights for this wallet.");
+            emptyLabel.setWrapText(true);
+            emptyLabel.setMaxWidth(Double.MAX_VALUE);
+            styleLabel(emptyLabel, FONT_SIZE_MUTED, false, messageColor);
+            this.insightsContainer.getChildren().add(emptyLabel);
+            return;
+        }
 
         for (final InsightCardViewState insight : cards) {
             final Label title = new Label(insight.title());
@@ -1058,7 +1112,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * Renders the transaction section.
      *
      * @param state
-     *            the transaction section state
+     *              the transaction section state
      */
     private void renderTransactions(final TransactionSectionViewState state) {
         this.transactionSectionTitleLabel.setText(state.title());
@@ -1069,12 +1123,12 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         runWithFilterUpdatesSuspended(() -> {
             this.transactionKeywordField.setText(filterInput.keyword() == null ? "" : filterInput.keyword());
             this.transactionCategoryField.setText(filterInput.categoryName() == null ? "" : filterInput.categoryName());
-            this.transactionCategoryTypeBox.setValue(filterInput.categoryType() == null ? "" : filterInput.categoryType());
+            this.transactionCategoryTypeBox
+                    .setValue(filterInput.categoryType() == null ? "" : filterInput.categoryType());
             this.transactionFromDatePicker.setValue(filterInput.fromDate());
             this.transactionToDatePicker.setValue(filterInput.toDate());
             this.transactionSortOrderBox.setValue(
-                    filterInput.sortOrder() == null ? ORDER_NEWEST_FIRST : filterInput.sortOrder()
-            );
+                    filterInput.sortOrder() == null ? ORDER_NEWEST_FIRST : filterInput.sortOrder());
         });
 
         this.transactionTable.getItems().setAll(state.table().rows());
@@ -1094,7 +1148,12 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         setStyle(
                 STYLE_TRANSPARENT_BG
-                + CSS_FONT_FAMILY_PREFIX + theme.getFontFamily() + CSS_QUOTE_SEMICOLON
+                        + CSS_FONT_FAMILY_PREFIX
+                        + theme.getFontFamily()
+                        + CSS_QUOTE_SEMICOLON
+                        + CSS_FONT_SIZE_PREFIX
+                        + theme.getFontSize()
+                        + CSS_PX_SEMICOLON
         );
 
         styleLabel(this.headerTitleLabel, FONT_SIZE_HEADER, true, strongText);
@@ -1112,11 +1171,12 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         styleLabel(this.expenseTotalLabel, FONT_SIZE_HEADER, true, strongText);
 
         styleLabel(this.budgetCardTitleLabel, FONT_SIZE_BODY, true, mediumText);
-        styleLabel(this.budgetStatusLabel, FONT_SIZE_STATUS, true, strongText);
+        styleLabel(this.budgetStatusLabel, FONT_SIZE_SUBTITLE, true, strongText);
         styleLabel(this.budgetProgressLabel, FONT_SIZE_SUBTITLE, false, strongText);
         styleLabel(this.budgetThresholdLabel, FONT_SIZE_CAPTION, false, softText);
         styleLabel(this.budgetCirclePercentageLabel, FONT_SIZE_STAT, true, strongText);
-        this.budgetCircleTrack.setStroke(dark ? Color.web("rgba(255, 255, 255, 0.14)") : Color.web("rgba(0, 0, 0, 0.08)"));
+        this.budgetCircleTrack
+                .setStroke(dark ? Color.web("rgba(255, 255, 255, 0.14)") : Color.web("rgba(0, 0, 0, 0.08)"));
 
         styleLabel(this.friendLoanTitleLabel, FONT_SIZE_BODY, true, mediumText);
         styleLabel(this.friendLoanTotalLabel, FONT_SIZE_HEADER, true, strongText);
@@ -1132,9 +1192,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             buildExpenseRows(this.currentExpenseBreakdown);
         }
 
-        if (!this.currentInsights.isEmpty()) {
-            buildInsightTiles(this.currentInsights);
-        }
+        buildInsightTiles(this.currentInsights);
 
         this.transactionTable.refresh();
     }
@@ -1143,11 +1201,11 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      * Applies a simple style to a label.
      *
      * @param label
-     *            the label to style
+     *              the label to style
      * @param size
-     *            the font size in pixels
+     *              the font size in pixels
      * @param bold
-     *            whether the font should be bold
+     *              whether the font should be bold
      * @param color
      *            the CSS text color
      */

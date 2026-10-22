@@ -37,6 +37,8 @@ import javafx.stage.Stage;
 public final class App extends Application {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(App.class);
+    private static final double MIN_WINDOW_WIDTH = 900.0;
+    private static final double MIN_WINDOW_HEIGHT = 600.0;
     private WalletAutoSaver walletSaver;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
@@ -109,8 +111,10 @@ public final class App extends Application {
         ThemeManager.applyThemeToScene(scene);
 
         primaryStage.setScene(scene);
-        primaryStage.setWidth(settings.getWindowPrefs().getWidth());
-        primaryStage.setHeight(settings.getWindowPrefs().getHeight());
+        primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
+        primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
+        primaryStage.setWidth(Math.max(MIN_WINDOW_WIDTH, settings.getWindowPrefs().getWidth()));
+        primaryStage.setHeight(Math.max(MIN_WINDOW_HEIGHT, settings.getWindowPrefs().getHeight()));
         primaryStage.setMaximized(settings.getWindowPrefs().isMaximized());
         primaryStage.setTitle("UniBodget");
         primaryStage.show();

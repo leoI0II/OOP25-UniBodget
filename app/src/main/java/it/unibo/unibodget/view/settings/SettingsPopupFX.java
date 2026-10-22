@@ -70,6 +70,7 @@ public final class SettingsPopupFX {
         dialog.initOwner(owner);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Settings - UniBodget");
+        dialog.setResizable(true);
 
         final Settings current = controller.getSettings();
 
