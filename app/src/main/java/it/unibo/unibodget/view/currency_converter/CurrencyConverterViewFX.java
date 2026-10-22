@@ -163,8 +163,7 @@ public final class CurrencyConverterViewFX {
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
 
         final Button closeButton = new Button("Close");
-        closeButton.getStyleClass().add("secondary-button");
-        closeButton.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6px 14px;");
+        closeButton.getStyleClass().addAll("secondary-button", "close-app-button");
         closeButton.setOnAction(e -> Platform.exit());
         ThemeManager.applyFont(closeButton);
 

@@ -308,8 +308,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final Region headerSpacer = new Region();
         HBox.setHgrow(headerSpacer, Priority.ALWAYS);
         final Button closeButton = new Button("Close");
-        closeButton.getStyleClass().add("secondary-button");
-        closeButton.setStyle("-fx-font-size: 12px; -fx-padding: 4px 10px;");
+        closeButton.getStyleClass().addAll("secondary-button", "close-app-button");
         closeButton.setOnAction(e -> Platform.exit());
         final HBox headerBar = new HBox(12, headerTextBox, headerSpacer, closeButton);
         headerBar.setAlignment(Pos.TOP_LEFT);

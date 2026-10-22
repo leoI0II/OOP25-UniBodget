@@ -43,7 +43,7 @@
                      <children>
                         <HBox alignment="TOP_RIGHT">
                            <children>
-                              <Button fx:id="closeButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleCloseApp" styleClass="secondary-button" text="Close" style="-fx-font-size: 12px; -fx-padding: 4px 10px;" />
+                              <Button fx:id="closeButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleCloseApp" styleClass="secondary-button, close-app-button" text="Close" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
