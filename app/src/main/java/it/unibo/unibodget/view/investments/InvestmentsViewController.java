@@ -89,8 +89,6 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DAY_AND_TIME = DateTimeFormatter.ofPattern("dd/MM HH:mm");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yy");
-    private static final int ADD_TRANSACTION_DIALOG_WIN_WIDTH = 450;
-    private static final int ADD_TRANSACTION_DIALOG_WIN_HEIGHT = 620;
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
     private static final int RENAME_DIALOG_SIZE = 400;
@@ -658,7 +656,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
             dialog.initOwner(addTransactionButton.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Transaction");
-            dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
+            // no fixed size: the window takes the size of the fxml (before it was smaller, 450,
+            // and the names of the buttons were cut)
+            dialog.setScene(new Scene(root));
             ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
