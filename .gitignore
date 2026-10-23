@@ -39,3 +39,15 @@ deleteme/
 # runtime data saved by the app (wallets, settings, ...)
 /data/
 /app/data/
+
+# --- LaTeX build artifacts ---
+.texbuild/
+*.aux
+*.fls
+*.fdb_latexmk
+*.out
+*.toc
+*.log
+*.synctex.gz
+*.bbl
+*.blg
