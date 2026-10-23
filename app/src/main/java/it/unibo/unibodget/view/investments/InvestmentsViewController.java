@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.investments;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.investment.BalanceSnapshot;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.Position;
 import it.unibo.unibodget.model.investment.controllers.InvestmentController;
@@ -13,6 +14,7 @@ import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
+import it.unibo.unibodget.model.utils.event.TickEvent;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
 import it.unibo.unibodget.view.main.AppContext;
@@ -29,7 +31,11 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,8 +45,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -49,6 +53,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -66,6 +71,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +83,12 @@ import org.slf4j.LoggerFactory;
 public final class InvestmentsViewController extends BaseViewController implements SideBarDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentsViewController.class);
-    private static final int REFRESH_EACH_SECONDS = 60;
-    private static final int ADD_TRANSACTION_DIALOG_WIN_WIDTH = 450;
-    private static final int ADD_TRANSACTION_DIALOG_WIN_HEIGHT = 620;
+    // how the time of the points is shown under the P/L chart, it depends on how long is the
+    // period in the chart (see chartDateFormat)
+    private static final DateTimeFormatter TIME_WITH_SECONDS = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DAY_AND_TIME = DateTimeFormatter.ofPattern("dd/MM HH:mm");
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yy");
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
     private static final int RENAME_DIALOG_SIZE = 400;
@@ -133,7 +142,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private Label worstPerformerPositionPercentage;
 
     @FXML
-    private LineChart<String, Number> performanceChart;
+    private LineChart<Number, Number> performanceChart;
+    @FXML
+    private NumberAxis chartXAxis;
     @FXML
     private PieChart allocationPieChart;
     @FXML
@@ -142,8 +153,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private ToggleGroup pieToggleGroup;
     // created only once: JavaFX gives the color (default-color0, 1, ...) with a counter that never
     // goes back to 0, so new series at every refresh had every time other colors
-    private final XYChart.Series<String, Number> plSeries = new XYChart.Series<>();
-    private final XYChart.Series<String, Number> costSeries = new XYChart.Series<>();
+    private final XYChart.Series<Number, Number> plSeries = new XYChart.Series<>();
+    // changed at every refresh of the chart, before the axis draws the labels
+    private DateTimeFormatter chartDateFormat = TIME;
 
     @FXML
     private TableView<Position> positionTableView;
@@ -157,8 +169,6 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private TableColumn<Position, Position> totalCostColumn;
     @FXML
     private TableColumn<Position, Position> profitLossColumn;
-
-    private Timeline currentMarkerPriceRefreshTimeline;
 
     @FXML
     private TableView<InvestmentTransaction> investmentTransactionTableView;
@@ -195,6 +205,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
 
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
         subscribe(NewWalletAddedEvent.class, ignored -> onNewWalletAddedEvent());
+        // refresh with the new prices at every tick of the app ticker. before the page had its own
+        // timeline, that was never stopped when changing page: every visit started one more
+        subscribe(TickEvent.class, ignored -> refreshMainPanel());
     }
 
     /**
@@ -211,7 +224,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
 
     /**
      * Called automatically by {@link javafx.fxml.FXMLLoader} after the FXML is loaded.
-     * Sets up the position and history tables and starts the price-refresh timer.
+     * Sets up the position and history tables, the pies and the P/L chart.
      */
     @FXML
     public void initialize() {
@@ -222,17 +235,73 @@ public final class InvestmentsViewController extends BaseViewController implemen
         setupHistoryTable();
         setupPieToggle();
         setupPerformanceChart();
-        startPriceRefreshTimeline();
     }
 
     /**
-     * Adds the P/L and cost basis series to the chart, only once.
-     * At every refresh only their points change (see {@link #refreshPerformanceLineChart()}).
+     * Adds the P/L series to the chart, only once.
+     * At every refresh only its points change (see {@link #refreshPerformanceLineChart()}).
      */
     private void setupPerformanceChart() {
         plSeries.setName("Total P/L");
-        costSeries.setName("Cost Basis");
-        performanceChart.getData().setAll(List.of(plSeries, costSeries));
+        // only the P/L: the cost basis jumps up and down with every buy and sell (it is not a
+        // performance) and with its big values the P/L line was flat on the zero.
+        // the cost basis is still saved in the snapshots and shown in the card
+        performanceChart.getData().setAll(List.of(plSeries));
+        // the x is the time in milliseconds, so the distance between two points is the real time
+        // (with the old CategoryAxis of strings all the points had the same distance). here the
+        // number is shown back like a date
+        chartXAxis.setTickLabelFormatter(new StringConverter<>() {
+            @Override
+            public String toString(final Number millis) {
+                return chartDateFormat.format(toDateTime(millis.longValue()));
+            }
+
+            @Override
+            public Number fromString(final String text) {
+                throw new UnsupportedOperationException("the axis labels are only shown");
+            }
+        });
+    }
+
+    /**
+     * Chooses how to show the dates under the P/L chart, from the first and last point: with few
+     * minutes of data the seconds are needed, with months of data only the day.
+     *
+     * @param first the time of the first point
+     * @param last the time of the last point
+     * @return the format for the labels of the x axis
+     */
+    private static DateTimeFormatter chartDateFormat(final LocalDateTime first, final LocalDateTime last) {
+        if (ChronoUnit.HOURS.between(first, last) < 1) {
+            return TIME_WITH_SECONDS;
+        }
+        if (ChronoUnit.DAYS.between(first, last) < 1) {
+            return TIME;
+        }
+        if (ChronoUnit.MONTHS.between(first, last) < 1) {
+            return DAY_AND_TIME;
+        }
+        return DATE;
+    }
+
+    /**
+     * Converts a date to the number used on the x axis of the P/L chart.
+     *
+     * @param time the date
+     * @return milliseconds from 1970-01-01, in the time zone of the system
+     */
+    private static long toMillis(final LocalDateTime time) {
+        return time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Converts a number of the x axis of the P/L chart back to a date.
+     *
+     * @param millis milliseconds from 1970-01-01
+     * @return the date, in the time zone of the system
+     */
+    private static LocalDateTime toDateTime(final long millis) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
     }
 
     /**
@@ -366,7 +435,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
     }
 
     /**
-     * Reloads and renders the P/L and cost-basis line chart from the current account's snapshots.
+     * Reloads and renders the P/L line chart from the current account's snapshots.
      */
     private void refreshPerformanceLineChart() {
         if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
@@ -374,18 +443,19 @@ public final class InvestmentsViewController extends BaseViewController implemen
         }
         final var account = investmentController.getCurrentInvestmentAccount().get();
 
-        final List<XYChart.Data<String, Number>> plPoints = new ArrayList<>();
-        final List<XYChart.Data<String, Number>> costPoints = new ArrayList<>();
-        snapshotService.getSnapshots(account.getId())
-                .forEach(snap -> {
-                    final String date = snap.timestamp()
-                            .format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"));
-                    plPoints.add(new XYChart.Data<>(date, snap.totalPL()));
-                    costPoints.add(new XYChart.Data<>(date, snap.costBasis()));
-                });
+        final List<BalanceSnapshot> snapshots = new ArrayList<>(snapshotService.getSnapshots(account.getId()));
+        // the last point is now, only shown and not saved (the snapshots are saved every few minutes),
+        // so the line always ends at the real value
+        snapshots.add(BalanceSnapshot.buildInvestmentSnapshot(account));
+
+        final List<XYChart.Data<Number, Number>> plPoints = new ArrayList<>();
+        for (final BalanceSnapshot snap : snapshots) {
+            plPoints.add(new XYChart.Data<>(toMillis(snap.timestamp()), snap.totalPL()));
+        }
+        // the format must be ready before the new points, the axis draws the labels after them
+        chartDateFormat = chartDateFormat(snapshots.getFirst().timestamp(), snapshots.getLast().timestamp());
         // same series, only new points, so the colors stay the same
         plSeries.getData().setAll(plPoints);
-        costSeries.getData().setAll(costPoints);
     }
 
     /**
@@ -458,28 +528,6 @@ public final class InvestmentsViewController extends BaseViewController implemen
                 positions,
                 p -> new PieChart.Data(p.asset().getShortName(), p.quantity().doubleValue()),
                 p -> p.quantity().stripTrailingZeros().toPlainString() + " " + p.asset().getShortName());
-    }
-
-    /**
-     * Starts (or restarts) the periodic timer that refreshes the market prices in the whole page.
-     * Before only the table was refreshed, so the pies, balance and best/worst stayed with the old prices.
-     */
-    private void startPriceRefreshTimeline() {
-        if (currentMarkerPriceRefreshTimeline == null) {
-            currentMarkerPriceRefreshTimeline = new Timeline(
-                    new KeyFrame(Duration.seconds(REFRESH_EACH_SECONDS), e -> refreshMainPanel()));
-        }
-        currentMarkerPriceRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
-        currentMarkerPriceRefreshTimeline.playFromStart();
-    }
-
-    /**
-     * Stops the periodic market-price refresh timer.
-     */
-    public void stopRefresh() {
-        if (currentMarkerPriceRefreshTimeline != null) {
-            currentMarkerPriceRefreshTimeline.stop();
-        }
     }
 
     /**
@@ -608,7 +656,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
             dialog.initOwner(addTransactionButton.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Transaction");
-            dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
+            // no fixed size: the window takes the size of the fxml (before it was smaller, 450,
+            // and the names of the buttons were cut)
+            dialog.setScene(new Scene(root));
             ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
@@ -751,7 +801,6 @@ public final class InvestmentsViewController extends BaseViewController implemen
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
         plSeries.getData().clear();
-        costSeries.getData().clear();
     }
 
     /**
