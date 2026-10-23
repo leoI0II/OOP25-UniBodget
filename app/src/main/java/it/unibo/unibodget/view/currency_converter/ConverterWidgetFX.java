@@ -25,12 +25,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
@@ -63,6 +63,13 @@ public final class ConverterWidgetFX {
     private static final int ROW_INDEX_5 = 5;
     private static final int ROW_INDEX_6 = 6;
     private static final int ROW_INDEX_7 = 7;
+    private static final double COL_LABEL_MIN_WIDTH = 70.0;
+    private static final double COL_LABEL_PREF_WIDTH = 75.0;
+    private static final double COL_INPUT_MIN_WIDTH = 180.0;
+    private static final double CARD_MIN_WIDTH = 320.0;
+    private static final double CARD_PREF_WIDTH = 350.0;
+    private static final double DIRECTION_BOX_MIN_WIDTH = 90.0;
+    private static final double DIRECTION_BOX_PREF_WIDTH = 95.0;
 
     /* -------------------- CONTROLLERS -------------------- */
     private final CurrencyConverterController controller;
@@ -214,9 +221,23 @@ public final class ConverterWidgetFX {
         card.setHgap(GRID_GAP);
         card.setVgap(GRID_GAP);
         card.setPadding(new Insets(CARD_PADDING));
+        card.setMinWidth(CARD_MIN_WIDTH);
+        card.setPrefWidth(CARD_PREF_WIDTH);
+
+        final ColumnConstraints colLabels = new ColumnConstraints();
+        colLabels.setMinWidth(COL_LABEL_MIN_WIDTH);
+        colLabels.setPrefWidth(COL_LABEL_PREF_WIDTH);
+        colLabels.setHgrow(Priority.NEVER);
+
+        final ColumnConstraints colInputs = new ColumnConstraints();
+        colInputs.setMinWidth(COL_INPUT_MIN_WIDTH);
+        colInputs.setHgrow(Priority.ALWAYS);
+
+        card.getColumnConstraints().setAll(colLabels, colInputs);
 
         /* ---------- AMOUNT FIELD ---------- */
         amountField.setPromptText("e.g. 10");
+        amountField.setMaxWidth(Double.MAX_VALUE);
 
         /* ---------- CURRENCY BOXES ---------- */
         final ObservableList<CurrencyUnit> currencies =
@@ -229,6 +250,8 @@ public final class ConverterWidgetFX {
 
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
+        fromBox.setMaxWidth(Double.MAX_VALUE);
+        toBox.setMaxWidth(Double.MAX_VALUE);
 
         setCurrencies("EUR", "USD");
 
@@ -249,7 +272,10 @@ public final class ConverterWidgetFX {
 
         /* ---------- ALERT CONTROLS ---------- */
         thresholdField.setPromptText("Threshold (e.g. 1.10)");
+        thresholdField.setMaxWidth(Double.MAX_VALUE);
         directionBox.setValue("Above");
+        directionBox.setMinWidth(DIRECTION_BOX_MIN_WIDTH);
+        directionBox.setPrefWidth(DIRECTION_BOX_PREF_WIDTH);
 
         addAlertButton.setOnAction(e -> {
             final BigDecimal parsedThreshold = parseDecimal(thresholdField.getText());
@@ -271,6 +297,7 @@ public final class ConverterWidgetFX {
 
         /* ---------- RESULT OUTPUT ---------- */
         output.setWrapText(true);
+        output.getStyleClass().add("converter-output");
 
         applyTheme();
 
@@ -297,14 +324,12 @@ public final class ConverterWidgetFX {
 
             // 1. check import
             if (amount == null || amount.signum() <= 0) {
-                output.setFont(currentThemeFont());
                 output.setText("Inserisci un importo maggiore di zero.");
                 return;
             }
 
             // 2. check currency unit both selected
             if (from == null || to == null) {
-                output.setFont(currentThemeFont());
                 output.setText("Seleziona la valuta di partenza e di arrivo.");
                 return;
             }
@@ -314,7 +339,6 @@ public final class ConverterWidgetFX {
             try {
                 result = controller.convert(amount, from, to);
 
-                output.setFont(currentResultFont());
                 output.setText(result.toPlainString() + " " + to.getCode());
 
                 resultLabel.setText(
@@ -323,7 +347,6 @@ public final class ConverterWidgetFX {
                 );
 
             } catch (final IllegalArgumentException | IllegalStateException ex) {
-                output.setFont(currentThemeFont());
                 output.setText("Conversione non disponibile. Riprova più tardi.");
                 return;
             }
@@ -356,14 +379,17 @@ public final class ConverterWidgetFX {
         card.add(swapButton, 1, 2);
         GridPane.setHalignment(swapButton, HPos.CENTER);
         card.addRow(3, toLabel, toBox);
-        card.add(convertButton, 0, 4, 2, 1);
+        card.add(convertButton, 0, 4, COL_SPAN_2, ROW_SPAN_1);
 
         final VBox resultBox = new VBox(4, resultLabel, output);
         resultBox.setAlignment(Pos.CENTER_LEFT);
         resultBox.setPadding(new Insets(10, 0, 0, 0));
         card.add(resultBox, COL_INDEX_0, ROW_INDEX_5, COL_SPAN_2, ROW_SPAN_1);
 
-        card.addRow(ROW_INDEX_6, thresholdField, directionBox);
+        final HBox alertInputs = new HBox(8, thresholdField, directionBox);
+        HBox.setHgrow(thresholdField, Priority.ALWAYS);
+        card.add(alertInputs, COL_INDEX_0, ROW_INDEX_6, COL_SPAN_2, ROW_SPAN_1);
+
         card.add(addAlertButton, COL_INDEX_0, ROW_INDEX_7, COL_SPAN_2, ROW_SPAN_1);
 
         GridPane.setHgrow(amountField, Priority.ALWAYS);
@@ -373,35 +399,24 @@ public final class ConverterWidgetFX {
 
     /* ================== HELPER METHODS ==================== */
 
-    private Font currentThemeFont() {
-        return FXAdapter.toFXFont(ThemeManager.getTheme());
-    }
-
-    private Font currentResultFont() {
-        final Theme theme = ThemeManager.getTheme();
-        return Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 10);
-    }
-
     private void applyTheme() {
-        final Font font = currentThemeFont();
-        final Font resultFont = currentResultFont();
         final Color textColor = FXAdapter.toFXColor(ThemeManager.getTheme().getTextColor());
 
-        amountField.setFont(font);
-        swapButton.setFont(font);
-        convertButton.setFont(font);
-        thresholdField.setFont(font);
-        addAlertButton.setFont(font);
+        ThemeManager.applyFont(amountField);
+        ThemeManager.applyFont(swapButton);
+        ThemeManager.applyFont(convertButton);
+        ThemeManager.applyFont(thresholdField);
+        ThemeManager.applyFont(directionBox);
+        ThemeManager.applyFont(addAlertButton);
 
-        styleMutedLabel(amountLabel, font, textColor);
-        styleMutedLabel(fromLabel, font, textColor);
-        styleMutedLabel(toLabel, font, textColor);
-        styleMutedLabel(resultLabel, font, textColor);
+        styleMutedLabel(amountLabel, textColor);
+        styleMutedLabel(fromLabel, textColor);
+        styleMutedLabel(toLabel, textColor);
+        styleMutedLabel(resultLabel, textColor);
 
-        output.setFont(resultFont);
+        ThemeManager.applyFont(output);
         output.setTextFill(textColor);
 
-        ThemeManager.applyFont(directionBox);
         ThemeManager.applyFont(card);
     }
 
@@ -409,11 +424,10 @@ public final class ConverterWidgetFX {
      * Styles a muted label used for section headers.
      *
      * @param label the label to style
-     * @param font the font to use
      * @param color the text color
      */
-    private void styleMutedLabel(final Label label, final Font font, final Color color) {
-        label.setFont(font);
+    private void styleMutedLabel(final Label label, final Color color) {
+        ThemeManager.applyFont(label);
         label.setTextFill(color);
         label.setOpacity(OPACITY);
     }

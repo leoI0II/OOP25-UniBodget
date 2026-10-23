@@ -60,7 +60,8 @@ public final class ThemeManager {
             "sidebar-nav-menu",
             "balance-value",
             "chart-title",
-            "hero-transaction-button"
+            "hero-transaction-button",
+            "converter-output"
     );
 
     private static final Set<Scene> SCENES =
