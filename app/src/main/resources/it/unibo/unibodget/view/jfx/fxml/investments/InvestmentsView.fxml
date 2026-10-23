@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.Cursor?>
-<?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
@@ -64,7 +63,8 @@
                         <Label styleClass="card-header" text="Performance" />
                         <LineChart fx:id="performanceChart" createSymbols="false" minHeight="0.0" VBox.vgrow="ALWAYS">
                            <xAxis>
-                              <CategoryAxis fx:id="chartXAxis" />
+                              <!-- x = time in milliseconds, shown like a date by the controller -->
+                              <NumberAxis fx:id="chartXAxis" forceZeroInRange="false" minorTickVisible="false" />
                            </xAxis>
                            <yAxis>
                               <NumberAxis fx:id="chartYAxis" />
