@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.Cursor?>
-<?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
@@ -21,8 +20,10 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- layout modeled after portfolio views, unified styles defined in /css/theme.css -->
-<!-- scroll pane so if the window is small the page scrolls instead of squeezing the charts -->
-<ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="investments-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
+<!-- scroll pane so if the window is small the page scrolls instead of squeezing the charts.
+     fitToHeight: if the window is big the page fills it (the tables take the extra space),
+     if it is smaller than the min height of the page it scrolls -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="investments-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
    <content>
       <VBox fx:id="investmentsVBoxPage" minWidth="600.0" spacing="16.0" styleClass="investments-page">
          <children>
@@ -64,7 +65,8 @@
                         <Label styleClass="card-header" text="Performance" />
                         <LineChart fx:id="performanceChart" createSymbols="false" minHeight="0.0" VBox.vgrow="ALWAYS">
                            <xAxis>
-                              <CategoryAxis fx:id="chartXAxis" />
+                              <!-- x = time in milliseconds, shown like a date by the controller -->
+                              <NumberAxis fx:id="chartXAxis" forceZeroInRange="false" minorTickVisible="false" />
                            </xAxis>
                            <yAxis>
                               <NumberAxis fx:id="chartYAxis" />
