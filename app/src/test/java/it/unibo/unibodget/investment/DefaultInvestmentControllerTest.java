@@ -49,6 +49,8 @@ final class DefaultInvestmentControllerTest {
     private static final String S_150 = "150";
     private static final String S_50000 = "50000";
     private static final String S_5 = "5";
+    private static final String S_091 = "0.91";
+    private static final String S_100 = "100";
     private static final String OTHER = "Other";
     private static final int I_5 = 5;
     private static final int I_9 = 9;
@@ -65,10 +67,10 @@ final class DefaultInvestmentControllerTest {
         "ETH->USD", new BigDecimal("4000"),
         "USDT->USD", BigDecimal.ONE,
         "USD->USDT", BigDecimal.ONE,
-        "USD->EUR", new BigDecimal("0.91"),
+        "USD->EUR", new BigDecimal(S_091),
         "AAPL->EUR", new BigDecimal("136.5"),
         "EUR->USDT", new BigDecimal("1.10"),
-        "USDT->EUR", new BigDecimal("0.91")
+        "USDT->EUR", new BigDecimal(S_091)
     );
 
     private static final CurrencyConverter MOCK_CONVERTER = (amount, from, to) -> {
@@ -427,7 +429,7 @@ final class DefaultInvestmentControllerTest {
     @Test
     void testExecuteSellOrderWithCashSuccess() {
         // Hold 10 AAPL; sell 5 @ $150 − $5 fee = $745 credited to cash
-        buyAapl(BigDecimal.TEN, new BigDecimal("100"));
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_100));
         final var result = controller.executeSellOrder(
             account, new PaymentSource.CashAccountChannel(cashAccount),
             StockMarketCurrency.AAPL, BigDecimal.valueOf(5),
@@ -454,7 +456,7 @@ final class DefaultInvestmentControllerTest {
         eurAccount.addTransaction(InvestmentTransaction.of(
             Asset.of(StockMarketCurrency.AAPL, BigDecimal.TEN),
             Category.INVESTMENT_BUY, TODAY, "", "",
-            Asset.of(FiatCurrency.EUR, new BigDecimal("100")),
+            Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
             Asset.zero(FiatCurrency.EUR)
         ));
 
@@ -462,7 +464,7 @@ final class DefaultInvestmentControllerTest {
         final var result = controller.executeSellOrder(
             eurAccount, new PaymentSource.StableCoinPositionChannel(eurAccount, CryptoCurrency.USDT),
             StockMarketCurrency.AAPL, BigDecimal.TWO,
-            Asset.of(FiatCurrency.EUR, new BigDecimal("100")),
+            Asset.of(FiatCurrency.EUR, new BigDecimal(S_100)),
             Asset.zero(FiatCurrency.EUR),
             TODAY, ""
         );
@@ -472,7 +474,7 @@ final class DefaultInvestmentControllerTest {
         assertEquals(new BigDecimal("220").stripTrailingZeros(), usdtIn.getAsset().amount().stripTrailingZeros());
         // the price of 1 usdt must be in the base currency of the account (EUR), not "1 USDT"
         assertEquals(FiatCurrency.EUR, usdtIn.getUnitPrice().currency());
-        assertEquals(new BigDecimal("0.91").stripTrailingZeros(), usdtIn.getUnitPrice().amount().stripTrailingZeros());
+        assertEquals(new BigDecimal(S_091).stripTrailingZeros(), usdtIn.getUnitPrice().amount().stripTrailingZeros());
     }
 
     @Test

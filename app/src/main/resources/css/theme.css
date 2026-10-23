@@ -173,12 +173,19 @@
 }
 
 .hero-transaction-button {
-    -fx-padding: 13px 30px;
-    -fx-font-size: 15px;
+    -fx-padding: 12px 28px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-min-width: 210px;
+    -fx-pref-width: 210px;
+    -fx-min-width: 0;
     -fx-background-radius: 12px;
     -fx-cursor: hand;
+}
+
+.budget-edit-button {
+    -fx-padding: 4px 10px;
+    -fx-font-size: 11px;
+    -fx-min-width: 0;
 }
 
 .theme-dark .button-secondary,
