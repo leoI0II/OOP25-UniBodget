@@ -1,15 +1,11 @@
 package it.unibo.unibodget.model.dashboard.api;
 
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import it.unibo.unibodget.model.transactions.base.CashTransaction;
-
-/**
- * Service responsible for exposing aggregated totals by category
- * for dashboard use.
- */
+/** Service responsible for exposing aggregated totals by category for dashboard use. */
 public interface CategoryService {
 
     /**
@@ -20,10 +16,18 @@ public interface CategoryService {
     Map<String, BigDecimal> getCategorySummaries();
 
     /**
+     * Returns the aggregated expenditure amounts by category.
+     *
+     * @return an unmodifiable map from expense category name to aggregated positive amount
+     */
+    default Map<String, BigDecimal> getExpenseCategorySummaries() {
+        return getCategorySummaries();
+    }
+
+    /**
      * Recomputes the category summaries from the given cash transactions.
      *
-     * @param transactions
-     *            the transactions to aggregate
+     * @param transactions the transactions to aggregate
      */
     void recomputeFromTransactions(List<CashTransaction> transactions);
 }

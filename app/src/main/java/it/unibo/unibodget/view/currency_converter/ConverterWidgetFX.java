@@ -1,16 +1,20 @@
 package it.unibo.unibodget.view.currency_converter;
 
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
+import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.alert.MarketAlert;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
-import it.unibo.unibodget.view.UI.FXAdapter;
+import it.unibo.unibodget.view.ui.FXAdapter;
+import it.unibo.unibodget.view.utils.DialogHelper;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -21,26 +25,23 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * JavaFX widget representing the main currency converter tool.
- * 
+ *
  * <p>
  * This component allows the user to:
  * <ul>
@@ -50,13 +51,11 @@ import java.math.BigDecimal;
  *     <li>register exchange‑rate alerts via {@link CurrencyAlertService}</li>
  * </ul>
  */
-public class ConverterWidgetFX {
+public final class ConverterWidgetFX {
 
     /* -------------------- UI CONSTANTS -------------------- */
     private static final double GRID_GAP = 12;
     private static final double CARD_PADDING = 20;
-    private static final double CARD_CORNER_RADIUS = 18;
-    private static final double BUTTON_CORNER_RADIUS = 8;
     private static final double OPACITY = 0.7;
     private static final int COL_SPAN_2 = 2;
     private static final int ROW_SPAN_1 = 1;
@@ -76,6 +75,17 @@ public class ConverterWidgetFX {
     private final TextField amountField = new TextField();
     private final ComboBox<CurrencyUnit> fromBox = new ComboBox<>();
     private final ComboBox<CurrencyUnit> toBox = new ComboBox<>();
+    private final Label amountLabel = new Label("Amount");
+    private final Label fromLabel = new Label("From");
+    private final Label toLabel = new Label("To");
+    private final Label resultLabel = new Label("Net Balance Result");
+    private final Button swapButton = new Button("⇅");
+    private final Button convertButton = new Button("Convert");
+    private final TextField thresholdField = new TextField();
+    private final ComboBox<String> directionBox =
+            new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
+    private final Button addAlertButton = new Button("Set Alert");
+    private final Label output = new Label("Waiting...");
 
     /**
      * Creates a new converter widget.
@@ -88,63 +98,105 @@ public class ConverterWidgetFX {
         this.controller = controller;
         this.alertService = alertService;
         buildUI();
-    }
-
-    /** 
-     * Return the amount input field.
-     * 
-     * @return the amount input field 
-     */
-    public TextField getAmountField() { 
-        return amountField; 
-    }
-
-    /** 
-     * Return the ComboBox for the source currency.
-     * 
-     * @return the ComboBox for the source currency 
-     */
-    public ComboBox<CurrencyUnit> getFromBox() { 
-        return fromBox; 
-    }
-
-    /** 
-     * Return the ComboBox for the target currency.
-     * 
-     * @return the ComboBox for the target currency 
-     */
-    public ComboBox<CurrencyUnit> getToBox() { 
-        return toBox; 
+        ThemeManager.addListener(t -> Platform.runLater(this::applyTheme));
     }
 
     /**
-     * Sets the currencies for the converter.
+     * Return the amount input field.
      *
-     * @param fromCode the ISO code of the source currency
-     * @param toCode the ISO code of the target currency
+     * @return the amount input field
      */
-    public void setCurrencies(final String fromCode, final String toCode) {
-        final CurrencyUnit from = Currency.get(fromCode);
-        final CurrencyUnit to = Currency.get(toCode);
-
-        fromBox.setValue(from);
-        toBox.setValue(to);
+    public TextField getAmountField() {
+        return amountField;
     }
 
-    /** 
-     * Return the view type GridPane.
-     * 
-     * @return the root JavaFX node of this widget 
+    /**
+     * Return the ComboBox for the source currency.
+     *
+     * @return the ComboBox for the source currency
      */
-    public GridPane getView() { 
-        return card; 
+    public ComboBox<CurrencyUnit> getFromBox() {
+        return fromBox;
+    }
+
+    /**
+     * Return the ComboBox for the target currency.
+     *
+     * @return the ComboBox for the target currency
+     */
+    public ComboBox<CurrencyUnit> getToBox() {
+        return toBox;
+    }
+
+    /**
+     * Restores a saved pair, warning if either currency is unavailable.
+     *
+     * @param fromCode the source currency code
+     * @param toCode the target currency code
+     */
+    public void setCurrencies(final String fromCode, final String toCode) {
+        final var from = fromBox.getItems().stream()
+                .filter(currency -> currency.getCode().equalsIgnoreCase(fromCode))
+                .findFirst();
+
+        final var to = toBox.getItems().stream()
+                .filter(currency -> currency.getCode().equalsIgnoreCase(toCode))
+                .findFirst();
+
+        if (from.isEmpty() || to.isEmpty()) {
+            final String missingCodes = Stream.of(fromCode, toCode)
+                    .filter(code -> fromBox.getItems().stream()
+                            .noneMatch(currency ->
+                                    currency.getCode().equalsIgnoreCase(code)))
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            DialogHelper.showWarning(
+                    card,
+                    "Watchlist",
+                    "Couple not available",
+                    "Currency not available: " + missingCodes
+                            + ".\nThe current selection has not been modified.");
+            return;
+        }
+
+        fromBox.setValue(from.get());
+        toBox.setValue(to.get());
+    }
+
+    /**
+     * Determines the display order of currency groups.
+     *
+     * @param currency the currency to classify
+     * @return the group order: fiat, stocks, crypto, others
+     */
+    private static int currencyGroupOrder(final CurrencyUnit currency) {
+        if (currency instanceof FiatCurrency) {
+            return 0;
+        }
+        if (currency instanceof StockMarketCurrency) {
+            return 1;
+        }
+        if (currency instanceof CryptoCurrency) {
+            return 2;
+        }
+        return 3;
+    }
+
+    /**
+     * Return the view type GridPane.
+     *
+     * @return the root JavaFX node of this widget
+     */
+    public GridPane getView() {
+        return card;
     }
 
     /* =============== UI BUILDING LOGIC ==================== */
 
     /**
      * Builds the entire UI card.
-     * 
+     *
      * <p>
      * Including:
      * <ul>
@@ -157,80 +209,33 @@ public class ConverterWidgetFX {
      */
     private void buildUI() {
 
-        /* ---------- THEME SETUP ---------- */
-        final Theme theme = ThemeManager.getTheme();
-        final Font font = FXAdapter.toFXFont(theme);
-        final Font resultFont = Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 10);
-
-        final Color textColor = FXAdapter.toFXColor(theme.getTextColor());
-        final Color buttonColor = FXAdapter.toFXColor(theme.getButtonColor());
-        final Color buttonTextColor = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getButtonColor()));
-
-        // Glass‑style background
-        final Color glassBase = FXAdapter.toFXColor(Theme.getReadableTextColor(theme.getPrimaryColor()));
-        final Color glassFill = new Color(glassBase.getRed(), 
-                                        glassBase.getGreen(), 
-                                        glassBase.getBlue(), 
-                                        0.045);
-        final Color glassBorder = new Color(glassBase.getRed(), 
-                                        glassBase.getGreen(), 
-                                        glassBase.getBlue(), 
-                                        0.07);
-
         /* ---------- CARD LAYOUT ---------- */
+        card.getStyleClass().add("card");
         card.setHgap(GRID_GAP);
         card.setVgap(GRID_GAP);
         card.setPadding(new Insets(CARD_PADDING));
-        card.setBackground(new Background(new BackgroundFill(glassFill, 
-                                                            new CornerRadii(CARD_CORNER_RADIUS), 
-                                                            Insets.EMPTY)));
-        card.setBorder(new Border(new BorderStroke(glassBorder, 
-                                                    BorderStrokeStyle.SOLID, 
-                                                    new CornerRadii(CARD_CORNER_RADIUS), 
-                                                    BorderWidths.DEFAULT)));
 
         /* ---------- AMOUNT FIELD ---------- */
         amountField.setPromptText("e.g. 10");
-        amountField.setFont(font);
-        amountField.setStyle(
-        "-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8; -fx-text-fill: white;"
-        );
 
         /* ---------- CURRENCY BOXES ---------- */
-        //final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList();
-        //CurrencyUnit.basicCurrencies().forEach(currencies::add);
-        final ObservableList<CurrencyUnit> currencies = FXCollections.observableArrayList(CurrencyUnit.allCurrencies());
+        final ObservableList<CurrencyUnit> currencies =
+                FXCollections.observableArrayList(CurrencyUnit.allCurrencies());
+
+        currencies.sort(
+                Comparator.comparingInt(ConverterWidgetFX::currencyGroupOrder)
+                        .thenComparing(CurrencyUnit::getCode, String.CASE_INSENSITIVE_ORDER)
+        );
 
         fromBox.setItems(currencies);
         toBox.setItems(currencies);
 
-        //fromBox.setValue(currencies.get(0));
-        toBox.setValue(currencies.get(1));
+        setCurrencies("EUR", "USD");
 
-        fromBox.setValue(Currency.get("EUR"));
-        toBox.setValue(Currency.get("USD"));
-        System.out.println("FROM selected: " + fromBox.getValue().getClass());
-        System.out.println("FROM code: " + fromBox.getValue().getCode());
-        System.out.println("TO selected: " + toBox.getValue().getClass());
-        System.out.println("TO code: " + toBox.getValue().getCode());
-
-        configureCurrencyBox(fromBox, font);
-        configureCurrencyBox(toBox, font);
-
-        /* ---------- LABELS ---------- */
-        final Label amountLabel = createMutedLabel("Amount", font, textColor);
-        final Label fromLabel = createMutedLabel("From", font, textColor);
-        final Label toLabel = createMutedLabel("To", font, textColor);
-        final Label resultLabel = createMutedLabel("Net Balance Result", font, textColor);
+        configureCurrencyBox(fromBox);
+        configureCurrencyBox(toBox);
 
         /* ---------- SWAP BUTTON ---------- */
-        final Button swapButton = new Button("⇅");
-        swapButton.setFont(font);
-        swapButton.setTextFill(textColor);
-        swapButton.setBackground(new Background(new BackgroundFill(glassFill, 
-                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
-                                                                    Insets.EMPTY)));
-
         swapButton.setOnAction(e -> {
             final CurrencyUnit temp = fromBox.getValue();
             fromBox.setValue(toBox.getValue());
@@ -238,28 +243,13 @@ public class ConverterWidgetFX {
         });
 
         /* ---------- CONVERT BUTTON ---------- */
-        final Button convertButton = new Button("Convert");
-        convertButton.setFont(font);
-        convertButton.setBackground(new Background(new BackgroundFill(buttonColor, 
-                                                                    new CornerRadii(BUTTON_CORNER_RADIUS), 
-                                                                    Insets.EMPTY)));
-        convertButton.setTextFill(buttonTextColor);
+        convertButton.getStyleClass().add("button-primary");
         convertButton.setMaxWidth(Double.MAX_VALUE);
         convertButton.setDisable(true);
 
         /* ---------- ALERT CONTROLS ---------- */
-        final TextField thresholdField = new TextField();
         thresholdField.setPromptText("Threshold (e.g. 1.10)");
-        thresholdField.setFont(font);
-        thresholdField.setStyle(amountField.getStyle());
-
-        final ComboBox<String> directionBox = 
-            new ComboBox<>(FXCollections.observableArrayList("Above", "Below"));
-        ThemeManager.applyFont(directionBox);
         directionBox.setValue("Above");
-
-        final Button addAlertButton = new Button("Set Alert");
-        addAlertButton.setFont(font);
 
         addAlertButton.setOnAction(e -> {
             final BigDecimal parsedThreshold = parseDecimal(thresholdField.getText());
@@ -280,10 +270,9 @@ public class ConverterWidgetFX {
         });
 
         /* ---------- RESULT OUTPUT ---------- */
-        final Label output = new Label("Waiting...");
-        output.setFont(resultFont);
-        output.setTextFill(textColor);
         output.setWrapText(true);
+
+        applyTheme();
 
         /* ---------- VALIDATION ---------- */
         final Runnable validate = () -> {
@@ -308,14 +297,14 @@ public class ConverterWidgetFX {
 
             // 1. check import
             if (amount == null || amount.signum() <= 0) {
-                output.setFont(font);
+                output.setFont(currentThemeFont());
                 output.setText("Inserisci un importo maggiore di zero.");
                 return;
             }
 
             // 2. check currency unit both selected
             if (from == null || to == null) {
-                output.setFont(font);
+                output.setFont(currentThemeFont());
                 output.setText("Seleziona la valuta di partenza e di arrivo.");
                 return;
             }
@@ -323,15 +312,9 @@ public class ConverterWidgetFX {
             final BigDecimal result;
             // 3. convert
             try {
-                System.out.println("[VIEW] Starting conversion: "
-                        + amount + " " + from.getCode()
-                        + " -> " + to.getCode());
-
                 result = controller.convert(amount, from, to);
 
-                System.out.println("[VIEW] Conversion returned: " + result);
-
-                output.setFont(resultFont);
+                output.setFont(currentResultFont());
                 output.setText(result.toPlainString() + " " + to.getCode());
 
                 resultLabel.setText(
@@ -340,16 +323,13 @@ public class ConverterWidgetFX {
                 );
 
             } catch (final IllegalArgumentException | IllegalStateException ex) {
-                output.setFont(font);
+                output.setFont(currentThemeFont());
                 output.setText("Conversione non disponibile. Riprova più tardi.");
-
-                System.out.println("[VIEW] Conversion failed: " + ex.getMessage());
                 return;
             }
 
             // 4. same currency
             if (from.getCode().equalsIgnoreCase(to.getCode())) {
-                System.out.println("[VIEW] Same currency: skipping alerts");
                 return;
             }
 
@@ -361,15 +341,12 @@ public class ConverterWidgetFX {
                         java.math.RoundingMode.HALF_UP
                 ).doubleValue();
 
-                System.out.println("[VIEW] Checking alerts at rate: " + rate);
-
+                final Window owner = DialogHelper.findWindow(card).orElse(null);
                 new MarketAlert(this.alertService)
-                        .checkAndShowAlerts(rate, from, to);
+                        .checkAndShowAlerts(rate, from, to, owner);
 
-                System.out.println("[VIEW] Alert check completed");
-
-            } catch (final IllegalArgumentException | IllegalStateException ex) {
-                System.out.println("[VIEW] Alert check failed: " + ex.getMessage());
+            } catch (final IllegalArgumentException | IllegalStateException ignored) {
+                // Alert failures are non-critical during conversion display.
             }
         });
 
@@ -396,48 +373,73 @@ public class ConverterWidgetFX {
 
     /* ================== HELPER METHODS ==================== */
 
-    /** 
-     * Creates a muted label used for section headers.
-     *
-     * @param text the label text
-     * @param font the font to use
-     * @param color the text color
-     * @return a styled Label instance
-     */
-    private Label createMutedLabel(final String text, final Font font, final Color color) {
-        final Label l = new Label(text);
-        l.setFont(font);
-        l.setTextFill(color);
-        l.setOpacity(OPACITY);
-        return l;
+    private Font currentThemeFont() {
+        return FXAdapter.toFXFont(ThemeManager.getTheme());
     }
 
-    /** 
-     * Configures a currency ComboBox with formatting and styling. 
-     * 
-     * @param box the ComboBox to configure
-     * @param font the font to use for the ComboBox items
+    private Font currentResultFont() {
+        final Theme theme = ThemeManager.getTheme();
+        return Font.font(theme.getFontFamily(), FontWeight.BOLD, theme.getFontSize() + 10);
+    }
+
+    private void applyTheme() {
+        final Font font = currentThemeFont();
+        final Font resultFont = currentResultFont();
+        final Color textColor = FXAdapter.toFXColor(ThemeManager.getTheme().getTextColor());
+
+        amountField.setFont(font);
+        swapButton.setFont(font);
+        convertButton.setFont(font);
+        thresholdField.setFont(font);
+        addAlertButton.setFont(font);
+
+        styleMutedLabel(amountLabel, font, textColor);
+        styleMutedLabel(fromLabel, font, textColor);
+        styleMutedLabel(toLabel, font, textColor);
+        styleMutedLabel(resultLabel, font, textColor);
+
+        output.setFont(resultFont);
+        output.setTextFill(textColor);
+
+        ThemeManager.applyFont(directionBox);
+        ThemeManager.applyFont(card);
+    }
+
+    /**
+     * Styles a muted label used for section headers.
+     *
+     * @param label the label to style
+     * @param font the font to use
+     * @param color the text color
      */
-    private void configureCurrencyBox(final ComboBox<CurrencyUnit> box, final Font font) {
+    private void styleMutedLabel(final Label label, final Font font, final Color color) {
+        label.setFont(font);
+        label.setTextFill(color);
+        label.setOpacity(OPACITY);
+    }
+
+    /**
+     * Configures a currency ComboBox with formatting and styling.
+     *
+     * @param box the ComboBox to configure
+     */
+    private void configureCurrencyBox(final ComboBox<CurrencyUnit> box) {
         box.setMaxWidth(Double.MAX_VALUE);
-        box.setStyle("-fx-font-size: "
-            + font.getSize()
-            + "px; -fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 8;");
 
         box.setConverter(new StringConverter<>() {
-            @Override 
-            public String toString(final CurrencyUnit c) { 
-                return c == null ? "" : formatCurrency(c); 
+            @Override
+            public String toString(final CurrencyUnit c) {
+                return c == null ? "" : formatCurrency(c);
             }
 
-            @Override 
-            public CurrencyUnit fromString(final String s) { 
-                return null; 
+            @Override
+            public CurrencyUnit fromString(final String s) {
+                return null;
             }
         });
 
         box.setCellFactory(lv -> new ListCell<>() {
-            @Override 
+            @Override
             protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
@@ -445,7 +447,7 @@ public class ConverterWidgetFX {
         });
 
         box.setButtonCell(new ListCell<>() {
-            @Override 
+            @Override
             protected void updateItem(final CurrencyUnit item, final boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : formatCurrency(item));
@@ -453,9 +455,9 @@ public class ConverterWidgetFX {
         });
     }
 
-    /** 
-     * Formats a currency for display. 
-     * 
+    /**
+     * Formats a currency for display.
+     *
      * @param currency the currency to format
      * @return a string representation, e.g., "€ EUR" for Euro
      */
@@ -469,15 +471,15 @@ public class ConverterWidgetFX {
         return currency.getCode();
     }
 
-    /** 
-     * Parses a decimal number from user input. 
-     * 
+    /**
+     * Parses a decimal number from user input.
+     *
      * @param text the string to parse
      * @return the parsed BigDecimal or null if parsing fails
      */
     private BigDecimal parseDecimal(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim().replace(',', '.'));
@@ -485,5 +487,5 @@ public class ConverterWidgetFX {
             return null;
         }
     }
-    
+
 }

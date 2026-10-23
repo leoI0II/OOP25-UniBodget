@@ -21,13 +21,13 @@ class WalletTest {
     void shouldAddTransaction() {
         final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        final CashTransaction tx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, new java.math.BigDecimal("10")),
-                Category.FOOD,
-                LocalDate.now(),
-                "desc",
-                "notes"
-        );
+        final CashTransaction tx = CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.TEN))
+                .category(Category.FOOD)
+                .date(LocalDate.now())
+                .description("desc")
+                .notes("notes")
+                .build();
 
         acc.addTransaction(tx);
 
@@ -38,13 +38,13 @@ class WalletTest {
     void shouldRejectZeroAmountTransaction() {
         final CashAccount acc = new CashAccount("MyCash", FiatCurrency.EUR);
 
-        final CashTransaction zeroTx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, java.math.BigDecimal.ZERO),
-                Category.FOOD,
-                LocalDate.now(),
-                "desc",
-                "notes"
-        );
+        final CashTransaction zeroTx = CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, java.math.BigDecimal.ZERO))
+                .category(Category.FOOD)
+                .date(LocalDate.now())
+                .description("desc")
+                .notes("notes")
+                .build();
 
         assertThrows(IllegalArgumentException.class, () -> acc.addTransaction(zeroTx));
     }

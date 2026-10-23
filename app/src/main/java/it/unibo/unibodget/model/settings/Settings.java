@@ -1,34 +1,31 @@
 package it.unibo.unibodget.model.settings;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.unibo.unibodget.model.currency.Currency;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import it.unibo.unibodget.model.currency.Currency;
-import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.currency.FiatCurrency;
-
 /**
  * Represents the global user preferences for the application.
  *
- * <p>
- * This includes: </p>
+ * <p>This includes:
+ *
  * <ul>
- *     <li>the current UI theme</li>
- *     <li>the base currency used across all views</li>
- *     <li>a history of saved configurations</li>
- *     <li>window size and layout preferences</li>
+ *   <li>the current UI theme
+ *   <li>the base currency used across all views
+ *   <li>a history of saved configurations
+ *   <li>window size and layout preferences
  * </ul>
  *
- * <p>
- * The class is fully serializable via Jackson and supports
- * snapshot‑based persistence for undo/restore operations.
- * </p>
+ * <p>The class is fully serializable via Jackson and supports snapshot‑based persistence for
+ * undo/restore operations.
  */
 public final class Settings {
 
@@ -40,17 +37,16 @@ public final class Settings {
 
     private WindowPreferences windowPrefs;
 
-    @JsonIgnore
-    private LocalDate lastModified;
+    @JsonIgnore private LocalDate lastModified;
 
     /**
      * Creates a Settings instance with default values.
-     * 
+     *
      * <ul>
-     *     <li>Theme: {@link Theme#DEFAULT}</li>
-     *     <li>Base currency: EUR</li>
-     *     <li>Empty preference history</li>
-     *     <li>Default window preferences</li>
+     *   <li>Theme: {@link Theme#DEFAULT}
+     *   <li>Base currency: EUR
+     *   <li>Empty preference history
+     *   <li>Default window preferences
      * </ul>
      */
     public Settings() {
@@ -63,71 +59,70 @@ public final class Settings {
     /**
      * Creates a Settings instance from JSON.
      *
-     * @param theme             the selected theme
-     * @param baseCurrency      the base currency code (e.g. "EUR")
+     * @param theme the selected theme
+     * @param baseCurrency the base currency code (e.g. "EUR")
      * @param preferenceHistory the list of saved snapshots
-     * @param windowPrefs       window layout preferences
+     * @param windowPrefs window layout preferences
      */
     @JsonCreator
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Settings encapsulates shared mutable window preferences")
     public Settings(
-        @JsonProperty("theme") final Theme theme,
-        @JsonProperty("baseCurrency") final String baseCurrency,
-        @JsonProperty("preferenceHistory") final List<SettingsSnapshot> preferenceHistory,
-        @JsonProperty("windowPrefs") final WindowPreferences windowPrefs
-    ) {
+            @JsonProperty("theme") final Theme theme,
+            @JsonProperty("baseCurrency") final String baseCurrency,
+            @JsonProperty("preferenceHistory") final List<SettingsSnapshot> preferenceHistory,
+            @JsonProperty("windowPrefs") final WindowPreferences windowPrefs) {
         this.theme = Objects.requireNonNull(theme);
         this.baseCurrency = Objects.requireNonNull(baseCurrency);
         this.preferenceHistory = new ArrayList<>(Objects.requireNonNull(preferenceHistory));
         this.windowPrefs = Objects.requireNonNull(windowPrefs);
     }
 
-    /** 
-     * Returns the current theme. 
-     * 
+    /**
+     * Returns the current theme.
+     *
      * @return theme
      */
-    public Theme getTheme() { 
-        return theme; 
+    public Theme getTheme() {
+        return theme;
     }
 
     /**
      * Sets the theme and records a snapshot if the theme actually changed.
      *
-     * <p>
-     * This ensures that the history only grows when meaningful
-     * changes occur.
-     * </p>
-     * 
+     * <p>This ensures that the history only grows when meaningful changes occur.
+     *
      * @param theme the new theme to apply
      */
-    public void setTheme(final Theme theme) { 
+    public void setTheme(final Theme theme) {
         if (!theme.equals(this.theme)) {
-            addSnapshotToHistory();   // Save previous configuration
+            addSnapshotToHistory(); // Save previous configuration
         }
-        this.theme = theme; 
+        this.theme = theme;
     }
 
-    /** 
-     * Returns the base currency code (e.g. "EUR"). 
-     * 
+    /**
+     * Returns the base currency code (e.g. "EUR").
+     *
      * @return base currency code
      */
-    public String getBaseCurrency() { 
-        return baseCurrency; 
+    public String getBaseCurrency() {
+        return baseCurrency;
     }
 
-    /** 
-     * Sets the base currency code. 
-     * 
+    /**
+     * Sets the base currency code.
+     *
      * @param currency the new base currency code (not null)
      */
-    public void setBaseCurrency(final String currency) { 
-        this.baseCurrency = currency; 
+    public void setBaseCurrency(final String currency) {
+        this.baseCurrency = currency;
     }
 
     /**
      * Returns an immutable view of the preference history.
-     * 
+     *
      * @return list of snapshots
      */
     public List<SettingsSnapshot> getPreferenceHistory() {
@@ -136,10 +131,9 @@ public final class Settings {
 
     /**
      * Replaces the entire preference history.
-     * 
-     * <p>
-     * This method is primarily intended for deserialization and testing.
-     * 
+     *
+     * <p>This method is primarily intended for deserialization and testing.
+     *
      * @param list the new list of snapshots (may be null or empty)
      */
     public void setPreferenceHistory(final List<SettingsSnapshot> list) {
@@ -151,7 +145,7 @@ public final class Settings {
 
     /**
      * Get LocalDate last modified.
-     * 
+     *
      * @return LocalDate last modified
      */
     public LocalDate getLastModified() {
@@ -160,87 +154,84 @@ public final class Settings {
 
     /**
      * Set LocalDate last modified.
-     * 
+     *
      * @param date LocalDate last modified
      */
     public void setLastModified(final LocalDate date) {
         this.lastModified = date;
     }
 
-    /**
-     * Appends a new snapshot representing the current settings state.
-     */
+    /** Appends a new snapshot representing the current settings state. */
     public void addSnapshotToHistory() {
         this.preferenceHistory.add(SettingsSnapshot.of(this));
     }
 
     /**
-     * Creates a new Settings instance from a snapshot.
-     * The history is intentionally reset.
-     * 
+     * Creates a new Settings instance from a snapshot. The history is intentionally reset.
+     *
      * @param snap the snapshot to restore from
      * @return a new Settings instance reflecting the snapshot
      */
     public static Settings fromSnapshot(final SettingsSnapshot snap) {
         return new Settings(
-            snap.getTheme(), 
-            snap.getBaseCurrency(), 
-            new ArrayList<>(), 
-            snap.getWindowPrefs());
+                snap.getTheme(), snap.getBaseCurrency(), new ArrayList<>(), snap.getWindowPrefs());
     }
 
     /**
      * Returns a deep copy of this Settings instance.
-     * 
-     * <p>
-     * The copy has its own independent history and window preferences.
-     * 
+     *
+     * <p>The copy has its own independent history and window preferences.
+     *
      * @return a new Settings instance with the same values
      */
     public Settings copy() {
         return new Settings(
-            theme, 
-            baseCurrency, 
-            new ArrayList<>(preferenceHistory), 
-            new WindowPreferences(
-                windowPrefs.getWidth(),
-                windowPrefs.getHeight(),
-                windowPrefs.isMaximized()
-            )
-        );
+                theme,
+                baseCurrency,
+                new ArrayList<>(preferenceHistory),
+                new WindowPreferences(
+                        windowPrefs.getWidth(),
+                        windowPrefs.getHeight(),
+                        windowPrefs.isMaximized()));
     }
 
-    /** 
+    /**
      * Returns the window layout preferences.
-     * 
+     *
      * @return window preferences
      */
-    public WindowPreferences getWindowPrefs() { 
-        return windowPrefs; 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "Settings exposes window preferences for direct UI binding")
+    public WindowPreferences getWindowPrefs() {
+        return windowPrefs;
     }
 
-    /** 
-     * Sets the window layout preferences. 
-     * 
+    /**
+     * Sets the window layout preferences.
+     *
      * @param prefs the new window preferences (not null)
      */
-    public void setWindowPrefs(final WindowPreferences prefs) { 
-        this.windowPrefs = prefs; 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Settings updates mutable window preferences")
+    public void setWindowPrefs(final WindowPreferences prefs) {
+        this.windowPrefs = prefs;
     }
 
     /**
      * Resolves the base currency code into a {@link CurrencyUnit}.
      *
-     * <p>
-     * This method is ignored during JSON serialization and used
-     * only at runtime.
-     * </p>
-     * 
+     * <p>This method is ignored during JSON serialization and used only at runtime.
+     *
      * @return the CurrencyUnit corresponding to the base currency code
      */
     @JsonIgnore
     public CurrencyUnit getBaseCurrencyUnit() {
+        final CurrencyUnit unit = CurrencyUnit.getByCode(baseCurrency);
+        if (unit != null) {
+            return unit;
+        }
         return Currency.get(baseCurrency);
     }
-
 }

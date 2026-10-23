@@ -1,19 +1,16 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
+import it.unibo.unibodget.model.categories.CategoryType;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
-import it.unibo.unibodget.model.categories.CategoryType;
-
 /**
  * Immutable criteria object used to filter and sort transaction history.
  *
- * <p>
- * All filter fields are optional. Missing values mean that the corresponding
- * filtering condition is not applied. Sorting always has a value and defaults
- * to {@link TransactionSortOrder#NEWEST_FIRST}.
- * </p>
+ * <p>All filter fields are optional. Missing values mean that the corresponding filtering condition
+ * is not applied. Sorting always has a value and defaults to {@link
+ * TransactionSortOrder#NEWEST_FIRST}.
  */
 public final class TransactionFilterCriteria {
 
@@ -24,9 +21,7 @@ public final class TransactionFilterCriteria {
     private final String keyword;
     private final TransactionSortOrder sortOrder;
 
-    /**
-     * Creates empty filter criteria with default newest-first sorting.
-     */
+    /** Creates empty filter criteria with default newest-first sorting. */
     public TransactionFilterCriteria() {
         this(null, null, null, null, null, TransactionSortOrder.NEWEST_FIRST);
     }
@@ -34,18 +29,12 @@ public final class TransactionFilterCriteria {
     /**
      * Creates filter criteria with the given optional values.
      *
-     * @param categoryName
-     *            the category name to match, or {@code null} for no category filter
-     * @param categoryType
-     *            the category type to match, or {@code null} for no type filter
-     * @param fromDate
-     *            the start date inclusive, or {@code null} for no lower bound
-     * @param toDate
-     *            the end date inclusive, or {@code null} for no upper bound
-     * @param keyword
-     *            a keyword to search in description or notes, or {@code null}
-     * @param sortOrder
-     *            the sort order to apply
+     * @param categoryName the category name to match, or {@code null} for no category filter
+     * @param categoryType the category type to match, or {@code null} for no type filter
+     * @param fromDate the start date inclusive, or {@code null} for no lower bound
+     * @param toDate the end date inclusive, or {@code null} for no upper bound
+     * @param keyword a keyword to search in description or notes, or {@code null}
+     * @param sortOrder the sort order to apply
      */
     public TransactionFilterCriteria(
             final String categoryName,

@@ -20,14 +20,14 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- layout copied more or less from the CoinMarketCap portfolio page, styles in investments.css -->
+<!-- layout modeled after portfolio views, unified styles defined in /css/theme.css -->
 <!-- scroll pane so if the window is small the page scrolls instead of squeezing the charts -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="investments-scroll" stylesheets="@investments.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
+<ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="investments-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.InvestmentsViewController">
    <content>
-      <VBox fx:id="investmentsVBoxPage" spacing="16.0" styleClass="investments-page">
+      <VBox fx:id="investmentsVBoxPage" minWidth="600.0" spacing="16.0" styleClass="investments-page">
          <children>
             <!-- header: wallet name (click to rename), balance and the buttons -->
-            <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <HBox alignment="TOP_LEFT" spacing="12.0">
                <children>
                   <VBox spacing="2.0" HBox.hgrow="ALWAYS">
                      <children>
@@ -39,8 +39,21 @@
                         <Label fx:id="walletBalance" styleClass="balance-big" text="\$00.00" />
                      </children>
                   </VBox>
-                  <Button fx:id="addTransactionButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" styleClass="primary-button" text="+ Add transaction" />
-                  <Button fx:id="exportToCSVBtn" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" styleClass="secondary-button" text="Export CSV" />
+                  <VBox alignment="TOP_RIGHT" spacing="8.0">
+                     <children>
+                        <HBox alignment="TOP_RIGHT">
+                           <children>
+                              <Button fx:id="closeButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleCloseApp" styleClass="secondary-button, close-app-button" text="Close" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                           <children>
+                              <Button fx:id="addTransactionButton" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleAddTransactionButtonClicked" styleClass="primary-button" text="+ Add transaction" />
+                              <Button fx:id="exportToCSVBtn" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#handleExportCSVOnMouseClicked" styleClass="secondary-button" text="Export CSV" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
                </children>
             </HBox>
             <!-- charts: performance big on the left, allocation pies on the right -->

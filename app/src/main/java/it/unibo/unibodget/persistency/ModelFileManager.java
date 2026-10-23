@@ -2,24 +2,23 @@ package it.unibo.unibodget.persistency;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 /**
- * Manages the lifecycle of reading and writing a single model type {@code T}
- * to a JSON file. This class abstracts file creation, loading, saving,
- * and updating, ensuring consistent JSON handling through Jackson.
+ * Manages the lifecycle of reading and writing a single model type {@code T} to a JSON file. This
+ * class abstracts file creation, loading, saving, and updating, ensuring consistent JSON handling
+ * through Jackson.
  *
- * <p>Typical usage:</p>
+ * <p>Typical usage:
+ *
  * <pre>
  * try (ModelFileManager<Settings> mgr =
  *         new ModelFileManager<>(path, resource, Settings.class)) {
@@ -40,7 +39,10 @@ public final class ModelFileManager<T> implements AutoCloseable {
     private final String objectKey;
     private final String listKey;
 
-    private enum State { OPEN, CLOSED }
+    private enum State {
+        OPEN,
+        CLOSED
+    }
 
     private State state = State.CLOSED;
 
@@ -49,9 +51,9 @@ public final class ModelFileManager<T> implements AutoCloseable {
     /**
      * Creates a manager for the given file and model type.
      *
-     * @param path         the file path where JSON is stored
+     * @param path the file path where JSON is stored
      * @param resourcePath fallback resource used if the file is missing or invalid
-     * @param type         the model class to serialize/deserialize
+     * @param type the model class to serialize/deserialize
      */
     public ModelFileManager(final Path path, final String resourcePath, final Class<T> type) {
         this(path, resourcePath, type, defaultKey(type), null);
@@ -60,27 +62,34 @@ public final class ModelFileManager<T> implements AutoCloseable {
     /**
      * Creates a manager with a custom JSON object key.
      *
-     * @param path         the file path
+     * @param path the file path
      * @param resourcePath fallback resource
-     * @param type         the model class
-     * @param objectKey    the JSON key used to store the object
+     * @param type the model class
+     * @param objectKey the JSON key used to store the object
      */
-    public ModelFileManager(final Path path, final String resourcePath,
-                            final Class<T> type, final String objectKey) {
+    public ModelFileManager(
+            final Path path,
+            final String resourcePath,
+            final Class<T> type,
+            final String objectKey) {
         this(path, resourcePath, type, objectKey, null);
     }
 
     /**
      * Creates a manager with custom object and list keys.
      *
-     * @param path         the file path
+     * @param path the file path
      * @param resourcePath fallback resource
-     * @param type         the model class
-     * @param objectKey    JSON key for the object
-     * @param listKey      JSON key for a list of objects
+     * @param type the model class
+     * @param objectKey JSON key for the object
+     * @param listKey JSON key for a list of objects
      */
-    public ModelFileManager(final Path path, final String resourcePath, final Class<T> type,
-                            final String objectKey, final String listKey) {
+    public ModelFileManager(
+            final Path path,
+            final String resourcePath,
+            final Class<T> type,
+            final String objectKey,
+            final String listKey) {
         this.path = path;
         this.resourcePath = resourcePath;
         this.type = type;
@@ -99,9 +108,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
     }
 
     /**
-     * Ensures the JSON file exists and contains valid JSON.
-     * If the file is missing, empty, or invalid, it is restored
-     * from the bundled resource.
+     * Ensures the JSON file exists and contains valid JSON. If the file is missing, empty, or
+     * invalid, it is restored from the bundled resource.
      *
      * @throws IOException if the file cannot be created or restored
      */
@@ -124,8 +132,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
     }
 
     /**
-     * Generates a default JSON key based on the class name.
-     * Example: Settings → {@code "settings"}.
+     * Generates a default JSON key based on the class name. Example: Settings → {@code "settings"}.
      *
      * @param type the model class used to derive the key
      * @return the default JSON key derived from the simple class name
@@ -141,13 +148,17 @@ public final class ModelFileManager<T> implements AutoCloseable {
      * @throws IOException if the resource cannot be read
      */
     private void restoreFromResources() throws IOException {
-        final InputStream is = getClass().getResourceAsStream(resourcePath);
-        if (is == null) {
-            throw new IOException("Resource not found: " + resourcePath);
-        }
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                throw new IOException("Resource not found: " + resourcePath);
+            }
 
-        Files.createDirectories(path.getParent());
-        Files.writeString(path, new String(is.readAllBytes()));
+            final Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.writeString(path, new String(is.readAllBytes(), StandardCharsets.UTF_8));
+        }
     }
 
     /**
@@ -178,9 +189,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         }
 
         return mapper.convertValue(
-            arr,
-            mapper.getTypeFactory().constructCollectionType(List.class, type)
-        );
+                arr, mapper.getTypeFactory().constructCollectionType(List.class, type));
     }
 
     /**
@@ -206,19 +215,16 @@ public final class ModelFileManager<T> implements AutoCloseable {
         }
     }
 
-    /**
-     * Closes the manager and prevents further operations.
-     */
+    /** Closes the manager and prevents further operations. */
     @Override
     public void close() {
         state = State.CLOSED;
     }
 
     /**
-     * Saves a list of objects under the given JSON key.
-     * The rest of the JSON file is preserved.
+     * Saves a list of objects under the given JSON key. The rest of the JSON file is preserved.
      *
-     * @param key  the JSON array key
+     * @param key the JSON array key
      * @param list the list to save
      * @throws IOException if writing fails
      */
@@ -228,9 +234,10 @@ public final class ModelFileManager<T> implements AutoCloseable {
         final JsonNode rootNode;
         if (Files.exists(path)) {
             final String raw = Files.readString(path);
-            rootNode = raw == null || raw.trim().isEmpty()
-                    ? mapper.createObjectNode()
-                    : mapper.readTree(raw);
+            rootNode =
+                    raw == null || raw.isBlank()
+                            ? mapper.createObjectNode()
+                            : mapper.readTree(raw);
         } else {
             rootNode = mapper.createObjectNode();
         }
@@ -265,8 +272,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
         requireOpen();
         final ObjectNode root = readCurrentRootOrEmpty();
         root.set(objectKey, mapper.valueToTree(obj));
-        mapper.writerWithDefaultPrettyPrinter()
-            .writeValue(path.toFile(), root);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), root);
     }
 
     /**
@@ -296,7 +302,7 @@ public final class ModelFileManager<T> implements AutoCloseable {
             return mapper.createObjectNode();
         }
         final String raw = Files.readString(path);
-        if (raw.trim().isEmpty()) {
+        if (raw.isBlank()) {
             return mapper.createObjectNode();
         }
         final JsonNode node = mapper.readTree(raw);
@@ -311,8 +317,8 @@ public final class ModelFileManager<T> implements AutoCloseable {
     private void requireListKey() {
         if (listKey == null) {
             throw new IllegalStateException(
-                "No list key configured for this ModelFileManager. "
-                + "Use the 4-arg constructor to set or call saveList(key, list)/loadList(key).");
+                    "No list key configured for this ModelFileManager. "
+                            + "Use the 4-arg constructor to set or call saveList(key, list)/loadList(key).");
         }
     }
 }

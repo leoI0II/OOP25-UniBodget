@@ -3,7 +3,6 @@ package it.unibo.unibodget.model.currency.bank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-
 import org.junit.jupiter.api.Test;
 
 class BankCalculatorTest {
@@ -28,5 +27,4 @@ class BankCalculatorTest {
 
         assertEquals(2, commission.scale());
     }
-
 }

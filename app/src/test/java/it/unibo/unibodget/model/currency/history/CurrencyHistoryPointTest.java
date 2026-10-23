@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
 
 class CurrencyHistoryPointTest {
@@ -25,10 +24,10 @@ class CurrencyHistoryPointTest {
 
     @Test
     void shouldImplementEqualsAndHashCode() {
-        final CurrencyHistoryPoint p1 = 
-            new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
-        final CurrencyHistoryPoint p2 = 
-            new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
+        final CurrencyHistoryPoint p1 =
+                new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
+        final CurrencyHistoryPoint p2 =
+                new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
 
         assertEquals(p1, p2);
         assertEquals(p1.hashCode(), p2.hashCode());
@@ -36,11 +35,10 @@ class CurrencyHistoryPointTest {
 
     @Test
     void shouldPrintReadableToString() {
-        final CurrencyHistoryPoint p = 
-            new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
+        final CurrencyHistoryPoint p =
+                new CurrencyHistoryPoint(LocalDate.of(YEAR_2024, MONTH_1, DAY_OF_M_1), RATE_1_25);
 
         assertTrue(p.toString().contains("2024-01-01"));
         assertTrue(p.toString().contains("1.25"));
     }
-
 }

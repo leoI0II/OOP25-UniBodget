@@ -10,44 +10,38 @@ import it.unibo.unibodget.model.categories.CategoryType;
 
 /**
  * Immutable input collected by the new-transaction dialog.
+ *
+ * @param unsignedAmount the positive amount entered by the user
+ * @param transactionType the chosen category type
+ * @param category the chosen category
+ * @param date the transaction date
+ * @param description the transaction description
+ * @param notes optional additional notes
+ * @param friendName optional friend name for a new loan
+ * @param friendLoanOperation optional friend loan operation type
+ * @param existingFriendLoanId optional friend loan identifier for repayments
  */
-public final class NewTransactionRequest {
+public record NewTransactionRequest(
+        BigDecimal unsignedAmount,
+        CategoryType transactionType,
+        Category category,
+        LocalDate date,
+        String description,
+        String notes,
+        String friendName,
+        FriendLoanOperation friendLoanOperation,
+        UUID existingFriendLoanId) {
 
-    private final BigDecimal unsignedAmount;
-    private final CategoryType transactionType;
-    private final Category category;
-    private final LocalDate date;
-    private final String description;
-    private final String notes;
-    private final String friendName;
-    private final FriendLoanOperation friendLoanOperation;
-    private final UUID existingFriendLoanId;
+    /**
+     * Compact canonical constructor with domain validation.
+     */
+    public NewTransactionRequest {
+        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
+        Objects.requireNonNull(transactionType, "transactionType must not be null");
+        Objects.requireNonNull(category, "category must not be null");
+        Objects.requireNonNull(date, "date must not be null");
+        Objects.requireNonNull(description, "description must not be null");
 
-    public NewTransactionRequest(
-            final BigDecimal unsignedAmount,
-            final CategoryType transactionType,
-            final Category category,
-            final LocalDate date,
-            final String description,
-            final String notes,
-            final String friendName,
-            final FriendLoanOperation friendLoanOperation,
-            final UUID existingFriendLoanId) {
-
-        this.unsignedAmount = Objects.requireNonNull(unsignedAmount);
-        this.transactionType = Objects.requireNonNull(transactionType);
-        this.category = Objects.requireNonNull(category);
-        this.date = Objects.requireNonNull(date);
-        this.description = Objects.requireNonNull(description);
-        this.notes = notes;
-        this.friendName = friendName;
-        this.friendLoanOperation = friendLoanOperation;
-        this.existingFriendLoanId = existingFriendLoanId;
-
-        validate();
-    }
-
-    private void validate() {
         if (unsignedAmount.signum() <= 0) {
             throw new IllegalArgumentException("Amount must be positive.");
         }
@@ -83,41 +77,5 @@ public final class NewTransactionRequest {
                 );
             }
         }
-    }
-
-    public BigDecimal unsignedAmount() {
-        return unsignedAmount;
-    }
-
-    public CategoryType transactionType() {
-        return transactionType;
-    }
-
-    public Category category() {
-        return category;
-    }
-
-    public LocalDate date() {
-        return date;
-    }
-
-    public String description() {
-        return description;
-    }
-
-    public String notes() {
-        return notes;
-    }
-
-    public String friendName() {
-        return friendName;
-    }
-
-    public FriendLoanOperation friendLoanOperation() {
-        return friendLoanOperation;
-    }
-
-    public UUID existingFriendLoanId() {
-        return existingFriendLoanId;
     }
 }

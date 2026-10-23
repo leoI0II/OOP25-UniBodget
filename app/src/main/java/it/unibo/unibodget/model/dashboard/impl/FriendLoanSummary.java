@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Immutable read model representing the dashboard summary of a friend loan.
- */
+/** Immutable read model representing the dashboard summary of a friend loan. */
 public final class FriendLoanSummary {
 
     private final UUID friendLoanId;
@@ -18,16 +16,11 @@ public final class FriendLoanSummary {
     /**
      * Creates a new friend-loan summary.
      *
-     * @param friendLoanId
-     *            the identifier of the friend loan; must not be null
-     * @param friendName
-     *            the related friend's name; must not be null
-     * @param totalGiven
-     *            the total amount given to the friend; must not be null
-     * @param totalReceived
-     *            the total amount received from the friend; must not be null
-     * @param netBalance
-     *            the signed residual balance; must not be null
+     * @param friendLoanId the identifier of the friend loan; must not be null
+     * @param friendName the related friend's name; must not be null
+     * @param totalGiven the total amount given to the friend; must not be null
+     * @param totalReceived the total amount received from the friend; must not be null
+     * @param netBalance the signed residual balance; must not be null
      */
     public FriendLoanSummary(
             final UUID friendLoanId,
@@ -81,10 +74,8 @@ public final class FriendLoanSummary {
     /**
      * Returns the signed net balance of the friend loan.
      *
-     * <p>
-     * A positive balance means the user has given more than received.
-     * A negative balance means the user has received more than given.
-     * </p>
+     * <p>A positive balance means the user has given more than received. A negative balance means
+     * the user has received more than given.
      *
      * @return the signed net balance
      */

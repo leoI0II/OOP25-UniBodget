@@ -1,6 +1,5 @@
 package it.unibo.unibodget.model.transactions;
 
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,27 +73,23 @@ public class Historical<T extends AbstractTransaction> {
      * Uses {@link Object#equals} to locate the transaction.
      *
      * @param transaction the transaction to remove
-     * @return {@code true} if the transaction was found and removed,
-     * {@code false} otherwise
+     * @return true if the transaction was found and removed, false otherwise
      */
     public boolean removeTransaction(final T transaction) {
         return history.remove(transaction);
     }
 
     /**
-     * Replaces an existing transaction with a new one, preserving its position
-     * in the ledger.
+     * Replaces an existing transaction with a new one, preserving its position in the ledger.
      *
      * <p>
      * Uses {@link Object#equals} to locate {@code oldTransaction}.
+     * </p>
      *
-     * @param oldTransaction the transaction to replace; must not be
-     * {@code null}
-     * @param newTransaction the replacement transaction; must not be
-     * {@code null}
-     * @return {@code true} if the replacement succeeded, {@code false} if
-     * {@code oldTransaction} was not found in the ledger
-     * @throws NullPointerException if either argument is {@code null}
+     * @param oldTransaction the transaction to replace; must not be null
+     * @param newTransaction the replacement transaction; must not be null
+     * @return true if the replacement succeeded, false if not found
+     * @throws NullPointerException if either argument is null
      */
     public boolean replaceTransaction(final T oldTransaction, final T newTransaction) {
         Objects.requireNonNull(oldTransaction);
@@ -136,23 +131,4 @@ public class Historical<T extends AbstractTransaction> {
     public int hashCode() {
         return Objects.hash(history);
     }
-
-    /**
-     * Returns all transactions that occurred within the given calendar month.
-     *
-     * @param month the month to filter by
-     * @return an unmodifiable list of transactions that occurred in the
-     * specified month
-     */
-    public List<T> filterByMonth(final YearMonth month) {
-        Objects.requireNonNull(month, "month must not be null");
-        final List<T> filtered = new ArrayList<>();
-        for (final T transaction : history) {
-            if (YearMonth.from(transaction.getDate()).equals(month)) {
-                filtered.add(transaction);
-            }
-        }
-        return Collections.unmodifiableList(filtered);
-    }
-
 }

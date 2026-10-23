@@ -5,8 +5,8 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState;
 /**
  * Contract for the dashboard view.
  *
- * <p>The dashboard view is responsible only for rendering UI state
- * and forwarding user interactions through bound actions.</p>
+ * <p>The dashboard view is responsible only for rendering UI state and forwarding user interactions
+ * through bound actions.
  */
 public interface DashboardView {
 

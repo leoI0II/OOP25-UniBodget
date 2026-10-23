@@ -3,11 +3,10 @@ package it.unibo.unibodget.model.currency;
 /**
  * Supported fiat currencies.
  *
- * <p>Each constant carries a display symbol, short ISO name, full name,
- * and currency code. All fiat currencies use 2 decimal places for display.</p>
+ * <p>Each constant carries a display symbol, short ISO name, full name, and currency code. All fiat
+ * currencies use 2 decimal places for display.
  */
 public enum FiatCurrency implements CurrencyUnit {
-
     EUR("€", "EUR", "Euro", "EUR"),
     USD(CurrencySymbols.DOLLAR, "USD", "United States Dollar", "USD"),
     GBP("£", "GBP", "Pound Sterling", "GBP"),
@@ -20,7 +19,7 @@ public enum FiatCurrency implements CurrencyUnit {
     HKD(CurrencySymbols.DOLLAR, "HKD", "Hong Kong Dollar", "HKD"),
     INR("₹", "INR", "Indian Rupee", "INR");
 
-    private final CurrencyType type = CurrencyType.FIAT;
+    private static final CurrencyType TYPE = CurrencyType.FIAT;
     private final String symbol;
     private final String shortName;
     private final String fullName;
@@ -29,17 +28,13 @@ public enum FiatCurrency implements CurrencyUnit {
     /**
      * Constructs a fiat currency definition.
      *
-     * @param symbol    the graphical symbol of the currency
+     * @param symbol the graphical symbol of the currency
      * @param shortName the short identifier (ISO-like code)
-     * @param fullName  the full descriptive name
-     * @param code      the standardized currency code
+     * @param fullName the full descriptive name
+     * @param code the standardized currency code
      */
     FiatCurrency(
-            final String symbol,
-            final String shortName,
-            final String fullName,
-            final String code
-    ) {
+            final String symbol, final String shortName, final String fullName, final String code) {
         this.symbol = symbol;
         this.shortName = shortName;
         this.fullName = fullName;
@@ -49,7 +44,7 @@ public enum FiatCurrency implements CurrencyUnit {
     /** {@inheritDoc} */
     @Override
     public CurrencyType getType() {
-        return this.type;
+        return TYPE;
     }
 
     /** {@inheritDoc} */
@@ -80,6 +75,23 @@ public enum FiatCurrency implements CurrencyUnit {
     @Override
     public int getDisplayDecimals() {
         return 2;
+    }
+
+    /**
+     * Resolves a {@link FiatCurrency} by its ISO code (case-insensitive).
+     *
+     * @param code the currency code (e.g., "USD", "EUR")
+     * @return the matching {@link FiatCurrency}, or {@link #EUR} if not found or code is null
+     */
+    public static FiatCurrency fromCode(final String code) {
+        if (code != null) {
+            for (final FiatCurrency fiat : values()) {
+                if (fiat.code.equalsIgnoreCase(code)) {
+                    return fiat;
+                }
+            }
+        }
+        return EUR;
     }
 
     /** {@inheritDoc} */

@@ -6,12 +6,12 @@ import java.util.Objects;
 /**
  * Immutable monetary value: a {@link CurrencyUnit} paired with a {@link BigDecimal} amount.
  *
- * <p>Positive amounts represent income or holdings; negative amounts represent expenses or debts.</p>
+ * <p>Positive amounts represent income or holdings; negative amounts represent expenses or debts.
  *
  * @param currency the type of currency (e.g., USD, EUR, BTC); must not be null
- * @param amount   the numerical amount; positive for income, negative for expense; must not be null
+ * @param amount the numerical amount; positive for income, negative for expense; must not be null
  */
-public record Asset(CurrencyUnit currency, BigDecimal amount) {
+public record Asset(CurrencyUnit currency, BigDecimal amount) implements Comparable<Asset> {
 
     /**
      * Constructs an Asset with the given currency and amount.
@@ -27,9 +27,9 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
 
     /**
      * Factory method to create an Asset from a currency unit and an amount.
-     * 
+     *
      * @param currency the currency unit of the asset; must not be null
-     * @param amount   the numerical amount; must not be null
+     * @param amount the numerical amount; must not be null
      * @return a new Asset instance
      */
     public static Asset of(final CurrencyUnit currency, final BigDecimal amount) {
@@ -55,11 +55,10 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
     private void requireSameCurrency(final Asset other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException(
-                "Cannot operate on assets with different currencies: "
-                        + this.currency
-                        + " vs "
-                        + other.currency
-            );
+                    "Cannot operate on assets with different currencies: "
+                            + this.currency
+                            + " vs "
+                            + other.currency);
         }
     }
 
@@ -159,17 +158,17 @@ public record Asset(CurrencyUnit currency, BigDecimal amount) {
     }
 
     /**
-     * Compares this asset's amount to {@code other}'s amount.
-     * Both assets must share the same currency.
+     * Compares this asset's amount to {@code other}'s amount. Both assets must share the same
+     * currency.
      *
      * @param other the asset to compare to; must have the same currency
-     * @return a negative integer, zero, or positive integer as this amount
-     *         is less than, equal to, or greater than {@code other}'s amount
+     * @return a negative integer, zero, or positive integer as this amount is less than, equal to,
+     *     or greater than {@code other}'s amount
      * @throws IllegalArgumentException if currencies differ
      */
+    @Override
     public int compareTo(final Asset other) {
         requireSameCurrency(other);
         return this.amount.compareTo(other.amount);
     }
-
 }

@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -26,6 +27,9 @@ import javafx.scene.paint.Color;
 public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
     private static final String DEFAULT_COLOR = "#4F46E5";
+    private static final double PREVIEW_BOX_SIZE = 42.0;
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
 
     private final TextField nameField;
     private final ColorPicker colorPicker;
@@ -43,6 +47,7 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
         setTitle("Create New Category");
         setHeaderText("Create a new " + formatCategoryType(fixedType) + " category");
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType createButtonType = new ButtonType("Create", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
@@ -54,17 +59,17 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
 
         nameField.setPromptText("Category name");
 
-        colorPreview.setMinSize(42, 42);
-        colorPreview.setPrefSize(42, 42);
-        colorPreview.setMaxSize(42, 42);
+        colorPreview.setMinSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
+        colorPreview.setPrefSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
+        colorPreview.setMaxSize(PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
         updateColorPreview(colorPicker.getValue());
 
         colorPicker.valueProperty().addListener((obs, oldColor, newColor) -> updateColorPreview(newColor));
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
         grid.add(new Label("Type:"), 0, 0);
         grid.add(new Label(formatCategoryType(fixedType)), 1, 0);
@@ -147,9 +152,9 @@ public final class NewCategoryDialog extends Dialog<NewCategoryRequest> {
      * @return the normalized hexadecimal RGB string
      */
     private static String toHexColor(final Color color) {
-        final int red = (int) Math.round(color.getRed() * 255);
-        final int green = (int) Math.round(color.getGreen() * 255);
-        final int blue = (int) Math.round(color.getBlue() * 255);
+        final long red = Math.round(color.getRed() * 255);
+        final long green = Math.round(color.getGreen() * 255);
+        final long blue = Math.round(color.getBlue() * 255);
         return String.format("#%02X%02X%02X", red, green, blue);
     }
 

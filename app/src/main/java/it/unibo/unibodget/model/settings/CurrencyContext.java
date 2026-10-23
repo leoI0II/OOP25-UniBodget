@@ -3,16 +3,15 @@ package it.unibo.unibodget.model.settings;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 
 /**
- * Global currency context used by all aggregators and dashboards.
- * When the user changes the base currency in Settings, this class
- * updates the global reference so all future calculations use it.
+ * Global currency context used by all aggregators and dashboards. When the user changes the base
+ * currency in Settings, this class updates the global reference so all future calculations use it.
  */
 public final class CurrencyContext {
 
     private static String base = FiatCurrency.EUR.getShortName();
 
     private CurrencyContext() {
-
+        // utility class
     }
 
     /**

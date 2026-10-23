@@ -25,21 +25,21 @@ class CashAccountTest {
     void shouldComputeBalanceCorrectly() {
         final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
-        acc.addTransaction(new CashTransaction(
-                new Asset(FiatCurrency.EUR, new BigDecimal("10")),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        ));
+        acc.addTransaction(CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, BigDecimal.TEN))
+                .category(Category.FOOD)
+                .date(LocalDate.now())
+                .description(DESC)
+                .notes(NOTES)
+                .build());
 
-        acc.addTransaction(new CashTransaction(
-                new Asset(FiatCurrency.EUR, new BigDecimal("5")),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        ));
+        acc.addTransaction(CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, new BigDecimal("5")))
+                .category(Category.FOOD)
+                .date(LocalDate.now())
+                .description(DESC)
+                .notes(NOTES)
+                .build());
 
         assertEquals(new BigDecimal("15"), acc.getBalance().amount());
     }
@@ -68,13 +68,13 @@ class CashAccountTest {
     void shouldRejectZeroAmountTransaction() {
         final CashAccount acc = new CashAccount(CASH_CUST, FiatCurrency.EUR);
 
-        final CashTransaction zeroTx = new CashTransaction(
-                new Asset(FiatCurrency.EUR, BigDecimal.ZERO),
-                Category.FOOD,
-                LocalDate.now(),
-                DESC,
-                NOTES
-        );
+        final CashTransaction zeroTx = CashTransaction.builder()
+                .asset(new Asset(FiatCurrency.EUR, BigDecimal.ZERO))
+                .category(Category.FOOD)
+                .date(LocalDate.now())
+                .description(DESC)
+                .notes(NOTES)
+                .build();
 
         assertThrows(IllegalArgumentException.class, () -> acc.addTransaction(zeroTx));
     }

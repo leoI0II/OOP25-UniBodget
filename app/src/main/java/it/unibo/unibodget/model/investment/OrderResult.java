@@ -1,28 +1,26 @@
 package it.unibo.unibodget.model.investment;
 
-import java.math.BigDecimal;
-
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import it.unibo.unibodget.model.transactions.base.InvestmentTransaction;
+import java.math.BigDecimal;
 
 /**
- * Represents the outcome of attempting to execute an investment order.
- * This sealed interface encompasses all possible success states and specific
- * failure reasons
- * for operations such as buying, selling, and transferring assets.
+ * Represents the outcome of attempting to execute an investment order. This sealed interface
+ * encompasses all possible success states and specific failure reasons for operations such as
+ * buying, selling, and transferring assets.
  */
 public sealed interface OrderResult
         permits OrderResult.BuyWithCashSuccess,
-        OrderResult.BuyWithStablesSuccess,
-        OrderResult.BuyNoPaymentSuccess,
-        OrderResult.SellWithCashSuccess,
-        OrderResult.SellWithStablesSuccess,
-        OrderResult.SellNoPaymentSuccess,
-        OrderResult.TransferSuccess,
-        OrderResult.InsufficientFunds,
-        OrderResult.InsufficientAssets,
-        OrderResult.CurrencyConversionError {
+                OrderResult.BuyWithStablesSuccess,
+                OrderResult.BuyNoPaymentSuccess,
+                OrderResult.SellWithCashSuccess,
+                OrderResult.SellWithStablesSuccess,
+                OrderResult.SellNoPaymentSuccess,
+                OrderResult.TransferSuccess,
+                OrderResult.InsufficientFunds,
+                OrderResult.InsufficientAssets,
+                OrderResult.CurrencyConversionError {
 
     /**
      * Indicates whether the order was executed successfully.
@@ -34,11 +32,12 @@ public sealed interface OrderResult
     /**
      * Represents a successful buy order paid for using a cash account.
      *
-     * @param cashTransaction       the transaction debiting the cash account
+     * @param cashTransaction the transaction debiting the cash account
      * @param investmentTransaction the transaction crediting the investment account
      */
     record BuyWithCashSuccess(
-            CashTransaction cashTransaction, InvestmentTransaction investmentTransaction) implements OrderResult {
+            CashTransaction cashTransaction, InvestmentTransaction investmentTransaction)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -47,17 +46,14 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a successful buy order paid for using stablecoins within the
-     * investment account.
+     * Represents a successful buy order paid for using stablecoins within the investment account.
      *
-     * @param stablesAccount          the transaction debiting the stablecoin
-     *                                balance
-     * @param targetInvestmentAccount the transaction crediting the purchased asset
-     *                                balance
+     * @param stablesAccount the transaction debiting the stablecoin balance
+     * @param targetInvestmentAccount the transaction crediting the purchased asset balance
      */
     record BuyWithStablesSuccess(
-            InvestmentTransaction stablesAccount,
-            InvestmentTransaction targetInvestmentAccount) implements OrderResult {
+            InvestmentTransaction stablesAccount, InvestmentTransaction targetInvestmentAccount)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -66,8 +62,8 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a successful buy order with no specified payment source (e.g., an
-     * external deposit).
+     * Represents a successful buy order with no specified payment source (e.g., an external
+     * deposit).
      *
      * @param investmentTransaction the transaction crediting the investment account
      */
@@ -83,12 +79,12 @@ public sealed interface OrderResult
      * Represents a successful transfer of assets between investment accounts.
      *
      * @param srcInvestmentTransaction the transaction debiting the source account
-     * @param dstInvestmentTransaction the transaction crediting the destination
-     *                                 account
+     * @param dstInvestmentTransaction the transaction crediting the destination account
      */
     record TransferSuccess(
             InvestmentTransaction srcInvestmentTransaction,
-            InvestmentTransaction dstInvestmentTransaction) implements OrderResult {
+            InvestmentTransaction dstInvestmentTransaction)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -97,16 +93,15 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a successful sell order where the proceeds are deposited into a
-     * cash account.
+     * Represents a successful sell order where the proceeds are deposited into a cash account.
      *
-     * @param investmentTransaction the transaction debiting the sold asset from the
-     *                              investment account
-     * @param cashTransaction       the transaction crediting the cash account
+     * @param investmentTransaction the transaction debiting the sold asset from the investment
+     *     account
+     * @param cashTransaction the transaction crediting the cash account
      */
     record SellWithCashSuccess(
-            InvestmentTransaction investmentTransaction,
-            CashTransaction cashTransaction) implements OrderResult {
+            InvestmentTransaction investmentTransaction, CashTransaction cashTransaction)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -115,15 +110,14 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a successful sell order where the proceeds are converted to
-     * stablecoins.
+     * Represents a successful sell order where the proceeds are converted to stablecoins.
      *
      * @param investmentTransaction the transaction debiting the sold asset
-     * @param stablesAccount        the transaction crediting the stablecoin balance
+     * @param stablesAccount the transaction crediting the stablecoin balance
      */
     record SellWithStablesSuccess(
-            InvestmentTransaction investmentTransaction,
-            InvestmentTransaction stablesAccount) implements OrderResult {
+            InvestmentTransaction investmentTransaction, InvestmentTransaction stablesAccount)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -132,12 +126,13 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a successful sell order with no specified target for the proceeds
-     * (e.g., an external withdrawal).
+     * Represents a successful sell order with no specified target for the proceeds (e.g., an
+     * external withdrawal).
      *
      * @param investmentTransaction the transaction debiting the sold asset
      */
-    record SellNoPaymentSuccess(InvestmentTransaction investmentTransaction) implements OrderResult {
+    record SellNoPaymentSuccess(InvestmentTransaction investmentTransaction)
+            implements OrderResult {
         /** {@inheritDoc} */
         @Override
         public boolean isSuccess() {
@@ -148,7 +143,7 @@ public sealed interface OrderResult
     /**
      * Represents a failed order due to insufficient funds in the payment source.
      *
-     * @param required  the amount required to complete the order
+     * @param required the amount required to complete the order
      * @param available the amount currently available in the payment source
      */
     record InsufficientFunds(Asset required, Asset available) implements OrderResult {
@@ -160,8 +155,7 @@ public sealed interface OrderResult
     }
 
     /**
-     * Represents a failed order due to insufficient assets available to sell or
-     * transfer.
+     * Represents a failed order due to insufficient assets available to sell or transfer.
      *
      * @param requested the quantity of the asset requested for the operation
      * @param available the quantity of the asset currently held

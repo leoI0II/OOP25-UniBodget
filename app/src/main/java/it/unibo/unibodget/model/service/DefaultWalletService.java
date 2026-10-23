@@ -1,39 +1,37 @@
 package it.unibo.unibodget.model.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.dashboard.support.WalletObserver;
 import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.WalletAddedEvent;
 import it.unibo.unibodget.model.utils.event.WalletDeletedEvent;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Default implementation of {@link WalletService}.
  *
- * <p>
- * This service stores the wallets available to the user, keeps track of the
- * currently selected wallet, and delegates transaction and observer operations
- * to the appropriate wallet or history.</p>
+ * <p>This service stores the wallets available to the user, keeps track of the currently selected
+ * wallet, and delegates transaction and observer operations to the appropriate wallet or history.
  *
  * @param <T> the type of transaction managed by the wallets
  * @param <W> the concrete wallet type, must extend {@link AbstractWallet}
  */
-public class DefaultWalletService<T extends AbstractTransaction, W extends AbstractWallet<T>> implements WalletService<T, W> {
+public class DefaultWalletService<T extends AbstractTransaction, W extends AbstractWallet<T>>
+        implements WalletService<T, W> {
 
     private final List<W> wallets = new ArrayList<>();
     private final List<WalletObserver> observers = new ArrayList<>();
     private W currentWallet;
 
-    /**
-     * Creates an empty wallet service.
-     */
+    /** Creates an empty wallet service. */
     public DefaultWalletService() {
+        // default constructor
     }
 
     /**
@@ -46,26 +44,23 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         this.currentWallet = this.wallets.isEmpty() ? null : this.wallets.get(0);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public List<W> getWallets() {
         return List.copyOf(wallets);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Optional<W> getCurrentWallet() {
         return Optional.ofNullable(currentWallet);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Service manages references to wallet domain entities")
     public void addWallet(final W wallet) {
         wallets.add(Objects.requireNonNull(wallet));
         if (currentWallet == null) {
@@ -75,15 +70,14 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         MessageBus.send(new WalletAddedEvent(wallet));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
-        final Optional<W> walletToRemove = wallets.stream()
-                .filter(wallet -> wallet.getId().equals(nonNullWalletId))
-                .findFirst();
+        final Optional<W> walletToRemove =
+                wallets.stream()
+                        .filter(wallet -> wallet.getId().equals(nonNullWalletId))
+                        .findFirst();
 
         if (walletToRemove.isEmpty()) {
             return false;
@@ -103,14 +97,13 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
     /**
      * {@inheritDoc}
      *
-     * <p>The rename event is published by {@link AbstractWallet#setName(String)}.</p>
+     * <p>The rename event is published by {@link AbstractWallet#setName(String)}.
      */
     @Override
     public boolean renameWallet(final UUID walletId, final String newName) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
-        final Optional<W> wallet = wallets.stream()
-                .filter(w -> w.getId().equals(nonNullWalletId))
-                .findFirst();
+        final Optional<W> wallet =
+                wallets.stream().filter(w -> w.getId().equals(nonNullWalletId)).findFirst();
 
         if (wallet.isEmpty()) {
             return false;
@@ -120,15 +113,14 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean selectWallet(final UUID walletId) {
         final UUID nonNullWalletId = Objects.requireNonNull(walletId);
-        final Optional<W> selectedWallet = wallets.stream()
-                .filter(wallet -> wallet.getId().equals(nonNullWalletId))
-                .findFirst();
+        final Optional<W> selectedWallet =
+                wallets.stream()
+                        .filter(wallet -> wallet.getId().equals(nonNullWalletId))
+                        .findFirst();
 
         if (selectedWallet.isEmpty()) {
             return false;
@@ -139,86 +131,70 @@ public class DefaultWalletService<T extends AbstractTransaction, W extends Abstr
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public List<T> getCurrentTransactions() {
         return List.copyOf(getRequiredCurrentWallet().getHistory().getTransactions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void addTransaction(final T transaction) {
         getRequiredCurrentWallet().addTransaction(Objects.requireNonNull(transaction));
         notifyObservers();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeTransaction(final T transaction) {
-        final boolean removed = getRequiredCurrentWallet()
-                .removeTransaction(Objects.requireNonNull(transaction));
+        final boolean removed =
+                getRequiredCurrentWallet().removeTransaction(Objects.requireNonNull(transaction));
         if (removed) {
             notifyObservers();
         }
         return removed;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void replaceTransaction(final T oldTransaction, final T newTransaction) {
-        final boolean replaced = getRequiredCurrentWallet()
-                .replaceTransaction(
-                        Objects.requireNonNull(oldTransaction),
-                        Objects.requireNonNull(newTransaction));
+        final boolean replaced =
+                getRequiredCurrentWallet()
+                        .replaceTransaction(
+                                Objects.requireNonNull(oldTransaction),
+                                Objects.requireNonNull(newTransaction));
         if (replaced) {
             notifyObservers();
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void clearCurrentWalletHistory() {
         getRequiredCurrentWallet().getHistory().clear();
         notifyObservers();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void addObserver(final WalletObserver observer) {
         observers.add(Objects.requireNonNull(observer));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeObserver(final WalletObserver observer) {
         observers.remove(Objects.requireNonNull(observer));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void notifyObservers() {
         observers.forEach(WalletObserver::update);
     }
 
     /**
-     * Returns the current wallet, throwing an exception if no wallet is
-     * selected.
+     * Returns the current wallet, throwing an exception if no wallet is selected.
      *
      * @return the currently selected wallet
      * @throws IllegalStateException if no wallet has been selected yet

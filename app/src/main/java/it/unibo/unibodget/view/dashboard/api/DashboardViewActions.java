@@ -2,7 +2,6 @@ package it.unibo.unibodget.view.dashboard.api;
 
 import java.util.UUID;
 
-import it.unibo.unibodget.view.dashboard.state.DashboardDestination;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
 
 /**
@@ -28,45 +27,16 @@ public interface DashboardViewActions {
     void onViewOpened();
 
     /**
-     * Called when a wallet is selected from the sidebar.
+     * Called when a wallet is selected.
      *
-     * @param walletId the identifier of the selected wallet; must not be
-     * {@code null}
+     * @param walletId the identifier of the selected wallet, must not be null
      */
     void onWalletSelected(UUID walletId);
 
     /**
-     * Called when editing a wallet is requested.
-     *
-     * @param walletId the wallet identifier
-     */
-    default void onEditWalletRequested(final UUID walletId) {
-    }
-
-    /**
-     * Called when deleting a wallet is requested.
-     *
-     * @param walletId the wallet identifier
-     */
-    default void onDeleteWalletRequested(final UUID walletId) {
-    }
-
-    /**
-     * Called when navigation to a dashboard destination is requested.
-     *
-     * @param destination the requested destination; must not be {@code null}
-     */
-    void onNavigationRequested(DashboardDestination destination);
-
-    /**
-     * Called when the settings area is requested directly.
-     */
-    void onSettingsRequested();
-
-    /**
      * Called when the transaction filter input changes.
      *
-     * @param input the new transaction filter input; must not be {@code null}
+     * @param input the new transaction filter input, must not be null
      */
     void onTransactionFiltersChanged(TransactionFilterInput input);
 
@@ -79,6 +49,19 @@ public interface DashboardViewActions {
      * Called when wallet creation is requested.
      */
     void onCreateWalletRequested();
+
+    /**
+     * Called when wallet deletion is requested.
+     *
+     * <p>
+     * This default implementation is intentionally empty to preserve backward
+     * compatibility with existing implementations. [web:477][web:617]
+     * </p>
+     *
+     * @param walletId the identifier of the wallet to delete
+     */
+    default void onDeleteWalletRequested(final UUID walletId) {
+    }
 
     /**
      * Called when transaction creation is requested.
@@ -98,8 +81,7 @@ public interface DashboardViewActions {
      * compatibility with existing implementations. [web:477][web:617]
      * </p>
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction row
      */
     default void onEditTransactionRequested(final UUID transactionRowId) {
     }
@@ -112,8 +94,7 @@ public interface DashboardViewActions {
      * compatibility with existing implementations. [web:477][web:617]
      * </p>
      *
-     * @param transactionRowId the identifier of the transaction represented by
-     * the selected row
+     * @param transactionRowId the identifier of the transaction row
      */
     default void onDeleteTransactionRequested(final UUID transactionRowId) {
     }

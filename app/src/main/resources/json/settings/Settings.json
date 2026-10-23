@@ -1,9 +1,9 @@
 {
   "theme": {
-    "name": "Light",
-    "primaryColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
-    "buttonColor": { "alpha": 255, "red": 192, "green": 192, "blue": 192 },
-    "textColor": { "alpha": 255, "red": 0, "green": 0, "blue": 0 },
+    "name": "Dark",
+    "primaryColor": { "alpha": 255, "red": 14, "green": 16, "blue": 27 },
+    "buttonColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
+    "textColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
     "fontFamily": "Arial",
     "fontSize": 14,
     "boldText": false

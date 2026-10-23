@@ -1,34 +1,32 @@
 package it.unibo.unibodget.model.currency;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Restores a registered currency from a code or a JSON object.
- */
-public class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUnit> {
+/** Restores a registered currency from a code or a JSON object. */
+public final class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUnit> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyUnitDeserializer.class);
 
     /**
      * Deserializes a currency code or JSON object into a registered currency.
      *
-     * <p>Accepts either a string code or an object containing a {@code code}
-     * field. Searches enum-based currencies first, then dynamically loaded
-     * currencies.</p>
+     * <p>Accepts either a string code or an object containing a {@code code} field. Searches
+     * enum-based currencies first, then dynamically loaded currencies.
      *
      * @param parser the JSON parser
      * @param context the deserialization context
      * @return the registered currency matching the code
-     * @throws IOException if parsing fails or the currency code is missing,
-     *         blank or unknown
+     * @throws IOException if parsing fails or the currency code is missing, blank or unknown
      */
     @Override
-    public CurrencyUnit deserialize(
-            final JsonParser parser,
-            final DeserializationContext context) throws IOException {
+    public CurrencyUnit deserialize(final JsonParser parser, final DeserializationContext context)
+            throws IOException {
 
         final JsonNode node = parser.getCodec().readTree(parser);
 
@@ -42,9 +40,7 @@ public class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUnit> {
         }
 
         if (code == null || code.isBlank()) {
-            throw new IOException(
-                    "Currency without a valid code: " + node
-            );
+            throw new IOException("Currency without a valid code: " + node);
         }
 
         // Search in enum: fiat, crypto e stock
@@ -56,16 +52,14 @@ public class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUnit> {
         }
 
         if (unit == null) {
-            throw new IOException(
-                    "Unknown currency code in saved data: " + code
-            );
+            throw new IOException("Unknown currency code in saved data: " + code);
         }
 
-        System.out.println("[PERSISTENCE] Restored currency: "
-                + unit.getCode()
-                + " as " + unit.getClass().getSimpleName());
+        LOGGER.debug(
+                "[PERSISTENCE] Restored currency: {} as {}",
+                unit.getCode(),
+                unit.getClass().getSimpleName());
 
         return unit;
     }
-
 }

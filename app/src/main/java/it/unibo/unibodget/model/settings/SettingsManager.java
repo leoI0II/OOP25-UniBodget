@@ -1,21 +1,25 @@
 package it.unibo.unibodget.model.settings;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.persistency.ModelFileManager;
-
 import java.io.IOException;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages loading and saving of {@link Settings} from persistent storage.
  *
- * <p>The manager keeps a single static instance of the current settings,
- * automatically loading it on first use. All changes are written to
- * <code>data/json/settings/Settings.json</code> using {@link ModelFileManager}.</p>
+ * <p>The manager keeps a single static instance of the current settings, automatically loading it
+ * on first use. All changes are written to <code>data/json/settings/Settings.json</code> using
+ * {@link ModelFileManager}.
  *
- * <p>It also provides convenience methods for appending snapshots to the
- * history and updating window preferences.</p>
+ * <p>It also provides convenience methods for appending snapshots to the history and updating
+ * window preferences.
  */
 public final class SettingsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
 
     private static final Path PATH = Path.of("data/json/settings/Settings.json");
     private static final String RESOURCE = "/json/settings/Settings.json";
@@ -23,9 +27,7 @@ public final class SettingsManager {
     private static Settings current;
     private static boolean initialized;
 
-    /**
-     * Creates a SettingsManager and initializes the settings if needed.
-     */
+    /** Creates a SettingsManager and initializes the settings if needed. */
     public SettingsManager() {
         if (!initialized) {
             init();
@@ -37,8 +39,15 @@ public final class SettingsManager {
      *
      * @return the active {@link Settings} instance
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP",
+            justification = "SettingsManager provides access to active singleton settings")
     public Settings getCurrent() {
         return current;
+    }
+
+    private static synchronized void setCurrent(final Settings s) {
+        current = s;
     }
 
     /**
@@ -52,10 +61,10 @@ public final class SettingsManager {
 
             mgr.open();
             mgr.saveObject(s);
-            current = s; // Update in‑memory reference
+            setCurrent(s);
 
         } catch (final IOException e) {
-            System.out.println("Settings save failed: " + e);
+            LOGGER.error("Settings save failed", e);
         }
     }
 
@@ -72,11 +81,12 @@ public final class SettingsManager {
     /**
      * Loads settings from disk or creates defaults if none exist.
      *
-     * <p>This method is called only once, on first construction of
-     * {@link SettingsManager}.</p>
+     * <p>This method is called only once, on first construction of {@link SettingsManager}.
      */
-    private static void init() {
-        initialized = false;
+    private static synchronized void init() {
+        if (initialized) {
+            return;
+        }
         try (ModelFileManager<Settings> mgr =
                 new ModelFileManager<>(PATH, RESOURCE, Settings.class)) {
 
@@ -96,5 +106,4 @@ public final class SettingsManager {
             initialized = true;
         }
     }
-
 }

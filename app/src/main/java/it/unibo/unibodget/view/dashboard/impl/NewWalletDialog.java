@@ -1,8 +1,10 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
+import java.util.List;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -16,11 +18,39 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
+/**
+ * Dialog used to create a new cash account (wallet).
+ */
 public final class NewWalletDialog extends Dialog<CashAccount> {
 
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
+
+    /**
+     * Creates a new wallet creation dialog.
+     *
+     * @param defaultCurrency the default currency pre-selected in the dialog
+     */
     public NewWalletDialog(final FiatCurrency defaultCurrency) {
+        this(defaultCurrency, List.of());
+    }
+
+    /**
+     * Creates a new wallet creation dialog with validation against existing wallets.
+     *
+     * @param defaultCurrency the default currency pre-selected in the dialog
+     * @param existingWallets currently existing cash accounts to prevent duplicate (name, currency)
+     */
+    public NewWalletDialog(
+            final FiatCurrency defaultCurrency,
+            final List<CashAccount> existingWallets) {
         setTitle("Create New Wallet");
         setHeaderText("Insert wallet details");
+        setResizable(true);
+        ThemeManager.applyThemeToDialog(this);
+
+        final List<CashAccount> nonNullExisting =
+                existingWallets == null ? List.of() : List.copyOf(existingWallets);
 
         final ButtonType createButtonType = new ButtonType("Create", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
@@ -32,7 +62,7 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
                 FXCollections.observableArrayList(FiatCurrency.values())
         );
         currencyBox.setMaxWidth(Double.MAX_VALUE);
-        currencyBox.getSelectionModel().select(defaultCurrency);
+        currencyBox.getSelectionModel().select(Objects.requireNonNull(defaultCurrency));
 
         currencyBox.setConverter(new StringConverter<>() {
             @Override
@@ -63,9 +93,9 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
         });
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
         grid.add(new Label("Wallet name:"), 0, 0);
         grid.add(walletNameField, 1, 0);
@@ -77,22 +107,35 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
         final javafx.scene.Node createButton = getDialogPane().lookupButton(createButtonType);
         createButton.setDisable(true);
 
-        walletNameField.textProperty().addListener((obs, oldValue, newValue) -> {
-            createButton.setDisable(newValue == null || newValue.trim().isEmpty());
-        });
+        final Runnable validator = () -> {
+            final String raw = walletNameField.getText();
+            final boolean blank = raw == null || raw.isBlank();
+            final String name = blank ? "" : raw.trim();
+            final FiatCurrency currency = currencyBox.getValue();
+            final boolean duplicate = !blank && nonNullExisting.stream().anyMatch(w ->
+                    w.getName().trim().equalsIgnoreCase(name)
+                            && Objects.equals(w.getBaseCurrency(), currency));
+            createButton.setDisable(blank || currency == null || duplicate);
+        };
+
+        walletNameField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        currencyBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
 
         setResultConverter(buttonType -> {
             if (!Objects.equals(buttonType, createButtonType)) {
                 return null;
             }
 
-            final String walletName = walletNameField.getText().trim();
+            final String raw = walletNameField.getText();
+            if (raw == null || raw.isBlank()) {
+                return null;
+            }
             final FiatCurrency selectedCurrency = currencyBox.getValue();
-
-            if (walletName.isEmpty() || selectedCurrency == null) {
+            if (selectedCurrency == null) {
                 return null;
             }
 
+            final String walletName = raw.trim();
             return new CashAccount(walletName, selectedCurrency);
         });
     }

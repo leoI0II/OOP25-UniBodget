@@ -1,9 +1,8 @@
 package it.unibo.unibodget.model.settings;
 
 /**
- * Represents the persisted window configuration of the application.
- * Stores width, height and maximized state so the UI can be restored
- * exactly as the user left it in the previous session.
+ * Represents the persisted window configuration of the application. Stores width, height and
+ * maximized state so the UI can be restored exactly as the user left it in the previous session.
  */
 public final class WindowPreferences {
 
@@ -16,9 +15,9 @@ public final class WindowPreferences {
     /**
      * Creates a new set of window preferences with the given size and state.
      *
-     * @param width      the window width in pixels
-     * @param height     the window height in pixels
-     * @param maximized  true if the window was maximized, false otherwise
+     * @param width the window width in pixels
+     * @param height the window height in pixels
+     * @param maximized true if the window was maximized, false otherwise
      */
     public WindowPreferences(final double width, final double height, final boolean maximized) {
         this.width = width;
@@ -27,9 +26,8 @@ public final class WindowPreferences {
     }
 
     /**
-     * Creates a default window preference set.
-     * This constructor is required by JSON deserializers such as Jackson.
-     * Defaults to a 1280×720 window, not maximized.
+     * Creates a default window preference set. This constructor is required by JSON deserializers
+     * such as Jackson. Defaults to a 1280×720 window, not maximized.
      */
     public WindowPreferences() {
         this(WIDTH_1280, HEIGHT_720, false);
@@ -40,8 +38,8 @@ public final class WindowPreferences {
      *
      * @return the width in pixels
      */
-    public double getWidth() { 
-        return this.width; 
+    public double getWidth() {
+        return this.width;
     }
 
     /**
@@ -49,8 +47,8 @@ public final class WindowPreferences {
      *
      * @param width the new width in pixels
      */
-    public void setWidth(final double width) { 
-        this.width = width; 
+    public void setWidth(final double width) {
+        this.width = width;
     }
 
     /**
@@ -58,8 +56,8 @@ public final class WindowPreferences {
      *
      * @return the height in pixels
      */
-    public double getHeight() { 
-        return this.height; 
+    public double getHeight() {
+        return this.height;
     }
 
     /**
@@ -67,8 +65,8 @@ public final class WindowPreferences {
      *
      * @param height the new height in pixels
      */
-    public void setHeight(final double height) { 
-        this.height = height; 
+    public void setHeight(final double height) {
+        this.height = height;
     }
 
     /**
@@ -76,8 +74,8 @@ public final class WindowPreferences {
      *
      * @return true if maximized, false otherwise
      */
-    public boolean isMaximized() { 
-        return this.maximized; 
+    public boolean isMaximized() {
+        return this.maximized;
     }
 
     /**
@@ -85,8 +83,7 @@ public final class WindowPreferences {
      *
      * @param maximized true if the window is maximized, false otherwise
      */
-    public void setMaximized(final boolean maximized) { 
-        this.maximized = maximized; 
+    public void setMaximized(final boolean maximized) {
+        this.maximized = maximized;
     }
-
 }

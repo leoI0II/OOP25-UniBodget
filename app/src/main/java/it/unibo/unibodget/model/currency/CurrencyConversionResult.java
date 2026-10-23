@@ -4,9 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Represents the result of a currency conversion operation.
- * It contains the original amount, the converted amount,
- * the applied exchange rate, and the involved currencies.
+ * Represents the result of a currency conversion operation. It contains the original amount, the
+ * converted amount, the applied exchange rate, and the involved currencies.
  */
 public class CurrencyConversionResult {
 
@@ -25,8 +24,12 @@ public class CurrencyConversionResult {
      * @param from the source currency
      * @param to the target currency
      */
-    public CurrencyConversionResult(final BigDecimal amount, final CurrencyUnit from, final CurrencyUnit to,
-                                    final BigDecimal appliedRate, final BigDecimal convertedAmount) {
+    public CurrencyConversionResult(
+            final BigDecimal amount,
+            final CurrencyUnit from,
+            final CurrencyUnit to,
+            final BigDecimal appliedRate,
+            final BigDecimal convertedAmount) {
         this.amount = amount;
         this.from = from;
         this.to = to;
@@ -34,30 +37,29 @@ public class CurrencyConversionResult {
         this.convertedAmount = convertedAmount;
     }
 
-    /** 
+    /**
      * Get the amount.
-     * 
-     * @return the original amount 
+     *
+     * @return the original amount
      */
     public BigDecimal getAmount() {
         return new BigDecimal(String.valueOf(amount));
     }
 
     /**
-     * Given the amount in BigDecimal type,
-     * round as usual, to two decimal places.
-     * 
-     * @return the roundedamount
+     * Given the amount in BigDecimal type, round as usual, to two decimal places.
+     *
+     * @param naturalAmount the amount to round
+     * @return the rounded amount
      */
-    public BigDecimal roundAmount(BigDecimal naturalAmount){
-        final BigDecimal rounded = naturalAmount.setScale(2, RoundingMode.HALF_UP);
-        return rounded;
+    public BigDecimal roundAmount(final BigDecimal naturalAmount) {
+        return naturalAmount.setScale(2, RoundingMode.HALF_UP);
     }
 
-    /** 
+    /**
      * Get the converted amount.
-     * 
-     * @return the converted amount 
+     *
+     * @return the converted amount
      */
     public BigDecimal getConvertedAmount() {
         return new BigDecimal(String.valueOf(convertedAmount));
@@ -65,35 +67,35 @@ public class CurrencyConversionResult {
 
     /**
      * Get the asset made by src CurrencyUnit and converterd amount.
-     * 
+     *
      * @return new asset made by src CurrencyUnit and converterd amount
      */
-    public Asset getAsset(){
+    public Asset getAsset() {
         return new Asset(to, getConvertedAmount());
     }
 
-    /** 
-     * Get the applied exchange rate. 
-     * 
+    /**
+     * Get the applied exchange rate.
+     *
      * @return the applied exchange rate
      */
     public BigDecimal getAppliedRate() {
         return new BigDecimal(String.valueOf(appliedRate));
     }
 
-    /** 
+    /**
      * Get the source currency unit.
-     * 
-     * @return the source currency 
+     *
+     * @return the source currency
      */
     public CurrencyUnit getFrom() {
         return from;
     }
 
-    /** 
-     * Get the target currency unit. 
-     * 
-     * @return the target currency 
+    /**
+     * Get the target currency unit.
+     *
+     * @return the target currency
      */
     public CurrencyUnit getTo() {
         return to;

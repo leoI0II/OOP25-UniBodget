@@ -1,85 +1,89 @@
-// package it.unibo.unibodget.model.dashboard.impl;
+package it.unibo.unibodget.model.dashboard.impl;
 
-// import java.math.BigDecimal;
-// import java.time.LocalDate;
-// import java.util.List;
-// import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
-// import it.unibo.unibodget.model.categories.Category;
-// import it.unibo.unibodget.model.categories.CategoryType;
-// import it.unibo.unibodget.model.currency.Asset;
-// import it.unibo.unibodget.model.currency.FiatCurrency;
-// import it.unibo.unibodget.model.transactions.base.CashTransaction;
-// import it.unibo.unibodget.model.utils.ARGBColor;
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.currency.Asset;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import it.unibo.unibodget.model.utils.ARGBColor;
 
-// /**
-//  * Tests for {@link DefaultFriendLoanSummaryService}.
-//  */
-// class DefaultFriendLoanSummaryServiceTest {
+/**
+ * Tests for {@link DefaultFriendLoanSummaryService}.
+ */
+class DefaultFriendLoanSummaryServiceTest {
 
-//     @Test
-//     void shouldSummarizeFriendLoansByLoanId() {
-//         final DefaultFriendLoanSummaryService service = new DefaultFriendLoanSummaryService();
+    private static final int YEAR = 2026;
+    private static final int MONTH = 5;
+    private static final String MARCO = "Marco";
 
-//         final Category friendLoanCategory = new Category(
-//                 "Friend loan",
-//                 new ARGBColor(0xFF9C27B0),
-//                 CategoryType.FRIEND_LOAN
-//         );
+    @Test
+    void shouldSummarizeFriendLoansByLoanId() {
+        final DefaultFriendLoanSummaryService service = new DefaultFriendLoanSummaryService();
 
-//         final UUID marcoLoanId = UUID.randomUUID();
-//         final UUID lucaLoanId = UUID.randomUUID();
+        final Category friendLoanCategory = new Category(
+                "Friend loan",
+                new ARGBColor(0xFF9C27B0),
+                CategoryType.FRIEND_LOAN
+        );
 
-//         final CashTransaction marcoLoan = new CashTransaction(
-//                 Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")),
-//                 friendLoanCategory,
-//                 LocalDate.of(2026, 5, 1),
-//                 "Loan to Marco",
-//                 "Initial loan",
-//                 marcoLoanId,
-//                 "Marco"
-//         );
+        final UUID marcoLoanId = UUID.randomUUID();
+        final UUID lucaLoanId = UUID.randomUUID();
 
-//         final CashTransaction marcoRepayment = new CashTransaction(
-//                 Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")),
-//                 friendLoanCategory,
-//                 LocalDate.of(2026, 5, 10),
-//                 "Marco repayment",
-//                 "Partial repayment",
-//                 marcoLoanId,
-//                 "Marco"
-//         );
+        final CashTransaction marcoLoan = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-100.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(YEAR, MONTH, 1))
+                .description("Loan to Marco")
+                .notes("Initial loan")
+                .loanId(marcoLoanId)
+                .friendName(MARCO)
+                .build();
 
-//         final CashTransaction lucaLoan = new CashTransaction(
-//                 Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")),
-//                 friendLoanCategory,
-//                 LocalDate.of(2026, 5, 3),
-//                 "Loan to Luca",
-//                 "Short loan",
-//                 lucaLoanId,
-//                 "Luca"
-//         );
+        final CashTransaction marcoRepayment = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("30.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(YEAR, MONTH, 10))
+                .description("Marco repayment")
+                .notes("Partial repayment")
+                .loanId(marcoLoanId)
+                .friendName(MARCO)
+                .build();
 
-//         final List<FriendLoanSummary> result = service.summarize(
-//                 List.of(marcoLoan, marcoRepayment, lucaLoan)
-//         );
+        final CashTransaction lucaLoan = CashTransaction.builder()
+                .asset(Asset.of(FiatCurrency.EUR, new BigDecimal("-50.00")))
+                .category(friendLoanCategory)
+                .date(LocalDate.of(YEAR, MONTH, 3))
+                .description("Loan to Luca")
+                .notes("Short loan")
+                .loanId(lucaLoanId)
+                .friendName("Luca")
+                .build();
 
-//         assertEquals(2, result.size());
+        final List<FriendLoanSummary> result = service.summarize(
+                List.of(marcoLoan, marcoRepayment, lucaLoan)
+        );
 
-//         final FriendLoanSummary first = result.get(0);
-//         final FriendLoanSummary second = result.get(1);
+        assertEquals(2, result.size());
 
-//         assertEquals("Marco", first.getFriendName());
-//         assertEquals(new BigDecimal("100.00"), first.getTotalGiven());
-//         assertEquals(new BigDecimal("30.00"), first.getTotalReceived());
-//         assertEquals(new BigDecimal("70.00"), first.getNetBalance());
+        final FriendLoanSummary first = result.get(0);
+        final FriendLoanSummary second = result.get(1);
 
-//         assertEquals("Luca", second.getFriendName());
-//         assertEquals(new BigDecimal("50.00"), second.getTotalGiven());
-//         assertEquals(BigDecimal.ZERO, second.getTotalReceived());
-//         assertEquals(new BigDecimal("50.00"), second.getNetBalance());
-//     }
-// }
+        assertEquals(MARCO, first.getFriendName());
+        assertEquals(new BigDecimal("100.00"), first.getTotalGiven());
+        assertEquals(new BigDecimal("30.00"), first.getTotalReceived());
+        assertEquals(new BigDecimal("70.00"), first.getNetBalance());
+
+        assertEquals("Luca", second.getFriendName());
+        assertEquals(new BigDecimal("50.00"), second.getTotalGiven());
+        assertEquals(BigDecimal.ZERO, second.getTotalReceived());
+        assertEquals(new BigDecimal("50.00"), second.getNetBalance());
+    }
+}

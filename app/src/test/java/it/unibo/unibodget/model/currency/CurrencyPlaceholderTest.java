@@ -18,5 +18,4 @@ class CurrencyPlaceholderTest {
         assertEquals(XYZ, p.getFullName());
         assertEquals(CurrencyType.FIAT, p.getType());
     }
-
 }

@@ -7,7 +7,8 @@ import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.settings.ThemeManager;
-import javafx.scene.control.Alert;
+import it.unibo.unibodget.view.utils.DialogHelper;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -17,10 +18,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JavaFX widget that performs bank‑mediated currency conversions.
- * 
+ *
  * <p>
  * This component allows the user to:
  * <ul>
@@ -31,6 +34,8 @@ import java.math.BigDecimal;
  * </ul>
  */
 public class BankConverterWidgetFX {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankConverterWidgetFX.class);
 
     /** Constants. */
     private static final double PERC = 50.0;
@@ -79,7 +84,7 @@ public class BankConverterWidgetFX {
 
         // Validation logic: enable button only when amount + bank are valid
         final Runnable validate = () -> {
-            final boolean emptyAmount = amountField.getText() == null 
+            final boolean emptyAmount = amountField.getText() == null
                 || amountField.getText().trim().isEmpty();
             calcBtn.setDisable(emptyAmount || bankBox.getValue() == null);
         };
@@ -108,9 +113,9 @@ public class BankConverterWidgetFX {
                     // Perform bank‑mediated conversion
                     final BankConversionService service = new BankConversionService(baseConverter);
                     final BankConversionResult res = service.convert(
-                        amount, 
-                        fromBox.getValue(), 
-                        toBox.getValue(), 
+                        amount,
+                        fromBox.getValue(),
+                        toBox.getValue(),
                         bank);
 
                     // Update UI
@@ -127,12 +132,10 @@ public class BankConverterWidgetFX {
                 resultLabel.setText("Insert value > 0");
             } catch (final IllegalArgumentException ex) {
                 resultLabel.setText("Conversion unavailable: " + ex.getMessage());
-                System.err.println("[BANK CONVERSION] Conversion failed");
-                ex.printStackTrace();
-            }  catch (final IllegalStateException ex) {
-                resultLabel.setText( "Price service unavailable. Please try again later." );
-                System.err.println("[BANK CONVERSION] Provider failed");
-                ex.printStackTrace();
+                LOGGER.warn("[BANK CONVERSION] Conversion failed: {}", ex.getMessage());
+            } catch (final IllegalStateException ex) {
+                resultLabel.setText("Price service unavailable. Please try again later.");
+                LOGGER.warn("[BANK CONVERSION] Provider failed: {}", ex.getMessage());
             }
         });
 
@@ -150,6 +153,7 @@ public class BankConverterWidgetFX {
         ThemeManager.applyFont(bankLabel);
 
         // Assemble UI
+        view.getStyleClass().add("card");
         view.getChildren().addAll(
                 bankLabel,
                 bankBox,
@@ -159,16 +163,29 @@ public class BankConverterWidgetFX {
                 resultLabel,
                 detailsLabel
         );
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(bankBox);
+            ThemeManager.applyFont(calcBtn);
+            ThemeManager.applyFont(convertedLabel);
+            ThemeManager.applyFont(resultLabel);
+            ThemeManager.applyFont(detailsLabel);
+            ThemeManager.applyFont(addBankBtn);
+            ThemeManager.applyFont(bankLabel);
+        }));
     }
 
     /**
      * Opens a dialog allowing the user to add a new bank with custom fees.
-     * 
+     *
      * <p>
      * The dialog validates fee values and updates both the controller and the UI.
      */
     private void openAddBankDialog() {
         final Dialog<Bank> dialog = new Dialog<>();
+        if (view.getScene() != null && view.getScene().getWindow() != null) {
+            dialog.initOwner(view.getScene().getWindow());
+        }
         dialog.setTitle("Add new bank");
 
         // Input fields
@@ -184,6 +201,7 @@ public class BankConverterWidgetFX {
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        ThemeManager.applyThemeToDialog(dialog);
 
         // Convert dialog result into a Bank instance
         dialog.setResultConverter(button -> {
@@ -204,19 +222,20 @@ public class BankConverterWidgetFX {
 
                     } else {
                         // Show validation error
-                        final Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Validation Error");
-                        alert.setHeaderText("Invalid Fees");
-                        alert.setContentText("The fixed and percentage fees cannot exceed 50%.");
-                        alert.showAndWait();
+                        DialogHelper.showError(
+                                dialog.getDialogPane(),
+                                "Validation Error",
+                                "Invalid Fees",
+                                "The fixed and percentage fees cannot exceed 50%.");
                     }
 
                 } catch (final IllegalArgumentException e) {
                     // Show input error
-                    final Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Input Error");
-                    alert.setContentText("Please enter valid numbers in the fee fields.");
-                    alert.showAndWait();
+                    DialogHelper.showWarning(
+                            dialog.getDialogPane(),
+                            "Input Error",
+                            null,
+                            "Please enter valid numbers in the fee fields.");
                 }
             }
             return null;

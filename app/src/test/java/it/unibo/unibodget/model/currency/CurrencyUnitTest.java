@@ -25,9 +25,6 @@ class CurrencyUnitTest {
         final var list = CurrencyUnit.basicCurrencies();
 
         assertFalse(list.isEmpty());
-        assertTrue(list.stream().allMatch(c ->
-                c.getType() == CurrencyType.FIAT
-        ));
+        assertTrue(list.stream().allMatch(c -> c.getType() == CurrencyType.FIAT));
     }
-
 }

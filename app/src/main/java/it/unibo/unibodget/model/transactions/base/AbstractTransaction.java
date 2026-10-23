@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
-/*
- * <p>Each transaction contains:
+/**
+ * Each transaction contains:
  * <ul>
  *   <li>an {@link Asset} describing the monetary value and currency</li>
  *   <li>a {@link Category} classifying the type of movement</li>
@@ -22,15 +22,17 @@ import it.unibo.unibodget.model.currency.Asset;
  *   <li>optional notes for additional context</li>
  * </ul>
  *
- * <p>This class is immutable: all fields are {@code final} and set at construction time.
+ * <p>
+ * This class is immutable: all fields are {@code final} and set at construction time.
+ * </p>
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "transactionType")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = CashTransaction.class, name = "cash"),
     @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
 })
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
-
 
     private final UUID id;
     private final Asset asset;
@@ -42,6 +44,7 @@ public abstract sealed class AbstractTransaction permits CashTransaction, Invest
     /**
      * Creates a new {@code AbstractTransaction} with the given fields.
      *
+     * @param id           the unique identifier of the transaction; must not be {@code null}
      * @param asset        the monetary value associated with the transaction;
      *                     must not be {@code null}
      * @param category     the category describing the nature of the transaction;

@@ -1,7 +1,7 @@
 package it.unibo.unibodget.model.dashboard.impl;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.List;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.dashboard.api.BudgetAlertStrategy;
@@ -10,20 +10,20 @@ import it.unibo.unibodget.model.dashboard.api.BudgetSettings;
 import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 
 /**
- * Default implementation of {@link BudgetMonitor}. This implementation
- * delegates the evaluation of the budget state to one of three strategies
- * according to the ratio between the current value and the configured limit.
+ * Default implementation of {@link BudgetMonitor}.
+ *
+ * <p>
+ * This implementation delegates the evaluation of the budget state polymorphically
+ * to an ordered list of {@link BudgetAlertStrategy} instances (by default: critical,
+ * warning, and safe fallback).
+ * </p>
  */
 public final class DefaultBudgetMonitor implements BudgetMonitor {
 
-    private static final BigDecimal CRITICAL_THRESHOLD = BigDecimal.valueOf(1.0);
-
-    private final BudgetAlertStrategy safeStrategy;
-    private final BudgetAlertStrategy warningStrategy;
-    private final BudgetAlertStrategy criticalStrategy;
+    private final List<BudgetAlertStrategy> strategies;
 
     /**
-     * Creates a monitor with default safe, warning, and critical strategies.
+     * Creates a monitor with default critical, warning, and safe strategies in evaluation order.
      */
     public DefaultBudgetMonitor() {
         this(new SafeBudgetStrategy(), new WarningBudgetStrategy(), new CriticalBudgetStrategy());
@@ -40,9 +40,20 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
             final BudgetAlertStrategy safeStrategy,
             final BudgetAlertStrategy warningStrategy,
             final BudgetAlertStrategy criticalStrategy) {
-        this.safeStrategy = Objects.requireNonNull(safeStrategy);
-        this.warningStrategy = Objects.requireNonNull(warningStrategy);
-        this.criticalStrategy = Objects.requireNonNull(criticalStrategy);
+        Objects.requireNonNull(safeStrategy, "safeStrategy must not be null");
+        Objects.requireNonNull(warningStrategy, "warningStrategy must not be null");
+        Objects.requireNonNull(criticalStrategy, "criticalStrategy must not be null");
+        this.strategies = List.of(criticalStrategy, warningStrategy, safeStrategy);
+    }
+
+    /**
+     * Creates a monitor with an explicit ordered list of strategies.
+     *
+     * @param strategies the ordered alert strategies
+     */
+    public DefaultBudgetMonitor(final List<BudgetAlertStrategy> strategies) {
+        Objects.requireNonNull(strategies, "strategies must not be null");
+        this.strategies = List.copyOf(strategies);
     }
 
     /**
@@ -50,24 +61,15 @@ public final class DefaultBudgetMonitor implements BudgetMonitor {
      */
     @Override
     public BudgetStatus getBudgetStatus(final BigDecimal currentValue, final BudgetSettings settings) {
-        Objects.requireNonNull(settings);
+        Objects.requireNonNull(currentValue, "currentValue must not be null");
+        Objects.requireNonNull(settings, "settings must not be null");
 
-        final BigDecimal limitValue = settings.getLimitValue();
-
-        if (limitValue.compareTo(BigDecimal.ZERO) <= 0) {
-            return safeStrategy.evaluate(currentValue, limitValue);
+        for (final BudgetAlertStrategy strategy : strategies) {
+            if (strategy.applies(currentValue, settings)) {
+                return strategy.evaluate(currentValue, settings);
+            }
         }
 
-        final BigDecimal ratio = currentValue.divide(limitValue, 4, RoundingMode.HALF_UP);
-
-        if (ratio.compareTo(CRITICAL_THRESHOLD) >= 0) {
-            return criticalStrategy.evaluate(currentValue, limitValue);
-        }
-
-        if (ratio.compareTo(settings.getWarningThreshold()) >= 0) {
-            return warningStrategy.evaluate(currentValue, limitValue);
-        }
-
-        return safeStrategy.evaluate(currentValue, limitValue);
+        return BudgetStatus.SAFE;
     }
 }

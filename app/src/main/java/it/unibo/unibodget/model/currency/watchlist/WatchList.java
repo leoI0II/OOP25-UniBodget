@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.watchlist;
 
+import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -7,15 +8,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import it.unibo.unibodget.persistency.ModelFileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Manages the collection of user-preferred currencies.
- * This model maintains the state of the watchlist and provides 
- * methods for modification.
+ * Manages the collection of user-preferred currencies. This model maintains the state of the
+ * watchlist and provides methods for modification.
  */
 public final class WatchList {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WatchList.class);
 
     private static final Path PATH = Path.of("data/json/currency/watchlist/Watchlist.json");
     private static final String RESOURCE = "/json/currency/watchlist/Watchlist.json";
@@ -23,9 +25,7 @@ public final class WatchList {
     private static boolean initialized;
     private static final Set<WatchlistPair> LOADED = new HashSet<>();
 
-    /**
-     * Creates a WatchList instance and initializes the watchlist if needed.
-     */
+    /** Creates a WatchList instance and initializes the watchlist if needed. */
     public WatchList() {
         if (!initialized) {
             init();
@@ -34,9 +34,9 @@ public final class WatchList {
 
     /**
      * Adds a currency to the user's watchlist.
-     * 
-     * @param   pair the watchlist pair to add.
-     * @return  added pair.
+     *
+     * @param pair the watchlist pair to add.
+     * @return added pair.
      */
     public boolean add(final WatchlistPair pair) {
         final boolean added = LOADED.add(pair);
@@ -48,9 +48,9 @@ public final class WatchList {
 
     /**
      * Removes a currency from the user's watchlist.
-     * 
-     * @param   pair the watchlist pair to remove.
-     * @return  removed pair.
+     *
+     * @param pair the watchlist pair to remove.
+     * @return removed pair.
      */
     public boolean remove(final WatchlistPair pair) {
         final boolean removed = LOADED.remove(pair);
@@ -62,52 +62,47 @@ public final class WatchList {
 
     /**
      * Returns an unmodifiable view of the current watchlist.
-     * 
+     *
      * @return a set of preferred currencies.
      */
     public Set<WatchlistPair> getFavorites() {
         return Collections.unmodifiableSet(LOADED);
     }
 
-    /**
-     * Saves the current watchlist to the JSON file.
-     */
+    /** Saves the current watchlist to the JSON file. */
     private static void save() {
         try {
             final ModelFileManager<WatchlistPair> mgr =
-                new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
+                    new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
             mgr.open();
             mgr.saveList("watchlist", new ArrayList<>(LOADED));
             mgr.close();
         } catch (final IOException e) {
-            System.out.println("WatchList save failed");
+            LOGGER.error("WatchList save failed", e);
         }
     }
 
-    /**
-     * Initializes the watchlist by loading data from the JSON file.
-     */
+    /** Initializes the watchlist by loading data from the JSON file. */
     public static void init() {
-        initialized = false;
         try {
             final ModelFileManager<WatchlistPair> mgr =
-                new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
+                    new ModelFileManager<>(PATH, RESOURCE, WatchlistPair.class);
             mgr.open();
             // load from json
             final var list = mgr.loadList("watchlist");
             mgr.close();
             if (list == null || list.isEmpty()) {
-                System.out.println("WatchList JSON empty → using empty list");
+                LOGGER.debug("WatchList JSON empty → using empty list");
                 LOADED.clear();
                 LOADED.addAll(generateMockWatchlist());
             } else {
                 LOADED.clear();
                 LOADED.addAll(list);
-                System.out.println("WatchList loaded from JSON → " + LOADED.size() + " items");
+                LOGGER.debug("WatchList loaded from JSON → {} items", LOADED.size());
             }
             initialized = true;
         } catch (final IOException e) {
-            System.out.println("WatchList load failed → using empty list");
+            LOGGER.warn("WatchList load failed → using empty list", e);
             LOADED.clear();
             LOADED.addAll(generateMockWatchlist());
             initialized = true;
@@ -116,15 +111,13 @@ public final class WatchList {
 
     /**
      * Generates a mock watchlist for testing purposes.
-     * 
+     *
      * @return a list of sample watchlist pairs.
      */
     private static List<WatchlistPair> generateMockWatchlist() {
         return List.of(
-            new WatchlistPair("EUR", "USD"),
-            new WatchlistPair("EUR", "GBP"),
-            new WatchlistPair("USD", "JPY")
-        );
+                new WatchlistPair("EUR", "USD"),
+                new WatchlistPair("EUR", "GBP"),
+                new WatchlistPair("USD", "JPY"));
     }
-
 }

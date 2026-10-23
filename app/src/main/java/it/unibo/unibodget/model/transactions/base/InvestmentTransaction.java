@@ -39,22 +39,17 @@ public final class InvestmentTransaction extends AbstractTransaction {
     private final Asset fee;
 
     /**
-     * Creates a new InvestmentTransaction with the given base transaction data
-     * and investment‑specific fields. Used for JSON parsing
+     * Creates a new InvestmentTransaction with the given base transaction data and fields.
      *
-     * @param asset the main asset involved in the transaction (e.g., total
-     * amount invested or received)
+     * @param asset the main asset involved in the transaction
      * @param category the category describing the nature of the transaction
      * @param date the date on which the transaction occurred
      * @param description a short human-readable description of the transaction
      * @param notes optional additional notes or comments
-     * @param unitPrice the historical unit price of the asset at the time of
-     * the transaction; must not be {@code null}
-     * @param fee an optional fee associated with the transaction (e.g., broker
-     * fee); may be {@code null} if no fee applies
-     * @throws NullPointerException if {@code unitPrice} is {@code null}
-     * @throws IllegalArgumentException if {@code unitPrice} or {@code fee} is
-     * negative
+     * @param unitPrice the historical unit price of the asset; must not be null
+     * @param fee an optional fee associated with the transaction; may be null
+     * @throws NullPointerException if unitPrice is null
+     * @throws IllegalArgumentException if unitPrice or fee is negative
      */
     @JsonCreator
     public InvestmentTransaction(
@@ -89,13 +84,11 @@ public final class InvestmentTransaction extends AbstractTransaction {
      * @param date the date on which the transaction occurred
      * @param description a short human-readable description of the transaction
      * @param notes optional additional notes or comments
-     * @param unitPrice the historical unit price of the asset; must not be
-     * {@code null}
-     * @param fee an optional fee; may be {@code null}
+     * @param unitPrice the historical unit price of the asset; must not be null
+     * @param fee an optional fee; may be null
      * @return a new {@code InvestmentTransaction}
-     * @throws NullPointerException if {@code unitPrice} is {@code null}
-     * @throws IllegalArgumentException if {@code unitPrice} or {@code fee} is
-     * negative
+     * @throws NullPointerException if unitPrice is null
+     * @throws IllegalArgumentException if unitPrice or fee is negative
      */
     public static InvestmentTransaction of(
             final Asset asset,
@@ -119,6 +112,11 @@ public final class InvestmentTransaction extends AbstractTransaction {
         return unitPrice;
     }
 
+    /**
+     * Returns the fee associated with the investment transaction, if any.
+     *
+     * @return the fee asset, or null if no fee was charged
+     */
     public Asset getFee() {
         return fee;
     }
@@ -128,7 +126,11 @@ public final class InvestmentTransaction extends AbstractTransaction {
      */
     @Override
     public boolean equals(final Object o) {
-        return super.equals(o);
+        if (!super.equals(o)) {
+            return false;
+        }
+        final InvestmentTransaction that = (InvestmentTransaction) o;
+        return Objects.equals(unitPrice, that.unitPrice) && Objects.equals(fee, that.fee);
     }
 
     /**

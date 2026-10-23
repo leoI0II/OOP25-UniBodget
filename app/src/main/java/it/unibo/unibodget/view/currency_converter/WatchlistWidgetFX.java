@@ -4,9 +4,10 @@ import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
 import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.utils.DialogHelper;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -15,7 +16,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * JavaFX widget that displays and manages the user's currency watchlist.
- * 
+ *
  * <p>
  * Allows saving the currently selected currency pair from the converter,
  * highlighting the active pair, and restoring a saved pair via double‑click.
@@ -48,6 +49,12 @@ public final class WatchlistWidgetFX {
         // Save button: stores the current converter pair into the watchlist
         final Button saveButton = new Button("Save couple in watchlist");
         ThemeManager.applyFont(saveButton);
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(title);
+            ThemeManager.applyFont(saveButton);
+            listView.refresh();
+        }));
         saveButton.setOnAction(e -> {
             final String from = converter.getFromBox().getValue().getCode();
             final String to = converter.getToBox().getValue().getCode();
@@ -58,11 +65,7 @@ public final class WatchlistWidgetFX {
                 if (controller.addPair(newPair)) {
                     items.add(newPair);
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Watchlist");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Already saved!");
-                    alert.showAndWait();
+                    DialogHelper.showInfo(listView, "Watchlist", null, "Already saved!");
                 }
                 listView.refresh();
             }
@@ -84,9 +87,9 @@ public final class WatchlistWidgetFX {
             protected void updateItem(final WatchlistPair item, final boolean empty) {
                 super.updateItem(item, empty);
 
+                getStyleClass().remove("active-pair");
                 if (empty || item == null) {
                     setText(null);
-                    setStyle("");
                     return;
                 }
 
@@ -100,17 +103,14 @@ public final class WatchlistWidgetFX {
                         new WatchlistPair(currentFrom.getCode(), currentTo.getCode());
 
                     if (item.equals(currentPair)) {
-                        setStyle("-fx-background-color: #333333; -fx-text-fill: white;");
-                    } else {
-                        setStyle("");
+                        getStyleClass().add("active-pair");
                     }
-                } else {
-                    setStyle("");
                 }
                 ThemeManager.applyFont(this);
             }
         });
 
+        view.getStyleClass().add("card");
         view.getChildren().addAll(title, saveButton, listView);
     }
 
@@ -122,4 +122,5 @@ public final class WatchlistWidgetFX {
     public VBox getView() {
         return view;
     }
+
 }

@@ -11,60 +11,44 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxWidth="400.0" minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
+<VBox styleClass="sidebar" maxWidth="400.0" minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
    <children>
-      <HBox prefHeight="60.0" prefWidth="150.0" spacing="8.0">
+      <HBox alignment="CENTER_LEFT" prefHeight="48.0" spacing="8.0">
          <children>
-            <Button minWidth="75.0" mnemonicParsing="false" onAction="#handleCloseApp" prefHeight="60.0" prefWidth="75.0" text="Close" textAlignment="JUSTIFY" wrapText="true">
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="14.0" />
-               </font>
-            </Button>
-            <Region prefHeight="41.0" prefWidth="30.0" HBox.hgrow="ALWAYS" />
-            <MenuButton alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" stylesheets="@style.css" text="Menu">
+            <MenuButton fx:id="menuButton" alignment="CENTER" maxWidth="1.7976931348623157E308" minHeight="38.0" mnemonicParsing="false" prefHeight="38.0" style="-fx-font-size: 14px; -fx-font-weight: bold;" styleClass="sidebar-nav-menu" text="Menu" HBox.hgrow="ALWAYS">
                <items>
-                  <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="Dashboard" />
-                  <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="Converter" />
-                  <MenuItem fx:id="navPortfolioItem" mnemonicParsing="false" text="Portfolio" />
-                  <MenuItem fx:id="navSettingsItem" mnemonicParsing="false" text="Settings" />
+                  <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="📊 Dashboard" />
+                  <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="🔄 Converter" />
+                  <MenuItem fx:id="navPortfolioItem" mnemonicParsing="false" text="📈 Portfolio" />
                </items>
                <HBox.margin>
                   <Insets />
                </HBox.margin>
-               <font>
-                  <Font name="JetBrainsMono NF Bold" size="14.0" />
-               </font>
             </MenuButton>
+            <Button fx:id="settingsButton" alignment="CENTER" maxHeight="38.0" maxWidth="38.0" minHeight="38.0" minWidth="38.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="38.0" style="-fx-font-size: 16px; -fx-padding: 0;" styleClass="sidebar-settings-button" text="⚙" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </padding>
       </HBox>
-      <ScrollPane fitToWidth="true" prefHeight="555.0" prefWidth="150.0" VBox.vgrow="ALWAYS">
+      <ScrollPane fitToWidth="true" minHeight="80.0" prefHeight="555.0" prefWidth="150.0" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="walletList" prefHeight="548.0" prefWidth="198.0" spacing="8.0">
                <padding>
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
                <children>
-                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="72.0" prefWidth="203.0" text="+">
-                     <font>
-                        <Font name="System Bold" size="24.0" />
-                     </font>
-                  </Button>
+                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="72.0" prefWidth="203.0" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="+" />
                </children>
             </VBox>
          </content>
       </ScrollPane>
-      <Label prefHeight="35.0" prefWidth="217.0" text="Total:">
-         <font>
-            <Font name="JetBrainsMono NF Bold" size="18.0" />
-         </font>
+      <Label fx:id="totalTitleLabel" maxWidth="1.7976931348623157E308" prefHeight="35.0" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Total:">
+         <padding>
+            <Insets left="8.0" />
+         </padding>
       </Label>
-      <Label fx:id="totalBalanceLabel" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" prefHeight="63.0" prefWidth="203.0" text="\$0.00">
-         <font>
-            <Font name="JetBrainsMono NF Bold" size="22.0" />
-         </font>
+      <Label fx:id="totalBalanceLabel" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" prefHeight="63.0" style="-fx-font-size: 22px; -fx-font-weight: bold;" text="\$0.00">
          <padding>
             <Insets right="10.0" />
          </padding>

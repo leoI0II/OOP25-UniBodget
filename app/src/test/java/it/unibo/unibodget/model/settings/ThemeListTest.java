@@ -16,9 +16,10 @@ class ThemeListTest {
     @Test
     void shouldReturnImmutableList() {
         final ThemeList list = new ThemeList();
-        assertThrows(UnsupportedOperationException.class, () -> {
-            list.getThemes().add(Theme.DEFAULT);
-        });
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> {
+                    list.getThemes().add(Theme.DEFAULT);
+                });
     }
-
 }

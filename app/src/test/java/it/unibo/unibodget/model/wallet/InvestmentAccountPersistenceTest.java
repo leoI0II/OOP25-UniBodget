@@ -2,21 +2,19 @@ package it.unibo.unibodget.model.wallet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
-
 /**
- * Checks that an investment account keeps its id after being saved and reloaded,
- * since the balance snapshots are stored per account id.
+ * Checks that an investment account keeps its id after being saved and reloaded, since the balance
+ * snapshots are stored per account id.
  */
 class InvestmentAccountPersistenceTest {
 
@@ -43,7 +41,8 @@ class InvestmentAccountPersistenceTest {
     @Test
     void shouldKeepIdAfterSaveAndReload() {
         final InvestmentAccountManager manager = new InvestmentAccountManager(NO_CONVERSION);
-        final InvestmentAccount account = new InvestmentAccount("Broker", FiatCurrency.EUR, NO_CONVERSION);
+        final InvestmentAccount account =
+                new InvestmentAccount("Broker", FiatCurrency.EUR, NO_CONVERSION);
 
         manager.saveAll(List.of(account));
         final List<InvestmentAccount> reloaded = manager.loadAll();
@@ -54,7 +53,8 @@ class InvestmentAccountPersistenceTest {
 
     @Test
     void withProviderShouldKeepId() {
-        final InvestmentAccount account = new InvestmentAccount("Broker", FiatCurrency.EUR, NO_CONVERSION);
+        final InvestmentAccount account =
+                new InvestmentAccount("Broker", FiatCurrency.EUR, NO_CONVERSION);
 
         assertEquals(account.getId(), account.withProvider(NO_CONVERSION).getId());
     }

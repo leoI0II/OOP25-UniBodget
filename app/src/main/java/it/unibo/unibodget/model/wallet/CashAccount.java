@@ -1,34 +1,31 @@
 package it.unibo.unibodget.model.wallet;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
 import it.unibo.unibodget.model.transactions.Historical;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
- * Represents a cash‑based wallet containing a ledger of {@link CashTransaction}
- * and a configurable monthly budget. A {@code CashAccount} computes its balance
- * dynamically from its transaction history and stores user‑defined budget
- * limits. It is the aggregate root for all cash operations within UniBodget.
+ * Represents a cash‑based wallet containing a ledger of {@link CashTransaction} and a configurable
+ * monthly budget. A {@code CashAccount} computes its balance dynamically from its transaction
+ * history and stores user‑defined budget limits. It is the aggregate root for all cash operations
+ * within UniBodget.
  */
 public final class CashAccount extends AbstractWallet<CashTransaction> {
 
     private DefaultBudgetSettings budgetSettings;
 
     /**
-     * Creates a {@code CashAccount} from JSON data. The saved {@code id} is kept,
-     * so that the wallet has the same identity across restarts; if it is missing
-     * (old files) a new one is generated. If {@code history} is null, an empty
-     * ledger is created. If {@code budgetSettings} is null, a default
-     * configuration is applied.
+     * Creates a {@code CashAccount} from JSON data. The saved {@code id} is kept, so that the
+     * wallet has the same identity across restarts; if it is missing (old files) a new one is
+     * generated. If {@code history} is null, an empty ledger is created. If {@code budgetSettings}
+     * is null, a default configuration is applied.
      *
      * @param id the saved wallet identifier, or null to generate a new one
      * @param name the display name of the wallet
@@ -49,16 +46,15 @@ public final class CashAccount extends AbstractWallet<CashTransaction> {
                 name,
                 baseCurrency,
                 history != null ? history : new Historical<>(),
-                "Cash Account"
-        );
-        this.budgetSettings = budgetSettings != null
-                ? budgetSettings
-                : new DefaultBudgetSettings(BigDecimal.ZERO);
+                "Cash Account");
+        this.budgetSettings =
+                budgetSettings != null
+                        ? budgetSettings
+                        : new DefaultBudgetSettings(BigDecimal.ZERO);
     }
 
     /**
-     * Creates a new {@code CashAccount} with an empty history and a default
-     * budget limit of zero.
+     * Creates a new {@code CashAccount} with an empty history and a default budget limit of zero.
      *
      * @param name the display name of the wallet
      * @param baseCurrency the currency used to express the balance
@@ -69,8 +65,7 @@ public final class CashAccount extends AbstractWallet<CashTransaction> {
                 name,
                 baseCurrency,
                 new Historical<>(),
-                new DefaultBudgetSettings(BigDecimal.ZERO)
-        );
+                new DefaultBudgetSettings(BigDecimal.ZERO));
     }
 
     /**
@@ -93,11 +88,10 @@ public final class CashAccount extends AbstractWallet<CashTransaction> {
     }
 
     /**
-     * Computes the current balance by summing all {@link Asset} values
-     * contained in the transaction history. The balance is never cached.
+     * Computes the current balance by summing all {@link Asset} values contained in the transaction
+     * history. The balance is never cached.
      *
-     * @return an {@link Asset} representing the total balance in the base
-     * currency
+     * @return an {@link Asset} representing the total balance in the base currency
      */
     @Override
     public Asset getBalance() {

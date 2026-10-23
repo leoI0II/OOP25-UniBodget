@@ -11,15 +11,21 @@ import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 /**
  * Main dashboard screen for all currency‑related operations.
@@ -39,12 +45,11 @@ import javafx.stage.Stage;
  */
 public final class CurrencyConverterViewFX {
 
-    private static final double ROOT_PADDING = 35;
-
-    /**
-     * Shared controller injected via launchWith().
-     */
-    private static CurrencyConverterController sharedController;
+    private static final double ROOT_PADDING_TOP = 18;
+    private static final double ROOT_PADDING_HORIZONTAL = 14;
+    private static final double ROOT_PADDING_BOTTOM = 18;
+    private static final int TITLE_FONT_SIZE = 28;
+    private static final String PROP_BOLD_BY_DEFAULT = "boldByDefault";
 
     /**
      * Window size and maximize preferences.
@@ -52,21 +57,23 @@ public final class CurrencyConverterViewFX {
     private static final WindowPreferences PREFS = new WindowPreferences();
 
     /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private CurrencyConverterViewFX() {
+    }
+
+    /**
      * Launches the JavaFX application with a pre‑initialized controller.
      *
      * @param controller the main currency converter controller
      */
     public static void launchWith(final CurrencyConverterController controller) {
-        sharedController = controller;
-        final Stage stage = new Stage();
-
-        //Application.launch(CurrencyConverterViewFX.class);
-
-        if (sharedController == null) {
+        if (controller == null) {
             throw new IllegalStateException("Controller not initialized. Use launchWith().");
         }
+        final Stage stage = new Stage();
 
-        final Parent root = buildContent(sharedController);
+        final Parent root = buildContent(controller);
 
         /* -------------------- WINDOW SETUP -------------------- */
         final Scene scene = new Scene(root);
@@ -100,6 +107,8 @@ public final class CurrencyConverterViewFX {
     public static Parent buildContent(final CurrencyConverterController controller) {
         /* -------------------- PAGE TITLE -------------------- */
         final Label pageTitle = new Label("Currencies Converter Dashboard");
+        pageTitle.getStyleClass().add("header-title");
+        pageTitle.setStyle("-fx-font-size: " + TITLE_FONT_SIZE + "px; -fx-font-weight: bold;");
         ThemeManager.applyFont(pageTitle);
 
         /* -------------------- WIDGET INSTANTIATION -------------------- */
@@ -142,17 +151,37 @@ public final class CurrencyConverterViewFX {
                         controller.getConverter()
                 );
 
-        showChartButton.setOnAction(e ->
-                CurrencyHistoryChartView.showInNewWindow(historyController)
-        );
-        
+        showChartButton.setOnAction(e -> {
+            final Window owner = showChartButton.getScene() != null
+                    ? showChartButton.getScene().getWindow()
+                    : null;
+            CurrencyHistoryChartView.showAsPopup(owner, historyController);
+        });
+
         /* -------------------- TOP BAR -------------------- */
-        final HBox topBar = new HBox(20);
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.getChildren().addAll(pageTitle, showChartButton);
+        final HBox titleBox = new HBox(16, pageTitle, showChartButton);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+
+        final Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
+        final Button closeButton = new Button("Close");
+        closeButton.getStyleClass().addAll("secondary-button", "close-app-button");
+        closeButton.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
+        closeButton.setOnAction(e -> Platform.exit());
+        ThemeManager.applyFont(closeButton);
+
+        final HBox topBar = new HBox(12, titleBox, topSpacer, closeButton);
+        topBar.setAlignment(Pos.TOP_LEFT);
+
+        ThemeManager.addListener(t -> Platform.runLater(() -> {
+            ThemeManager.applyFont(pageTitle);
+            ThemeManager.applyFont(showChartButton);
+            ThemeManager.applyFont(closeButton);
+        }));
 
         /* -------------------- MAIN CONTENT -------------------- */
-        final HBox contentRow = new HBox(25);
+        final FlowPane contentRow = new FlowPane(20, 20);
         contentRow.setAlignment(Pos.TOP_LEFT);
         contentRow.getChildren().addAll(
                 converterWidget.getView(),
@@ -160,21 +189,39 @@ public final class CurrencyConverterViewFX {
                 bankConverterWidget.getView()
         );
 
-        final VBox root = new VBox(30, topBar, contentRow);
-        root.setPadding(new Insets(ROOT_PADDING));
+        final VBox root = new VBox(20, topBar, contentRow);
+        root.setPadding(new Insets(
+                ROOT_PADDING_TOP,
+                ROOT_PADDING_HORIZONTAL,
+                ROOT_PADDING_BOTTOM,
+                ROOT_PADDING_HORIZONTAL
+        ));
         root.setAlignment(Pos.TOP_LEFT);
 
-        /* -------------------- BACKGROUND GRADIENT -------------------- */
-        root.getStyleClass().add("theme-background");
+        /* -------------------- BACKGROUND -------------------- */
+        root.setStyle("-fx-background-color: transparent;");
+
+        final ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("converter-scroll");
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
 
         // Applies the theme when embedded in the main application scene.
-        root.sceneProperty().addListener((observable, oldScene, newScene) -> {
-        if (newScene != null) {
+        scrollPane.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene != null) {
                 ThemeManager.applyThemeToScene(newScene);
-        }
+                Platform.runLater(() -> {
+                    scrollPane.applyCss();
+                    scrollPane.layout();
+                    contentRow.requestLayout();
+                });
+            }
         });
 
-        return root;
+        return scrollPane;
     }
 
 }

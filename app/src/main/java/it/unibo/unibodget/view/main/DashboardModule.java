@@ -12,7 +12,6 @@ import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetMonitor;
 import it.unibo.unibodget.model.dashboard.impl.DefaultCategoryService;
 import it.unibo.unibodget.model.dashboard.impl.DefaultDashboardFacade;
 import it.unibo.unibodget.model.dashboard.impl.DefaultFriendLoanSummaryService;
-import it.unibo.unibodget.model.dashboard.impl.DefaultTotalCashBalanceService;
 import it.unibo.unibodget.model.dashboard.impl.DefaultWalletInsightService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.settings.Settings;
@@ -76,15 +75,11 @@ public final class DashboardModule {
                 settings
         );
 
-        final DefaultTotalCashBalanceService totalCashBalanceService =
-                new DefaultTotalCashBalanceService(cashAccountService, converter);
-
         this.dashboardView = new DefaultDashboardView();
         this.dashboardController = new DefaultDashboardController(
                 dashboardView,
                 dashboardFacade,
                 cashAccountService,
-                totalCashBalanceService,
                 settings,
                 cashTransactionFactory
         );

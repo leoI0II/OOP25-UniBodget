@@ -13,6 +13,7 @@ import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -29,6 +30,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 /**
@@ -50,13 +52,17 @@ import javafx.util.StringConverter;
  */
 public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
+    private static final double GRID_GAP = 12.0;
+    private static final double PADDING_INSET = 16.0;
+    private static final double CATEGORY_ROW_SPACING = 8.0;
+
     private final TextField descriptionField;
     private final TextField amountField;
     private final DatePicker datePicker;
     private final ComboBox<CategoryType> transactionTypeBox;
     private final ComboBox<Category> categoryBox;
     private final TextArea notesArea;
-    private final TextField friendNameField;
+    private final ComboBox<String> friendNameBox;
     private final ComboBox<FriendLoanOperation> friendLoanOperationBox;
     private final ComboBox<FriendLoanSummary> existingFriendLoanBox;
     private final Label walletCurrencyLabel;
@@ -116,6 +122,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
         setTitle(editMode ? "Edit Transaction" : "Create Transaction");
         setHeaderText(editMode ? "Update transaction details" : "Insert transaction details");
+        setResizable(true);
+        ThemeManager.applyThemeToDialog(this);
 
         final ButtonType confirmButtonType =
                 new ButtonType(editMode ? "Save" : "Create", ButtonData.OK_DONE);
@@ -127,7 +135,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         this.transactionTypeBox = new ComboBox<>();
         this.categoryBox = new ComboBox<>();
         this.notesArea = new TextArea();
-        this.friendNameField = new TextField();
+        this.friendNameBox = new ComboBox<>();
+        this.friendNameBox.setEditable(true);
         this.friendLoanOperationBox = new ComboBox<>();
         this.existingFriendLoanBox = new ComboBox<>();
         this.walletCurrencyLabel = new Label(String.valueOf(Objects.requireNonNull(walletCurrency)));
@@ -136,7 +145,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         amountField.setPromptText("Amount");
         notesArea.setPromptText("Optional notes");
         notesArea.setPrefRowCount(3);
-        friendNameField.setPromptText("Friend name");
+        friendNameBox.setPromptText("Friend name");
+        friendNameBox.setMaxWidth(Double.MAX_VALUE);
 
         configureTransactionTypeBox();
         configureCategoryBox();
@@ -155,32 +165,42 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> updateFriendLoanControls());
 
         final GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(16));
+        grid.setHgap(GRID_GAP);
+        grid.setVgap(GRID_GAP);
+        grid.setPadding(new Insets(PADDING_INSET));
 
-        final HBox categoryRow = new HBox(8, categoryBox, newCategoryButton);
+        final HBox categoryRow = new HBox(CATEGORY_ROW_SPACING, categoryBox, newCategoryButton);
 
-        grid.add(new Label("Transaction type:"), 0, 0);
-        grid.add(transactionTypeBox, 1, 0);
-        grid.add(new Label("Category:"), 0, 1);
-        grid.add(categoryRow, 1, 1);
-        grid.add(new Label("Description:"), 0, 2);
-        grid.add(descriptionField, 1, 2);
-        grid.add(new Label("Amount:"), 0, 3);
-        grid.add(amountField, 1, 3);
-        grid.add(new Label("Wallet currency:"), 0, 4);
-        grid.add(walletCurrencyLabel, 1, 4);
-        grid.add(new Label("Date:"), 0, 5);
-        grid.add(datePicker, 1, 5);
-        grid.add(new Label("Friend loan mode:"), 0, 6);
-        grid.add(friendLoanOperationBox, 1, 6);
-        grid.add(new Label("Friend name:"), 0, 7);
-        grid.add(friendNameField, 1, 7);
-        grid.add(new Label("Existing loan:"), 0, 8);
-        grid.add(existingFriendLoanBox, 1, 8);
-        grid.add(new Label("Notes:"), 0, 9);
-        grid.add(notesArea, 1, 9);
+        int row = 0;
+        grid.add(new Label("Transaction type:"), 0, row);
+        grid.add(transactionTypeBox, 1, row);
+        row++;
+        grid.add(new Label("Category:"), 0, row);
+        grid.add(categoryRow, 1, row);
+        row++;
+        grid.add(new Label("Description:"), 0, row);
+        grid.add(descriptionField, 1, row);
+        row++;
+        grid.add(new Label("Amount:"), 0, row);
+        grid.add(amountField, 1, row);
+        row++;
+        grid.add(new Label("Wallet currency:"), 0, row);
+        grid.add(walletCurrencyLabel, 1, row);
+        row++;
+        grid.add(new Label("Date:"), 0, row);
+        grid.add(datePicker, 1, row);
+        row++;
+        grid.add(new Label("Friend loan mode:"), 0, row);
+        grid.add(friendLoanOperationBox, 1, row);
+        row++;
+        grid.add(new Label("Friend name:"), 0, row);
+        grid.add(friendNameBox, 1, row);
+        row++;
+        grid.add(new Label("Existing loan:"), 0, row);
+        grid.add(existingFriendLoanBox, 1, row);
+        row++;
+        grid.add(new Label("Notes:"), 0, row);
+        grid.add(notesArea, 1, row);
 
         getDialogPane().setContent(grid);
 
@@ -201,7 +221,8 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         transactionTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         categoryBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         friendLoanOperationBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
-        friendNameField.textProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        friendNameBox.getEditor().textProperty().addListener((obs, oldValue, newValue) -> validator.run());
+        friendNameBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
         existingFriendLoanBox.valueProperty().addListener((obs, oldValue, newValue) -> validator.run());
 
         validator.run();
@@ -309,6 +330,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         existingFriendLoanBox.setCellFactory(listView -> createTextCell(existingFriendLoanBox.getConverter()::toString));
         existingFriendLoanBox.setButtonCell(createTextCell(existingFriendLoanBox.getConverter()::toString));
         existingFriendLoanBox.setMaxWidth(Double.MAX_VALUE);
+
+        final List<String> existingFriends = openFriendLoans.stream()
+                .map(FriendLoanSummary::getFriendName)
+                .distinct()
+                .toList();
+        friendNameBox.setItems(FXCollections.observableArrayList(existingFriends));
     }
 
     /**
@@ -351,7 +378,9 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
                                 .orElse(null)
                 );
             } else {
-                friendNameField.setText(transaction.getFriendName().orElse(""));
+                final String friend = transaction.getFriendName().orElse("");
+                friendNameBox.getEditor().setText(friend);
+                friendNameBox.setValue(friend.isEmpty() ? null : friend);
             }
         } else {
             updateFriendLoanControls();
@@ -371,11 +400,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         final boolean newLoan = friendLoan && operation == FriendLoanOperation.NEW_LOAN;
         final boolean repayment = friendLoan && operation == FriendLoanOperation.REPAYMENT;
 
-        friendNameField.setDisable(!newLoan);
+        friendNameBox.setDisable(!newLoan);
         existingFriendLoanBox.setDisable(!repayment);
 
         if (!newLoan) {
-            friendNameField.clear();
+            friendNameBox.getEditor().clear();
+            friendNameBox.setValue(null);
         }
         if (!repayment) {
             existingFriendLoanBox.getSelectionModel().clearSelection();
@@ -410,9 +440,18 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         return switch (operation) {
-            case NEW_LOAN -> friendNameField.getText() != null && !friendNameField.getText().trim().isEmpty();
+            case NEW_LOAN -> !getEnteredFriendName().isBlank();
             case REPAYMENT -> existingFriendLoanBox.getValue() != null;
         };
+    }
+
+    private String getEnteredFriendName() {
+        final String editorText = friendNameBox.getEditor().getText();
+        if (editorText != null && !editorText.isBlank()) {
+            return editorText.trim();
+        }
+        final String value = friendNameBox.getValue();
+        return value == null ? "" : value.trim();
     }
 
     /**
@@ -441,7 +480,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         if (type == CategoryType.FRIEND_LOAN) {
             operation = friendLoanOperationBox.getValue();
             if (operation == FriendLoanOperation.NEW_LOAN) {
-                friendName = friendNameField.getText().trim();
+                friendName = getEnteredFriendName();
             } else {
                 final FriendLoanSummary selectedLoan = existingFriendLoanBox.getValue();
                 existingFriendLoanId = selectedLoan.getFriendLoanId();
@@ -472,6 +511,12 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
         }
 
         final NewCategoryDialog dialog = new NewCategoryDialog(selectedType);
+        final Window owner = getDialogPane().getScene() != null
+                ? getDialogPane().getScene().getWindow()
+                : null;
+        if (owner != null) {
+            dialog.initOwner(owner);
+        }
         dialog.showAndWait().ifPresent(request ->
                 categoryCreator.apply(request, selectedType).ifPresent(createdCategory -> {
                     updateCategoriesFor(selectedType);
@@ -525,11 +570,11 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
      */
     private static BigDecimal parseAmount(final String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isBlank()) {
                 return null;
             }
             return new BigDecimal(text.trim());
-        } catch (NumberFormatException exception) {
+        } catch (final NumberFormatException exception) {
             return null;
         }
     }

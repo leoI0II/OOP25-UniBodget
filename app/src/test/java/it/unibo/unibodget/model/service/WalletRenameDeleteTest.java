@@ -6,24 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.WalletDeletedEvent;
 import it.unibo.unibodget.model.utils.event.WalletRenamedEvent;
 import it.unibo.unibodget.model.wallet.CashAccount;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- * Tests for wallet renaming and deletion, and for the events they publish.
- */
+/** Tests for wallet renaming and deletion, and for the events they publish. */
 class WalletRenameDeleteTest {
 
     private static final String OLD_NAME = "Old";

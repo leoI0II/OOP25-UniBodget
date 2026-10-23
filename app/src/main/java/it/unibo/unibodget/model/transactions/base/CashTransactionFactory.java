@@ -23,6 +23,13 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
  */
 public final class CashTransactionFactory {
 
+    private static final String MSG_AMOUNT_NOT_NULL = "unsignedAmount must not be null";
+    private static final String MSG_CURRENCY_NOT_NULL = "currency must not be null";
+    private static final String MSG_TYPE_NOT_NULL = "selectedType must not be null";
+    private static final String MSG_CATEGORY_NOT_NULL = "category must not be null";
+    private static final String MSG_DATE_NOT_NULL = "date must not be null";
+    private static final String MSG_FRIEND_NAME_NOT_NULL = "friendName must not be null";
+
     /**
      * Creates a standard cash transaction.
      *
@@ -57,11 +64,11 @@ public final class CashTransactionFactory {
             final String description,
             final String notes) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
 
         validatePositiveAmount(unsignedAmount);
         validateTypeConsistency(selectedType, category);
@@ -75,7 +82,13 @@ public final class CashTransactionFactory {
         final BigDecimal signedAmount = normalizeStandardAmount(unsignedAmount, selectedType);
         final Asset asset = Asset.of(currency, signedAmount);
 
-        return new CashTransaction(asset, category, date, description, notes);
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .build();
     }
 
     /**
@@ -114,12 +127,55 @@ public final class CashTransactionFactory {
             final String notes,
             final String friendName) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
-        Objects.requireNonNull(friendName, "friendName must not be null");
+        return createFriendLoan(
+                unsignedAmount,
+                currency,
+                selectedType,
+                category,
+                date,
+                description,
+                notes,
+                friendName,
+                null
+        );
+    }
+
+    /**
+     * Creates a friend-loan transaction, optionally linked to an existing friend-loan identifier.
+     *
+     * <p>
+     * If {@code friendLoanId} is {@code null}, a new unique loan identifier is generated.
+     * If non-null, this disbursement is linked to that existing friend loan.
+     * </p>
+     *
+     * @param unsignedAmount the positive amount entered by the user
+     * @param currency the currency of the transaction
+     * @param selectedType the semantic type chosen by the user
+     * @param category the selected category
+     * @param date the transaction date
+     * @param description the transaction description
+     * @param notes optional notes, may be null
+     * @param friendName the related friend's name
+     * @param friendLoanId the optional identifier of an existing friend loan, or null
+     * @return a valid friend-loan disbursement transaction
+     */
+    public CashTransaction createFriendLoan(
+            final BigDecimal unsignedAmount,
+            final CurrencyUnit currency,
+            final CategoryType selectedType,
+            final Category category,
+            final LocalDate date,
+            final String description,
+            final String notes,
+            final String friendName,
+            final UUID friendLoanId) {
+
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
+        Objects.requireNonNull(friendName, MSG_FRIEND_NAME_NOT_NULL);
 
         validatePositiveAmount(unsignedAmount);
         validateTypeConsistency(selectedType, category);
@@ -130,16 +186,16 @@ public final class CashTransactionFactory {
         }
 
         final Asset asset = Asset.of(currency, unsignedAmount.abs().negate());
+        final UUID effectiveLoanId = friendLoanId != null ? friendLoanId : UUID.randomUUID();
 
-        return new CashTransaction(
-                asset,
-                category,
-                date,
-                description,
-                notes,
-                UUID.randomUUID(),
-                friendName
-        );
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .friendLoan(effectiveLoanId, friendName.trim())
+                .build();
     }
 
     /**
@@ -182,12 +238,12 @@ public final class CashTransactionFactory {
             final String friendName,
             final UUID friendLoanId) {
 
-        Objects.requireNonNull(unsignedAmount, "unsignedAmount must not be null");
-        Objects.requireNonNull(currency, "currency must not be null");
-        Objects.requireNonNull(selectedType, "selectedType must not be null");
-        Objects.requireNonNull(category, "category must not be null");
-        Objects.requireNonNull(date, "date must not be null");
-        Objects.requireNonNull(friendName, "friendName must not be null");
+        Objects.requireNonNull(unsignedAmount, MSG_AMOUNT_NOT_NULL);
+        Objects.requireNonNull(currency, MSG_CURRENCY_NOT_NULL);
+        Objects.requireNonNull(selectedType, MSG_TYPE_NOT_NULL);
+        Objects.requireNonNull(category, MSG_CATEGORY_NOT_NULL);
+        Objects.requireNonNull(date, MSG_DATE_NOT_NULL);
+        Objects.requireNonNull(friendName, MSG_FRIEND_NAME_NOT_NULL);
         Objects.requireNonNull(friendLoanId, "friendLoanId must not be null");
 
         validatePositiveAmount(unsignedAmount);
@@ -200,15 +256,14 @@ public final class CashTransactionFactory {
 
         final Asset asset = Asset.of(currency, unsignedAmount.abs());
 
-        return new CashTransaction(
-                asset,
-                category,
-                date,
-                description,
-                notes,
-                friendLoanId,
-                friendName
-        );
+        return CashTransaction.builder()
+                .asset(asset)
+                .category(category)
+                .date(date)
+                .description(description)
+                .notes(notes)
+                .friendLoan(friendLoanId, friendName)
+                .build();
     }
 
     /**

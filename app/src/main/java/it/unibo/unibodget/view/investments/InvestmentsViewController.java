@@ -1,5 +1,6 @@
 package it.unibo.unibodget.view.investments;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.ExportResult;
@@ -12,12 +13,35 @@ import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.utils.event.NewWalletAddedEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
+import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.AbstractWallet;
-import it.unibo.unibodget.view.main.*;
+import it.unibo.unibodget.view.main.AppContext;
+import it.unibo.unibodget.view.main.BaseViewController;
+import it.unibo.unibodget.view.main.SideBarDelegate;
+import it.unibo.unibodget.view.main.SideBarItem;
+import it.unibo.unibodget.view.main.SideBarViewController;
+import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.main.WalletRenamePrompt;
 import it.unibo.unibodget.view.utils.AssetFormatter;
+import it.unibo.unibodget.view.utils.DialogHelper;
 import it.unibo.unibodget.view.utils.ToastNotification;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -37,40 +61,30 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JavaFX controller for the investments view.
  * Displays portfolio positions, transaction history, performance charts,
  * and delegates sidebar interactions via {@link SideBarDelegate}.
  */
-public class InvestmentsViewController extends BaseViewController implements SideBarDelegate {
+public final class InvestmentsViewController extends BaseViewController implements SideBarDelegate {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentsViewController.class);
     private static final int REFRESH_EACH_SECONDS = 60;
     private static final int ADD_TRANSACTION_DIALOG_WIN_WIDTH = 450;
     private static final int ADD_TRANSACTION_DIALOG_WIN_HEIGHT = 620;
     private static final int ADD_NEW_WALLET_DIALOG_WIDTH = 300;
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
+    private static final int RENAME_DIALOG_SIZE = 400;
     private static final String NOT_AVAILABLE = "N/A";
+    private static final String PROP_BOLD_BY_DEFAULT = "boldByDefault";
     private static final String PROFIT_STYLE = "positive";
     private static final String LOSS_STYLE = "negative";
     private static final int TOOLTIP_DELAY_MILLIS = 100;
@@ -89,6 +103,8 @@ public class InvestmentsViewController extends BaseViewController implements Sid
     private Window addNewWalletDialog;
 
     private SideBarViewController sideBarViewController;
+    @FXML
+    private Button closeButton;
     @FXML
     private Button addTransactionButton;
     private Window addTransactionDialog;
@@ -166,6 +182,9 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * @param snapshotService        provides historical balance snapshots for the chart
      * @param viewControllersFactory factory used to instantiate sub-dialogs (e.g. add-transaction)
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of controllers and services")
     public InvestmentsViewController(
             final InvestmentController investmentController,
             final InvestmentsSnapshotService snapshotService,
@@ -175,7 +194,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
         this.viewControllersFactory = Objects.requireNonNull(viewControllersFactory);
 
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
-        subscribe(NewWalletAddedEvent.class, this::onNewWalletAddedEvent);
+        subscribe(NewWalletAddedEvent.class, ignored -> onNewWalletAddedEvent());
     }
 
     /**
@@ -183,6 +202,9 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      *
      * @param sideBarViewController the sidebar controller, must not be {@code null}
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Dependency injection of sidebar controller")
     public void setSideBarViewController(final SideBarViewController sideBarViewController) {
         this.sideBarViewController = Objects.requireNonNull(sideBarViewController);
     }
@@ -193,6 +215,9 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      */
     @FXML
     public void initialize() {
+        if (closeButton != null) {
+            closeButton.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
+        }
         setupPositionTable();
         setupHistoryTable();
         setupPieToggle();
@@ -503,16 +528,17 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * Opens a text-input dialog that lets the user rename the current investment account.
      */
     @FXML
-    private void handleCurrentWalletNameChange() {
+    public void handleCurrentWalletNameChange() {
         if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
             return;
         }
 
         final TextInputDialog dialog = new TextInputDialog();
+        ThemeManager.applyThemeToDialog(dialog);
         dialog.initOwner(currentWalletName.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setWidth(400);
-        dialog.setHeight(400);
+        dialog.setWidth(RENAME_DIALOG_SIZE);
+        dialog.setHeight(RENAME_DIALOG_SIZE);
         dialog.setResizable(false);
         dialog.setTitle(String.format("Change %s's account current name:",
                 investmentController.getCurrentInvestmentAccount().get().getName()));
@@ -533,38 +559,34 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * On success or failure, fires a notification event on the {@link MessageBus}.
      */
     @FXML
-    private void handleExportCSVOnMouseClicked() {
+    public void handleExportCSVOnMouseClicked() {
         if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
             return;
         }
 
         final var account = investmentController.getCurrentInvestmentAccount().get();
-
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV investments data");
-
-        final var accountName = account.getName().replaceAll("\\s+", "_");
-        fileChooser.setInitialFileName(accountName + "_investments_data.csv");
-
-        final var downloadsDir = new File(System.getProperty("user.home"), "Downloads");
-        if (downloadsDir.exists()) {
-            fileChooser.setInitialDirectory(downloadsDir);
-        }
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-        final var stage = (Stage) currentWalletName.getScene().getWindow();
-        final var selectedFile = fileChooser.showSaveDialog(stage);
-        if (selectedFile == null) {
+        final Optional<File> fileOpt = DialogHelper.showSaveCsvDialog(
+                currentWalletName,
+                "Export CSV investments data",
+                account.getName() + "_investments_data");
+        if (fileOpt.isEmpty()) {
             return; // user pressed cancel
         }
 
-        final var result = investmentController.exportCurrentAccountData(selectedFile);
-        switch (result) {
-            case ExportResult.Error error ->
-                    MessageBus.send(new MainErrorNotificationEvent("Export failed: " + error.message()));
-            case ExportResult.Success success ->
-                    MessageBus.send(new MainInfoNotificationEvent("Export successful!"));
+        final var result = investmentController.exportCurrentAccountData(fileOpt.get());
+        if (result instanceof ExportResult.Error error) {
+            MessageBus.send(new MainErrorNotificationEvent("Failed to export investments data: " + error.message()));
+        } else if (result instanceof ExportResult.Success) {
+            MessageBus.send(new MainInfoNotificationEvent("Investments data exported successfully!"));
         }
+    }
+
+    /**
+     * Closes the application when the close button is clicked.
+     */
+    @FXML
+    public void handleCloseApp() {
+        Platform.exit();
     }
 
     /**
@@ -572,7 +594,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
      * Refreshes the view once the dialog is closed.
      */
     @FXML
-    private void handleAddTransactionButtonClicked() {
+    public void handleAddTransactionButtonClicked() {
         try {
             final FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/investments/AddTransactionDialog.fxml"));
@@ -587,6 +609,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Transaction");
             dialog.setScene(new Scene(root, ADD_TRANSACTION_DIALOG_WIN_WIDTH, ADD_TRANSACTION_DIALOG_WIN_HEIGHT));
+            ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addTransactionController.dispose());
@@ -596,8 +619,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             refreshData();
 
         } catch (final IOException e) {
-            System.err.println("=== DIALOG ERROR ===");
-            e.printStackTrace();
+            LOGGER.error("=== DIALOG ERROR ===", e);
             ToastNotification.showError(
                     addTransactionButton.getScene().getWindow(),
                     "Error opening dialog: " + e.getMessage());
@@ -748,7 +770,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
 
     /**
      * Colors the given labels green for a profit or red for a loss,
-     * using the style classes of {@code investments.css}.
+     * using the style classes of {@code theme.css}.
      *
      * @param loss   {@code true} if the value is a loss
      * @param labels the labels to color
@@ -779,6 +801,7 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle("Add Wallet");
             dialog.setScene(new Scene(root, ADD_NEW_WALLET_DIALOG_WIDTH, ADD_NEW_WALLET_DIALOG_HEIGHT));
+            ThemeManager.applyThemeToScene(dialog.getScene());
             dialog.setResizable(false);
             closeOnEscape(dialog);
             dialog.setOnCloseRequest(event -> addNewWalletVC.dispose());
@@ -790,15 +813,14 @@ public class InvestmentsViewController extends BaseViewController implements Sid
             sideBarViewController.refresh();
 
         } catch (final IOException e) {
-            System.err.println("=== DIALOG ERROR ===");
-            e.printStackTrace();
+            LOGGER.error("=== DIALOG ERROR ===", e);
             ToastNotification.showError(
                     investmentsVBoxPage.getScene().getWindow(),
                     "Error opening dialog: " + e.getMessage());
         }
     }
 
-    private void onNewWalletAddedEvent(final NewWalletAddedEvent event) {
+    private void onNewWalletAddedEvent() {
         if (addNewWalletDialog == null) {
             return;
         }
