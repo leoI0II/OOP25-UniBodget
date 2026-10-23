@@ -735,6 +735,56 @@
     -fx-border-color: rgba(0, 0, 0, 0.16);
 }
 
+/* Primary navigation menu button in sidebar (brighter, prominent) */
+.sidebar-nav-menu {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.sidebar-nav-menu .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.sidebar-nav-menu:hover,
+.sidebar-nav-menu:showing {
+    -fx-background-color: #1d4ed8;
+}
+
+.theme-dark .sidebar-settings-button {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+.theme-dark .sidebar-settings-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+.theme-light .sidebar-settings-button {
+    -fx-background-color: #f1f4f9;
+    -fx-text-fill: #1a1e28;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(0, 0, 0, 0.10);
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+.theme-light .sidebar-settings-button:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-border-color: rgba(0, 0, 0, 0.18);
+}
+
 /* ==========================================================================
    POPUP MENU (ContextMenu & MenuItem)
    ========================================================================== */

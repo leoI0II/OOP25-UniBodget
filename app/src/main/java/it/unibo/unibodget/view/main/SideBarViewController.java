@@ -40,6 +40,7 @@ public class SideBarViewController extends BaseViewController {
     private static final double TOTAL_FONT_SIZE = 22.0;
 
     @FXML private MenuButton menuButton;
+    @FXML private Button settingsButton;
     @FXML private VBox walletList;
     @FXML private Label totalTitleLabel;
     @FXML private Label totalBalanceLabel;
@@ -86,7 +87,12 @@ public class SideBarViewController extends BaseViewController {
         navDashboardItem.setOnAction(e -> navigationHandler.accept(AppContext.DASHBOARD));
         navConverterItem.setOnAction(e -> navigationHandler.accept(AppContext.CONVERTER));
         navPortfolioItem.setOnAction(e -> navigationHandler.accept(AppContext.INVESTMENTS));
-        navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+        if (navSettingsItem != null) {
+            navSettingsItem.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+        }
+        if (settingsButton != null) {
+            settingsButton.setOnAction(e -> navigationHandler.accept(AppContext.SETTINGS));
+        }
         if (totalBalanceLabel != null) {
             totalBalanceLabel.textProperty().addListener((obs, oldVal, newVal) -> updateWidthForTotal(newVal));
         }
@@ -97,6 +103,9 @@ public class SideBarViewController extends BaseViewController {
     private void applyThemeAndRefresh() {
         if (menuButton != null) {
             ThemeManager.applyFont(menuButton);
+        }
+        if (settingsButton != null) {
+            ThemeManager.applyFont(settingsButton);
         }
         if (totalTitleLabel != null) {
             ThemeManager.applyFont(totalTitleLabel);

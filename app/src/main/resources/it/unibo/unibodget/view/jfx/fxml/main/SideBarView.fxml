@@ -13,20 +13,19 @@
 
 <VBox styleClass="sidebar" maxWidth="400.0" minWidth="200.0" prefHeight="700.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.main.SideBarViewController">
    <children>
-      <HBox alignment="CENTER_RIGHT" prefHeight="60.0" prefWidth="150.0" spacing="8.0">
+      <HBox alignment="CENTER_LEFT" prefHeight="48.0" spacing="8.0">
          <children>
-            <Region prefHeight="41.0" prefWidth="30.0" HBox.hgrow="ALWAYS" />
-            <MenuButton fx:id="menuButton" alignment="CENTER" minWidth="75.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="75.0" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Menu">
+            <MenuButton fx:id="menuButton" alignment="CENTER" maxWidth="1.7976931348623157E308" minHeight="38.0" mnemonicParsing="false" prefHeight="38.0" style="-fx-font-size: 14px; -fx-font-weight: bold;" styleClass="sidebar-nav-menu" text="Menu" HBox.hgrow="ALWAYS">
                <items>
-                  <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="Dashboard" />
-                  <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="Converter" />
-                  <MenuItem fx:id="navPortfolioItem" mnemonicParsing="false" text="Portfolio" />
-                  <MenuItem fx:id="navSettingsItem" mnemonicParsing="false" text="Settings" />
+                  <MenuItem fx:id="navDashboardItem" mnemonicParsing="false" text="📊 Dashboard" />
+                  <MenuItem fx:id="navConverterItem" mnemonicParsing="false" text="🔄 Converter" />
+                  <MenuItem fx:id="navPortfolioItem" mnemonicParsing="false" text="📈 Portfolio" />
                </items>
                <HBox.margin>
                   <Insets />
                </HBox.margin>
             </MenuButton>
+            <Button fx:id="settingsButton" alignment="CENTER" maxHeight="38.0" maxWidth="38.0" minHeight="38.0" minWidth="38.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="38.0" style="-fx-font-size: 16px; -fx-padding: 0;" styleClass="sidebar-settings-button" text="⚙" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
