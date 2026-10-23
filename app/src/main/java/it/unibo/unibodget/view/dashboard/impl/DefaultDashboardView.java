@@ -447,6 +447,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
 
         final ScrollPane rootScrollPane = new ScrollPane(centerContent);
         rootScrollPane.setFitToWidth(true);
+        rootScrollPane.setFitToHeight(true);
         rootScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         rootScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         rootScrollPane.setStyle(
@@ -618,10 +619,12 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         final Node filtersBar = createTransactionFiltersBar();
 
         final VBox card = createCard(topBar, filtersBar);
+        card.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(this.transactionTable, Priority.ALWAYS);
         this.transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         this.transactionTable.setMinHeight(TABLE_MIN_HEIGHT);
         this.transactionTable.setPrefHeight(TABLE_PREF_HEIGHT);
+        this.transactionTable.setMaxHeight(Double.MAX_VALUE);
         card.getChildren().add(this.transactionTable);
         return card;
     }
