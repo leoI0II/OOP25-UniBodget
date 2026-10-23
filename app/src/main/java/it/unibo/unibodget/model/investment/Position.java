@@ -25,6 +25,9 @@ public record Position(
         Asset averageBasisCost,
         Asset currentMarketValue) {
 
+    // how many decimals we keep in the division pl / cost (before the * 100).
+    // with only 4, a small loss like -0.0045% became 0% and was equal to a 0% position,
+    // so best/worst were wrong. on screen it is still shown with 2 decimals
     private static final int PERCENTAGE_SCALE = 10;
 
     /**

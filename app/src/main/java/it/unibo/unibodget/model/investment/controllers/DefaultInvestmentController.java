@@ -7,7 +7,6 @@ import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
-import it.unibo.unibodget.model.investment.BalanceSnapshot;
 import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
@@ -519,9 +518,6 @@ public class DefaultInvestmentController implements InvestmentController {
                     buyTransaction);
             case PaymentSource.NoPaymentChannel noSrc -> new OrderResult.BuyNoPaymentSuccess(buyTransaction);
         };
-        snapshotService.save(
-                targetAccount.getId(), BalanceSnapshot.buildInvestmentSnapshot(targetAccount));
-        return result;
     }
 
     /** {@inheritDoc} */
@@ -557,9 +553,6 @@ public class DefaultInvestmentController implements InvestmentController {
                             "Convert proceeds to " + stableCoinDst.stableCoin(), notes));
             case PaymentSource.NoPaymentChannel noDst -> new OrderResult.SellNoPaymentSuccess(sellTransaction);
         };
-        snapshotService.save(
-                sourceAccount.getId(), BalanceSnapshot.buildInvestmentSnapshot(sourceAccount));
-        return result;
     }
 
     /** {@inheritDoc} */
@@ -603,10 +596,6 @@ public class DefaultInvestmentController implements InvestmentController {
                 Asset.zero(asset)  // No fee for transfers in this implementation
         );
         targetAccount.addTransaction(transferInTransaction);
-        snapshotService.save(
-                sourceAccount.getId(), BalanceSnapshot.buildInvestmentSnapshot(sourceAccount));
-        snapshotService.save(
-                targetAccount.getId(), BalanceSnapshot.buildInvestmentSnapshot(targetAccount));
 
         return new OrderResult.TransferSuccess(transferOutTransaction, transferInTransaction);
     }
