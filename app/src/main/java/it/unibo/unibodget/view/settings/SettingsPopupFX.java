@@ -71,6 +71,7 @@ public final class SettingsPopupFX {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Settings - UniBodget");
         dialog.setResizable(true);
+        ThemeManager.applyThemeToDialog(dialog);
 
         final Settings current = controller.getSettings();
 

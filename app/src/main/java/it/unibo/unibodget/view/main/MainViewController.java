@@ -199,6 +199,8 @@ public final class MainViewController extends BaseViewController {
         if (contentArea.getScene() != null) {
             ThemeManager.applyThemeToScene(contentArea.getScene());
         }
+        contentArea.applyCss();
+        contentArea.layout();
     }
 
     /**
@@ -235,6 +237,8 @@ public final class MainViewController extends BaseViewController {
             ivc.onItemSelected(investmentController.getAllInvestmentAccounts().getFirst().getId());
         }
         ThemeManager.applyThemeToScene(contentArea.getScene());
+        contentArea.applyCss();
+        contentArea.layout();
     }
 
     /**
@@ -300,6 +304,8 @@ public final class MainViewController extends BaseViewController {
         if (contentArea.getScene() != null) {
             ThemeManager.applyThemeToScene(contentArea.getScene());
         }
+        contentArea.applyCss();
+        contentArea.layout();
     }
 
     /**
@@ -334,6 +340,8 @@ public final class MainViewController extends BaseViewController {
         }
 
         ThemeManager.applyThemeToScene(owner.getScene());
+        contentArea.applyCss();
+        contentArea.layout();
     }
 
     /**

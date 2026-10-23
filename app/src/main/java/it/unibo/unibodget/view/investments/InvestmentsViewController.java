@@ -84,6 +84,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private static final int ADD_NEW_WALLET_DIALOG_HEIGHT = 400;
     private static final int RENAME_DIALOG_SIZE = 400;
     private static final String NOT_AVAILABLE = "N/A";
+    private static final String PROP_BOLD_BY_DEFAULT = "boldByDefault";
     private static final String PROFIT_STYLE = "positive";
     private static final String LOSS_STYLE = "negative";
     private static final int TOOLTIP_DELAY_MILLIS = 100;
@@ -214,6 +215,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
      */
     @FXML
     public void initialize() {
+        if (closeButton != null) {
+            closeButton.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
+        }
         setupPositionTable();
         setupHistoryTable();
         setupPieToggle();

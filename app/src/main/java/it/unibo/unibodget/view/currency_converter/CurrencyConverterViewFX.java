@@ -45,8 +45,11 @@ import javafx.stage.Window;
  */
 public final class CurrencyConverterViewFX {
 
-    private static final double ROOT_PADDING = 35;
+    private static final double ROOT_PADDING_TOP = 18;
+    private static final double ROOT_PADDING_HORIZONTAL = 14;
+    private static final double ROOT_PADDING_BOTTOM = 18;
     private static final int TITLE_FONT_SIZE = 28;
+    private static final String PROP_BOLD_BY_DEFAULT = "boldByDefault";
 
     /**
      * Window size and maximize preferences.
@@ -156,18 +159,20 @@ public final class CurrencyConverterViewFX {
         });
 
         /* -------------------- TOP BAR -------------------- */
-        final HBox topBar = new HBox(20);
-        topBar.setAlignment(Pos.CENTER_LEFT);
+        final HBox titleBox = new HBox(16, pageTitle, showChartButton);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
 
         final Region topSpacer = new Region();
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
 
         final Button closeButton = new Button("Close");
         closeButton.getStyleClass().addAll("secondary-button", "close-app-button");
+        closeButton.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
         closeButton.setOnAction(e -> Platform.exit());
         ThemeManager.applyFont(closeButton);
 
-        topBar.getChildren().addAll(pageTitle, showChartButton, topSpacer, closeButton);
+        final HBox topBar = new HBox(12, titleBox, topSpacer, closeButton);
+        topBar.setAlignment(Pos.TOP_LEFT);
 
         ThemeManager.addListener(t -> Platform.runLater(() -> {
             ThemeManager.applyFont(pageTitle);
@@ -184,8 +189,13 @@ public final class CurrencyConverterViewFX {
                 bankConverterWidget.getView()
         );
 
-        final VBox root = new VBox(30, topBar, contentRow);
-        root.setPadding(new Insets(ROOT_PADDING));
+        final VBox root = new VBox(20, topBar, contentRow);
+        root.setPadding(new Insets(
+                ROOT_PADDING_TOP,
+                ROOT_PADDING_HORIZONTAL,
+                ROOT_PADDING_BOTTOM,
+                ROOT_PADDING_HORIZONTAL
+        ));
         root.setAlignment(Pos.TOP_LEFT);
 
         /* -------------------- BACKGROUND -------------------- */
@@ -203,6 +213,11 @@ public final class CurrencyConverterViewFX {
         scrollPane.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene != null) {
                 ThemeManager.applyThemeToScene(newScene);
+                Platform.runLater(() -> {
+                    scrollPane.applyCss();
+                    scrollPane.layout();
+                    contentRow.requestLayout();
+                });
             }
         });
 

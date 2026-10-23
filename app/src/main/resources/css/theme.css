@@ -932,7 +932,7 @@
 
 .investments-page {
     -fx-background-color: transparent;
-    -fx-padding: 18px;
+    -fx-padding: 18px 14px 18px 14px;
 }
 
 /* Wallet Header */

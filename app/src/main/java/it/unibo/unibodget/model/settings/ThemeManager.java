@@ -1,13 +1,18 @@
 package it.unibo.unibodget.model.settings;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -50,7 +55,12 @@ public final class ThemeManager {
             "column-header",
             "tab-label",
             "bold",
-            "header-title"
+            "header-title",
+            "close-app-button",
+            "sidebar-nav-menu",
+            "balance-value",
+            "chart-title",
+            "hero-transaction-button"
     );
 
     private static final Set<Scene> SCENES =
@@ -58,6 +68,22 @@ public final class ThemeManager {
 
     private static final List<Consumer<Theme>> LISTENERS =
             new CopyOnWriteArrayList<>();
+
+    private static final String FONT_STYLESHEET_PREFIX = "unibodget-font-";
+    private static final File FONT_STYLESHEET_FILE;
+
+    static {
+        File temp = null;
+        try {
+            temp = File.createTempFile(FONT_STYLESHEET_PREFIX, ".css");
+            temp.deleteOnExit();
+        } catch (final IOException expected) {
+            // Fallback gracefully if temp file cannot be created.
+        }
+        FONT_STYLESHEET_FILE = temp;
+    }
+
+    private static String fontStylesheetUrl;
 
     /**
      * The theme currently in use by the application.
@@ -89,6 +115,7 @@ public final class ThemeManager {
      */
     public static void setTheme(final Theme theme) {
         currentTheme = Objects.requireNonNull(theme);
+        updateFontStylesheet();
 
         for (final Scene scene : SCENES.toArray(new Scene[0])) {
             applyThemeToScene(scene);
@@ -97,6 +124,16 @@ public final class ThemeManager {
         for (final Consumer<Theme> listener : LISTENERS) {
             listener.accept(currentTheme);
         }
+
+        Platform.runLater(() -> {
+            for (final Scene scene : SCENES.toArray(new Scene[0])) {
+                final Parent root = scene.getRoot();
+                if (root != null) {
+                    root.applyCss();
+                    root.layout();
+                }
+            }
+        });
     }
 
     /**
@@ -115,6 +152,27 @@ public final class ThemeManager {
      */
     public static void removeListener(final Consumer<Theme> listener) {
         LISTENERS.remove(listener);
+    }
+
+    /**
+     * Updates the dynamic stylesheet file with the font family of the current theme.
+     */
+    private static synchronized void updateFontStylesheet() {
+        if (FONT_STYLESHEET_FILE == null) {
+            return;
+        }
+        try {
+            final String safeFont = currentTheme.getFontFamily().replace("'", "\\'");
+            final String fontCss = String.format(
+                    Locale.ROOT,
+                    ".root, * {%n    -fx-font-family: '%s';%n}%n",
+                    safeFont
+            );
+            Files.writeString(FONT_STYLESHEET_FILE.toPath(), fontCss, StandardCharsets.UTF_8);
+            fontStylesheetUrl = FONT_STYLESHEET_FILE.toURI().toURL().toExternalForm() + "?v=" + System.nanoTime();
+        } catch (final IOException expected) {
+            // Fallback to inline font styling if writing temp file fails.
+        }
     }
 
     /**
@@ -144,6 +202,12 @@ public final class ThemeManager {
             }
         }
 
+        updateFontStylesheet();
+        if (fontStylesheetUrl != null) {
+            scene.getStylesheets().removeIf(url -> url != null && url.contains(FONT_STYLESHEET_PREFIX));
+            scene.getStylesheets().add(fontStylesheetUrl);
+        }
+
         final Parent root = scene.getRoot();
         if (root != null) {
             root.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
@@ -158,8 +222,13 @@ public final class ThemeManager {
 
             applyBackground(root);
             applyFont(root);
-            root.applyCss();
             applyToTree(root);
+            root.applyCss();
+            root.layout();
+            Platform.runLater(() -> {
+                root.applyCss();
+                root.layout();
+            });
         }
     }
 
@@ -182,6 +251,13 @@ public final class ThemeManager {
                     dialogPane.getStylesheets().add(ext);
                 }
             }
+
+            updateFontStylesheet();
+            if (fontStylesheetUrl != null) {
+                dialogPane.getStylesheets().removeIf(url -> url != null && url.contains(FONT_STYLESHEET_PREFIX));
+                dialogPane.getStylesheets().add(fontStylesheetUrl);
+            }
+
             dialogPane.getStyleClass().removeAll(THEME_DARK, THEME_LIGHT);
             dialogPane.getStyleClass().add(currentTheme.isDarkMode() ? THEME_DARK : THEME_LIGHT);
             applyBackground(dialogPane);
@@ -291,22 +367,26 @@ public final class ThemeManager {
         final boolean boldDefault = isNodeOrParentBoldByDefault(node);
         final boolean effectiveBold = boldDefault || currentTheme.isBoldText();
 
-        final String existingStyle = node.getStyle().replaceAll(
-                "(?i)-fx-font-(?:family|weight)"
-                        + "\\s*:[^;]*(?:;|$)",
+        String cleanedStyle = node.getStyle() == null ? "" : node.getStyle().replaceAll(
+                "(?i)-fx-font-(?:family|weight)\\s*:[^;]*(?:;|$)",
                 ""
-        );
+        ).trim();
+        while (cleanedStyle.endsWith(";")) {
+            cleanedStyle = cleanedStyle.substring(0, cleanedStyle.length() - 1).trim();
+        }
+        final String baseStyle = cleanedStyle.isEmpty() ? "" : cleanedStyle + "; ";
 
         final String familyStyle = CSS_FONT_FAMILY_PREFIX + currentTheme.getFontFamily() + CSS_QUOTE_SEMICOLON;
 
-        if (boldDefault) {
-            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: bold;");
-            node.getProperties().remove(PROP_THEME_APPLIED_BOLD);
-        } else if (effectiveBold) {
-            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: bold;");
-            node.getProperties().put(PROP_THEME_APPLIED_BOLD, Boolean.TRUE);
+        if (boldDefault || effectiveBold) {
+            node.setStyle(baseStyle + familyStyle + "-fx-font-weight: bold;");
+            if (!boldDefault) {
+                node.getProperties().put(PROP_THEME_APPLIED_BOLD, Boolean.TRUE);
+            } else {
+                node.getProperties().remove(PROP_THEME_APPLIED_BOLD);
+            }
         } else {
-            node.setStyle(existingStyle + ";" + familyStyle + "-fx-font-weight: normal;");
+            node.setStyle(baseStyle + familyStyle);
             node.getProperties().remove(PROP_THEME_APPLIED_BOLD);
         }
     }
