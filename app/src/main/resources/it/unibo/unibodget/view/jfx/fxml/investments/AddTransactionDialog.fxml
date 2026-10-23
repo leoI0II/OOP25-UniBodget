@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox styleClass="card" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.AddTransactionDialogViewController">
+<VBox styleClass="card" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="660.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unibo.unibodget.view.investments.AddTransactionDialogViewController">
    <children>
       <HBox prefHeight="50.0" spacing="10.0" VBox.vgrow="NEVER">
          <children>
@@ -113,14 +113,16 @@
                </children>
             </HBox>
             <Region prefHeight="20.0" prefWidth="460.0" VBox.vgrow="ALWAYS" />
-            <HBox maxWidth="1.7976931348623157E308" prefHeight="35.0" prefWidth="460.0" spacing="10.0" VBox.vgrow="ALWAYS">
+            <!-- payment: the 3 buttons in one row with the same width, the account combo under them.
+                 before the combo was in the same row and the names of the buttons were cut -->
+            <HBox maxWidth="1.7976931348623157E308" prefHeight="35.0" prefWidth="460.0" spacing="10.0" VBox.vgrow="NEVER">
                <children>
-                  <ToggleButton fx:id="cashAccountToggleButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="109.0" text="Cash account" HBox.hgrow="ALWAYS" />
-                  <ToggleButton fx:id="stableCoinToggleButton" mnemonicParsing="false" prefHeight="42.0" prefWidth="101.0" text="Stable coin" HBox.hgrow="ALWAYS" />
-                  <ToggleButton fx:id="noPaymentToggleButton" mnemonicParsing="false" prefHeight="39.0" prefWidth="101.0" text="No payment" HBox.hgrow="ALWAYS" />
-                  <ComboBox fx:id="paymentSourceComboBox" prefHeight="35.0" prefWidth="150.0" HBox.hgrow="ALWAYS" />
+                  <ToggleButton fx:id="cashAccountToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" text="Cash account" HBox.hgrow="ALWAYS" />
+                  <ToggleButton fx:id="stableCoinToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" text="Stable coin" HBox.hgrow="ALWAYS" />
+                  <ToggleButton fx:id="noPaymentToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" text="No payment" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
+            <ComboBox fx:id="paymentSourceComboBox" maxWidth="1.7976931348623157E308" prefHeight="35.0" prefWidth="460.0" VBox.vgrow="NEVER" />
             <Region prefHeight="20.0" prefWidth="460.0" VBox.vgrow="ALWAYS" />
             <VBox maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="460.0" spacing="10.0" VBox.vgrow="ALWAYS">
                <children>

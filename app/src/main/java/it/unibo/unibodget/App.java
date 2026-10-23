@@ -8,17 +8,21 @@ import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
 import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
+import it.unibo.unibodget.model.investment.service.PeriodicSnapshotSaver;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
+import it.unibo.unibodget.model.utils.AppTicker;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
 import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
 import it.unibo.unibodget.view.main.ViewControllersFactory;
+import it.unibo.unibodget.view.utils.FxAppTicker;
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +43,13 @@ public final class App extends Application {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(App.class);
     private static final double MIN_WINDOW_WIDTH = 900.0;
     private static final double MIN_WINDOW_HEIGHT = 600.0;
+    // time between two ticks of the app (e.g. the portfolio page refreshes the prices)
+    private static final Duration TICK_INTERVAL = Duration.ofMinutes(1);
+    // how often a P/L snapshot of each investment account is saved while the app is open
+    private static final Duration SNAPSHOT_INTERVAL = Duration.ofMinutes(10);
     private WalletAutoSaver walletSaver;
+    private PeriodicSnapshotSaver snapshotSaver;
+    private AppTicker ticker;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
 
@@ -75,6 +85,10 @@ public final class App extends Application {
 
         final Settings settings = settingsController.getSettings();
         final var snapshotService = new CSVInvestmentsSnapshotService();
+        snapshotSaver = new PeriodicSnapshotSaver(
+                        investmentsService::getWallets, snapshotService, SNAPSHOT_INTERVAL
+        );
+        snapshotSaver.start();
 
         final var investmentsController =
                 new DefaultInvestmentController(
@@ -123,6 +137,10 @@ public final class App extends Application {
 
         persistenceReady = true;
         walletSaver.start();
+        // the first tick is sent right away: the snapshots are saved and so the prices are
+        // downloaded now, and not when the user opens the portfolio page
+        ticker = new FxAppTicker(TICK_INTERVAL);
+        ticker.start();
     }
 
     /**
@@ -174,6 +192,8 @@ public final class App extends Application {
 
         for (final Runnable save
                 : List.<Runnable>of(
+                        ticker::stop,
+                        snapshotSaver::stop,
                         walletSaver::stop,
                         walletSaver::saveAll,
                         () -> {
