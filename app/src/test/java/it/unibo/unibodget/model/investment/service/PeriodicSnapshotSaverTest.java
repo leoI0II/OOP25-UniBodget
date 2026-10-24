@@ -25,6 +25,11 @@ class PeriodicSnapshotSaverTest {
 
     private static final Duration INTERVAL = Duration.ofMinutes(10);
     private static final LocalDateTime START = LocalDateTime.of(2026, 10, 23, 10, 0);
+    private static final int MINUTES_3 = 3;
+    private static final int MINUTES_5 = 5;
+    private static final int MINUTES_7 = 7;
+    private static final int MINUTES_9 = 9;
+    private static final int MINUTES_10 = 10;
     // empty accounts never ask a price, so the converter is never used
     private static final CurrencyConverter NO_CONVERSION = (amount, from, to) -> null;
 
@@ -60,11 +65,11 @@ class PeriodicSnapshotSaverTest {
     @Test
     void shouldWaitTheIntervalBetweenTwoSnapshots() {
         saver.onTick(START);
-        saver.onTick(START.plusMinutes(5));
-        saver.onTick(START.plusMinutes(9));
+        saver.onTick(START.plusMinutes(MINUTES_5));
+        saver.onTick(START.plusMinutes(MINUTES_9));
         assertEquals(1, savedCount());
 
-        saver.onTick(START.plusMinutes(10));
+        saver.onTick(START.plusMinutes(MINUTES_10));
         assertEquals(2, savedCount());
     }
 
@@ -73,12 +78,12 @@ class PeriodicSnapshotSaverTest {
         // a snapshot saved 3 minutes before the app was opened
         memoryService.save(
                 account.getId(),
-                new BalanceSnapshot(START.minusMinutes(3), BigDecimal.ZERO, BigDecimal.ZERO));
+                new BalanceSnapshot(START.minusMinutes(MINUTES_3), BigDecimal.ZERO, BigDecimal.ZERO));
 
         saver.onTick(START);
         assertEquals(1, savedCount());
 
-        saver.onTick(START.plusMinutes(7));
+        saver.onTick(START.plusMinutes(MINUTES_7));
         assertEquals(2, savedCount());
     }
 
