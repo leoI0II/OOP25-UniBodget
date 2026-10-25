@@ -3,6 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import javafx.geometry.Insets;
@@ -109,13 +110,6 @@ public final class EditBudgetDialog extends Dialog<EditBudgetRequest> {
      * @return the parsed decimal, or null if invalid
      */
     private static BigDecimal parseDecimal(final String text) {
-        try {
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-            return new BigDecimal(text.trim());
-        } catch (final NumberFormatException exception) {
-            return null;
-        }
+        return MonetaryInputParser.parse(text).orElse(null);
     }
 }

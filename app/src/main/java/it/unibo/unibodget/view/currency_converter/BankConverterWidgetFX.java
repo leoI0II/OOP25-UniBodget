@@ -2,12 +2,15 @@ package it.unibo.unibodget.view.currency_converter;
 
 import it.unibo.unibodget.controller.currency_converter.BankConversionController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.currency.bank.Bank;
 import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.view.utils.DialogHelper;
+import java.math.BigDecimal;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -17,7 +20,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,25 +99,24 @@ public class BankConverterWidgetFX {
             convertedLabel.setText("");
             detailsLabel.setText("");
             try {
-                //final BigDecimal amount = new BigDecimal(amountField.getText());
-                final BigDecimal amount = new BigDecimal(
-                    amountField.getText().trim().replace(',', '.')
-                );
+                final Optional<BigDecimal> amountOpt =
+                        MonetaryInputParser.parsePositive(amountField.getText());
+                if (amountOpt.isEmpty()) {
+                    resultLabel.setText("Insert value > 0");
+                    return;
+                }
+                final BigDecimal amount = amountOpt.get();
                 final Bank bank = bankBox.getValue();
                 final CurrencyUnit from = fromBox.getValue();
                 final CurrencyUnit to = toBox.getValue();
 
-                if (bank != null || from != null || to != null) {
-                    if (amount.signum() <= 0) {
-                        resultLabel.setText("Insert value > 0");
-                        return;
-                    }
+                if (bank != null && from != null && to != null) {
                     // Perform bank‑mediated conversion
                     final BankConversionService service = new BankConversionService(baseConverter);
                     final BankConversionResult res = service.convert(
                         amount,
-                        fromBox.getValue(),
-                        toBox.getValue(),
+                        from,
+                        to,
                         bank);
 
                     // Update UI
@@ -206,36 +207,40 @@ public class BankConverterWidgetFX {
         // Convert dialog result into a Bank instance
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
-                try {
-                    final double fixed = Double.parseDouble(fixedField.getText());
-                    final double percent = Double.parseDouble(percentField.getText());
+                final Optional<Double> fixedOpt =
+                        MonetaryInputParser.parseNonNegativeDouble(fixedField.getText());
+                final Optional<Double> percentOpt =
+                        MonetaryInputParser.parseNonNegativeDouble(percentField.getText());
 
-                    // Basic validation: avoid unrealistic fees
-                    if (fixed <= PERC && percent <= PERC) {
-                        final Bank newBank = new Bank(nameField.getText(), fixed, percent);
-
-                        // Persist and update UI
-                        controller.addBank(newBank);
-                        bankBox.getItems().add(newBank);
-
-                        return newBank;
-
-                    } else {
-                        // Show validation error
-                        DialogHelper.showError(
-                                dialog.getDialogPane(),
-                                "Validation Error",
-                                "Invalid Fees",
-                                "The fixed and percentage fees cannot exceed 50%.");
-                    }
-
-                } catch (final IllegalArgumentException e) {
-                    // Show input error
+                if (fixedOpt.isEmpty() || percentOpt.isEmpty()) {
                     DialogHelper.showWarning(
                             dialog.getDialogPane(),
+                            "Invalid Input",
                             "Input Error",
-                            null,
-                            "Please enter valid numbers in the fee fields.");
+                            "Please enter valid numeric fees.");
+                    return null;
+                }
+
+                final double fixed = fixedOpt.get();
+                final double percent = percentOpt.get();
+
+                // Basic validation: avoid unrealistic fees
+                if (fixed <= PERC && percent <= PERC) {
+                    final Bank newBank = new Bank(nameField.getText(), fixed, percent);
+
+                    // Persist and update UI
+                    controller.addBank(newBank);
+                    bankBox.getItems().add(newBank);
+
+                    return newBank;
+
+                } else {
+                    // Show validation error
+                    DialogHelper.showError(
+                            dialog.getDialogPane(),
+                            "Validation Error",
+                            "Invalid Fees",
+                            "The fixed and percentage fees cannot exceed 50%.");
                 }
             }
             return null;

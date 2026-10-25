@@ -12,6 +12,7 @@ import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
@@ -569,14 +570,7 @@ public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
      * @return the parsed amount, or {@code null} if parsing fails
      */
     private static BigDecimal parseAmount(final String text) {
-        try {
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-            return new BigDecimal(text.trim());
-        } catch (final NumberFormatException exception) {
-            return null;
-        }
+        return MonetaryInputParser.parse(text).orElse(null);
     }
 
     /**

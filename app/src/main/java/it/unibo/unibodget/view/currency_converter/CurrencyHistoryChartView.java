@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.currency_converter.CurrencyConverterController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.currency.history.CurrencyHistoryPoint;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import java.time.LocalDate;
@@ -322,14 +323,7 @@ public final class CurrencyHistoryChartView extends VBox {
      * @return parsed double or null if invalid
      */
     private Double parseThreshold(final String text) {
-        if (text == null || text.isBlank()) {
-            return null;
-        }
-        try {
-            return Double.parseDouble(text.trim().replace(',', '.'));
-        } catch (final NumberFormatException e) {
-            return null;
-        }
+        return MonetaryInputParser.parseDouble(text).orElse(null);
     }
 
     /**

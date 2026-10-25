@@ -5,6 +5,7 @@ import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.Currency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
@@ -493,14 +494,7 @@ public final class ConverterWidgetFX {
      * @return the parsed BigDecimal or null if parsing fails
      */
     private BigDecimal parseDecimal(final String text) {
-        try {
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-            return new BigDecimal(text.trim().replace(',', '.'));
-        } catch (final NumberFormatException e) {
-            return null;
-        }
+        return MonetaryInputParser.parse(text).orElse(null);
     }
 
 }
