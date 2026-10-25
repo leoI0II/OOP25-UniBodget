@@ -48,6 +48,7 @@ public final class CurrencyPlaceholder implements CurrencyUnit {
 
     @Override
     public int getDisplayDecimals() {
-        return 2; // TODO CHECK USE THE FUCKING UTIL FOR IT
+        return 2;
     }
+
 }
