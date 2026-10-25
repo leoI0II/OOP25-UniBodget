@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency;
 
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,7 +24,7 @@ public final class Currency implements CurrencyUnit {
     private static final Map<String, Currency> LOADED = new HashMap<>();
     private static boolean initialized;
 
-    private static final Path PATH = Path.of("data/json/currency/Currencies.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("currency/Currencies.json");
     private static final String RESOURCE = "/json/currency/Currencies.json";
 
     private CurrencyType type;

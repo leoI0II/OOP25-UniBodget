@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.settings;
 
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Loads and provides access to all available {@link Theme} instances.
  *
- * <p>The list of themes is loaded once from <code>data/json/settings/Theme.json</code> and cached
+ * <p>The list of themes is loaded once from the resolved settings JSON path and cached
  * statically. If the file is missing or invalid, the list falls back to containing only {@link
  * Theme#DEFAULT}.
  *
@@ -19,7 +20,7 @@ import java.util.List;
  */
 public final class ThemeList {
 
-    private static final Path PATH = Path.of("data/json/settings/Theme.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("settings/Theme.json");
     private static final String RESOURCE = "/json/settings/Theme.json";
 
     private static boolean initialized;

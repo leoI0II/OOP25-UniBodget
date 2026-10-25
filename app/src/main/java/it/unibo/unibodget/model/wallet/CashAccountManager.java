@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.CurrencyUnitDeserializer;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import it.unibo.unibodget.persistency.parser.impl.PersistenceJacksonConfig;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public final class CashAccountManager {
 
     private static final Logger LOGGER = Logger.getLogger(CashAccountManager.class.getName());
 
-    private static final Path PATH = Path.of("data/json/wallet/CashAccounts.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("wallet/CashAccounts.json");
     private static final String RESOURCE = "/json/wallet/CashAccounts.json";
     private static final String KEY = "cashAccounts";
 

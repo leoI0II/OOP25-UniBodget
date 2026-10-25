@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.currency.engin.CurrencyConverter;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
 class InvestmentAccountPersistenceTest {
 
     // Same file used by InvestmentAccountManager: it is backed up and restored around each test.
-    private static final Path DATA_FILE = Path.of("data/json/wallet/InvestmentAccounts.json");
+    private static final Path DATA_FILE = AppDataPathResolver.resolveJson("wallet/InvestmentAccounts.json");
     private static final CurrencyConverter NO_CONVERSION = (amount, from, to) -> null;
 
     private byte[] backup;

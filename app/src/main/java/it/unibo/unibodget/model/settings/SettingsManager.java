@@ -1,6 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * Manages loading and saving of {@link Settings} from persistent storage.
  *
  * <p>The manager keeps a single static instance of the current settings, automatically loading it
- * on first use. All changes are written to <code>data/json/settings/Settings.json</code> using
+ * on first use. All changes are written to the resolved settings JSON path using
  * {@link ModelFileManager}.
  *
  * <p>It also provides convenience methods for appending snapshots to the history and updating
@@ -21,7 +22,7 @@ public final class SettingsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsManager.class);
 
-    private static final Path PATH = Path.of("data/json/settings/Settings.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("settings/Settings.json");
     private static final String RESOURCE = "/json/settings/Settings.json";
 
     private static Settings current;

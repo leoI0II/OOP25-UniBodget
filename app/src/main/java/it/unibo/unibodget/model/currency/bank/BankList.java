@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.bank;
 
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,7 +30,7 @@ public final class BankList {
     private static final double PERC_FEE_1 = 1.0;
     private static final double PERC_FEE_1_5 = 1.5;
 
-    private static final Path PATH = Path.of("data/json/currency/bank/Banks.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("currency/bank/Banks.json");
     private static final String RESOURCE = "/json/currency/bank/Banks.json";
 
     private static boolean initialized;

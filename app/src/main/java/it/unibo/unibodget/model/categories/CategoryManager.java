@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.categories;
 
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  */
 public final class CategoryManager {
 
-    private static final Path PATH = Path.of("data/json/categories/Categories.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("categories/Categories.json");
     private static final String RESOURCE = "/json/categories/Categories.json";
     private static final Logger LOGGER = Logger.getLogger(CategoryManager.class.getName());
 

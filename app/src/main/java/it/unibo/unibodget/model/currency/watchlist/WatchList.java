@@ -1,5 +1,6 @@
 package it.unibo.unibodget.model.currency.watchlist;
 
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.ModelFileManager;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,7 +20,7 @@ public final class WatchList {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WatchList.class);
 
-    private static final Path PATH = Path.of("data/json/currency/watchlist/Watchlist.json");
+    private static final Path PATH = AppDataPathResolver.resolveJson("currency/watchlist/Watchlist.json");
     private static final String RESOURCE = "/json/currency/watchlist/Watchlist.json";
 
     private static boolean initialized;
