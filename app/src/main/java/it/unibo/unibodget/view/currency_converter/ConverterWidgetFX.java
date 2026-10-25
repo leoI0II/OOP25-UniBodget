@@ -67,8 +67,8 @@ public final class ConverterWidgetFX {
     private static final double COL_INPUT_MIN_WIDTH = 180.0;
     private static final double CARD_MIN_WIDTH = 320.0;
     private static final double CARD_PREF_WIDTH = 350.0;
-    private static final double DIRECTION_BOX_MIN_WIDTH = 90.0;
-    private static final double DIRECTION_BOX_PREF_WIDTH = 95.0;
+    private static final double DIRECTION_BOX_MIN_WIDTH = 125.0;
+    private static final double DIRECTION_BOX_PREF_WIDTH = 130.0;
 
     /* -------------------- CONTROLLERS -------------------- */
     private final CurrencyConverterController controller;
@@ -273,6 +273,7 @@ public final class ConverterWidgetFX {
         thresholdField.setPromptText("Threshold (e.g. 1.10)");
         thresholdField.setMaxWidth(Double.MAX_VALUE);
         directionBox.setValue("Above");
+        directionBox.getStyleClass().add("direction-box");
         directionBox.setMinWidth(DIRECTION_BOX_MIN_WIDTH);
         directionBox.setPrefWidth(DIRECTION_BOX_PREF_WIDTH);
 
@@ -387,6 +388,7 @@ public final class ConverterWidgetFX {
 
         final HBox alertInputs = new HBox(8, thresholdField, directionBox);
         HBox.setHgrow(thresholdField, Priority.ALWAYS);
+        HBox.setHgrow(directionBox, Priority.NEVER);
         card.add(alertInputs, COL_INDEX_0, ROW_INDEX_6, COL_SPAN_2, ROW_SPAN_1);
 
         card.add(addAlertButton, COL_INDEX_0, ROW_INDEX_7, COL_SPAN_2, ROW_SPAN_1);

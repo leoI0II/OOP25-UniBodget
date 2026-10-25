@@ -122,6 +122,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final double CIRCLE_ROTATE_ANGLE = -90.0;
     private static final double BUDGET_CIRCLE_BOX_SIZE = 72.0;
     private static final double FILTERS_PREF_WRAP_LENGTH = 300.0;
+    private static final double DATE_PICKER_PREF_WIDTH = 135.0;
     private static final int CARD_PADDING = 14;
     private static final double MIN_PIE_SLICE_PERCENTAGE = 0.01;
     private static final double RANK_LABEL_MIN_WIDTH = 24.0;
@@ -600,6 +601,8 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         this.transactionCategoryTypeBox.setPromptText("Type");
         this.transactionFromDatePicker.setPromptText("From");
         this.transactionToDatePicker.setPromptText("To");
+        this.transactionFromDatePicker.setPrefWidth(DATE_PICKER_PREF_WIDTH);
+        this.transactionToDatePicker.setPrefWidth(DATE_PICKER_PREF_WIDTH);
         this.transactionSortOrderBox.setPromptText("Sort by");
 
         this.transactionCategoryTypeBox.getItems().setAll(
