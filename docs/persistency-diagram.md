@@ -6,333 +6,153 @@ classDiagram
     direction TB
 
     %% ============================================================
-    %% ========== FILEMANAGER API ==========
+    %% ============ CENTRAL PATH RESOLVER ===============
     %% ============================================================
 
-    class FileCreator {
-        <<interface>>
-        +Path create(Path) throws IOException
+    class AppDataPathResolver {
+        <<utility>>
+        -DATA_DIR_NAME : String$
+        -DEFAULT_DATA_DIR : Path$
+        -DATA_DIR_SYS_PROP : String$
+        -DATA_DIR_ENV_VAR : String$
+        -MAX_SEARCH_DEPTH : int$
+        -MAX_VISITED_DIRECTORIES : int$
+        -cachedDataDir : Path$
+        +getDataDir()$ Path
+        +resolve(String)$ Path
+        +resolve(Path)$ Path
+        +resolveJson(String)$ Path
+        +resolveCsv(String)$ Path
+        +isValidUniBodgetDataDir(Path)$ boolean
+        +setCustomDataDir(Path)$ void
+        +reset()$ void
+        -resolveBaseDataDir()$ Path
+        -scanSubtree(Path)$ Path
+        -normalizePrefix(String)$ String
     }
 
-    class FileInitializer {
-        <<interface>>
-        +initialize() throws FileInitializationException
+    class ModelFileManager {
+        <<utility>>
+        +ensureFileExists(Path, String)$ void
     }
 
-    class FileOpener {
-        <<interface>>
-        +Path open(Path) throws IOException
-    }
-
-    class FileInitializationException {
-        <<exception>>
-    }
+    AppDataPathResolver ..> ModelFileManager : self-healing fallback
 
     %% ============================================================
-    %% ========== FILEMANAGER IMPL ==========
+    %% ============ MANAGERS & REPOSITORIES =============
     %% ============================================================
 
-    class BasicFileCreator {
-        <<abstract>>
-        +create(Path) Path
-        #ensureParentExists(Path)
+    class SettingsManager {
+        -Settings settings
+        -List~SettingsSnapshot~ history
+        -Path settingsFilePath
+        +SettingsManager()
+        +getSettings() Settings
+        +saveSettings(Settings) void
+        +getHistory() List~SettingsSnapshot~
+        +restoreSnapshot(SettingsSnapshot) void
+        -loadOrCreateSettings() Settings
     }
 
-    class JsonFileCreator {
-        +create(Path) Path
+    class ThemeList {
+        -List~Theme~ themes
+        -Path themesFilePath
+        +getThemes()$ List~Theme~
+        +saveThemes(List~Theme~)$ void
+        +loadDefaultThemes()$ List~Theme~
     }
 
-    class FileCreatorFactory {
-        <<static>>
-        +create(Path) FileCreator
+    class BankList {
+        -List~Bank~ banks
+        -Path bankFilePath
+        +getBanks()$ List~Bank~
+        +saveBanks(List~Bank~)$ void
+        +generateMockBanks()$ List~Bank~
     }
 
-    class BasicFileInitializer {
-        <<abstract>>
-        +initialize()
-        #writeDefaultContent(Path)
+    class WatchList {
+        -Set~WatchlistPair~ pairs
+        -Path watchlistPath
+        +addPair(CurrencyUnit, CurrencyUnit) boolean
+        +removePair(WatchlistPair) boolean
+        +getPairs() Set~WatchlistPair~
+        +load()$ WatchList
+        +save() void
     }
 
-    class CurrencyFileInitializer {
-        +initialize()
+    class Currency {
+        +saveToFile(Path)$ void
+        +loadFromFile(Path)$ List~Currency~
     }
 
-    class CategoryFileInitializer {
-        +initialize()
-    }
-
-    class MovementFileInitializer {
-        +initialize()
-    }
-
-    class UserDataFileInitializer {
-        +initialize()
-    }
-
-    class FileInitializerFactory {
-        <<static>>
-        +create(Path) FileInitializer
-    }
-
-    class SafeFileOpener {
-        +open(Path) Path
-    }
+    SettingsManager ..> AppDataPathResolver : resolves "settings/Settings.json"
+    ThemeList ..> AppDataPathResolver : resolves "theme/themeList.json"
+    BankList ..> AppDataPathResolver : resolves "bank/banks.json"
+    WatchList ..> AppDataPathResolver : resolves "watchlist/watchlist.json"
+    Currency ..> AppDataPathResolver : resolves "currency/customCurrencies.json"
 
     %% ============================================================
-    %% ========== PARSER API ==========
+    %% ============ SERIALIZATION LAYER (JACKSON) =================
     %% ============================================================
 
-    class DataParser~T~ {
-        <<interface>>
-        +T parse(String) throws DataParserException
+    class PersistenceJacksonConfig {
+        <<utility>>
+        +createPersistenceMapper()$ ObjectMapper
     }
 
-    class DataParserException {
-        <<exception>>
+    class LocalDateSerializer {
+        +serialize(LocalDate, JsonGenerator, SerializerProvider) void
     }
 
-    class DataSerializer~T~ {
-        <<interface>>
-        +String serialize(T) throws DataSerializerException
+    class LocalDateDeserializer {
+        +deserialize(JsonParser, DeserializationContext) LocalDate
     }
 
-    class DataSerializerException {
-        <<exception>>
+    class OptionalUUIDSerializer {
+        +serialize(Optional~UUID~, JsonGenerator, SerializerProvider) void
     }
+
+    class OptionalUUIDDeserializer {
+        +deserialize(JsonParser, DeserializationContext) Optional~UUID~
+    }
+
+    class CurrencyUnitSerializer {
+        +serialize(CurrencyUnit, JsonGenerator, SerializerProvider) void
+    }
+
+    class CurrencyUnitDeserializer {
+        +deserialize(JsonParser, DeserializationContext) CurrencyUnit
+    }
+
+    PersistenceJacksonConfig ..> LocalDateSerializer : registers
+    PersistenceJacksonConfig ..> LocalDateDeserializer : registers
+    PersistenceJacksonConfig ..> OptionalUUIDSerializer : registers
+    PersistenceJacksonConfig ..> OptionalUUIDDeserializer : registers
+    PersistenceJacksonConfig ..> CurrencyUnitSerializer : registers
+    PersistenceJacksonConfig ..> CurrencyUnitDeserializer : registers
+
+    SettingsManager ..> PersistenceJacksonConfig : uses ObjectMapper
+    ThemeList ..> PersistenceJacksonConfig : uses ObjectMapper
+    BankList ..> PersistenceJacksonConfig : uses ObjectMapper
+    WatchList ..> PersistenceJacksonConfig : uses ObjectMapper
 
     %% ============================================================
-    %% ========== PARSER IMPL ==========
+    %% ============ WALLET & CSV PERSISTENCE ======================
     %% ============================================================
 
-    class BasicDataParser {
-        <<abstract>>
-        +parse(String)
-        #extractField(String,String)
+    class WalletAutoSaver {
+        -CashAccountService cashAccountService
+        -ScheduledExecutorService executor
+        +start() void
+        +stop() void
+        +saveNow() void
     }
 
-    class CategoryParser {
-        +parse(String) Category
+    class CSVInvestmentsSnapshotService {
+        +exportInvestmentPositions(Path, List~Position~) void
+        +exportOrderHistory(Path, List~InvestmentTransaction~) void
     }
 
-    class CurrencyParser {
-        +parse(String) CurrencyUnit
-    }
-
-    class MovementDataParser {
-        +parse(String) CashTransaction
-    }
-
-    class UserDataParser {
-        +parse(String) UserData
-    }
-
-    class ParserFactory {
-        <<static>>
-        +create(String) DataParser
-    }
-
-    class BasicDataSerializer {
-        <<abstract>>
-        +serialize(Object)
-    }
-
-    class JsonDataSerializer {
-        +serialize(T) String
-        -serializeValue(Object,Map)
-        -serializeObject(Object,Map)
-        -serializeRecord(Object,Map)
-        -serializeList(List,Map)
-        -serializeMap(Map,Map)
-        -escape(String)
-    }
-
-    class SerializerFactory {
-        <<static>>
-        +create(String) DataSerializer
-    }
-
-    %% ============================================================
-    %% ========== READER API ==========
-    %% ============================================================
-
-    class FileReader~T~ {
-        <<interface>>
-        +T readFile() throws IOException
-    }
-
-    %% ============================================================
-    %% ========== READER IMPL ==========
-    %% ============================================================
-
-    class BasicReader~T~ {
-        <<abstract>>
-        -String path
-        +getPath()
-        +readFile()
-        -validatePath()
-    }
-
-    class JsonReader {
-        +readFile()
-    }
-
-    class FileReaderFactory {
-        <<static>>
-        +create(String) FileReader
-    }
-
-    %% ============================================================
-    %% ========== UTIL API ==========
-    %% ============================================================
-
-    class Logger {
-        <<interface>>
-        +info(String)
-        +warn(String)
-        +error(String,Throwable)
-    }
-
-    %% ============================================================
-    %% ========== UTIL IMPL ==========
-    %% ============================================================
-
-    class LoggerImpl {
-        +info(String)
-        +warn(String)
-        +error(String,Throwable)
-    }
-
-    %% ============================================================
-    %% ========== WRITER API ==========
-    %% ============================================================
-
-    class FileAppender {
-        <<interface>>
-        +append(Path,String) throws IOException
-    }
-
-    class FileOverwriter {
-        <<interface>>
-        +overwrite(Path,String) throws IOException
-    }
-
-    class FileSaver {
-        <<interface>>
-        +save(Path,String) throws IOException
-    }
-
-    class FileUpdater {
-        <<interface>>
-        +update(Path,String) throws IOException
-    }
-
-    %% ============================================================
-    %% ========== WRITER IMPL ==========
-    %% ============================================================
-
-    class BasicFileAppender {
-        <<abstract>>
-        +append(Path,String)
-    }
-
-    class JsonFileAppender {
-        +append(Path,String)
-    }
-
-    class BasicFileOverwriter {
-        <<abstract>>
-        +overwrite(Path,String)
-    }
-
-    class JsonFileOverwriter {
-        +overwrite(Path,String)
-    }
-
-    class BasicFileSaver {
-        <<abstract>>
-        +save(Path,String)
-    }
-
-    class JsonFileSaver {
-        +save(Path,String)
-    }
-
-    class BasicFileUpdater {
-        <<abstract>>
-        +update(Path,String)
-    }
-
-    class JsonFileUpdater {
-        +update(Path,String)
-    }
-
-    class WriterFactory {
-        <<static>>
-        +createAppender(String)
-        +createOverwriter(String)
-        +createSaver(String)
-        +createUpdater(String)
-    }
-
-    %% ============================================================
-    %% ========== RELATIONS ==========
-    %% ============================================================
-
-    %% FileCreator
-    FileCreator <|.. BasicFileCreator
-    BasicFileCreator <|-- JsonFileCreator
-    FileCreatorFactory --> FileCreator
-
-    %% FileInitializer
-    FileInitializer <|.. BasicFileInitializer
-    BasicFileInitializer <|-- CurrencyFileInitializer
-    BasicFileInitializer <|-- CategoryFileInitializer
-    BasicFileInitializer <|-- MovementFileInitializer
-    BasicFileInitializer <|-- UserDataFileInitializer
-    FileInitializerFactory --> FileInitializer
-
-    %% FileOpener
-    FileOpener <|.. SafeFileOpener
-
-    %% Reader
-    FileReader <|.. BasicReader
-    BasicReader <|-- JsonReader
-    FileReaderFactory --> FileReader
-
-    %% Parser
-    DataParser <|.. BasicDataParser
-    BasicDataParser <|-- CategoryParser
-    BasicDataParser <|-- CurrencyParser
-    BasicDataParser <|-- MovementDataParser
-    BasicDataParser <|-- UserDataParser
-    ParserFactory --> DataParser
-
-    DataSerializer <|.. BasicDataSerializer
-    BasicDataSerializer <|-- JsonDataSerializer
-    SerializerFactory --> DataSerializer
-
-    %% Util
-    Logger <|.. LoggerImpl
-
-    %% Writer
-    FileAppender <|.. BasicFileAppender
-    BasicFileAppender <|-- JsonFileAppender
-
-    FileOverwriter <|.. BasicFileOverwriter
-    BasicFileOverwriter <|-- JsonFileOverwriter
-
-    FileSaver <|.. BasicFileSaver
-    BasicFileSaver <|-- JsonFileSaver
-
-    FileUpdater <|.. BasicFileUpdater
-    BasicFileUpdater <|-- JsonFileUpdater
-
-    WriterFactory --> FileAppender
-    WriterFactory --> FileOverwriter
-    WriterFactory --> FileSaver
-    WriterFactory --> FileUpdater
-
-    %% Exceptions
-    FileInitializer --> FileInitializationException
-    DataParser --> DataParserException
-    DataSerializer --> DataSerializerException
+    WalletAutoSaver ..> AppDataPathResolver : resolves wallet storage
+    CSVInvestmentsSnapshotService ..> AppDataPathResolver : resolves export targets
+```
