@@ -78,6 +78,8 @@ tasks.named<JavaExec>("run") {
 
 tasks.test {
     useJUnitPlatform()
+    exclude("**/* *")
+    exclude("**/* 2*")
 }
 
 tasks.withType<Javadoc>().configureEach {
