@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.scene.layout.VBox;
 
 /**
@@ -23,6 +24,9 @@ import javafx.scene.layout.VBox;
  * The widget delegates all modifications to the {@link WatchListController}
  * to keep the MVC separation clean.
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "JavaFX widget exposes root view node")
 public final class WatchlistWidgetFX {
 
     private final VBox view = new VBox(10);

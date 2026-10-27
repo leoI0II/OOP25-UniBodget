@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.csv.CSVPrinter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
@@ -82,6 +83,9 @@ import javafx.stage.Window;
  * whenever the wallet or its transactions are modified.
  * </p>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP2",
+        justification = "Controller holds references to shared model services and application settings")
 public final class DefaultDashboardController implements DashboardViewActions, WalletObserver {
 
     private static final int MAX_CATEGORY_ROWS = 4;

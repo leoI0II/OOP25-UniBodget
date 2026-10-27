@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 
@@ -32,6 +33,9 @@ import it.unibo.unibodget.model.currency.Asset;
     @JsonSubTypes.Type(value = InvestmentTransaction.class, name = "investment")
 })
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Category model instance reference is shared intentionally")
 public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction {
 
     private final UUID id;

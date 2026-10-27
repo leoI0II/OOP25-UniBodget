@@ -18,6 +18,7 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransactionFactory;
 import it.unibo.unibodget.view.dashboard.impl.DefaultDashboardView;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.scene.layout.Region;
 
 import java.util.Objects;
@@ -33,6 +34,9 @@ import java.util.Objects;
  * operate on the <strong>same</strong> cash wallets, currency converter and
  * settings.</p>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Module wires and exposes dashboard view and controller to main shell")
 public final class DashboardModule {
 
     private final DashboardFacade dashboardFacade;

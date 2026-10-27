@@ -335,7 +335,7 @@ public class DefaultInvestmentController implements InvestmentController {
                     heldQuantity(stableCoinSrc.account(), stableCoinSrc.stableCoin())
             ));
             // no payment source, so there is no balance to check
-            case PaymentSource.NoPaymentChannel noSrc -> Optional.empty();
+            case PaymentSource.NoPaymentChannel() -> Optional.empty();
         };
     }
 
@@ -516,7 +516,7 @@ public class DefaultInvestmentController implements InvestmentController {
                     moveStableCoin(stableCoinSrc, costOut.amount(), date,
                             "Use " + cost + " from stablecoin position to buy " + quantity + " " + asset, notes),
                     buyTransaction);
-            case PaymentSource.NoPaymentChannel noSrc -> new OrderResult.BuyNoPaymentSuccess(buyTransaction);
+            case PaymentSource.NoPaymentChannel() -> new OrderResult.BuyNoPaymentSuccess(buyTransaction);
         };
     }
 
@@ -551,7 +551,7 @@ public class DefaultInvestmentController implements InvestmentController {
                     sellTransaction,
                     moveStableCoin(stableCoinDst, proceeds.amount(), date,
                             "Convert proceeds to " + stableCoinDst.stableCoin(), notes));
-            case PaymentSource.NoPaymentChannel noDst -> new OrderResult.SellNoPaymentSuccess(sellTransaction);
+            case PaymentSource.NoPaymentChannel() -> new OrderResult.SellNoPaymentSuccess(sellTransaction);
         };
     }
 

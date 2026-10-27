@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 
@@ -21,6 +22,9 @@ import it.unibo.unibodget.model.categories.CategoryType;
  * @param friendLoanOperation optional friend loan operation type
  * @param existingFriendLoanId optional friend loan identifier for repayments
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Request record carries category reference from UI dialog")
 public record NewTransactionRequest(
         BigDecimal unsignedAmount,
         CategoryType transactionType,

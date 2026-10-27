@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.CategoryCatalog;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
@@ -33,6 +34,9 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  * dashboard state for the selected cash wallet.
  * </p>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Facade wires shared services, settings, and category catalog")
 public final class DefaultDashboardFacade implements DashboardFacade {
 
     private final CashAccountService walletService;

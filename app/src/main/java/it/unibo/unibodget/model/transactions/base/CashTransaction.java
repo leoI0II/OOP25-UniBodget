@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.Asset;
@@ -217,6 +218,9 @@ public final class CashTransaction extends AbstractTransaction {
     /**
      * Builder for constructing immutable {@link CashTransaction} instances fluently.
      */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Category reference stored in builder state intentionally")
     public static final class Builder {
 
         private UUID id;

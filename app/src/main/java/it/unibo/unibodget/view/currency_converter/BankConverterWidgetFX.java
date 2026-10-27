@@ -20,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,9 @@ import org.slf4j.LoggerFactory;
  *     <li>add new banks dynamically through a dialog</li>
  * </ul>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "JavaFX UI widget stores controller and exposes root node")
 public class BankConverterWidgetFX {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankConverterWidgetFX.class);
