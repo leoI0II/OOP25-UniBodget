@@ -3,8 +3,6 @@ package it.unibo.unibodget.model.currency;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import javafx.collections.FXCollections;
 
 /**
  * Common contract for all currency types in the system.
@@ -112,12 +110,11 @@ public interface CurrencyUnit {
      */
     static List<CurrencyUnit> basicCurrencies() {
         final List<CurrencyUnit> list = new ArrayList<>(allCurrencies());
-        return FXCollections.observableArrayList(
-                list.stream()
-                        .filter(c -> c.getType() != CurrencyType.STOCK)
-                        .filter(c -> c.getType() != CurrencyType.CUSTOM)
-                        .filter(c -> c.getType() != CurrencyType.CRYPTO)
-                        .collect(Collectors.toList()));
+        return list.stream()
+                .filter(c -> c.getType() != CurrencyType.STOCK)
+                .filter(c -> c.getType() != CurrencyType.CUSTOM)
+                .filter(c -> c.getType() != CurrencyType.CRYPTO)
+                .toList();
     }
 
     /**

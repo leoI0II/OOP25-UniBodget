@@ -1,8 +1,10 @@
 package it.unibo.unibodget.model.currency;
 
 /**
- * Lightweight placeholder used during JSON deserialization. It only stores the currency code. After
- * initialization, Currency.init() replaces these placeholders with real Currency objects.
+ * Lightweight placeholder used during JSON deserialization. It only stores the
+ * currency code. After
+ * initialization, Currency.init() replaces these placeholders with real
+ * Currency objects.
  */
 public final class CurrencyPlaceholder implements CurrencyUnit {
 
@@ -11,8 +13,11 @@ public final class CurrencyPlaceholder implements CurrencyUnit {
     /**
      * Creates a new placeholder currency used during JSON deserialization.
      *
-     * <p>The placeholder stores only the currency code. After all currency definitions are loaded,
-     * {@link Currency#init()} replaces instances of {@code CurrencyPlaceholder} with fully
+     * <p>
+     * The placeholder stores only the currency code. After all currency definitions
+     * are loaded,
+     * {@link Currency#init()} replaces instances of {@code CurrencyPlaceholder}
+     * with fully
      * initialized {@link Currency} objects.
      *
      * @param code the ISO-like currency code extracted from JSON

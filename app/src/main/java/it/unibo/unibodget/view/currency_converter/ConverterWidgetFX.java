@@ -34,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -51,6 +52,9 @@ import java.util.stream.Stream;
  *     <li>register exchange‑rate alerts via {@link CurrencyAlertService}</li>
  * </ul>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "JavaFX UI widget stores services and exposes UI controls to callers")
 public final class ConverterWidgetFX {
 
     /* -------------------- UI CONSTANTS -------------------- */

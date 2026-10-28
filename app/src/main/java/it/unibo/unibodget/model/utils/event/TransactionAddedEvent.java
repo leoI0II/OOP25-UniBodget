@@ -13,5 +13,5 @@ import it.unibo.unibodget.model.wallet.AbstractWallet;
 @SuppressFBWarnings(
         value = "EI_EXPOSE_REP",
         justification = "Event payload carries wallet and transaction entity references")
-public record TransactionAddedEvent(AbstractWallet wallet, AbstractTransaction transaction)
+public record TransactionAddedEvent(AbstractWallet<?> wallet, AbstractTransaction transaction)
         implements MessageEvent { }

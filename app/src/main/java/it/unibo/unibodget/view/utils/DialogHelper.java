@@ -4,7 +4,6 @@ import it.unibo.unibodget.model.settings.ThemeManager;
 import java.io.File;
 import java.util.Optional;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
@@ -27,9 +26,10 @@ public final class DialogHelper {
      * @return     an optional containing the host window, or empty if detached
      */
     public static Optional<Window> findWindow(final Node node) {
-        return Optional.ofNullable(node)
-                .map(Node::getScene)
-                .map(Scene::getWindow);
+        if (node == null || node.getScene() == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(node.getScene().getWindow());
     }
 
     /**

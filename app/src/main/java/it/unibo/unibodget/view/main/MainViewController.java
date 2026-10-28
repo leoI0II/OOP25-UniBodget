@@ -107,7 +107,11 @@ public final class MainViewController extends BaseViewController {
     @FXML
     public void initialize() {
         sideBarController.setNavigationHandler(this::navigateTo);
-        sideBarController.setWidthAdjustmentHandler(this::adjustSideBarWidth);
+        sideBarController.setWidthAdjustmentHandler(width -> {
+            if (width != null) {
+                adjustSideBarWidth(width);
+            }
+        });
         setupResizableSideBar();
         showDashboard();
     }

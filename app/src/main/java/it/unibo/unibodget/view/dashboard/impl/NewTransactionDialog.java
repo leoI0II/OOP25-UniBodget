@@ -31,6 +31,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
@@ -51,6 +52,9 @@ import javafx.util.StringConverter;
  * fields are pre-filled.</li>
  * </ul>
  */
+@SuppressFBWarnings(
+        value = "EI_EXPOSE_REP2",
+        justification = "Dialog retains shared reference to CategoryCatalog")
 public final class NewTransactionDialog extends Dialog<NewTransactionRequest> {
 
     private static final double GRID_GAP = 12.0;

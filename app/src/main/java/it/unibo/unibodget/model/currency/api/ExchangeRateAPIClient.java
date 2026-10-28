@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>The Frankfurter API supports historical ranges using the format {@code
- *       /YYYY-MM-DD..YYYY-MM-DD?from=XXX&to=YYY}.
+ *       /YYYY-MM-DD..YYYY-MM-DD?from=EUR&to=USD}.
  *   <li>Debug print statements are included to help diagnose malformed URLs, empty responses, or
  *       unexpected JSON formats.
  *   <li>JSON parsing is intentionally minimal and tailored to the API's predictable structure.

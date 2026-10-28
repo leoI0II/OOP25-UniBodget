@@ -76,7 +76,7 @@ public final class MessageBus {
      *
      * @param msg the event to publish; must implement {@link MessageEvent}
      */
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
+    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
     public static void send(final MessageEvent msg) {
         final var classType = msg.getClass();
         final var subs = INSTANCE.subscribers.get(classType);

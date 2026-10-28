@@ -109,8 +109,8 @@ public final class NewWalletDialog extends Dialog<CashAccount> {
 
         final Runnable validator = () -> {
             final String raw = walletNameField.getText();
-            final boolean blank = raw == null || raw.isBlank();
-            final String name = blank ? "" : raw.trim();
+            final String name = raw == null ? "" : raw.trim();
+            final boolean blank = name.isEmpty();
             final FiatCurrency currency = currencyBox.getValue();
             final boolean duplicate = !blank && nonNullExisting.stream().anyMatch(w ->
                     w.getName().trim().equalsIgnoreCase(name)

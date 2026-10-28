@@ -1,9 +1,23 @@
 package it.unibo.unibodget.view.dashboard.impl;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
+
+import it.unibo.unibodget.model.categories.Category;
+import it.unibo.unibodget.model.categories.CategoryCatalog;
+import it.unibo.unibodget.model.categories.CategoryType;
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
+import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
+import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import it.unibo.unibodget.model.wallet.CashAccount;
+import it.unibo.unibodget.view.utils.DialogHelper;
 
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.model.settings.ThemeManager;
@@ -285,6 +299,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     @Override
     public void render(final DashboardViewState state) {
         Objects.requireNonNull(state);
+        if (!Platform.isFxApplicationThread()) {
+            Platform.runLater(() -> render(state));
+            return;
+        }
 
         renderHeader(state.header());
         renderBalanceCard(state.balanceCard());
@@ -302,6 +320,10 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
      */
     @Override
     public void showError(final String message) {
+        if (!Platform.isFxApplicationThread()) {
+            Platform.runLater(() -> showError(message));
+            return;
+        }
         this.headerSubtitleLabel.setText(message);
     }
 
@@ -1330,5 +1352,79 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             return null;
         }
         return value.trim();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<CashAccount> promptCreateWallet(
+            final FiatCurrency defaultCurrency,
+            final List<CashAccount> existingWallets) {
+        final NewWalletDialog dialog = new NewWalletDialog(defaultCurrency, existingWallets);
+        DialogHelper.findWindow(this).ifPresent(dialog::initOwner);
+        return dialog.showAndWait();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<NewTransactionRequest> promptCreateTransaction(
+            final CurrencyUnit currency,
+            final CategoryCatalog catalog,
+            final List<FriendLoanSummary> openFriendLoans,
+            final BiFunction<NewCategoryRequest, CategoryType, Optional<Category>> categoryCreator) {
+        final NewTransactionDialog dialog = new NewTransactionDialog(
+                currency,
+                catalog,
+                openFriendLoans,
+                categoryCreator
+        );
+        DialogHelper.findWindow(this).ifPresent(dialog::initOwner);
+        return dialog.showAndWait();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<NewTransactionRequest> promptEditTransaction(
+            final CurrencyUnit currency,
+            final CategoryCatalog catalog,
+            final List<FriendLoanSummary> openFriendLoans,
+            final BiFunction<NewCategoryRequest, CategoryType, Optional<Category>> categoryCreator,
+            final CashTransaction originalTransaction) {
+        final NewTransactionDialog dialog = new NewTransactionDialog(
+                currency,
+                catalog,
+                openFriendLoans,
+                categoryCreator,
+                originalTransaction
+        );
+        DialogHelper.findWindow(this).ifPresent(dialog::initOwner);
+        return dialog.showAndWait();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<EditBudgetRequest> promptEditBudget(final DefaultBudgetSettings currentSettings) {
+        final EditBudgetDialog dialog = new EditBudgetDialog(currentSettings);
+        DialogHelper.findWindow(this).ifPresent(dialog::initOwner);
+        return dialog.showAndWait();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<File> promptSaveCsv(final String title, final String defaultFileName) {
+        return DialogHelper.showSaveCsvDialog(
+                DialogHelper.findWindow(this).orElse(null),
+                title,
+                defaultFileName
+        );
     }
 }
