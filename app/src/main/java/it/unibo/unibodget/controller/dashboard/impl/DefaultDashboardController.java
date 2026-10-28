@@ -43,13 +43,9 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.persistency.CsvExportFormat;
 import it.unibo.unibodget.view.dashboard.api.DashboardView;
 import it.unibo.unibodget.view.dashboard.api.DashboardViewActions;
-import it.unibo.unibodget.view.dashboard.impl.EditBudgetDialog;
 import it.unibo.unibodget.view.dashboard.impl.FriendLoanOperation;
 import it.unibo.unibodget.view.dashboard.impl.NewCategoryRequest;
-import it.unibo.unibodget.view.dashboard.impl.NewTransactionDialog;
 import it.unibo.unibodget.view.dashboard.impl.NewTransactionRequest;
-import it.unibo.unibodget.view.dashboard.impl.NewWalletDialog;
-import it.unibo.unibodget.view.utils.DialogHelper;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.BalanceCardViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.BudgetCardViewState;
@@ -63,9 +59,6 @@ import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionRow
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionSectionViewState;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState.TransactionTableViewState;
 import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
-import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.stage.Window;
 
 /**
  * Default implementation of the dashboard controller.
@@ -166,15 +159,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      */
     @Override
     public void update() {
-        try {
-            if (Platform.isFxApplicationThread()) {
-                refreshDashboard();
-            } else {
-                Platform.runLater(this::refreshDashboard);
-            }
-        } catch (final IllegalStateException exception) {
-            refreshDashboard();
-        }
+        refreshDashboard();
     }
 
     /**
@@ -223,8 +208,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         }
 
         final CashAccount wallet = walletOpt.get();
-        final Optional<File> fileOpt = DialogHelper.showSaveCsvDialog(
-                getOwnerWindow(),
+        final Optional<File> fileOpt = view.promptSaveCsv(
                 "Export CSV transactions data",
                 wallet.getName() + "_transactions");
         if (fileOpt.isEmpty()) {
@@ -319,12 +303,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         try {
             final FiatCurrency currentCurrency = FiatCurrency.fromCode(settings.getBaseCurrency());
             final List<CashAccount> existingWallets = cashAccountService.getWallets();
-            final NewWalletDialog dialog = new NewWalletDialog(currentCurrency, existingWallets);
-            final Window owner = getOwnerWindow();
-            if (owner != null) {
-                dialog.initOwner(owner);
-            }
-            dialog.showAndWait().ifPresent(newWallet -> {
+            view.promptCreateWallet(currentCurrency, existingWallets).ifPresent(newWallet -> {
                 if (isWalletDuplicate(newWallet.getName(), newWallet.getBaseCurrency(), null)) {
                     final String msg = "A wallet named '" + newWallet.getName() + "' with currency "
                             + newWallet.getBaseCurrency().getShortName() + " already exists.";
@@ -406,19 +385,12 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
             final List<FriendLoanSummary> openFriendLoans = getOpenFriendLoans(snapshot);
 
-            final NewTransactionDialog dialog = new NewTransactionDialog(
+            view.promptCreateTransaction(
                     currentWallet.getBaseCurrency(),
                     dashboardFacade.getCategoryCatalog(),
                     openFriendLoans,
                     this::createCustomCategory
-            );
-
-            final Window owner = getOwnerWindow();
-            if (owner != null) {
-                dialog.initOwner(owner);
-            }
-
-            dialog.showAndWait().ifPresent(request -> {
+            ).ifPresent(request -> {
                 validateFriendLoanRequest(request, openFriendLoans);
                 final CashTransaction transaction = toCashTransaction(
                         request,
@@ -458,20 +430,13 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             final DashboardSnapshot snapshot = dashboardFacade.loadDashboard();
             final List<FriendLoanSummary> openFriendLoans = getOpenFriendLoans(snapshot);
 
-            final NewTransactionDialog dialog = new NewTransactionDialog(
+            view.promptEditTransaction(
                     currentWallet.getBaseCurrency(),
                     dashboardFacade.getCategoryCatalog(),
                     openFriendLoans,
                     this::createCustomCategory,
                     originalTransaction
-            );
-
-            final Window owner = getOwnerWindow();
-            if (owner != null) {
-                dialog.initOwner(owner);
-            }
-
-            dialog.showAndWait().ifPresent(request -> {
+            ).ifPresent(request -> {
                 validateFriendLoanRequest(request, openFriendLoans);
                 final CashTransaction replacement = toCashTransactionPreservingId(
                         request,
@@ -532,12 +497,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private void openEditBudgetDialog() {
         try {
             final CashAccount currentWallet = getRequiredCurrentWallet();
-            final EditBudgetDialog dialog = new EditBudgetDialog(currentWallet.getBudgetSettings());
-            final Window owner = getOwnerWindow();
-            if (owner != null) {
-                dialog.initOwner(owner);
-            }
-            dialog.showAndWait().ifPresent(request -> {
+            view.promptEditBudget(currentWallet.getBudgetSettings()).ifPresent(request -> {
                 currentWallet.setBudgetSettings(new DefaultBudgetSettings(
                         request.limitValue(),
                         request.warningThreshold()
@@ -1198,16 +1158,4 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 .filter(summary -> summary.getNetBalance().signum() > 0)
                 .toList();
     }
-
-    /**
-     * Resolves the JavaFX window hosting the dashboard view, if attached to a scene.
-     *
-     * @return the host window, or {@code null} if unavailable
-     */
-    private Window getOwnerWindow() {
-        return view instanceof Node node
-                ? DialogHelper.findWindow(node).orElse(null)
-                : null;
-    }
-
 }
