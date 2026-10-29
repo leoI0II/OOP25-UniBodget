@@ -52,6 +52,7 @@ public final class App extends Application {
     private AppTicker ticker;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
+    private Stage primaryStage;
 
     /** {@inheritDoc} */
     @Override
@@ -123,6 +124,8 @@ public final class App extends Application {
 
         final Scene scene = new Scene(root);
         ThemeManager.applyThemeToScene(scene);
+
+        this.primaryStage = primaryStage;
 
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
@@ -213,15 +216,11 @@ public final class App extends Application {
                         walletSaver::stop,
                         walletSaver::saveAll,
                         () -> {
-                            final WindowPreferences preferences =
-                                    settingsController.getSettings().getWindowPrefs();
-
-                            settingsController.updateWindowPrefs(
-                                    new WindowPreferences(
-                                            preferences.getWidth(),
-                                            preferences.getHeight(),
-                                            preferences.isMaximized()));
+                            if (primaryStage != null) {
+                                saveWindowPreferences(primaryStage);
+                            }
                         })) {
+                            
             try {
                 save.run();
             } catch (final IllegalStateException | IllegalArgumentException ex) {
