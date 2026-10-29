@@ -1,5 +1,7 @@
 package it.unibo.unibodget.model.settings;
 
+import java.util.Objects;
+
 /**
  * Represents the persisted window configuration of the application. Stores width, height and
  * maximized state so the UI can be restored exactly as the user left it in the previous session.
@@ -85,5 +87,26 @@ public final class WindowPreferences {
      */
     public void setMaximized(final boolean maximized) {
         this.maximized = maximized;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final WindowPreferences that = (WindowPreferences) obj;
+        return Double.compare(that.width, width) == 0
+                && Double.compare(that.height, height) == 0
+                && maximized == that.maximized;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height, maximized);
     }
 }

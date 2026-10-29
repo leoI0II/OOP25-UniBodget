@@ -4,7 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.investment.controllers.InvestmentController;
+import it.unibo.unibodget.controller.investments.InvestmentController;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.CreateNewInvestmentWalletRequestedEvent;
 import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;

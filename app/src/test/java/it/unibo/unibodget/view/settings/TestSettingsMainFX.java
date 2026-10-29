@@ -1,7 +1,6 @@
 package it.unibo.unibodget.view.settings;
 
 import it.unibo.unibodget.controller.settings.SettingsController;
-import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import javafx.application.Application;
 import javafx.scene.Scene;

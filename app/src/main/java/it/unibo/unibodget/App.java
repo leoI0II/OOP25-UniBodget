@@ -6,13 +6,13 @@ import it.unibo.unibodget.model.currency.api.provider.AlphaPriceProvider;
 import it.unibo.unibodget.model.currency.api.provider.CoinGeckoPriceProvider;
 import it.unibo.unibodget.model.currency.api.provider.UniversalPriceService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
-import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
+import it.unibo.unibodget.controller.investments.DefaultInvestmentController;
 import it.unibo.unibodget.model.investment.service.CSVInvestmentsSnapshotService;
 import it.unibo.unibodget.model.investment.service.PeriodicSnapshotSaver;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;
 import it.unibo.unibodget.model.settings.Settings;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.utils.AppTicker;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
@@ -133,7 +133,7 @@ public final class App extends Application {
         primaryStage.setTitle("UniBodget");
         primaryStage.show();
 
-        updateWindowProperty(primaryStage, settings);
+        updateWindowProperty(primaryStage);
 
         persistenceReady = true;
         walletSaver.start();
@@ -146,34 +146,50 @@ public final class App extends Application {
     /**
      * Updates window preferences when the window dimensions or state change.
      *
-     * @param primaryStage the main application stage
-     * @param settings the settings instance to update
+     * @param stage the main application stage
      */
-    private void updateWindowProperty(final Stage primaryStage, final Settings settings) {
-        primaryStage
-                .widthProperty()
+    private void updateWindowProperty(final Stage stage) {
+        stage.widthProperty()
                 .addListener(
                         (observable, oldValue, newValue) -> {
-                            if (!primaryStage.isMaximized()) {
-                                settings.getWindowPrefs().setWidth(newValue.doubleValue());
+                            if (!stage.isMaximized()) {
+                                saveWindowPreferences(stage);
                             }
                         });
 
-        primaryStage
-                .heightProperty()
+        stage.heightProperty()
                 .addListener(
                         (observable, oldValue, newValue) -> {
-                            if (!primaryStage.isMaximized()) {
-                                settings.getWindowPrefs().setHeight(newValue.doubleValue());
+                            if (!stage.isMaximized()) {
+                                saveWindowPreferences(stage);
                             }
                         });
 
-        primaryStage
-                .maximizedProperty()
+        stage.maximizedProperty()
                 .addListener(
                         (observable, oldValue, newValue) -> {
-                            settings.getWindowPrefs().setMaximized(newValue);
+                            saveWindowPreferences(stage);
                         });
+
+        stage.setOnCloseRequest(event -> saveWindowPreferences(stage));
+    }
+
+    /**
+     * Persists the current window preferences through the settings controller.
+     *
+     * @param stage the stage whose geometry to persist
+     */
+    private void saveWindowPreferences(final Stage stage) {
+        final WindowPreferences currentPrefs = settingsController.getSettings().getWindowPrefs();
+        final double width = stage.isMaximized()
+                ? currentPrefs.getWidth()
+                : Math.max(MIN_WINDOW_WIDTH, stage.getWidth());
+        final double height = stage.isMaximized()
+                ? currentPrefs.getHeight()
+                : Math.max(MIN_WINDOW_HEIGHT, stage.getHeight());
+        final boolean maximized = stage.isMaximized();
+
+        settingsController.updateWindowPrefs(new WindowPreferences(width, height, maximized));
     }
 
     /**

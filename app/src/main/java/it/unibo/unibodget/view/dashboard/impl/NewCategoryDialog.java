@@ -3,7 +3,7 @@ package it.unibo.unibodget.view.dashboard.impl;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.categories.CategoryType;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;

@@ -15,7 +15,7 @@ import it.unibo.unibodget.model.dashboard.impl.DefaultFriendLoanSummaryService;
 import it.unibo.unibodget.model.dashboard.impl.DefaultWalletInsightService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.settings.Settings;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransactionFactory;
 import it.unibo.unibodget.view.dashboard.impl.DefaultDashboardView;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

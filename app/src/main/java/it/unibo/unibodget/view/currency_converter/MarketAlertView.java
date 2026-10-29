@@ -1,8 +1,11 @@
-package it.unibo.unibodget.model.currency.alert;
+package it.unibo.unibodget.view.currency_converter;
+
+import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
+import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
+import it.unibo.unibodget.view.settings.ThemeManager;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
-import it.unibo.unibodget.model.settings.ThemeManager;
 import java.util.List;
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
@@ -13,18 +16,18 @@ import org.slf4j.LoggerFactory;
  * High-level component responsible for checking currency exchange alerts and displaying warning
  * dialogs when threshold conditions are met.
  *
- * <p>A {@code MarketAlert} delegates alert evaluation to a {@link CurrencyAlertService} and handles
+ * <p>A {@code MarketAlertView} delegates alert evaluation to a {@link CurrencyAlertService} and handles
  * the UI side-effects (JavaFX dialogs) when alerts are triggered. This class does not perform any
  * threshold logic itself; it only reacts to alerts already validated by the service.
  */
-public final class MarketAlert {
+public final class MarketAlertView {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MarketAlert.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MarketAlertView.class);
 
     private final CurrencyAlertService alertService;
 
     /**
-     * Creates a new {@code MarketAlert} instance.
+     * Creates a new {@code MarketAlertView} instance.
      *
      * @param service the alert service used to evaluate threshold conditions; must not be {@code
      *     null}
@@ -32,7 +35,7 @@ public final class MarketAlert {
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
             justification = "Dependency injection of currency alert service")
-    public MarketAlert(final CurrencyAlertService service) {
+    public MarketAlertView(final CurrencyAlertService service) {
         this.alertService = service;
     }
 

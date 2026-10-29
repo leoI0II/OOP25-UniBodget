@@ -20,7 +20,7 @@ import it.unibo.unibodget.model.wallet.CashAccount;
 import it.unibo.unibodget.view.utils.DialogHelper;
 
 import it.unibo.unibodget.model.settings.Theme;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.view.dashboard.api.DashboardView;
 import it.unibo.unibodget.view.dashboard.api.DashboardViewActions;
 import it.unibo.unibodget.view.dashboard.state.DashboardViewState;

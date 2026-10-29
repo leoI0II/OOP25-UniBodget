@@ -1,4 +1,6 @@
-package it.unibo.unibodget.model.settings;
+package it.unibo.unibodget.view.settings;
+
+import it.unibo.unibodget.model.settings.Theme;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

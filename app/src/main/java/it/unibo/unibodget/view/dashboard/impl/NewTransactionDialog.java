@@ -14,7 +14,7 @@ import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.dashboard.impl.FriendLoanSummary;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;

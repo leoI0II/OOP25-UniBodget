@@ -27,7 +27,7 @@ import it.unibo.unibodget.model.investment.ExportResult;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
-import it.unibo.unibodget.model.investment.controllers.DefaultInvestmentController;
+import it.unibo.unibodget.controller.investments.DefaultInvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.model.service.CashAccountService;
 import it.unibo.unibodget.model.service.InvestmentAccountService;

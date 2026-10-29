@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.wallet.CashAccount;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;

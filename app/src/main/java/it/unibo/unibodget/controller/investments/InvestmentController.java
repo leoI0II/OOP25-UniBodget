@@ -1,4 +1,4 @@
-package it.unibo.unibodget.model.investment.controllers;
+package it.unibo.unibodget.controller.investments;
 
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.CurrencyUnit;

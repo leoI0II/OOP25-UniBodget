@@ -6,7 +6,7 @@ import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.investment.OrderResult;
 import it.unibo.unibodget.model.investment.OrderType;
 import it.unibo.unibodget.model.investment.PaymentSource;
-import it.unibo.unibodget.model.investment.controllers.InvestmentController;
+import it.unibo.unibodget.controller.investments.InvestmentController;
 import it.unibo.unibodget.model.utils.MessageBus;
 import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;

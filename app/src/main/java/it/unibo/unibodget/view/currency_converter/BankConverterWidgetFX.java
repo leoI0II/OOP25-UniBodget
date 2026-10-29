@@ -7,7 +7,7 @@ import it.unibo.unibodget.model.currency.bank.Bank;
 import it.unibo.unibodget.model.currency.bank.BankConversionResult;
 import it.unibo.unibodget.model.currency.bank.BankConversionService;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.view.utils.DialogHelper;
 import java.math.BigDecimal;
 import java.util.Optional;

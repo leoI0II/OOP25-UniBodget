@@ -6,7 +6,7 @@ import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsManager;
 import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import java.util.List;
 

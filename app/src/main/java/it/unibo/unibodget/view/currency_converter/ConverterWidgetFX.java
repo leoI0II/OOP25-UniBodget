@@ -9,8 +9,9 @@ import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.currency.StockMarketCurrency;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlert;
 import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
-import it.unibo.unibodget.model.currency.alert.MarketAlert;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.view.ui.FXAdapter;
 import it.unibo.unibodget.view.utils.DialogHelper;
 
@@ -137,6 +138,24 @@ public final class ConverterWidgetFX {
      */
     public ComboBox<CurrencyUnit> getToBox() {
         return toBox;
+    }
+
+    /**
+     * Return the threshold input field.
+     *
+     * @return the threshold input field
+     */
+    public TextField getThresholdField() {
+        return thresholdField;
+    }
+
+    /**
+     * Return the add alert button.
+     *
+     * @return the add alert button
+     */
+    public Button getAddAlertButton() {
+        return addAlertButton;
     }
 
     /**
@@ -298,6 +317,7 @@ public final class ConverterWidgetFX {
             ));
 
             thresholdField.clear();
+            MessageBus.send(new MainInfoNotificationEvent("Alert threshold set correctly!"));
         });
 
         /* ---------- RESULT OUTPUT ---------- */
@@ -370,7 +390,7 @@ public final class ConverterWidgetFX {
                 ).doubleValue();
 
                 final Window owner = DialogHelper.findWindow(card).orElse(null);
-                new MarketAlert(this.alertService)
+                new MarketAlertView(this.alertService)
                         .checkAndShowAlerts(rate, from, to, owner);
 
             } catch (final IllegalArgumentException | IllegalStateException ignored) {

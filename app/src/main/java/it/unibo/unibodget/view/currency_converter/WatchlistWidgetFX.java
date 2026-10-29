@@ -3,7 +3,7 @@ package it.unibo.unibodget.view.currency_converter;
 import it.unibo.unibodget.controller.currency_converter.WatchListController;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.watchlist.WatchlistPair;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.view.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
