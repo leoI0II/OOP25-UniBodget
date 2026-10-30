@@ -1,0 +1,66 @@
+% small set of tikz styles to draw uml class diagrams by hand.
+% every box is a node, every relation is a \draw with one of the styles below.
+
+\usetikzlibrary{shapes.multipart, arrows.meta, positioning, calc}
+
+\definecolor{umlhead}{RGB}{226, 234, 245}
+\definecolor{umlline}{RGB}{40, 40, 40}
+
+\tikzset{
+  % box with two parts: name (with stereotype) and operations
+  uml/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part align={center, left},
+    rectangle split part fill={umlhead, white},
+    draw=umlline, minimum width=#1, align=left, inner sep=3pt,
+    font=\sffamily\footnotesize, anchor=north
+  },
+  uml/.default=4.6cm,
+  % box with only the name, for classes already shown in another figure
+  umlref/.style={
+    rectangle, draw=umlline, fill=umlhead, dashed,
+    font=\sffamily\footnotesize, minimum width=3cm, minimum height=0.8cm,
+    align=center, anchor=north
+  },
+  every uml relation/.style={draw=umlline, semithick},
+  extends/.style={every uml relation, -{Triangle[open, length=3mm, width=3mm]}},
+  implements/.style={every uml relation, dashed, -{Triangle[open, length=3mm, width=3mm]}},
+  association/.style={every uml relation, -{Stealth[length=2.5mm]}},
+  composition/.style={every uml relation, {Diamond[length=3.5mm, width=2.4mm]}-{Stealth[length=2.5mm]}},
+  aggregation/.style={every uml relation, {Diamond[open, length=3.5mm, width=2.4mm]}-{Stealth[length=2.5mm]}},
+  dependency/.style={every uml relation, dashed, -{Stealth[length=2.5mm]}},
+  rel/.style={font=\sffamily\scriptsize, inner sep=1.5pt},
+}
+
+% header colors, one for each area of the application (used by the global domain diagram)
+\definecolor{areaCurrency}{RGB}{220, 232, 247}
+\definecolor{areaWallet}{RGB}{215, 240, 236}
+\definecolor{areaDashboard}{RGB}{226, 243, 218}
+\definecolor{areaInvest}{RGB}{253, 233, 210}
+\definecolor{areaMarket}{RGB}{236, 226, 248}
+\definecolor{areaSettings}{RGB}{232, 232, 232}
+
+% \umlarea{color}: the next boxes get this header color
+\newcommand{\umlarea}[1]{\colorlet{umlhead}{#1}}
+
+% no hyphenation inside the boxes: method names must stay whole
+\newcommand{\umlnohyphen}{\hyphenpenalty=10000\exhyphenpenalty=10000\relax}
+
+% \umlclass[width]{node id}{position}{stereotype}{name}{operations, one per line separated by \\}
+% the stereotype can be empty (plain class). abstract methods: write them inside \umlabstract{...}
+\newcommand{\umlclass}[6][4.6cm]{%
+  \node[uml=#1] (#2) at (#3) {%
+    \ifx\relax#4\relax\else{\scriptsize\guillemotleft #4\guillemotright}\\\fi\textbf{#5}%
+    \nodepart{second}\umlnohyphen#6};%
+}
+
+% shortcut for interfaces
+\newcommand{\umlinterface}[5][4.6cm]{\umlclass[#1]{#2}{#3}{interface}{#4}{#5}}
+
+% abstract operation (italic, as in uml)
+\newcommand{\umlabstract}[1]{\textit{#1}}
+
+% \umlref{node id}{position}{name}: class already shown in another figure, name only
+\newcommand{\umlref}[3]{%
+  \node[umlref] (#1) at (#2) {\textbf{#3}};%
+}
