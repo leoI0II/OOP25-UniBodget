@@ -1,6 +1,6 @@
 package it.unibo.unibodget.view.utils;
 
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import java.io.File;
 import java.util.Optional;
 import javafx.scene.Node;

@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import it.unibo.unibodget.model.currency.MonetaryInputParser;
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;

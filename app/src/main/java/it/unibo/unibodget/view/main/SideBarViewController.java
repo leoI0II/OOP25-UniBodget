@@ -3,7 +3,7 @@ package it.unibo.unibodget.view.main;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.view.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

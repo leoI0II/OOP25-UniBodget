@@ -1,4 +1,4 @@
-package it.unibo.unibodget.model.investment.controllers;
+package it.unibo.unibodget.controller.investments;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.model.categories.Category;

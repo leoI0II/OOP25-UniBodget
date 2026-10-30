@@ -1,4 +1,6 @@
-package it.unibo.unibodget.model.settings;
+package it.unibo.unibodget.view.settings;
+
+import it.unibo.unibodget.model.settings.Theme;
 
 import java.io.File;
 import java.io.IOException;

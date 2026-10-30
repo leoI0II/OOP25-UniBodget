@@ -6,7 +6,6 @@ import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.settings.Settings;
 import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
-import it.unibo.unibodget.model.settings.ThemeManager;
 import it.unibo.unibodget.view.utils.DialogHelper;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;

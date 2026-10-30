@@ -55,4 +55,5 @@ public final class CurrencyPlaceholder implements CurrencyUnit {
     public int getDisplayDecimals() {
         return 2;
     }
+
 }

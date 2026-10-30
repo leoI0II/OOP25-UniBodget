@@ -2,7 +2,7 @@ package it.unibo.unibodget.view.main;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.settings.SettingsController;
-import it.unibo.unibodget.model.investment.controllers.InvestmentController;
+import it.unibo.unibodget.controller.investments.InvestmentController;
 import it.unibo.unibodget.model.investment.service.InvestmentsSnapshotService;
 import it.unibo.unibodget.view.investments.AddNewWalletDialogViewController;
 import it.unibo.unibodget.view.investments.AddTransactionDialogViewController;

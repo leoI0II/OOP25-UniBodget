@@ -9,7 +9,7 @@ import it.unibo.unibodget.model.currency.alert.CurrencyAlertService;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIClient;
 import it.unibo.unibodget.model.currency.engin.BasicCurrencyConverter;
 import it.unibo.unibodget.model.currency.watchlist.WatchList;
-import it.unibo.unibodget.model.settings.ThemeManager;
+import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
