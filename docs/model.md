@@ -332,14 +332,8 @@ classDiagram
         +checkAlerts(double, CurrencyUnit, CurrencyUnit) List~CurrencyAlert~
     }
 
-    class MarketAlert {
-        <<utility>>
-        +showAlert(CurrencyAlert, double)$ void
-    }
-
     WatchList --> WatchlistPair : maintains
     CurrencyAlertService --> CurrencyAlert : manages
-    MarketAlert --> CurrencyAlert : visualizes
 
     %% ============================================================
     %% ================= SETTINGS & MEMENTO =======================
@@ -391,16 +385,6 @@ classDiagram
         +restoreSnapshot(SettingsSnapshot) void
     }
 
-    class ThemeManager {
-        <<utility>>
-        -Theme currentTheme
-        -List~Scene~ registeredScenes
-        +applyThemeToScene(Scene)$ void
-        +registerScene(Scene)$ void
-        +getCurrentTheme()$ Theme
-        +setTheme(Theme)$ void
-    }
-
     class WindowPreferences {
         <<record>>
         -double width
@@ -415,7 +399,6 @@ classDiagram
     Settings --> Theme
     Settings --> BudgetLimit
     Settings --> WindowPreferences
-    ThemeManager --> Theme : applies to views
 
     %% ============================================================
     %% ================= TRANSACTIONS & WALLETS ===================

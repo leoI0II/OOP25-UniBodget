@@ -86,9 +86,10 @@ classDiagram
         -refreshTable() void
     }
 
-    class MarketAlert {
-        <<utility>>
-        +showAlert(CurrencyAlert, double)$ void
+    class MarketAlertView {
+        -CurrencyAlertService alertService
+        +checkAndShowAlerts(double, CurrencyUnit, CurrencyUnit) void
+        +checkAndShowAlerts(double, CurrencyUnit, CurrencyUnit, Window) void
     }
 
     CurrencyConverterModule --> CurrencyConverterViewFX : orchestrates (Facade)
@@ -98,11 +99,22 @@ classDiagram
     CurrencyConverterViewFX --> CurrencyHistoryChartView : contains
     CurrencyConverterViewFX --> WatchlistWidgetFX : contains
 
-    ConverterWidgetFX ..> MarketAlert : triggers alerts
+    ConverterWidgetFX ..> MarketAlertView : triggers alerts
 
     %% ============================================================
     %% ============ SETTINGS VIEW SUBSYSTEM  =============
     %% ============================================================
+
+    class ThemeManager {
+        -Theme currentTheme
+        -Set~Scene~ SCENES
+        +applyThemeToScene(Scene)$ void
+        +applyThemeToDialog(Dialog)$ void
+        +applyFont(Node)$ void
+        +setTheme(Theme)$ void
+        +getTheme()$ Theme
+        +addListener(Consumer~Theme~)$ void
+    }
 
     class SettingsTabFX {
         -SettingsController controller
