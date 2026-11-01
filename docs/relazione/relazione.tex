@@ -245,9 +245,9 @@ più eventuali valute personalizzate (\texttt{Currency}); per l'importo il tipo 
 10~EUR, 0,5~BTC e 3~AAPL sono tutti importi.
 
 \paragraph{Conti e movimenti}
-Il dominio ruota attorno al concetto di \textbf{conto} (\texttt{AbstractWallet}). Un conto ha un nome,
+Il dominio ruota attorno al concetto di \textbf{conto} (\texttt{Wallet}). Un conto ha un nome,
 una valuta di riferimento e uno \textbf{storico} (\texttt{Historical}) che registra tutti i suoi
-\textbf{movimenti} (\texttt{AbstractTransaction}). Il saldo non è un'informazione a sé, ma si ricava sempre
+\textbf{movimenti} (\texttt{Transaction}). Il saldo non è un'informazione a sé, ma si ricava sempre
 dallo storico. Ogni movimento ha una data, una descrizione, un importo e una \textbf{categoria}
 (\texttt{Category}) con nome, colore e tipo (entrata, spesa, trasferimento, prestito). Esistono due tipi
 di conto, e ognuno accetta un solo tipo di movimento:
@@ -266,9 +266,9 @@ una soglia di avviso. Confrontando la spesa del mese con il budget si ottiene lo
 (\texttt{BudgetStatus}): nella norma, in avviso o critico (\texttt{BudgetMonitor}). Dai movimenti di
 liquidità si ricavano anche i \textbf{riepiloghi dei prestiti} (\texttt{FriendLoanSummary}), uno per
 amico, con quanto è stato prestato, quanto restituito e il saldo residuo
-(\texttt{FriendLoanSummaryService}), e i \textbf{confronti mensili} (\texttt{WalletInsight}), che dicono
+(\texttt{FriendLoanSummary}), e i \textbf{confronti mensili} (\texttt{WalletInsight}), che dicono
 come spese, entrate e risparmi sono cambiati rispetto al mese precedente
-(\texttt{WalletInsightService}). Queste informazioni non vengono memorizzate: si calcolano ogni volta dai
+(\texttt{WalletInsight}). Queste informazioni non vengono memorizzate: si calcolano ogni volta dai
 movimenti.
 
 \paragraph{Investimenti}
@@ -976,6 +976,25 @@ Per la parte sviluppata da \textbf{Arianna Palmucci}, sono state implementate su
     \end{itemize}
 \end{itemize}
 
+Per la parte sviluppata da \textbf{Favour Emuwahen}, il collaudo automatizzato si concentra sull'integrità del cruscotto contabile, sulle transazioni e sulle logiche algoritmiche di budget e trend:
+\begin{itemize}
+    \item \textbf{Dashboard, Facciata e Snapshot Contabile:}
+    \begin{itemize}
+        \item \texttt{DefaultDashboardFacadeTest}, \texttt{DefaultDashboardSnapshotTest}, \texttt{DefaultDashboardControllerTest}: validazione dell'aggregazione atomica dei dati informativi e coordinamento della vista passiva.
+        \item \texttt{DefaultWalletServiceTest}, \texttt{DefaultCategoryServiceTest}, \texttt{DefaultFriendLoanSummaryServiceTest}: verifica dell'elaborazione analitica dei movimenti e del debito/credito residuo verso amici.
+    \end{itemize}
+    \item \textbf{Strategie di Budget, Trend Mensili e Specifiche di Filtro:}
+    \begin{itemize}
+        \item \texttt{BudgetAlertStrategyTest}, \texttt{DefaultBudgetMonitorTest}: collaudo delle soglie percentuali e degli stati di allerta (\texttt{SAFE}, \texttt{WARNING}, \texttt{CRITICAL}).
+        \item \texttt{MonthlyInsightTemplateTest}, \texttt{DefaultWalletInsightServiceTest}: verifica del calcolo delle variazioni percentuali mese su mese e gestione della divisione per zero.
+        \item \texttt{TransactionSpecificationTest}, \texttt{DefaultTransactionHistoryFilterServiceTest}: verifica dei filtri componibili per categoria, data e parole chiave.
+    \end{itemize}
+    \item \textbf{Costruzione e Validazione Transazioni di Cassa:}
+    \begin{itemize}
+        \item \texttt{CashTransactionTest}, \texttt{CashTransactionBuilderTest}, \texttt{CashTransactionFactoryTest}, \texttt{CashAccountTest}: verifica dell'immutabilità, della validazione preventiva dei campi e della consistenza dei saldi.
+    \end{itemize}
+\end{itemize}
+
 Per la parte sviluppata da \textbf{Daniele Zappalà}, le attività di testing automatizzato coprono il modulo investimenti, i contratti di esecuzione degli ordini e le componenti infrastrutturali:
 \begin{itemize}
     \item \textbf{Investimenti e Rendicontazione Portafoglio Titoli:}
@@ -1003,22 +1022,22 @@ Nello sviluppo del sottosistema Dashboard e Contabilità sono state valorizzate 
 
 \begin{itemize}[itemsep=5pt,topsep=3pt]
     \item \textbf{Gerarchie Sigillate ed Ereditarietà Controllata (\emph{sealed classes}):} Adozione della classe astratta sigillata (\texttt{public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction}) per blindare a livello di compilatore l'albero polimorfico delle transazioni, impedendo estensioni non controllate e garantendo verifiche esaustive nei controlli di tipo.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/transactions/base/AbstractTransaction.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/transactions/base/AbstractTransaction.java#L39-L46}
 
     \item \textbf{Interfacce Funzionali e Generici Componibili (\texttt{Predicate<T>}):} Reificazione dello Specification Pattern tramite un'interfaccia che estende \texttt{Predicate<CashTransaction>} e fornisce combinatori logici di default (\texttt{and}, \texttt{or}, \texttt{not}) basati su lambda, consentendo l'assemblaggio dinamico e dichiarativo di filtri complessi.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/specification/TransactionSpecification.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/dashboard/specification/TransactionSpecification.java#L17-L63}
 
     \item \textbf{Pattern Matching per Switch e Record Patterns (Java 21):} Impiego del pattern matching per switch con decostruzione contestuale dei record per gestire le diverse modalità di regolamento economico in \texttt{NewTransactionDialog}, azzerando cast espliciti e variabili di appoggio temporanee.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/impl/NewTransactionDialog.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/dashboard/impl/NewTransactionDialog.java#L587-L594}
 
     \item \textbf{Record Immutabili per il Trasferimento Dati (\emph{Data Transfer Objects}):} Modellazione dello stato di presentazione della UI (\texttt{DashboardViewState}, \texttt{HeaderCardState}, \texttt{BalanceCardState}) e dei risultati intermedi (\texttt{BudgetStatus}, \texttt{WalletInsight}) tramite record nativi immutabili, eliminando codice boilerplate e scongiurando side-effect tra strati applicativi.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/state/DashboardViewState.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/dashboard/state/DashboardViewState.java#L33-L72}
 
     \item \textbf{Stream API Avanzate e Raggruppamento Funzionale (\texttt{Collectors.groupingBy}):} Elaborazione analitica dei movimenti finanziari tramite pipeline funzionali con operatori intermedi e terminali (\texttt{.filter()}, \texttt{.map()}, \texttt{.reduce()}) per il calcolo cumulativo dei saldi e raggruppamento per tipologia di spesa tramite \texttt{Collectors.groupingBy()} in \texttt{DefaultCategoryService}.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/DefaultCategoryService.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/DefaultCategoryService.java#L103-L117}
 
     \item \textbf{Aritmetica Decimale Esatta con \texttt{BigDecimal}:} Utilizzo pervasivo di \texttt{BigDecimal} con scala esplicita e arrotondamento controllato (\texttt{RoundingMode.HALF\_UP}) per tutte le grandezze monetarie e percentuali, eliminando alla radice le imprecisioni dell'aritmetica floating-point IEEE 754.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/AbstractMonthlyInsightTemplate.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/AbstractMonthlyInsightTemplate.java#L32-L72}
 \end{itemize}
 
 \subsection{Arianna Palmucci}
@@ -1027,19 +1046,19 @@ Nello sviluppo del modulo di gestione delle valute, quotazioni, persistenza JSON
 
 \begin{itemize}[itemsep=5pt,topsep=3pt]
     \item \textbf{Networking Moderno con HTTP/2 e Client Asincrono (\texttt{java.net.http.*}):} Interrogazione dei servizi RESTful di cambio valuta tramite \texttt{HttpClient} e \texttt{HttpRequest}, configurati con timeout espliciti (\texttt{Duration}), gestione nativa del protocollo HTTP/2 e logiche di fallback trasparente sui dati in cache o predefiniti in assenza di rete.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/api/ExchangeRateAPIClient.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/currency/api/ExchangeRateAPIClient.java#L133-L157}
 
-    \item \textbf{Serializzazione JSON Polimorfica e Moduli Custom (Jackson):} Configurazione avanzata di \texttt{ObjectMapper} con il modulo \texttt{JavaTimeModule} e deserializzatori ad hoc per gestire la persistenza delle preferenze, consentendo la ricostruzione polimorfica delle istanze di \texttt{CurrencyUnit} tramite factory method senza violare l'incapsulamento.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/settings/SettingsManager.java}
+    \item \textbf{Serializzazione JSON Polimorfica e Moduli Custom (Jackson):} Configurazione avanzata di \texttt{ObjectMapper} in \texttt{PersistenceJacksonConfig} con il modulo \texttt{JavaTimeModule} e deserializzatori ad hoc per gestire la persistenza delle preferenze, consentendo la ricostruzione polimorfica delle istanze di \texttt{CurrencyUnit} tramite factory method senza violare l'incapsulamento.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/persistency/parser/impl/PersistenceJacksonConfig.java#L54-L80}
 
     \item \textbf{Gestione Resiliente del File System con Java NIO.2 (\texttt{java.nio.file.*}):} Risoluzione centralizzata dei percorsi dati in \texttt{AppDataPathResolver}, con creazione automatica delle cartelle di lavoro, gestione atomica dei file e totale indipendenza dal sistema operativo ospitante (macOS, Windows, Linux).
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/persistency/AppDataPathResolver.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/persistency/AppDataPathResolver.java#L159-L283}
 
     \item \textbf{Robustezza Funzionale e Aritmetica con \texttt{Optional} e \texttt{BigDecimal}:} Adozione sistematica di \texttt{Optional<BigDecimal>} in \texttt{MonetaryInputParser} per gestire stringhe monetarie eterogenee (delimitatori punto/virgola) azzerando i riferimenti \texttt{null}, affiancata da calcoli di conversione monetaria e commissioni bancarie su \texttt{BigDecimal} con \texttt{RoundingMode.HALF\_UP}.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/MonetaryInputParser.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/currency/MonetaryInputParser.java#L46-L88}
 
-    \item \textbf{Callback Funzionali Reattive e Record Immutabili (Java 21):} Impiego dell'interfaccia funzionale \texttt{Consumer<Theme>} in \texttt{ThemeManager} per registrare callback invocate alla commutazione del tema visivo a caldo, e modellazione dei risultati di conversione e delle allerte tramite \texttt{record} immutabili (\texttt{CurrencyConversionResult}, \texttt{CurrencyAlert}).
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyConversionResult.java}
+    \item \textbf{Callback Funzionali Reattive e Strutture Dati Immutabili:} Impiego dell'interfaccia funzionale \texttt{Consumer<Theme>} in \texttt{ThemeManager} per registrare callback invocate alla commutazione del tema visivo a caldo, e incapsulamento rigoroso dei risultati di conversione tramite la classe immutabile \texttt{CurrencyConversionResult} (affiancata nel modulo dai record \texttt{Asset} per gli importi), garantendo assenza di side-effect.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyConversionResult.java#L10-L37}
 \end{itemize}
 
 \clearpage
@@ -1049,22 +1068,22 @@ Nello sviluppo del modulo investimenti, del canale di eventi disaccoppiato e del
 
 \begin{itemize}[itemsep=5pt,topsep=3pt]
     \item \textbf{Tipi Sigillati e Pattern Matching per Switch:} Modellazione gerarchica delle sorgenti di pagamento e degli esiti degli ordini tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}) e record immutabili, gestiti nei controller mediante switch esaustivi con decostruzione dei tipi verificati a tempo di compilazione.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java#L23-L52}
 
     \item \textbf{Generici con Type Token e Programmazione Funzionale (\texttt{MessageBus}):} Implementazione del bus applicativo disaccoppiato tramite un metodo generico limitato (\texttt{<T extends MessageEvent>}) basato su type token (\texttt{Class<T>}) e consumatori funzionali (\texttt{Consumer<T>}), garantendo type-safety a runtime nella distribuzione degli eventi.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java#L59-L63}
 
     \item \textbf{Stream API con \texttt{Collectors.groupingBy} e Riduzioni Complesse:} Calcolo delle posizioni di portafoglio aperte e determinazione contabile del costo medio ponderato aggregando le transazioni storiche tramite raggruppamento funzionale con \texttt{Collectors.groupingBy} in \texttt{InvestmentAccount}.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java#L146-L154}
 
     \item \textbf{Astrazione del Tempo Applicativo con JavaFX \texttt{Timeline}:} Separazione netta della sorgente temporale mediante l'astrazione di dominio \texttt{AppTicker}, la cui implementazione grafica sfrutta una \texttt{Timeline} JavaFX per scandire i cicli periodici di snapshot e aggiornamento.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java#L29-L39}
 
     \item \textbf{I/O Tabellare con Apache Commons CSV e Salvataggio Automatico:} Serializzazione e storicizzazione delle istantanee patrimoniali su file CSV tramite la libreria Commons CSV, integrata con un motore di salvataggio automatico (\texttt{WalletAutoSaver}) basato su \texttt{Supplier} e \texttt{Consumer}.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java#L59-L65}
 
     \item \textbf{Reflection e Inizializzazione Dinamica dei Controller FXML:} Istanziazione centralizzata dei controller di vista in \texttt{ViewControllersFactory} tramite reflection controllata per iniettare programmaticamente le dipendenze applicative nei moduli caricati a runtime.
-    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java}
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java#L64-L91}
 \end{itemize}
 
 \chapter{Commenti finali}
@@ -1292,7 +1311,7 @@ Di seguito si riportano i riferimenti delle consegne settimanali relative all'in
 \subsection*{Arianna Palmucci (\texttt{arianna.palmucci@studio.unibo.it})}
 
 \noindent
-\emph{Nota:} Per i laboratori da 01 a 05 le consegne settimanali sono state originariamente effettuate senza l'uso di GitHub, di conseguenza i relativi repository indicati di seguito sono stati creati successivamente, appositamente per consentire la consultazione diretta del codice sorgente tramite i collegamenti ipertestuali all'interno di questa relazione.
+\emph{Nota:} Per i laboratori da 01 a 06 le consegne settimanali sono consultabili sui relativi repository GitHub; a partire dal Laboratorio 07 le consegne sono state registrate direttamente sui thread del forum su Virtuale:
 
 \begin{itemize}
     \item \textbf{Laboratorio 01:} \url{https://github.com/palmucci4rianna/oop-lab1}
@@ -1301,11 +1320,11 @@ Di seguito si riportano i riferimenti delle consegne settimanali relative all'in
     \item \textbf{Laboratorio 04:} \url{https://github.com/palmucci4rianna/oop-lab4}
     \item \textbf{Laboratorio 05:} \url{https://github.com/palmucci4rianna/oop-lab5}
     \item \textbf{Laboratorio 06:} \url{https://github.com/palmucci4rianna/lab06} \quad e \quad \url{https://github.com/palmucci4rianna/lab06-61pt2}
-    \item \textbf{Laboratorio 07:} \url{https://github.com/palmucci4rianna/lab07}
-    \item \textbf{Laboratorio 08:} \url{https://github.com/palmucci4rianna/lab08}
-    \item \textbf{Laboratorio 09:} \url{https://github.com/palmucci4rianna/lab09}
-    \item \textbf{Laboratorio 10:} \url{https://github.com/palmucci4rianna/lab10}
-    \item \textbf{Laboratorio 11:} \url{https://github.com/palmucci4rianna/lab11}
+    \item \textbf{Laboratorio 07:} \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=207193#p284992}
+    \item \textbf{Laboratorio 08:} \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=207921#p286196}
+    \item \textbf{Laboratorio 09:} \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=208718#p287253}
+    \item \textbf{Laboratorio 10:} \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=209589#p288497}
+    \item \textbf{Laboratorio 11:} \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=210617#p289688}
     \item \textbf{Laboratorio 12:}
 \end{itemize}
 
