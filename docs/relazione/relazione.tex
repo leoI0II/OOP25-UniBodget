@@ -13,17 +13,19 @@
 \usepackage{xcolor}
 \usepackage{float}
 \usepackage{microtype}
+\usepackage{enumitem}
 \usepackage{pdflscape}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,shapes.multipart,arrows.meta,positioning,fit,calc}
-\input{uml/uml-style}
 
 \hypersetup{
     colorlinks=true,
     linkcolor=blue!70!black,
     citecolor=blue!70!black,
-    urlcolor=blue!70!black
+    urlcolor=blue!70!black,
+    breaklinks=true
 }
+\usepackage{xurl}
 
 \lstset{
     basicstyle=\small\ttfamily,
@@ -40,13 +42,12 @@
 \title{\textbf{UniBodget — Relazione di Progetto} \\
 \large Corso di Programmazione ad Oggetti --- A.A. 2025/2026}
 \author{%
-  \textbf{Arianna Palmucci}\\{\small\texttt{arianna.palmucci@studio.unibo.it}}
+  Arianna Palmucci\\{\small\texttt{arianna.palmucci@studio.unibo.it}}
   \and
   Daniele Zappalà\\{\small\texttt{daniele.zappala3@studio.unibo.it}}
   \and
   Favour Emuwahen\\{\small\texttt{favour.emuwahen@studio.unibo.it}}
 }
-\date{Ottobre 2026}
 
 \begin{document}
 
@@ -293,7 +294,7 @@ convertitore ma non fanno parte del problema.
 \begin{landscape}
   \begin{figure}[p]
     \centering
-    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-1.png}
+    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-1.pdf}
     \caption{Schema UML del dominio (Parte 1): conti, storico transazioni, posizioni e gestione del budget.}
     \label{fig:dominio-conti}
   \end{figure}
@@ -302,7 +303,7 @@ convertitore ma non fanno parte del problema.
 
   \begin{figure}[p]
     \centering
-    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-2.png}
+    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-2.pdf}
     \caption{Schema UML del dominio (Parte 2): mercati, tassi di cambio, watchlist, banche e conversioni valutarie.}
     \label{fig:dominio-mercato}
   \end{figure}
@@ -363,7 +364,7 @@ Il disaccoppiamento è garantito dall'adozione del principio di inversione delle
 \begin{landscape}
   \begin{figure}[p]
     \centering
-    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-architettura.png}
+    \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-architettura.pdf}
     \caption{Rappresentazione ad alto livello dell'architettura MVC e del MessageBus disaccoppiato.}
     \label{fig:architecture}
   \end{figure}
@@ -406,7 +407,7 @@ La gerarchia delle valute e il motore di conversione sono strutturati come segue
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
     \item \textbf{Strategy Pattern:} L'interfaccia \texttt{CurrencyConverter} rappresenta la \emph{Strategy} astratta per il calcolo delle conversioni. \texttt{BasicCurrencyConverter} costituisce la \emph{Concrete Strategy} che esegue la triangolazione ponderata sui tassi correnti. Il client (\texttt{CurrencyConverterController} e \texttt{ConverterWidgetFX}) opera esclusivamente contro l'interfaccia, consentendo la sostituzione trasparente dell'algoritmo di conversione (es. per collaudo o con commissioni istituzionali).
-    \item \textbf{Adapter Pattern:} I dati eterogenei restituiti dai provider remoti (payload JSON di formati differenti) vengono normalizzati attraverso \texttt{ExchangeRateAPIClient} e \texttt{UniversalPriceService}, che fungono da \emph{Adapter} verso le strutture di dominio interne.
+    \item \textbf{Adapter Pattern e Composite Service:} I provider dedicati verso i servizi esterni (\texttt{CoinGeckoPriceProvider}, \texttt{AlphaPriceProvider} ed \texttt{ExchangeRateAPIClient}) fungono da \emph{Adapter}, convertendo e normalizzando i formati JSON eterogenei dei diversi provider nei contratti uniformi del dominio (\texttt{PriceProvider} ed \texttt{ExchangeRateAPI}). Il componente \texttt{UniversalPriceService} opera come \emph{Composite Service / Facade} orchestrando tali adapter in base alla tipologia di asset richiesta.
 \end{itemize}
 
 \begin{figure}[H]
@@ -440,23 +441,25 @@ I servizi web esterni che forniscono le quotazioni di mercato delle diverse clas
 
 \subsubsection*{3. Schema UML e Interazioni}
 L'interfaccia \texttt{ExchangeRateAPI} espone i metodi \texttt{getLatestRates(base)} e \texttt{getHistoricalRates(base, target, from, to)}.
-\texttt{ExchangeRateAPIImpl} implementa tale contratto mantenendo una mappa \texttt{cachedRates} associata a un timestamp \texttt{Instant lastUpdate}. Se la richiesta perviene entro la finestra di validità della cache, i dati vengono restituiti istantaneamente; in caso contrario, viene effettuata la chiamata HTTP aggiornando la cache solo a fronte di una risposta valida (HTTP 200). Parallelamente, \texttt{UniversalPriceService} coordina i provider dedicati per le diverse classi di asset, delegando a \texttt{PriceProvider} per quotazioni crittografiche e azionarie:
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[
-        width=0.95\textwidth,
-        keepaspectratio
-    ]{img/uml-conversion.png}
-    \caption{Diagramma delle classi: gerarchia polimorfica di \texttt{CurrencyUnit}, \texttt{Asset} e motore di conversione.}
-    \label{fig:currency-conversion}
-\end{figure}
+\texttt{ExchangeRateAPIImpl} implementa tale contratto mantenendo una mappa \texttt{cachedRates} associata a un timestamp \texttt{Instant lastUpdate}. Se la richiesta perviene entro la finestra di validità della cache, i dati vengono restituiti istantaneamente; in caso contrario, viene effettuata la chiamata HTTP aggiornando la cache solo a fronte di una risposta valida (HTTP 200). Parallelamente, \texttt{UniversalPriceService} coordina i provider dedicati per le diverse classi di asset, delegando a \texttt{PriceProvider} per quotazioni crittografiche e azionarie. L'architettura complessiva e le interazioni tra i provider sono illustrate nella Figura~\ref{fig:currency-conversion}.
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
-    \item \textbf{Cache Proxy Pattern:} \texttt{ExchangeRateAPIImpl} controlla e protegge l'accesso alla risorsa remota costosa (chiamate di rete su protocollo HTTP), intercettando le richieste e soddisfacendole dalla cache interna ogni qualvolta i dati siano ancora validi.
-    \item \textbf{Null Object / Fallback Strategy Pattern:} \texttt{MockExchangeRateAPI} offre un'implementazione autonoma e affidabile dei contratti di mercato, garantendo la totale continuità operativa del sistema e la determinazione nei test automatici.
+    \item \textbf{Caching In-Memory con TTL e Fallback (Ispirato al Proxy):} \texttt{ExchangeRateAPIImpl} protegge l'accesso alla risorsa remota costosa (chiamate di rete su protocollo HTTP) incapsulando una cache in memoria controllata da un tempo di validità (\emph{Time-To-Live}). Riprende il principio del Proxy nell'intercettare le richieste per servirle istantaneamente dalla memoria locale finché i dati sono validi, minimizzando le chiamate di rete.
+    \item \textbf{Fallback Strategy e Mock Provider (Test Double deterministico):} \texttt{MockExchangeRateAPI} offre un'implementazione autonoma e affidabile del contratto \texttt{ExchangeRateAPI}, garantendo la continuità operativa in modalità offline e la determinazione nei test automatici unitari.
 \end{itemize}
+
+\clearpage
+\begin{figure}[p]
+    \centering
+    \includegraphics[
+        height=0.85\textheight,
+        keepaspectratio
+    ]{img/uml-conversion.pdf}
+    \caption{Diagramma delle classi: architettura dei provider di cambio, caching e fallback.}
+    \label{fig:currency-conversion}
+\end{figure}
+\clearpage
 
 % ----------------------------------------------------------------------------
 \subsection{Monitoraggio dei Tassi, Allerte di Mercato e Watchlist Reattiva}
@@ -497,7 +500,7 @@ La separazione dei componenti per il monitoraggio reattivo dei mercati e per la 
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
-    \item \textbf{Observer Pattern:} \texttt{CurrencyAlertService} funge da soggetto di monitoraggio. Quando viene registrato un nuovo tasso di cambio durante una conversione, il servizio valuta le soglie e notifica i componenti della View (\texttt{MarketAlertView}) affinché presentino l'avviso all'utente.
+    \item \textbf{Rule Engine Dichiarativo e Disaccoppiamento Reattivo:} \texttt{CurrencyAlertService} incapsula la logica pura di business per la valutazione delle soglie di allarme tramite Stream Java. La propagazione delle notifiche verso la vista (\texttt{MarketAlertView}) e verso gli altri moduli dell'applicazione è completamente disaccoppiata e demandata all'infrastruttura condivisa di Publish-Subscribe del \texttt{MessageBus}.
     \item \textbf{Defensive Design:} \texttt{WatchList} restituisce collezioni immutabili (\texttt{Collections.unmodifiableSet}) per proteggere lo stato interno da manipolazioni esterne non autorizzate.
 \end{itemize}
 
@@ -517,7 +520,7 @@ L'ergonomia dell'applicazione prevede la completa personalizzazione dello spazio
     \item \textbf{Alternativa scartata B (Riavvio forzato dell'applicazione):} Costringere l'utente a riavviare l'applicazione per applicare un tema o una valuta base comporta una grave degradazione dell'usabilità e la potenziale perdita di dati non salvati nelle form aperte.
     \item \textbf{Soluzione adottata:}
     \begin{itemize}
-        \item \emph{Reificazione del Memento Pattern:} La classe \texttt{Settings} opera come \emph{Originator}, incapsulando lo stato corrente e generando istantanee immutabili \texttt{SettingsSnapshot} (\emph{Memento}) complete di timestamp, valuta e tema; il manager persistente \texttt{SettingsManager} funge da \emph{Caretaker}, archiviando lo storico delle istantanee e fornendo il metodo \texttt{restoreSnapshot()} per ripristinare uno stato passato in modo atomico;
+        \item \emph{Reificazione del Memento Pattern:} La classe \texttt{Settings} opera come \emph{Originator}, incapsulando lo stato corrente e generando istantanee immutabili \texttt{SettingsSnapshot} (\emph{Memento}) complete di timestamp, valuta e tema; il manager persistente \texttt{SettingsManager} e \texttt{SettingsController} fungono da \emph{Caretaker}, archiviando lo storico delle istantanee e consentendo tramite \texttt{applyConfiguration(snapshot)} e \texttt{Settings.fromSnapshot(...)} di ripristinare uno stato passato in modo atomico;
         \item \emph{Registro centralizzato di stile nella View (\texttt{ThemeManager}):} Collocato nel package della vista (\texttt{it.unibo.unibodget.view.settings}), il manager centralizza la gestione dei fogli di stile. Il metodo \texttt{ThemeManager.applyThemeToScene(Scene)} manipola direttamente la collezione \texttt{scene.getStylesheets()}, iniettando a runtime le classi CSS radice (\texttt{.theme-dark} vs \texttt{.theme-light}) con ricalcolo immediato del rendering da parte del motore grafico JavaFX.
     \end{itemize}
 \end{itemize}
@@ -526,80 +529,13 @@ L'ergonomia dell'applicazione prevede la completa personalizzazione dello spazio
 La struttura del sistema di gestione delle configurazioni, la reificazione del pattern Memento e la propagazione dello stile tramite Observer sono presentate nel seguente diagramma:
 
 \begin{figure}[H]
-\centering
-\resizebox{0.95\textwidth}{!}{
-\begin{tikzpicture}[
-    umlclass/.style={
-        draw=blue!65!black,
-        fill=white,
-        rectangle split,
-        rectangle split parts=3,
-        rectangle split part fill={blue!6, white, white},
-        rounded corners=2pt,
-        font=\scriptsize,
-        align=left
-    },
-    uses/.style={thick, -{Stealth[scale=0.8]}},
-    duses/.style={thick, dashed, -{Stealth[scale=0.8]}}
-]
-\node[umlclass] (manager) at (0, 6.2) {
-    \hfil \textbf{SettingsManager (Caretaker)} \hfil
-    \nodepart{second}
-    - settings : Settings \\
-    - history : List~SettingsSnapshot~
-    \nodepart{third}
-    + getSettings() : Settings \\
-    + saveSettings(settings : Settings) : void \\
-    + getHistory() : List~SettingsSnapshot~ \\
-    + restoreSnapshot(snapshot : SettingsSnapshot) : void
-};
-
-\node[umlclass] (settings) at (-4.8, 1.8) {
-    \hfil \textbf{Settings (Originator)} \hfil
-    \nodepart{second}
-    - theme : Theme \\
-    - baseCurrency : CurrencyUnit \\
-    - windowPreferences : WindowPreferences
-    \nodepart{third}
-    + createSnapshot() : SettingsSnapshot \\
-    + restoreFromSnapshot(snapshot : SettingsSnapshot) : void \\
-    + getTheme() : Theme \\
-    + setTheme(Theme) : void
-};
-
-\node[umlclass] (snapshot) at (4.8, 1.8) {
-    \hfil \textbf{\guillemotleft record\guillemotright} \hfil \\ \hfil \textbf{SettingsSnapshot (Memento)} \hfil
-    \nodepart{second}
-    - timestamp : Instant \\
-    - theme : Theme \\
-    - baseCurrency : CurrencyUnit
-    \nodepart{third}
-    + timestamp() : Instant \\
-    + theme() : Theme \\
-    + baseCurrency() : CurrencyUnit
-};
-
-\node[umlclass] (themeMgr) at (-4.8, -3.2) {
-    \hfil \textbf{\guillemotleft Observer / CSS Registry\guillemotright} \hfil \\ \hfil \textbf{ThemeManager} \hfil
-    \nodepart{second}
-    - currentTheme : Theme \\
-    - registeredScenes : List~Scene~
-    \nodepart{third}
-    + applyThemeToScene(scene : Scene) : void \\
-    + registerScene(scene : Scene) : void \\
-    + getCurrentTheme() : Theme \\
-    + setTheme(theme : Theme) : void
-};
-
-\draw[uses] (manager.south) -- ++(-2.2, -0.6) -| node[near end, left, font=\scriptsize] {persists} (settings.north);
-\draw[uses] (manager.south) -- ++(2.2, -0.6) -| node[near end, right, font=\scriptsize] {stores history} (snapshot.north);
-\draw[uses] (settings) -- node[above, font=\scriptsize] {creates / restores} (snapshot);
-\draw[duses] (settings.south) -- node[right, font=\scriptsize] {notifies} (themeMgr.north);
-
-\end{tikzpicture}
-}
-\caption{Diagramma delle classi: reificazione del Memento Pattern per le impostazioni e Observer per l'iniezione dinamica del tema.}
-\label{fig:memento-theme}
+    \centering
+    \includegraphics[
+        width=0.88\textwidth,
+        keepaspectratio
+    ]{img/uml-settings.pdf}
+    \caption{Diagramma delle classi: reificazione del Memento Pattern per le impostazioni e gestione dinamica del tema.}
+    \label{fig:memento-theme}
 \end{figure}
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
@@ -632,7 +568,7 @@ Oltre alla necessità di aggregare questi componenti mantenendoli totalmente dis
     \item \textbf{Risoluzione dei conflitti di stile e specificità CSS:}
     \begin{itemize}
         \item Per il selettore \texttt{directionBox}, è stata innalzata la specificità nel foglio di stile \texttt{theme.css} introducendo selettori contestualizzati (\texttt{.theme-dark .direction-box}, \texttt{.direction-box .cell}, \texttt{.direction-box .arrow-button}) con padding azzerato o controllato, stabilendo una larghezza minima di sicurezza (\texttt{125px}) e preferita (\texttt{130px}) e imponendo \texttt{HBox.setHgrow(directionBox, Priority.NEVER)} per prevenire compressioni indebite.
-        \item \textbf{Adattamento dinamico del layout del pannello:} Quando la finestra viene ridimensionata e lo spazio orizzontale disponibile si riduce, l'interfaccia riorganizza automaticamente i componenti, disponendoli su più righe anziché mantenerli affiancati. In particolare, alcuni elementi vengono spostati nella parte inferiore del pannello per garantire una visualizzazione più ordinata e leggibile. Per gestire il contenuto che eccede lo spazio verticale disponibile, viene inoltre introdotta una barra di scorrimento sul lato destro, che consente di accedere a tutti gli elementi senza compromettere il layout.
+        \item \textbf{Adattamento dinamico del layout del pannello:} La disposizione dei widget è stata gestita mediante un componente \texttt{FlowPane}, configurato con una spaziatura orizzontale e verticale di \texttt{20px}, che consente il riposizionamento automatico degli elementi su righe successive quando lo spazio orizzontale disponibile non è sufficiente. L'intero contenuto della dashboard è stato inoltre racchiuso in un \texttt{ScrollPane}, configurato con \texttt{fitToWidth(true)} e barre di scorrimento impostate su \texttt{AS\_NEEDED}, così da adattarsi alla larghezza della finestra e consentire lo scorrimento verticale quando il contenuto eccede l'area visibile.
     \end{itemize}
 \end{itemize}
 
@@ -640,100 +576,19 @@ Oltre alla necessità di aggregare questi componenti mantenendoli totalmente dis
 L'architettura composita della vista del convertitore è strutturata come segue:
 
 \begin{figure}[H]
-\centering
-\resizebox{0.95\textwidth}{!}{
-\begin{tikzpicture}[
-    umlclass/.style={
-        draw=blue!65!black,
-        fill=white,
-        rectangle split,
-        rectangle split parts=3,
-        rectangle split part fill={blue!6, white, white},
-        rounded corners=2pt,
-        font=\scriptsize,
-        align=left
-    },
-    uses/.style={thick, -{Stealth[scale=0.8]}},
-    duses/.style={thick, dashed, -{Stealth[scale=0.8]}}
-]
-\node[umlclass] (module) at (0, 7.8) {
-    \hfil \textbf{CurrencyConverterModule} \hfil
-    \nodepart{second}
-    - view : CurrencyConverterViewFX \\
-    - controller : CurrencyConverterController
-    \nodepart{third}
-    + getView() : Node \\
-    + getController() : CurrencyConverterController
-};
-
-\node[umlclass] (facade) at (0, 4.0) {
-    \hfil \textbf{\guillemotleft Facade\guillemotright} \hfil \\ \hfil \textbf{CurrencyConverterViewFX} \hfil
-    \nodepart{second}
-    - converterWidget : ConverterWidgetFX \\
-    - bankWidget : BankConverterWidgetFX \\
-    - chartWidget : CurrencyHistoryChartView \\
-    - watchlistWidget : WatchlistWidgetFX
-    \nodepart{third}
-    + getView() : Parent
-};
-
-\node[umlclass] (conv) at (-5.5, 0.2) {
-    \hfil \textbf{ConverterWidgetFX} \hfil
-    \nodepart{second}
-    - amountField : TextField \\
-    - fromBox : ComboBox \\
-    - toBox : ComboBox
-    \nodepart{third}
-    + getView() : Node
-};
-
-\node[umlclass] (bank) at (5.5, 0.2) {
-    \hfil \textbf{BankConverterWidgetFX} \hfil
-    \nodepart{second}
-    - bankCombo : ComboBox \\
-    - amountField : TextField \\
-    - netAmountLabel : Label
-    \nodepart{third}
-    + getView() : Node
-};
-
-\node[umlclass] (chart) at (-5.5, -3.8) {
-    \hfil \textbf{CurrencyHistoryChartView} \hfil
-    \nodepart{second}
-    - chart : LineChart \\
-    - fromDatePicker : DatePicker \\
-    - toDatePicker : DatePicker
-    \nodepart{third}
-    + getView() : Node
-};
-
-\node[umlclass] (watch) at (5.5, -3.8) {
-    \hfil \textbf{WatchlistWidgetFX} \hfil
-    \nodepart{second}
-    - tableView : TableView \\
-    - baseBox : ComboBox
-    \nodepart{third}
-    + getView() : Node
-};
-
-\draw[uses] (module) -- node[right, font=\scriptsize] {orchestrates} (facade);
-\draw[uses] (facade.south) -- ++(-2.2, -0.6) -| (conv.north);
-\draw[uses] (facade.south) -- ++(2.2, -0.6) -| (bank.north);
-
-% Outer bypass arrows passing cleanly on the outside
-\draw[uses] (facade.west) -- ++(-5.5, 0) |- (chart.west);
-\draw[uses] (facade.east) -- ++(5.5, 0) |- (watch.east);
-
-\end{tikzpicture}
-}
-\caption{Diagramma delle classi: scomposizione modulare e composizione dei widget della vista del convertitore.}
-\label{fig:view-composition-diagram}
+    \centering
+    \includegraphics[
+        width=0.88\textwidth,
+        keepaspectratio
+    ]{img/uml-view-converter.pdf}
+    \caption{Diagramma delle classi: scomposizione modulare e composizione dei widget della vista del convertitore.}
+    \label{fig:view-composition-diagram}
 \end{figure}
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
     \item \textbf{Facade Pattern:} \texttt{CurrencyConverterViewFX} funge da \emph{Facade} per l'intero sottosistema grafico del convertitore, nascondendo alla shell principale i dettagli dell'albero JavaFX e offrendo un punto d'ingresso pulito.
-    \item \textbf{Module Pattern:} \texttt{CurrencyConverterModule} incapsula il ciclo di vita del modulo, istanziando il rispettivo controller e adottando la \emph{Lazy Initialization} per la costruzione della vista, riducendo l'impronta di memoria e velocizzando il bootstrap dell'app.
+    \item \textbf{Incapsulamento Modulare e Lazy Initialization:} \texttt{CurrencyConverterModule} incapsula il ciclo di vita del modulo e adotta la \emph{Lazy Initialization} per la costruzione dell'albero grafico JavaFX (\texttt{CurrencyConverterViewFX}), istanziando i nodi visivi solo al primo effettivo accesso e ottimizzando l'impronta di memoria e i tempi di bootstrap.
 \end{itemize}
 
 % ----------------------------------------------------------------------------
@@ -769,94 +624,18 @@ Nelle prime versioni dell'applicazione, ciascuna classe responsabile della persi
 Il ruolo centrale di \texttt{AppDataPathResolver} come punto di disaccoppiamento e l'interazione con le classi persistenti sono illustrati nel seguente diagramma:
 
 \begin{figure}[H]
-\centering
-\resizebox{0.95\textwidth}{!}{
-\begin{tikzpicture}[
-    umlclass/.style={
-        draw=blue!65!black,
-        fill=white,
-        rectangle split,
-        rectangle split parts=3,
-        rectangle split part fill={blue!6, white, white},
-        rounded corners=2pt,
-        font=\scriptsize,
-        align=left
-    },
-    uses/.style={thick, -{Stealth[scale=0.8]}},
-    duses/.style={thick, dashed, -{Stealth[scale=0.8]}}
-]
-\node[umlclass] (resolver) at (0, 3.8) {
-    \hfil \textbf{\guillemotleft Single Source of Truth\guillemotright} \hfil \\ \hfil \textbf{AppDataPathResolver} \hfil
-    \nodepart{second}
-    - DATA\_DIR\_NAME : String = "data" \\
-    - MAX\_SEARCH\_DEPTH : int = 3 \\
-    - MAX\_VISITED\_DIRECTORIES : int = 500 \\
-    - cachedDataDir : Path
-    \nodepart{third}
-    + getDataDir() : Path \\
-    + resolve(relativePath : String) : Path \\
-    + resolveJson(subpath : String) : Path \\
-    + resolveCsv(subpath : String) : Path \\
-    + isValidUniBodgetDataDir(candidate : Path) : boolean \\
-    + setCustomDataDir(path : Path) : void \\
-    + reset() : void
-};
-
-\node[umlclass] (fileMgr) at (0, -1.8) {
-    \hfil \textbf{\guillemotleft Self-Healing\guillemotright} \hfil \\ \hfil \textbf{ModelFileManager} \hfil
-    \nodepart{second}
-    \nodepart{third}
-    + ensureFileExists(target : Path,\\~~~~resourceTemplate : String) : void
-};
-
-\node[umlclass] (sm) at (-7.2, 5.0) {
-    \hfil \textbf{SettingsManager} \hfil
-    \nodepart{second}
-    - settingsFilePath : Path
-    \nodepart{third}
-    + getSettings() : Settings \\
-    + saveSettings(...) : void
-};
-
-\node[umlclass] (bl) at (-7.2, 1.8) {
-    \hfil \textbf{BankList} \hfil
-    \nodepart{second}
-    - bankFilePath : Path
-    \nodepart{third}
-    + getBanks() : List~Bank~
-};
-
-\node[umlclass] (tl) at (7.2, 5.0) {
-    \hfil \textbf{ThemeList} \hfil
-    \nodepart{second}
-    - themesFilePath : Path
-    \nodepart{third}
-    + getThemes() : List~Theme~
-};
-
-\node[umlclass] (wl) at (7.2, 1.8) {
-    \hfil \textbf{WatchList} \hfil
-    \nodepart{second}
-    - watchlistPath : Path
-    \nodepart{third}
-    + load() : WatchList
-};
-
-\draw[duses] (resolver.south) -- node[right, font=\scriptsize] {fallback templates} (fileMgr.north);
-\draw[duses] (sm.east) -- node[above, font=\scriptsize] {resolveJson} (resolver.west |- sm.east);
-\draw[duses] (bl.east) -- node[above, sloped, font=\scriptsize] {resolveJson} (resolver.south west);
-\draw[duses] (tl.west) -- node[above, font=\scriptsize] {resolveJson} (resolver.east |- tl.west);
-\draw[duses] (wl.west) -- node[above, sloped, font=\scriptsize] {resolveJson} (resolver.south east);
-
-\end{tikzpicture}
-}
-\caption{Diagramma delle classi: architettura del percorso dati centralizzato e relazioni con i manager di persistenza.}
-\label{fig:resolver-diagram}
+    \centering
+    \includegraphics[
+        width=0.88\textwidth,
+        keepaspectratio
+    ]{img/uml-app-data-path-resolver.pdf}
+    \caption{Diagramma delle classi: architettura del percorso dati centralizzato e relazioni con i manager di persistenza.}
+    \label{fig:resolver-diagram}
 \end{figure}
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
-    \item \textbf{Chain of Responsibility / Strategy Pattern:} La selezione della directory di lavoro incapsula una sequenza di strategie di lookup ordinate per priorità, arrestandosi al verificarsi della prima condizione soddisfacente.
+    \item \textbf{Risoluzione Euristica a Priorità a Cascata:} La selezione della directory dati incapsula una sequenza di strategie di lookup ordinate per priorità (directory personalizzata da test, root di repository di sviluppo o percorso standard utente), arrestandosi al verificarsi della prima condizione valida.
     \item \textbf{Single Source of Truth:} Tutte le 8 classi persistenti sono state disaccoppiate e collegate ad \texttt{AppDataPathResolver.resolveJson(...)} e \texttt{resolveCsv(...)}, garantendo che qualsiasi modifica logistica della cartella dati si propaghi istantaneamente e uniformemente a tutta l'applicazione.
     \item \textbf{Design for Testability:} La classe mette a disposizione i metodi \texttt{setCustomDataDir(Path)} e \texttt{reset()}, consentendo alle suite di test automatizzati di operare su directory temporanee isolate (\texttt{@TempDir}) senza interferire con lo stato persistente reale dell'applicazione.
 \end{itemize}
@@ -895,77 +674,13 @@ Nel design originario, ciascuna finestra di dialogo e ciascun widget del modulo 
 L'architettura del parser monetario centralizzato e i componenti di vista che ne fanno uso sono riassunti nel diagramma delle classi seguente:
 
 \begin{figure}[H]
-\centering
-\resizebox{0.95\textwidth}{!}{
-\begin{tikzpicture}[
-    umlclass/.style={
-        draw=blue!65!black,
-        fill=white,
-        rectangle split,
-        rectangle split parts=3,
-        rectangle split part fill={blue!6, white, white},
-        rounded corners=2pt,
-        font=\scriptsize,
-        align=left
-    },
-    duses/.style={thick, dashed, -{Stealth[scale=0.8]}}
-]
-\node[umlclass] (parser) at (0, 5.2) {
-    \hfil \textbf{\guillemotleft Single Source of Truth\guillemotright} \hfil \\ \hfil \textbf{MonetaryInputParser} \hfil
-    \nodepart{second}
-    - DECIMAL\_DELIMITER\_PATTERN : Pattern \\
-    - STRICT\_NUMERIC\_PATTERN : Pattern
-    \nodepart{third}
-    + sanitize(input : String) : String \\
-    + parse(input : String) : Optional~BigDecimal~ \\
-    + parsePositive(input : String) : Optional~BigDecimal~ \\
-    + parseNonNegative(input : String) : Optional~BigDecimal~ \\
-    + parsePositiveWithMaxScale(input : String, maxScale : int) : Optional~BigDecimal~ \\
-    + parseDouble(input : String) : OptionalDouble \\
-    + parsePositiveDouble(input : String) : OptionalDouble \\
-    + parseNonNegativeDouble(input : String) : OptionalDouble
-};
-
-\node[umlclass] (conv) at (-5.5, 1.2) {
-    \hfil \textbf{ConverterWidgetFX} \hfil
-    \nodepart{second}
-    \nodepart{third}
-    - parseDecimal(text) : BigDecimal
-};
-
-\node[umlclass] (bank) at (5.5, 1.2) {
-    \hfil \textbf{BankConverterWidgetFX} \hfil
-    \nodepart{second}
-    \nodepart{third}
-    - parsePositiveAmount(text) \\
-    - parseFee(text)
-};
-
-\node[umlclass] (chart) at (-5.5, -2.2) {
-    \hfil \textbf{CurrencyHistoryChartView} \hfil
-    \nodepart{second}
-    \nodepart{third}
-    - parseThreshold(text) : OptionalDouble
-};
-
-\node[umlclass] (dialog) at (5.5, -2.2) {
-    \hfil \textbf{NewTransactionDialog} \hfil
-    \nodepart{second}
-    \nodepart{third}
-    - parseAmount(text) : BigDecimal
-};
-
-\draw[duses] (conv.north) -- node[left, font=\scriptsize] {parse} (parser.south -| conv.north);
-\draw[duses] (bank.north) -- node[right, font=\scriptsize] {parsePositive} (parser.south -| bank.north);
-
-% Outer bypass arrows for chart and dialog passing cleanly on the outside
-\draw[duses] (chart.west) -- ++(-1.8, 0) |- node[near start, left, font=\scriptsize] {parseDouble} (parser.west);
-\draw[duses] (dialog.east) -- ++(1.8, 0) |- node[near start, right, font=\scriptsize] {parse} (parser.east);
-
-\end{tikzpicture}
-}
-\caption{Diagramma delle classi: architettura di validazione e parsing dell'input monetario e relative interazioni con le viste.}
-\label{fig:monetary-parser-diagram}
+    \centering
+    \includegraphics[
+        width=0.88\textwidth,
+        keepaspectratio
+    ]{img/uml-monetary-input-parser.pdf}
+    \caption{Diagramma delle classi: architettura di validazione e parsing dell'input monetario e relative interazioni con le viste.}
+    \label{fig:monetary-parser-diagram}
 \end{figure}
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
@@ -1005,8 +720,7 @@ Consentire al controller o alla vista di interrogare direttamente i singoli serv
 \subsubsection*{3. Schema UML e Interazioni}
 \begin{figure}[H]
 \centering
-% \includegraphics[width=\textwidth]{img/uml-pattern-dashboard-facade.pdf}
-\includegraphics[width=\textwidth]{img/uml-pattern-dashboard-facade.png}
+\includegraphics[width=0.92\textwidth,keepaspectratio]{img/uml-facade-dashboard.pdf}
 \caption{Reificazione del Facade Pattern e della Passive View per il sottosistema Dashboard.}
 \label{fig:dashboard-facade}
 \end{figure}
@@ -1038,8 +752,7 @@ L'approccio tradizionale basato su costruttori sovraccaricati (\emph{telescoping
 \subsubsection*{3. Schema UML e Interazioni}
 \begin{figure}[H]
 \centering
-% \includegraphics[width=0.85\textwidth]{img/uml-pattern-cashtransaction.pdf}
-\includegraphics[width=0.85\textwidth]{img/uml-pattern-cashtransaction.png}
+\includegraphics[width=0.85\textwidth,keepaspectratio]{img/uml-builder-transaction.pdf}
 \caption{Reificazione dei pattern Builder e Factory per la creazione sicura di CashTransaction.}
 \label{fig:transaction-builder}
 \end{figure}
@@ -1050,41 +763,42 @@ L'approccio tradizionale basato su costruttori sovraccaricati (\emph{telescoping
     \item \textbf{Factory Pattern:} \texttt{CashTransactionFactory} incapsula la costruzione dei casi d'uso canonici (\texttt{createExpense}, \texttt{createIncome}, \texttt{createFriendLoan}), gestendo in automatico la polarità degli importi (\texttt{Asset.amount().negate()}) e preservando il principio di singola responsabilità (SRP).
 \end{itemize}
 
+\clearpage
 \subsection{Monitoraggio Dinamico e Strategie di Allerta del Budget (Strategy Pattern)}
 \subsubsection*{1. Descrizione del problema}
 Il controllo delle spese rispetto al budget mensile richiede di valutare la spesa cumulativa corrente rispetto al tetto limite prefissato dall'utente e a una soglia percentuale di avviso (es. 80\%). In base al consumo calcolato, il sistema deve emettere un responso qualitativo differenziato (\texttt{SAFE}, \texttt{WARNING}, \texttt{CRITICAL}), corredato da messaggi contestuali e badge cromatici di allerta nella dashboard. La logica di valutazione doveva essere totalmente estendibile, consentendo l'introduzione futura di nuovi criteri di allarme (es. proiezioni di spesa predittiva a metà mese o budget per singola categoria) senza dover modificare il monitor centrale.
 
 \subsubsection*{2. Soluzione proposta e alternative}
-\begin{itemize}
+\begin{itemize}[noitemsep,topsep=2pt,partopsep=0pt,parsep=0pt]
     \item \textbf{Alternativa scartata (Istruzioni condizionali annidate nel monitor):} L'uso di ramificazioni if-else o switch cablate all'interno di \texttt{DefaultBudgetMonitor} avrebbe violato il principio Open/Closed (OCP).
     \item \textbf{Soluzione adottata:} Adozione dello Strategy Pattern. L'interfaccia \texttt{BudgetAlertStrategy} definisce il contratto formale per la valutazione algoritmica della spesa. Il monitor (\texttt{DefaultBudgetMonitor}) delega la valutazione alla strategia appropriata, ottenendo come risultato il record immutabile \texttt{BudgetStatus}.
 \end{itemize}
 
 \subsubsection*{3. Schema UML e Interazioni}
-\begin{figure}[H]
-\centering
-% \includegraphics[width=\textwidth]{img/uml-pattern-budget-strategy.pdf}
-\includegraphics[width=\textwidth]{img/uml-pattern-budget-strategy.png}
-\caption{Reificazione dello Strategy Pattern per la valutazione delle soglie di allarme del Budget.}
-\label{fig:budget-strategy}
-\end{figure}
+L'architettura dello Strategy Pattern e le relative classi concrete di allerta sono illustrate nella Figura~\ref{fig:budget-strategy}.
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
-\begin{itemize}
+\begin{itemize}[noitemsep,topsep=2pt,partopsep=0pt,parsep=0pt]
     \item \textbf{Strategy Pattern:} \texttt{BudgetAlertStrategy} costituisce la Strategy astratta; \texttt{SafeBudgetStrategy}, \texttt{WarningBudgetStrategy} e \texttt{CriticalBudgetStrategy} rappresentano le Concrete Strategies. Il client (\texttt{DefaultBudgetMonitor}) agisce da Context, mantenendo completa indipendenza dalle specifiche condizioni di soglia.
     \item \textbf{Open/Closed Principle (OCP):} È possibile introdurre nuove strategie di allerta creando nuove classi che implementano l'interfaccia, senza alterare il codice esistente del monitor.
 \end{itemize}
 
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-strategy-budget.pdf}
+\caption{Reificazione dello Strategy Pattern per la valutazione delle soglie di allarme del Budget.}
+\label{fig:budget-strategy}
+\end{figure}
+\end{landscape}
+
+\clearpage
 \subsection{Algoritmo di Analisi Comparativa Mensile (Template Method Pattern)}
 \subsubsection*{1. Descrizione del problema}
-La dashboard include schede sintetiche per l'analisi comparativa mese-su-mese (\emph{Monthly Insights}) relative a tre indicatori finanziari fondamentali:
-\begin{enumerate}
-    \item Variazione complessiva delle uscite (\emph{Spending});
-    \item Variazione complessiva delle entrate (\emph{Income});
-    \item Tasso e volume di risparmio netto (\emph{Net Savings}).
-\end{enumerate}
-Ciascuno di questi calcoli condivide la medesima struttura algoritmica:
-\begin{enumerate}
+La dashboard include schede sintetiche per l'analisi comparativa mese-su-mese (\emph{Monthly Insights}) relative a tre indicatori finanziari fondamentali: \emph{1) Spending} (uscite), \emph{2) Income} (entrate), \emph{3) Net Savings} (risparmio netto).
+Ciascuno di questi calcoli condivide la medesima struttura algoritmica sequenziale:
+\begin{enumerate}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
     \item Partizionare lo storico transazioni isolando il mese corrente e il mese solare antecedente;
     \item Aggregare la metrica monetaria di interesse per ciascuno dei due periodi;
     \item Calcolare la variazione percentuale (\emph{delta percentage}), gestendo i casi limite di divisione per zero quando il mese precedente ha valore nullo;
@@ -1094,61 +808,63 @@ Ciascuno di questi calcoli condivide la medesima struttura algoritmica:
 Duplicare questa sequenza logica in tre servizi distinti avrebbe generato ridondanza di codice e rischi di calcolo difforme.
 
 \subsubsection*{2. Soluzione proposta e alternative}
-\begin{itemize}
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
     \item \textbf{Alternativa scartata (Metodo monolitico procedurale):} Raggruppare i tre calcoli in un unico blocco condizionale avrebbe creato un metodo voluminoso, fragile e difficilmente manutenibile.
-    \item \textbf{Soluzione adottata:} Adozione del pattern Template Method. La classe astratta \texttt{AbstractMonthlyInsightTemplate} fissa lo scheletro invariante dell'algoritmo nel metodo \texttt{generateInsight()}, delegando alle sottoclassi concrete la sola implementazione dei metodi hook primitivi: \texttt{computeMetric(transactions)} e \texttt{determineTrend(delta, current, previous)}.
+    \item \textbf{Soluzione adottata:} Adozione del pattern Template Method. La classe astratta \texttt{AbstractMonthlyInsightTemplate} fissa lo scheletro invariante dell'algoritmo nel metodo \texttt{generate()}, delegando alle sottoclassi concrete la sola implementazione dei metodi hook primitivi: \texttt{computeMetric(transactions)} e \texttt{determineTrend(delta, current, previous)}.
 \end{itemize}
 
 \subsubsection*{3. Schema UML e Interazioni}
-\begin{figure}[H]
-\centering
-% \includegraphics[width=\textwidth]{img/uml-pattern-monthly-insights.pdf}
-\includegraphics[width=\textwidth]{img/uml-pattern-monthly-insights.png}
-\caption{Reificazione del Template Method Pattern per il calcolo comparativo dei Monthly Insights.}
-\label{fig:monthly-insights}
-\end{figure}
+La gerarchia delle classi e il flusso algoritmico del Template Method sono schematizzati nella Figura~\ref{fig:monthly-insights}.
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
-\begin{itemize}
-    \item \textbf{Template Method Pattern:} Il metodo \texttt{generateInsight()} di \texttt{AbstractMonthlyInsightTemplate} definisce l'ordine di esecuzione immutabile (filtraggio $\rightarrow$ calcolo metriche $\rightarrow$ delta percentuale con gestione divisione per zero $\rightarrow$ determinazione trend).
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item \textbf{Template Method Pattern:} Il metodo \texttt{generate()} di \texttt{AbstractMonthlyInsightTemplate} definisce l'ordine di esecuzione immutabile (filtraggio $\to$ calcolo metriche $\to$ delta percentuale con gestione divisione per zero $\to$ determinazione trend).
     \item \textbf{Inversione del Controllo (Hollywood Principle):} Le classi concrete (\texttt{SpendingInsightTemplate}, \texttt{IncomeInsightTemplate}, \texttt{SavingsInsightTemplate}) non controllano il flusso; implementano solo la specifica metrica contabile e la semantica del trend (ad esempio, per le uscite un delta di spesa negativo è un trend \texttt{POSITIVE}, mentre per le entrate è considerato \texttt{NEGATIVE}).
 \end{itemize}
 
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-template-walletInsight.pdf}
+\caption{Reificazione del Template Method Pattern per il calcolo comparativo dei Monthly Insights.}
+\label{fig:monthly-insights}
+\end{figure}
+\end{landscape}
+
+\clearpage
 \subsection{Filtraggio Composito ed Estendibile della Cronologia (Specification Pattern)}
 \subsubsection*{1. Descrizione del problema}
-La tabella dei movimenti finanziari della Dashboard mette a disposizione dell'utente una barra di ricerca avanzata con criteri di filtraggio combinabili a piacere:
-\begin{itemize}
-    \item Intervallo temporale delimitato da data iniziale (\emph{from date}) e finale (\emph{to date});
-    \item Tipologia contabile del movimento (\emph{Tutte}, \emph{Solo Entrate}, \emph{Solo Spese}, \emph{Prestiti});
-    \item Categoria di spesa o entrata selezionata dal menu a tendina;
-    \item Ricerca testuale libera per parola chiave su causale e note descrittive;
-    \item Criterio di ordinamento dinamico (cronologico crescente/decrescente o per importo).
-\end{itemize}
-Una gestione procedurale basata su controlli condizionali concatenati (if-else o cicli mutabili) avrebbe innescato un'esplosione combinatoria ingestibile ($2^4 = 16$ possibili rami logici), rendendo il codice fragile, prono a regressioni e ostico da collaudare nelle singole combinazioni. Inoltre, l'aggiunta di un nuovo parametro di ricerca (ad esempio per importo minimo/massimo) avrebbe costretto a riscrivere la logica interna dell'intero servizio.
+La tabella dei movimenti finanziari della Dashboard offre all'utente una barra di ricerca avanzata con filtri combinabili: intervallo temporale (\emph{from/to date}), tipologia contabile (\emph{Tutte, Entrate, Spese, Prestiti}), categoria, ricerca testuale su causale e note, e ordinamento dinamico. Una gestione procedurale a controlli condizionali concatenati avrebbe innescato un'esplosione combinatoria ($2^4 = 16$ rami logici), rendendo il codice fragile e prono a regressioni; l'introduzione di un nuovo filtro avrebbe inoltre richiesto modifiche invasive all'intero servizio.
 
 \subsubsection*{2. Soluzione proposta e alternative}
-\begin{itemize}
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
     \item \textbf{Alternativa scartata (Filtraggio procedurale con if annidati):} Scartata per la natura non componibile e l'elevata fragilità del flusso imperativo.
-    \item \textbf{Alternativa scartata (Predicati Java standard non incapsulati):} L'uso di semplici predicati anonimi (\texttt{Predicate<CashTransaction>}) dispersi nel controller avrebbe privato il dominio di astrazioni formali nominative e riusabili.
-    \item \textbf{Soluzione adottata:} Adozione dello Specification Pattern di derivazione Domain-Driven Design. L'interfaccia formale \texttt{TransactionSpecification} estende \texttt{Predicate<CashTransaction>} e implementa metodi di default componibili algebricamente (\texttt{and}, \texttt{or}, \texttt{not}). Attorno a questa radice polimorfica sono state reificate le specifiche atomiche (\texttt{CategoryNameSpecification}, \texttt{CategoryTypeSpecification}, \texttt{DateRangeSpecification}, \texttt{KeywordSpecification}), assemblate in modo compatto dalla factory \texttt{TransactionSpecifications.fromCriteria(criteria)}. Il servizio \texttt{DefaultTransactionHistoryFilterService} riceve i criteri, recupera la specifica composta e filtra lo stream delle transazioni in un singolo passaggio dichiarativo.
+    \item \textbf{Alternativa scartata (Predicati generici anonimi):} L'uso di predicati standard (\texttt{Predicate<CashTransaction>}) dispersi nel controller avrebbe privato il dominio di astrazioni formali nominative e riusabili.
+    \item \textbf{Soluzione adottata:} Adozione dello Specification Pattern (DDD). L'interfaccia formale \texttt{TransactionSpecification} estende \texttt{Predicate<CashTransaction>} fornendo metodi algebrici di default (\texttt{and}, \texttt{or}, \texttt{not}). Le specifiche atomiche (\texttt{CategoryNameSpecification}, \texttt{CategoryTypeSpecification}, \texttt{DateRangeSpecification}, \texttt{KeywordSpecification}) vengono assemblate dalla factory \texttt{TransactionSpecifications.fromCriteria(criteria)}. Il servizio \texttt{DefaultTransactionHistoryFilterService} riceve i criteri, recupera la specifica composta e filtra lo stream in un singolo passaggio dichiarativo.
 \end{itemize}
 
 \subsubsection*{3. Schema UML e Interazioni}
-\begin{figure}[H]
+La composizione logico-funzionale dello Specification Pattern è dettagliata nella Figura~\ref{fig:transaction-specification}.
+
+\subsubsection*{4. Pattern utilizzati e reificazione}
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item \textbf{Specification Pattern:} Separa la logica del predicato contabile dall'iterazione sulla collezione; ogni specifica rispetta il principio di singola responsabilità (SRP) ed è collaudabile in completo isolamento.
+    \item \textbf{Factory Method / Combiner:} La classe \texttt{TransactionSpecifications} centralizza l'istanziazione e la composizione logica (\texttt{spec.and(...)}) a partire dal record \texttt{TransactionFilterCriteria}.
+    \item \textbf{Functional Pipeline e Defensive Copying:} Il filtraggio sfrutta \texttt{Stream.filter} con il predicato \texttt{isSatisfiedBy} e restituisce collezioni immutabili (\texttt{List.copyOf}), proteggendo l'integrità contabile da manipolazioni esterne.
+\end{itemize}
+
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
 \centering
-% \includegraphics[width=\textwidth]{img/uml-pattern-transaction-specification.pdf}
-\includegraphics[width=\textwidth]{img/uml-pattern-transaction-specification.png}
+\includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-specifications-filter.pdf}
 \caption{Reificazione dello Specification Pattern per il filtraggio avanzato e componibile delle transazioni.}
 \label{fig:transaction-specification}
 \end{figure}
+\end{landscape}
 
-\subsubsection*{4. Pattern utilizzati e reificazione}
-\begin{itemize}
-    \item \textbf{Specification Pattern:} Separa la logica del predicato di business finanziario dall'iterazione sulla collezione; ogni specifica atomica rispetta rigorosamente il principio di singola responsabilità (SRP) ed è testabile in completo isolamento.
-    \item \textbf{Factory Method / Combiner:} La classe di utilità \texttt{TransactionSpecifications} centralizza la creazione e la combinazione booleana (\texttt{spec.and(...)}) a partire dal record \texttt{TransactionFilterCriteria}.
-    \item \textbf{Functional Pipeline e Defensive Copying:} L'applicazione del filtro sfrutta \texttt{Stream.filter(spec::isSatisfiedBy)} e restituisce liste congelate e immutabili (\texttt{List.copyOf}), proteggendo l'integrità contabile del portafoglio da qualsiasi mutazione esterna.
-\end{itemize}
-
+\clearpage
 \section{Design Dettagliato (Daniele Zappalà)}
 
 In questa sezione vengono presentati i quattro problemi di progettazione principali affrontati e risolti da \textbf{Daniele Zappalà}, riguardanti la gestione del modulo investimenti, la modellazione degli ordini e delle sorgenti di pagamento, il calcolo continuo di saldi e posizioni dallo storico, il canale di eventi disaccoppiato e la finestra principale con barra laterale condivisa.
@@ -1236,10 +952,12 @@ Per la parte sviluppata da \textbf{Arianna Palmucci}, sono state implementate su
         \item \texttt{CurrencyConversionResultTest}: verifica del corretto arrotondamento contabile con \texttt{BigDecimal} ed eliminazione degli errori di troncamento.
         \item \texttt{CurrencyConverterTest}: verifica della coerenza delle conversioni tra asset diversi.
     \end{itemize}
-    \item \textbf{Provider di Cambio e Caching:}
+    \item \textbf{Provider di Cambio, Caching e Normalizzazione Dati:}
     \begin{itemize}
         \item \texttt{MockExchangeRateAPITest} e \texttt{ExchangeRateAPIClientTest}: validazione della logica di memorizzazione nella cache e correttezza dei dati di fallback.
-        \item \texttt{ExchangeRateTest}: verifica delle invarianti numeriche delle quotazioni.
+        \item \texttt{CurrencyUnitTest} e \texttt{FiatCurrencyTest}: verifica rigorosa delle invarianti numeriche e delle proprietà polimorfiche delle valute.
+        \item \texttt{MonetaryInputParserTest}: collaudo esaustivo della sanitizzazione, parsing e gestione unificata dei delimitatori decimali.
+        \item \texttt{AppDataPathResolverTest}: verifica della risoluzione euristica dei percorsi dati e isolamento mediante directory temporanee (\texttt{@TempDir}).
     \end{itemize}
     \item \textbf{Simulazioni Bancarie e Commissioni:}
     \begin{itemize}
@@ -1277,151 +995,76 @@ Tutti i test vengono eseguiti automaticamente dal task \texttt{./gradlew check}.
 
 \section{Note di Sviluppo}
 
+In questa sezione vengono documentate le caratteristiche avanzate del linguaggio Java (versione 21 LTS) e delle librerie applicative impiegate nei rispettivi moduli, evidenziando le scelte implementative che hanno garantito modularità, robustezza e concisione del codice.
+
 \subsection{Favour Emuwahen}
 
-Di seguito viene fornito l'elenco analitico delle feature avanzate del linguaggio Java (versione 21 LTS) e delle librerie applicative impiegate nello sviluppo del sottosistema Dashboard e Contabilità, corredate da specifici riferimenti e permalink al repository GitHub nel branch \texttt{base}:
+Nello sviluppo del sottosistema Dashboard e Contabilità sono state valorizzate le potenzialità introdotte dalle recenti versioni di Java, coniugando paradigmi orientati agli oggetti e funzionali:
 
-\begin{itemize}
-    \item \textbf{Gerarchie Sigillate ed Ereditarietà Controllata (\emph{sealed classes}):} Utilizzo di classi astratte sigillate (\texttt{public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction}) per delimitare a compile-time l'albero polimorfico delle transazioni monetarie, abilitando controlli di esaustività ed escludendo estensioni non autorizzate.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/transactions/base/AbstractTransaction.java}
-    \end{itemize}
+\begin{itemize}[itemsep=5pt,topsep=3pt]
+    \item \textbf{Gerarchie Sigillate ed Ereditarietà Controllata (\emph{sealed classes}):} Adozione della classe astratta sigillata (\texttt{public abstract sealed class AbstractTransaction permits CashTransaction, InvestmentTransaction}) per blindare a livello di compilatore l'albero polimorfico delle transazioni, impedendo estensioni non controllate e garantendo verifiche esaustive nei controlli di tipo.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/transactions/base/AbstractTransaction.java}
 
-    \item \textbf{Progettazione con Interfacce Funzionali e Generici Componibili (\texttt{Predicate\textless T\textgreater}):} L'interfaccia di specifica estende \texttt{Predicate\textless CashTransaction\textgreater} e implementa metodi di default componibili algebricamente (\texttt{and}, \texttt{or}, \texttt{not}) tramite espressioni lambda.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/specification/TransactionSpecification.java}
-    \end{itemize}
+    \item \textbf{Interfacce Funzionali e Generici Componibili (\texttt{Predicate<T>}):} Reificazione dello Specification Pattern tramite un'interfaccia che estende \texttt{Predicate<CashTransaction>} e fornisce combinatori logici di default (\texttt{and}, \texttt{or}, \texttt{not}) basati su lambda, consentendo l'assemblaggio dinamico e dichiarativo di filtri complessi.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/specification/TransactionSpecification.java}
 
-    \item \textbf{Pattern Matching per Switch e Record Patterns (Java 21):} Utilizzo del pattern matching per switch con decostruzione dei record (\texttt{case PaymentSource.NoPaymentChannel() -\textgreater \dots}) all'interno dei selettori di stato e di pagamento, eliminando cast manuali e variabili locali inutilizzate.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/impl/NewTransactionDialog.java}
-    \end{itemize}
+    \item \textbf{Pattern Matching per Switch e Record Patterns (Java 21):} Impiego del pattern matching per switch con decostruzione contestuale dei record per gestire le diverse modalità di regolamento economico in \texttt{NewTransactionDialog}, azzerando cast espliciti e variabili di appoggio temporanee.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/impl/NewTransactionDialog.java}
 
-    \item \textbf{Records Immutabili per il Trasferimento Dati (\emph{Data Transfer Objects}):} Definizione di record nativi per modellare lo stato di presentazione della UI (\texttt{DashboardViewState}, \texttt{HeaderCardState}, \texttt{BalanceCardState}, \texttt{BudgetCardState}) e le strutture di richiesta (\texttt{NewTransactionRequest}, \texttt{BudgetStatus}, \texttt{WalletInsight}), garantendo immutabilità strutturale e azzerando il codice boilerplate.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/state/DashboardViewState.java}
-    \end{itemize}
+    \item \textbf{Record Immutabili per il Trasferimento Dati (\emph{Data Transfer Objects}):} Modellazione dello stato di presentazione della UI (\texttt{DashboardViewState}, \texttt{HeaderCardState}, \texttt{BalanceCardState}) e dei risultati intermedi (\texttt{BudgetStatus}, \texttt{WalletInsight}) tramite record nativi immutabili, eliminando codice boilerplate e scongiurando side-effect tra strati applicativi.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/dashboard/state/DashboardViewState.java}
 
-    \item \textbf{Stream API Avanzate e Pipeline di Riduzione Funzionale (\texttt{Collectors.groupingBy}):} Elaborazione dello storico transazioni mediante pipeline con operatori intermedi e terminali (\texttt{.filter()}, \texttt{.map()}, \texttt{.sorted()}, \texttt{.reduce()}) per il calcolo dei saldi cumulativi (\texttt{BigDecimal.ZERO}, \texttt{BigDecimal::add}) e raggruppamento delle spese con \texttt{Collectors.groupingBy()} in \texttt{DefaultCategoryService}.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/DefaultCategoryService.java}
-    \end{itemize}
+    \item \textbf{Stream API Avanzate e Raggruppamento Funzionale (\texttt{Collectors.groupingBy}):} Elaborazione analitica dei movimenti finanziari tramite pipeline funzionali con operatori intermedi e terminali (\texttt{.filter()}, \texttt{.map()}, \texttt{.reduce()}) per il calcolo cumulativo dei saldi e raggruppamento per tipologia di spesa tramite \texttt{Collectors.groupingBy()} in \texttt{DefaultCategoryService}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/DefaultCategoryService.java}
 
-    \item \textbf{Aritmetica Decimale Esatta (\texttt{java.math.BigDecimal}) e Arrotondamento Finanziario:} Rappresentazione e calcolo rigoroso di tutti gli importi, percentuali di budget e tassi di variazione mese su mese con \texttt{BigDecimal} e arrotondamento bancario controllato (\texttt{RoundingMode.HALF\_UP}), eliminando gli errori di approssimazione dell'aritmetica floating-point IEEE 754.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/AbstractMonthlyInsightTemplate.java}
-    \end{itemize}
-
-    \item \textbf{Pattern Creazionale Builder Fluente con Validazione delle Invarianti:} Costruzione atomica di oggetti complessi con controllo a tempo di creazione dei vincoli di consistenza contabile (es. obbligatorietà del campo \texttt{friendName} per transazioni di tipo \texttt{FRIEND\_LOAN}).
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/transactions/base/CashTransaction.java}
-    \end{itemize}
-
-    \item \textbf{Disaccoppiamento ad Eventi con MessageBus:} Architettura orientata agli eventi per la sincronizzazione dei componenti attraverso la pubblicazione e sottoscrizione disaccoppiata di eventi applicativi (\texttt{TransactionAddedEvent}).
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java}
-    \end{itemize}
-
-    \item \textbf{Architettura GUI Modulare in JavaFX 21 con Passive View:} Separazione netta tra logica di presentazione e rendering visuale, con controller snelli che manipolano unicamente lo stato della vista e delegano il layout ai componenti grafici.
-    \begin{itemize}
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/controller/dashboard/impl/DefaultDashboardController.java}
-    \end{itemize}
+    \item \textbf{Aritmetica Decimale Esatta con \texttt{BigDecimal}:} Utilizzo pervasivo di \texttt{BigDecimal} con scala esplicita e arrotondamento controllato (\texttt{RoundingMode.HALF\_UP}) per tutte le grandezze monetarie e percentuali, eliminando alla radice le imprecisioni dell'aritmetica floating-point IEEE 754.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/dashboard/impl/AbstractMonthlyInsightTemplate.java}
 \end{itemize}
 
 \subsection{Arianna Palmucci}
 
-Di seguito si riportano le caratteristiche avanzate del linguaggio Java 21 LTS e dell'ecosistema applicativo impiegate nello sviluppo del modulo di gestione delle valute, motore di conversione, persistenza, temi e preferenze dell'applicazione, corredate dai rispettivi riferimenti e permalink al codice sorgente nel branch \texttt{base}:
+Nello sviluppo del modulo di gestione delle valute, quotazioni, persistenza JSON, impostazioni e tematizzazione dinamica sono state impiegate le seguenti caratteristiche avanzate dell'ecosistema Java 21:
 
-\begin{itemize}
-    \item \textbf{Polimorfismo Valutario, Gerarchie Eterogenee e Tipizzazione Forte:}
-    \begin{itemize}
-        \item Definizione dell'interfaccia radice comune \texttt{CurrencyUnit} implementata in modo polimorfico da enumerazioni distinte per tipologia finanziaria (\texttt{FiatCurrency}, \texttt{CryptoCurrency}, \texttt{StockMarketCurrency}) e dalla classe estendibile \texttt{Currency}.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyUnit.java}
-    \end{itemize}
+\begin{itemize}[itemsep=5pt,topsep=3pt]
+    \item \textbf{Networking Moderno con HTTP/2 e Client Asincrono (\texttt{java.net.http.*}):} Interrogazione dei servizi RESTful di cambio valuta tramite \texttt{HttpClient} e \texttt{HttpRequest}, configurati con timeout espliciti (\texttt{Duration}), gestione nativa del protocollo HTTP/2 e logiche di fallback trasparente sui dati in cache o predefiniti in assenza di rete.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/api/ExchangeRateAPIClient.java}
 
-    \item \textbf{Interfacce Funzionali e Callback Reattive (\texttt{java.util.function.*}):}
-    \begin{itemize}
-        \item Utilizzo esteso di \texttt{Consumer\textless T\textgreater}, \texttt{Function\textless T, R\textgreater} e \texttt{BiFunction\textless T, U, R\textgreater} nei controller e nelle viste per una programmazione dichiarativa e reattiva.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/alert/CurrencyAlertService.java}
-    \end{itemize}
+    \item \textbf{Serializzazione JSON Polimorfica e Moduli Custom (Jackson):} Configurazione avanzata di \texttt{ObjectMapper} con il modulo \texttt{JavaTimeModule} e deserializzatori ad hoc per gestire la persistenza delle preferenze, consentendo la ricostruzione polimorfica delle istanze di \texttt{CurrencyUnit} tramite factory method senza violare l'incapsulamento.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/settings/SettingsManager.java}
 
-    \item \textbf{Stream API, Pipeline Funzionali e Costrutto \texttt{Optional}:}
-    \begin{itemize}
-        \item Adozione sistematica di \texttt{Optional\textless BigDecimal\textgreater} e \texttt{OptionalDouble} nella classe \texttt{MonetaryInputParser} per prevenire eccezioni non controllate e azzerare l'uso di riferimenti \texttt{null}.
-        \item Elaborazione dichiarativa delle collezioni di tassi, filtraggio delle allerte e trasformazioni di liste valutarie tramite pipeline (\texttt{.filter()}, \texttt{.map()}, \texttt{.toList()}).
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/MonetaryInputParser.java}
-    \end{itemize}
+    \item \textbf{Gestione Resiliente del File System con Java NIO.2 (\texttt{java.nio.file.*}):} Risoluzione centralizzata dei percorsi dati in \texttt{AppDataPathResolver}, con creazione automatica delle cartelle di lavoro, gestione atomica dei file e totale indipendenza dal sistema operativo ospitante (macOS, Windows, Linux).
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/persistency/AppDataPathResolver.java}
 
-    \item \textbf{Java Time API (\texttt{java.time.*}):}
-    \begin{itemize}
-        \item Gestione temporale immutabile con \texttt{Instant}, \texttt{Duration} e \texttt{LocalDate} per la scadenza della cache in-memory e l'ordinamento cronologico delle serie storiche dei tassi di cambio.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/api/ExchangeRateAPIClient.java}
-    \end{itemize}
+    \item \textbf{Robustezza Funzionale e Aritmetica con \texttt{Optional} e \texttt{BigDecimal}:} Adozione sistematica di \texttt{Optional<BigDecimal>} in \texttt{MonetaryInputParser} per gestire stringhe monetarie eterogenee (delimitatori punto/virgola) azzerando i riferimenti \texttt{null}, affiancata da calcoli di conversione monetaria e commissioni bancarie su \texttt{BigDecimal} con \texttt{RoundingMode.HALF\_UP}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/MonetaryInputParser.java}
 
-    \item \textbf{Modern HTTP Client (\texttt{java.net.http.*}):}
-    \begin{itemize}
-        \item Utilizzo di \texttt{HttpClient} e \texttt{HttpRequest} con supporto nativo HTTP/2, timeout dedicati (\texttt{Duration.ofSeconds(10)}) e gestione resiliente delle chiamate RESTful verso i servizi web di quotazione.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/api/ExchangeRateAPIClient.java}
-    \end{itemize}
-
-    \item \textbf{Serializzazione e Deserializzazione JSON Avanzata con Jackson (\texttt{com.fasterxml.jackson}):}
-    \begin{itemize}
-        \item Configurazione centralizzata di \texttt{ObjectMapper} con modulo \texttt{JavaTimeModule} e deserializzatori custom per la ricostruzione polimorfica di \texttt{CurrencyUnit} tramite factory method \texttt{CurrencyUnit.getByCode(code)} e persistenza di \texttt{Settings}, \texttt{BankList}, \texttt{ThemeList} e \texttt{WatchList}.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/settings/SettingsManager.java}
-    \end{itemize}
-
-    \item \textbf{Java NIO.2 e Gestione Resiliente del File System (\texttt{java.nio.file.*}):}
-    \begin{itemize}
-        \item Manipolazione robusta di percorsi e file mediante \texttt{Path}, \texttt{Files.exists()}, \texttt{Files.createDirectories()} e \texttt{Files.copy(InputStream, Path)} in \texttt{AppDataPathResolver} per garantire l'indipendenza dalla piattaforma OS.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/persistency/AppDataPathResolver.java}
-    \end{itemize}
-
-    \item \textbf{JavaFX 21 Avanzato: Scomposizione Modulare, Grafici e CSS Dinamico:}
-    \begin{itemize}
-        \item Realizzazione di widget modulari e componibili, grafici storici \texttt{LineChart} e iniezione a runtime dei fogli di stile con gestione dinamica dei temi chiaro/scuro in \texttt{ThemeManager}.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/settings/ThemeManager.java}
-    \end{itemize}
-
-    \item \textbf{Robustezza Numerica con \texttt{BigDecimal} e Precisione Finanziaria:}
-    \begin{itemize}
-        \item Impiego sistematico di \texttt{BigDecimal} con scala esplicita e \texttt{RoundingMode.HALF\_UP} per prevenire qualsiasi errore di cancellazione numerica o imprecisione nei calcoli di conversione monetaria e commissioni bancarie.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/engin/CurrencyConverter.java}
-    \end{itemize}
-
-    \item \textbf{Pattern Matching, Records Immutabili e Costrutti Moderni di Java 21:}
-    \begin{itemize}
-        \item Definizione di record immutabili per il trasferimento dati (\texttt{CurrencyConversionResult}, \texttt{Bank}) e pattern matching per switch per un codice conciso ed esente da boilerplate.
-        \item \emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyConversionResult.java}
-    \end{itemize}
+    \item \textbf{Callback Funzionali Reattive e Record Immutabili (Java 21):} Impiego dell'interfaccia funzionale \texttt{Consumer<Theme>} in \texttt{ThemeManager} per registrare callback invocate alla commutazione del tema visivo a caldo, e modellazione dei risultati di conversione e delle allerte tramite \texttt{record} immutabili (\texttt{CurrencyConversionResult}, \texttt{CurrencyAlert}).
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyConversionResult.java}
 \end{itemize}
 
+\clearpage
 \subsection{Daniele Zappalà}
 
-Di seguito si riportano le caratteristiche avanzate del linguaggio Java (versione 21 LTS) e le librerie utilizzate per lo sviluppo del modulo investimenti, del bus di eventi e dell'infrastruttura condivisa, corredate dai rispettivi permalink:
+Nello sviluppo del modulo investimenti, del canale di eventi disaccoppiato e dell'infrastruttura condivisa sono state adottate le seguenti caratteristiche avanzate del linguaggio Java 21:
 
-\begin{itemize}
-  \item \textbf{Interfacce \texttt{sealed} e \texttt{record} per modellare le sorgenti di pagamento}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java#L23-L52}
-  \item \textbf{Pattern matching nello \texttt{switch} su tipi sigillati}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/investment/controllers/DefaultInvestmentController.java#L511-L521}
-  \item \textbf{Metodo generico con tipo limitato e \emph{type token} (\texttt{<T extends MessageEvent>})}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java#L59-L66}
-  \item \textbf{Metodo generico con interfacce funzionali (\texttt{Supplier}, \texttt{Consumer})}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java#L59-L80}
-  \item \textbf{Stream con \texttt{Collectors.groupingBy} per calcolare le posizioni}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java#L146-L160}
-  \item \textbf{\texttt{Optional} e \texttt{Comparator} con method reference (miglior e peggior titolo)}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/investment/controllers/DefaultInvestmentController.java#L667-L677}
-  \item \textbf{Reflection per creare i controller delle pagine FXML}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java#L64-L90}
-  \item \textbf{API \texttt{java.time} (\texttt{ChronoUnit}) per il formato delle date del grafico}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/view/investments/InvestmentsViewController.java#L274-L286}
-  \item \textbf{Metodo generico con lambda per le colonne numeriche delle tabelle JavaFX}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/view/investments/InvestmentsViewController.java#L382-L400}
-  \item \textbf{Libreria Apache Commons CSV per le istantanee del profitto/perdita}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/model/investment/service/CSVInvestmentsSnapshotService.java#L151-L170}
-  \item \textbf{Libreria JavaFX: \texttt{Timeline} per il tempo dell'applicazione}\\
-    \url{https://github.com/leoI0II/OOP25-UniBodget/blob/dcf7b2c11de58754a6b6dd15155276ac9113b07a/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java#L29-L40}
+\begin{itemize}[itemsep=5pt,topsep=3pt]
+    \item \textbf{Tipi Sigillati e Pattern Matching per Switch:} Modellazione gerarchica delle sorgenti di pagamento e degli esiti degli ordini tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}) e record immutabili, gestiti nei controller mediante switch esaustivi con decostruzione dei tipi verificati a tempo di compilazione.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java}
+
+    \item \textbf{Generici con Type Token e Programmazione Funzionale (\texttt{MessageBus}):} Implementazione del bus applicativo disaccoppiato tramite un metodo generico limitato (\texttt{<T extends MessageEvent>}) basato su type token (\texttt{Class<T>}) e consumatori funzionali (\texttt{Consumer<T>}), garantendo type-safety a runtime nella distribuzione degli eventi.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java}
+
+    \item \textbf{Stream API con \texttt{Collectors.groupingBy} e Riduzioni Complesse:} Calcolo delle posizioni di portafoglio aperte e determinazione contabile del costo medio ponderato aggregando le transazioni storiche tramite raggruppamento funzionale con \texttt{Collectors.groupingBy} in \texttt{InvestmentAccount}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java}
+
+    \item \textbf{Astrazione del Tempo Applicativo con JavaFX \texttt{Timeline}:} Separazione netta della sorgente temporale mediante l'astrazione di dominio \texttt{AppTicker}, la cui implementazione grafica sfrutta una \texttt{Timeline} JavaFX per scandire i cicli periodici di snapshot e aggiornamento.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java}
+
+    \item \textbf{I/O Tabellare con Apache Commons CSV e Salvataggio Automatico:} Serializzazione e storicizzazione delle istantanee patrimoniali su file CSV tramite la libreria Commons CSV, integrata con un motore di salvataggio automatico (\texttt{WalletAutoSaver}) basato su \texttt{Supplier} e \texttt{Consumer}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java}
+
+    \item \textbf{Reflection e Inizializzazione Dinamica dei Controller FXML:} Istanziazione centralizzata dei controller di vista in \texttt{ViewControllersFactory} tramite reflection controllata per iniettare programmaticamente le dipendenze applicative nei moduli caricati a runtime.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/base/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java}
 \end{itemize}
 
 \chapter{Commenti finali}
@@ -1429,101 +1072,103 @@ Di seguito si riportano le caratteristiche avanzate del linguaggio Java (version
 \section{Autovalutazione e lavori futuri}
 
 \subsection{Favour Emuwahen}
-All'interno del progetto UniBodget mi sono occupato della progettazione architetturale, dello sviluppo e del collaudo del sottosistema Dashboard, della gestione dei Portafogli di Cassa (\emph{Cash Accounts}), del ciclo di vita delle Transazioni Contanti (\emph{Cash Transactions}), del monitoraggio del Budget, del motore di analisi statistica dei Trend Mensili (\emph{Monthly Insights}) e del motore di filtraggio avanzato con lo Specification Pattern.
+Nel corso del progetto UniBodget mi sono dedicato principalmente al nucleo contabile e alla schermata della Dashboard: la gestione dei conti di liquidità (\texttt{CashAccount}), la creazione e validazione rigorosa delle transazioni di cassa, il monitoraggio delle soglie di budget, l'elaborazione statistica dei trend mensili e il motore di ricerca e filtraggio avanzato dei movimenti.
 
 \subsubsection*{Punti di forza del contributo:}
 \begin{itemize}
-    \item \textbf{Solidità architetturale e applicazione rigorosa dei design pattern:} L'adozione coordinata di pattern creazionali (Builder, Factory Method), comportamentali (Template Method, Specification, Strategy) e strutturali (Facade, Passive View) ha reso il codice modulare, orientato all'estendibilità futura senza violare il principio Open-Closed (OCP).
-    \item \textbf{Integrità contabile e immutabilità:} Nessuna transazione può essere generata in uno stato parziale o incoerente grazie alle invarianti verificate a tempo di costruzione nel Builder. Tutti i calcoli patrimoniali operano con aritmetica esatta \texttt{BigDecimal} e arrotondamento bancario controllato (\texttt{RoundingMode.HALF\_UP}).
-    \item \textbf{Qualità formale del codice e conformità QA:} Conseguimento di 0 violazioni statiche secondo il severo profilo imposto da \texttt{gradle-java-qa} (Checkstyle, PMD e SpotBugs), con totale rimozione di numeri magici di layout, copie difensive e incapsulamento rigoroso.
-    \item \textbf{Copertura di test esaustiva:} Realizzazione di una suite di oltre 15 classi di test automatici con JUnit 5 con un tasso di successo del 100\%, verificando sia i casi nominali sia le condizioni al contorno (divisione per zero, transazioni prive di categoria, vincoli sui prestiti).
+    \item \textbf{Architettura modulare ed estendibile:} L'adozione mirata di pattern comportamentali (Template Method per i trend, Specification per i filtri, Strategy per le allerte del budget) ha evitato catene di controlli condizionali imperativi, permettendo di introdurre nuovi criteri di calcolo o regole di business in modo pulito e senza alterare il codice esistente.
+    \item \textbf{Integrità contabile e validazione preventiva:} L'uso del Builder per \texttt{CashTransaction} impedisce alla radice la creazione di transazioni in stati parziali o incoerenti. Per tutti i calcoli su saldi e percentuali abbiamo scelto l'uso pervasivo di \texttt{BigDecimal} con scala esplicita, preservando l'esattezza contabile al centesimo ed eliminando i tipici errori di approssimazione floating-point.
+    \item \textbf{Affidabilità della suite di test:} Ho sviluppato una suite approfondita di test unitari con JUnit 5 per verificare sia i casi nominali sia le condizioni al contorno più insidiose (come la divisione per zero nel calcolo dei trend in assenza di spese nel mese precedente o l'intervallo temporale invertito nei filtri).
 \end{itemize}
 
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
 \begin{itemize}
-    \item \textbf{Sincronizzazione asincrona:} Le operazioni di ricalcolo della dashboard e di salvataggio dello snapshot vengono attualmente eseguite in modo sincrono sul thread chiamante; l'introduzione di \texttt{CompletableFuture} per il recupero concorrente delle statistiche mensili avrebbe ulteriormente ottimizzato i tempi di caricamento su collezioni storiche di dimensioni molto elevate.
-    \item \textbf{Conversione multivaluta omnicomprensiva nel cruscotto:} Attualmente la dashboard calcola il saldo aggregato aggregando le transazioni appartenenti al portafoglio nella sua valuta base specifica; una conversione istantanea incrociata omnicomprensiva su tutte le valute mondiali nella vista principale arricchirebbe ulteriormente l'esperienza d'uso.
+    \item \textbf{Calcoli sincroni sulla dashboard:} Il ricalcolo dei totali patrimoniali e il filtraggio avvengono attualmente sul thread chiamante; con moli di transazioni molto voluminose, delegare l'elaborazione a worker asincroni garantirebbe una reattività dell'interfaccia ancora più fluida.
+    \item \textbf{Conversione multivaluta diretta nel cruscotto:} La dashboard mostra i dati nella valuta base del portafoglio corrente; integrare direttamente nel cruscotto una visualizzazione a saldo convertito istantaneo su qualsiasi divisa internazionale arricchirebbe l'esperienza d'uso.
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
-All'interno del team ho curato la progettazione e l'implementazione del cuore funzionale dell'applicazione: il sottosistema Dashboard, il motore delle transazioni di cassa, il monitoraggio delle soglie di spesa e l'integrazione del sistema di visualizzazione grafica. Ho inoltre coordinato la definizione dei contratti di interfaccia DTO (tramite Java Records) che hanno permesso ai colleghi di lavorare in parallelo senza interferenze sui rispettivi moduli.
+Lavorare in team è stata un'esperienza costruttiva: con Arianna e Daniele abbiamo concordato fin dalle prime fasi i contratti dei DTO condivisi tramite record Java. Questa chiara definizione dei confini architetturali ha permesso a ciascuno di noi di procedere in autonomia e in parallelo sui rispettivi moduli (convertitore valute e investimenti), integrandoci poi con naturalezza nel flusso dei conti senza bloccarci a vicenda.
 
-\subsubsection*{Sviluppi futuri:}
-Qualora il progetto venisse proseguito per una distribuzione aperta, le direttrici evolutive più promettenti includono:
+\subsubsection*{Sviluppi futuri specifici del modulo:}
 \begin{enumerate}
-    \item \textbf{Budgeting predittivo intelligente:} Integrazione di modelli statistici o di machine learning leggero per prevedere l'andamento delle spese a fine mese sulla base dello storico dei consumi settimanali.
-    \item \textbf{Esportazione contabile avanzata:} Generazione automatica di rendiconti periodici e prospetti fiscali in formato PDF vettoriale, CSV RFC 4180 ed Excel.
-    \item \textbf{Sincronizzazione Cloud sicura:} Espansione del layer di persistenza locale verso un'architettura ibrida con replica cifrata dei dati su cloud storage personale.
+    \item \textbf{Budgeting predittivo intelligente:} Introduzione di stime statistiche sull'andamento delle uscite a fine mese, basandosi sul ritmo di spesa rilevato nelle prime settimane del periodo.
+    \item \textbf{Esportazione contabile avanzata:} Generazione automatica di riepiloghi finanziari esportabili in formato PDF o foglio di calcolo (CSV/Excel) per l'archiviazione e rendicontazione personale.
 \end{enumerate}
 
 \subsection{Arianna Palmucci}
-
-All'interno del progetto UniBodget mi sono occupata della progettazione architetturale, dello sviluppo e del collaudo del sottosistema Valute e Mercato, del motore di Conversione Monetaria (\emph{Currency Converter}), dell'integrazione del client di rete per i tassi di cambio esterni con gestione della cache e fallback offline, del monitoraggio e notifica delle Allerte Valutarie (\emph{Currency Alerts}), del sistema di gestione persistente delle Watchlist, delle Banche e delle Impostazioni utente (\emph{Settings}), nonché dell'infrastruttura di tematizzazione grafica dinamica (\emph{Theme Manager}) e della validazione centralizzata dell'input monetario (\emph{Monetary Input Parser}).
+All'interno del progetto mi sono occupata del modulo Valute e Mercato: il motore di conversione monetaria, l'integrazione del client di rete per i tassi remoti con caching e fallback locale, il sistema di notifiche e watchlist, la persistenza su file JSON delle preferenze utente, l'infrastruttura di tematizzazione dinamica a runtime e la normalizzazione centralizzata dell'input numerico.
 
 \subsubsection*{Punti di forza del contributo:}
 \begin{itemize}
-    \item \textbf{Modularità e separazione delle responsabilità:} Disaccoppiamento netto tra il modello matematico di conversione, le fonti remote dei tassi e l'interfaccia grafica. La vista del convertitore è stata scomposta in widget modulari specializzati e riutilizzabili (\texttt{ConverterWidgetFX}, \texttt{BankConverterWidgetFX}, \texttt{CurrencyHistoryChartView}, \texttt{WatchlistWidgetFX}).
-    \item \textbf{Resilienza e tolleranza ai guasti di rete:} Progettazione di un'architettura di rete a doppio livello con caching intelligente in-memory (TTL configurabile) e meccanismo trasparente di fallback: qualora le API esterne di borsa non siano raggiungibili, il convertitore continua a funzionare regolarmente sui tassi memorizzati nella cache o sui tassi predefiniti, garantendo la totale continuità di servizio.
-    \item \textbf{Precisione numerica e validazione robusta (\emph{Single Source of Truth}):} Centralizzazione delle logiche di parsing e sanificazione dell'input numerico monetario nella classe \texttt{MonetaryInputParser}, gestendo uniformemente separatori decimali italiani e anglosassoni, importi negativi e formati non validi con tipi di ritorno sicuri (\texttt{Optional\textless BigDecimal\textgreater}). Tutti i calcoli di cambio e commissione adottano aritmetica esatta \texttt{BigDecimal} con arrotondamento bancario.
-    \item \textbf{Persistenza JSON strutturata e dinamica dei temi:} Adozione del pattern Memento per il salvataggio atomico delle impostazioni utente su file JSON in directory sandbox OS-independent, associata all'iniezione dinamica a runtime dei fogli di stile CSS per il cambio tema istantaneo chiaro/scuro su tutta la scena applicativa.
-    \item \textbf{Qualità formale del codice e copertura di test:} Totale conformità ai controlli di analisi statica di Checkstyle, PMD e SpotBugs con zero violazioni; realizzazione di una suite di test unitari automatizzati completa con JUnit 5 per verificare conversioni triangolari, soglie di allerta, parsing numerico e persistenza JSON.
+    \item \textbf{Resilienza alle anomalie di rete e continuità d'uso:} Uno degli aspetti su cui ho lavorato con maggiore cura è stato garantire che l'applicazione non andasse mai in blocco in assenza di connessione. Con il meccanismo di cache controllata da TTL e il fallback automatico su mock deterministico o sugli ultimi dati validi memorizzati, il convertitore continua a rispondere puntualmente anche a fronte di disconnessioni o rate-limit dei server esterni.
+    \item \textbf{Normalizzazione centralizzata dell'input:} La classe \texttt{MonetaryInputParser} ha risolto alla radice le eterogeneità di digitazione dell'utente, accettando indifferentemente virgola e punto decimale ed eliminando spazi e apici. L'uso di \texttt{Optional<BigDecimal>} restituisce un feedback chiaro ed elegante ai form, evitando che eccezioni non gestite compromettano l'esperienza grafica.
+    \item \textbf{Modularità della vista e tematizzazione a caldo:} La schermata del convertitore è strutturata in widget autonomi facilmente riposizionabili. Le impostazioni dell'utente persistono in formato JSON con storico reversibile (ispirato al pattern Memento), e la commutazione tra tema chiaro e scuro avviene istantaneamente a runtime senza dover riavviare l'applicazione.
 \end{itemize}
 
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
 \begin{itemize}
-    \item \textbf{Molteplicità di provider API remoti:} Attualmente il sistema integra un singolo provider di cambio valute primario via HTTP; l'introduzione di una catena di responsabilità (\emph{Chain of Responsibility}) con provider secondari alternativi (es. CoinGecko per crypto, Yahoo Finance per azioni) avrebbe aumentato ulteriormente la ridondanza.
-    \item \textbf{Aggiornamento dei tassi storici in background concorrente:} Il recupero dei grafici storici su ampi intervalli temporali viene richiamato su richiesta; un job di sincronizzazione asincrono schedulato in background ridurrebbe la latenza percepita al primo accesso al grafico.
+    \item \textbf{Singolo provider di rete primario:} Il client per le valute fiat si appoggia principalmente a un unico servizio remoto; una catena di provider multipli con fallback automatico a cascata avrebbe offerto una ridondanza ancora superiore.
+    \item \textbf{Caricamento on-demand dei grafici storici:} Il recupero dei dati storici su archi temporali estesi avviene all'apertura del dialogo; anticipare il pre-caricamento in background ridurrebbe ulteriormente la latenza percepita dall'utente.
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
-All'interno del team ho curato la definizione delle basi del dominio multivaluta (interfaccia \texttt{CurrencyUnit} e relative implementazioni), l'intero ecosistema di quotazione e conversione monetaria, il layer di persistenza, la gestione delle preferenze dell'applicazione e la coerenza visiva dell'interfaccia grafica tramite l'architettura dei temi. Ho inoltre collaborato attivamente alla definizione dell'architettura MVC comune, all'integrazione del MessageBus tra i vari moduli e alla gestione accurata delle finestre modali e popup di dialogo (\texttt{SettingsPopupFX}, grafici storici e dialoghi di allerta), garantendo che ogni schermata secondaria si apra effettivamente come una vera finestra popup sopraelevata e contestuale anziché essere gestita come una visualizzazione a schermo intero.
+Nel lavoro di squadra mi sono concentrata sulla definizione delle basi multivaluta comuni (\texttt{CurrencyUnit}) e sulla coerenza visiva dell'intera suite attraverso l'architettura dei temi CSS. Ho inoltre collaborato alla definizione del \texttt{MessageBus} e alla corretta gestione delle finestre popup e modali sopraelevate (\texttt{SettingsPopupFX} e grafici di andamento), assicurandomi che ogni dialogo secondario si aprisse come una vera finestra contestuale senza invadere lo schermo intero.
 
-\subsubsection*{Sviluppi futuri:}
-Qualora il progetto venisse proseguito per una distribuzione aperta, le direttrici evolutive più promettenti includono:
+\subsubsection*{Sviluppi futuri specifici del modulo:}
 \begin{enumerate}
-    \item \textbf{Supporto a provider multipli concorrenti con fallback a cascata:} Implementazione di strategie adattive di selezione della fonte di cambio con bilanciamento del carico tra endpoint pubblici gratuiti.
-    \item \textbf{Ottimizzatore avanzato delle commissioni bancarie:} Algoritmo di confronto automatico multicriterio tra le banche censite per suggerire all'utente l'istituto finanziario più conveniente in base all'importo e alla valuta scambiata.
-    \item \textbf{Basket valutario personalizzato e indici sintetici:} Possibilità per l'utente di creare panieri di valute o indici compositi su misura per monitorare in tempo reale il valore ponderato del proprio portafoglio internazionale.
-    \item \textbf{Filtri di ordinamento come varianti intercambiabili:} Estendere i criteri di ordinamento dell'elenco contabile (per data, importo o categoria) strutturandoli come varianti del pattern Strategy, garantendo flessibilità e combinazione fluida con i filtri esistenti.
-    \item \textbf{Persistenza evoluta con servizi e cloud storage esterni:} Integrare provider remoti (es. Google Drive, Dropbox o cloud storage cifrati) per il salvataggio dei dati contabili e delle impostazioni, assicurando backup automatico e sincronizzazione trasparente multi-device.
-    \item \textbf{Ottimizzazione responsive degli spazi per l'elenco transazioni:} Rifinire la vista tabellare delle transazioni con layout ad auto-adattamento e scorrimento virtualizzato, massimizzando la leggibilità dei record contabili anche a risoluzioni ridotte o su finestre compatte.
-    \item \textbf{Micro-interazioni visive, effetti mouse over e feedback UI:} Arricchire l'interfaccia JavaFX con transizioni fluide, evidenziazioni cromatiche al passaggio del mouse (\emph{mouse hover}) su pulsanti e righe e tooltip dinamici riepilogativi su grafici e tabelle.
-    \item \textbf{Ecosistema multipiattaforma (Database, Server, Web e Mobile):} Progettare un'infrastruttura client-server scalabile con database relazionale/NoSQL e API REST, affiancando all'applicativo desktop un portale web responsivo e un'app mobile per la gestione in mobilità.
-    \item \textbf{Refactoring architetturale continuo e Dependency Injection:} Perfezionare costantemente il disaccoppiamento tra controller e logica di dominio mediante Dependency Injection (es. Guice) e separazione formale dei contratti di servizio, elevando la manutenibilità del codice.
+    \item \textbf{Provider di cambio multipli con fallback a cascata:} Interrogazione in sequenza di più fonti web pubbliche (es. BCE, piattaforme crypto) per garantire quotazioni aggiornate anche a fronte di rate limit o indisponibilità temporanee.
+    \item \textbf{Comparatore avanzato delle commissioni bancarie:} Algoritmo di confronto multicriterio tra le banche censite per consigliare all'utente l'istituto o il canale più conveniente in base alla valuta e all'importo scambiato.
+    \item \textbf{Basket valutario personalizzato e indici sintetici:} Possibilità per l'utente di definire panieri monetari su misura e indici compositi (es. combinando valute fiat e criptovalute con pesi percentuali) per monitorare in tempo reale il valore ponderato del proprio portafoglio internazionale.
 \end{enumerate}
 
+\clearpage
 \subsection{Daniele Zappalà}
-
-All'interno del progetto UniBodget mi sono occupato della progettazione, sviluppo e collaudo del modulo degli investimenti: conti di investimento (\texttt{InvestmentAccount}), calcolo continuo di posizioni e profitto/perdita, ordini di acquisto, vendita e trasferimento titoli con le diverse sorgenti di pagamento (\texttt{PaymentSource}), istantanee periodiche temporali (\texttt{BalanceSnapshot}), grafico di andamento e pagina \emph{Portfolio}. Ho inoltre realizzato la finestra principale (\texttt{MainViewController}) con la barra laterale condivisa con pattern Delegate, in cui sono integrate a runtime le pagine degli altri moduli, il canale disaccoppiato di eventi (\texttt{MessageBus}), il tempo dell'applicazione (\texttt{AppTicker}) e il sottosistema di salvataggio automatico dei portafogli (\texttt{WalletAutoSaver}). Nel team ho curato inoltre buona parte dell'integrazione tra i moduli e la convergenza dei rami di sviluppo.
+\enlargethispage{1.5\baselineskip}
+Nel progetto mi sono dedicato alla progettazione e implementazione del modulo investimenti (\texttt{InvestmentAccount}, gestione degli ordini di acquisto e vendita con molteplici sorgenti di pagamento, calcolo delle posizioni aperte e del profitto/perdita), oltre ad aver realizzato la finestra principale (\texttt{MainViewController}) con la barra laterale condivisa a navigazione delegata, il bus di eventi disaccoppiato (\texttt{MessageBus}), l'astrazione temporale (\texttt{AppTicker}) e il salvataggio automatico periodico.
 
 \subsubsection*{Punti di forza del contributo:}
-\begin{itemize}
-  \item \textbf{Tipi sigillati per ordini ed esiti contabili:} Le sorgenti di pagamento e gli esiti degli ordini sono modellati tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}): il compilatore verifica a tempo di compilazione l'esaustività dello \texttt{switch}, e gli errori previsti giungono alla view come strutture dati descrittive, eliminando eccezioni e logiche imperativo-procedurali.
-  \item \textbf{Integrità contabile e ricalcolo dallo storico:} Saldi, posizioni e profitto/perdita sono sempre calcolati a partire dallo storico delle transazioni con metodo contabile a costo medio ponderato, garantendo coerenza anche dopo modifiche o cancellazioni retroattive.
-  \item \textbf{Disaccoppiamento del model da JavaFX:} Il modello degli investimenti non dipende dal toolkit grafico; anche il tempo dell'applicazione è un'astrazione del model (\texttt{AppTicker}), implementata nella view tramite \texttt{FxAppTicker}.
-  \item \textbf{Copertura di test e determinismo:} Il controller degli investimenti e i conti sono coperti da test approfonditi su tutte le combinazioni di operazioni e sorgenti di pagamento, adottando convertitori deterministici a quotazioni fisse indipendenti dalla rete.
+\begin{itemize}[noitemsep,topsep=2pt]
+    \item \textbf{Espressività dei tipi sigillati e pattern matching:} Modellare sorgenti ed esiti delle transazioni tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}) e record ha reso il flusso operativo estremamente leggibile e sicuro: il compilatore verifica l'esaustività degli switch, eliminando la necessità di ricorrere a eccezioni per gestire esiti nominali di business (come fondi insufficienti).
+    \item \textbf{Integrità contabile derivata dallo storico:} La decisione di non salvare saldo e posizioni come campi mutabili volatili, ma di ricavarli in modo trasparente e dinamico dallo storico delle operazioni con il metodo a costo medio ponderato, ha azzerato i rischi di disallineamento matematico dei dati anche a seguito di modifiche o cancellazioni retroattive.
+    \item \textbf{Indipendenza del modello dal framework grafico:} La logica finanziaria e la scansione del tempo sono del tutto slegate da JavaFX, rendendo il core applicativo pienamente collaudabile in modo deterministico nei test automatici.
 \end{itemize}
 
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
-\begin{itemize}
-  \item \textbf{Canale eventi statico:} Il \texttt{MessageBus} adotta un pattern statico, rendendolo unico per l'intera applicazione. Sebbene pratico, in fase di test automatizzati indipendenti gli iscritti vengono condivisi tra test diversi; un'istanza iniettata tramite costruttore avrebbe garantito un isolamento superiore.
-  \item \textbf{Ricalcolo retroattivo delle istantanee:} Le istantanee di portafoglio già salvate su CSV non vengono ricalcolate retroattivamente quando si modifica o elimina una transazione passata, lasciando discrepanze temporali sullo storico del grafico per quel dato intervallo.
-  \item \textbf{Risoluzione sincrona dei prezzi:} La risoluzione dei prezzi correnti avviene sul thread chiamante: al primo accesso alla pagina degli investimenti, se le quotazioni non sono ancora in memoria, si può verificare una breve latenza visiva.
+\begin{itemize}[noitemsep,topsep=2pt]
+    \item \textbf{Canale eventi globale:} Il \texttt{MessageBus} adotta un pattern ad accesso statico: una soluzione immediata ed efficace per connettere viste e controller disaccoppiati, ma che richiede particolare pulizia nei test unitari per non condividere accidentalmente subscriber tra suite diverse; un'iniezione esplicita per istanza avrebbe garantito un isolamento ancora più rigoroso.
+    \item \textbf{Ricalcolo retroattivo degli snapshot storici:} Le serie storiche salvate periodicamente su file CSV registrano lo stato patrimoniale al momento del campionamento; modificare ordini passati non rigenera in automatico i vecchi punti del grafico.
 \end{itemize}
 
-\subsubsection*{Sviluppi futuri:}
-\begin{enumerate}
-  \item \textbf{Caricamento asincrono delle quotazioni:} Recupero dei prezzi di mercato in background con \texttt{CompletableFuture} per azzerare i tempi di attesa al primo avvio della vista.
-  \item \textbf{Personalizzazione temporale e analitica dei grafici:} Introduzione nel grafico di performance della selezione dinamica dell'intervallo temporale (giorno, settimana, mese, anno) e grafici di andamento per i singoli titoli in portafoglio.
-  \item \textbf{Ricalcolo dinamico degli snapshot:} Algoritmo di rigenerazione trasparente delle istantanee storiche a seguito di modifiche o eliminazioni retroattive di transazioni contabili.
-  \item \textbf{Evoluzione Web Multi-utente e Multi-tenant:} In una futura estensione web con autenticazione utente, evolvere il \texttt{MessageBus} da singleton statico a istanza con scope di sessione utente, affiancando un database relazionale per la persistenza multi-utente e riusando l'intero Model e i Controller agnostici dalla GUI.
+\subsubsection*{Ruolo all'interno del gruppo:}
+Oltre allo sviluppo della sezione investimenti, ho curato la cornice principale dell'interfaccia con la barra laterale unificata in cui convergono le schermate dei vari moduli. Mi sono inoltre fatto carico della gestione del canale eventi comune e ho coordinato buona parte dell'integrazione del codice su Git, facilitando la risoluzione dei conflitti e la convergenza dei rami di lavoro.
+
+\subsubsection*{Sviluppi futuri specifici del modulo:}
+\begin{enumerate}[noitemsep,topsep=2pt]
+    \item \textbf{Analitica temporale avanzata dei grafici:} Selezione dinamica del timeframe (settimanale, mensile, annuale) e visualizzazione della curva di rendimento per ogni singolo strumento in portafoglio.
+    \item \textbf{Rigenerazione retroattiva degli snapshot:} Algoritmo di ricalcolo automatico della serie storica CSV per riallineare i dati in caso di modifiche o eliminazioni di ordini passati.
+\end{enumerate}
+
+\subsection{Sviluppi Futuri Comuni}
+
+Dal confronto collegiale tra i membri del gruppo sono emerse alcune direttrici evolutive di respiro sistemico, che rappresentano il naturale proseguimento dell'architettura condivisa qualora il software venisse esteso per un impiego su larga scala:
+
+\begin{enumerate}[noitemsep,topsep=2pt]
+    \item \textbf{Persistenza Remota e Sincronizzazione Cloud Multi-dispositivo:}
+    L'attuale memorizzazione locale su file JSON e CSV garantisce privacy e funzionamento offline. La sua naturale evoluzione consiste nell'integrazione di un database relazionale (es. PostgreSQL) o di un connettore cloud cifrato, consentendo all'utente di sincronizzare in modo trasparente conti, transazioni e impostazioni su più dispositivi, con supporto a backup automatici e ripristino di emergenza.
+
+    \item \textbf{Pipeline Concorrente e Reattività Asincrona Non Bloccante:}
+    Attualmente il caricamento dei dati di rete e i calcoli aggregati avvengono principalmente in modo sincrono sul thread chiamante. L'adozione sistematica di un'infrastruttura asincrona basata su \texttt{CompletableFuture} e thread worker in background permetterebbe di scaricare quotazioni remote, elaborare statistiche complesse e aggiornare gli snapshot patrimoniali in parallelo, mantenendo l'interfaccia JavaFX costantemente fluida e reattiva anche con moli di dati storici considerevoli.
+
+    \item \textbf{Apertura ad Architetture Web e Mobile:}
+    La netta separazione architetturale tra il Model (completamente disaccoppiato dalla GUI) e i View Controller rende il nucleo logico di UniBodget immediatamente riusabile. Un'evoluzione strategica prevede l'esposizione di API RESTful attorno ai servizi di dominio esistenti, consentendo di affiancare all'attuale applicazione desktop un portale web responsivo e un'applicazione mobile nativa, condividendo le medesime regole di business per la gestione contabile, valutaria e degli investimenti.
 \end{enumerate}
 
 
 \section{Difficoltà Incontrate e Commenti per i Docenti}
 
 Nel corso del progetto, il team ha affrontato e superato diverse difficoltà significative:
-\begin{itemize}
+\begin{itemize}[noitemsep,topsep=2pt]
     \item \textbf{Conciliazione tra JavaFX e Rigorosa Analisi Statica (QA):} L'integrazione del toolkit grafico JavaFX con le severe regole di analisi statica imposte dal plugin del Prof. Pianini (\texttt{gradle-java-qa}, comprendente Checkstyle, PMD e SpotBugs) ha richiesto un impegno notevole. In particolare, la gestione delle classi interne anonime, la rimozione sistematica di costanti magiche di layout e la corretta giustificazione dei pattern di esposizione di riferimenti per i nodi grafici hanno reso necessario uno studio approfondito della progettazione ad oggetti.
     \item \textbf{Eliminazione dei Numeri Magici e Token Tipografici:} Rendere l'interfaccia JavaFX dinamica e gradevole rispettando il vincolo di zero numeri magici ha imposto l'estrazione meticolosa di ogni spaziatura, coordinata grafica e raggio di curvatura in classi costanti di utilità visiva.
     \item \textbf{Aritmetica e Precisione Finanziaria:} Garantire la coerenza monetaria tra saldi di cassa, quote azionarie frazionate e percentuali di cambio ha imposto l'adozione pervasiva di \texttt{BigDecimal}, prestando massima attenzione alle scale di divisione e alla gestione delle divisioni per zero nei trend statistici.

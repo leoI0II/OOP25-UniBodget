@@ -40,8 +40,9 @@ deleteme/
 /data/
 /app/data/
 
-# --- LaTeX build artifacts ---
+# --- LaTeX build artifacts & review ---
 .texbuild/
+.texreview/
 *.aux
 *.fls
 *.fdb_latexmk
