@@ -116,7 +116,7 @@ applicazione, che lavora sul computer dell'utente senza richiedere l'accesso ai 
   converte denaro da una valuta a un'altra, spesso insieme a una commissione fissa.
   \item[Budget] limite di spesa mensile fissato dall'utente per un conto di liquidità, con una soglia di
   avviso espressa in percentuale del limite.
-  \item[Cruscotto (dashboard)] schermata di riepilogo di un conto di liquidità: saldo, budget, spese per
+  \item[Dashboard] pagina di riepilogo di un conto di liquidità: saldo, budget, spese per
   categoria, prestiti, confronti con il mese precedente e movimenti recenti.
   \item[Prestito ad amici] denaro dato a un amico (o restituito da lui) che l'utente vuole tracciare, per
   sapere in ogni momento quanto deve ancora ricevere.
@@ -141,9 +141,9 @@ applicazione, che lavora sul computer dell'utente senza richiedere l'accesso ai 
   \item Lo storico di un conto si può esportare in un file leggibile da un foglio di calcolo.
 \end{itemize}
 
-\paragraph{Cruscotto, budget e prestiti}
+\paragraph{Dashboard, budget e prestiti}
 \begin{itemize}
-  \item L'utente sceglie il conto di liquidità da consultare; il cruscotto ne mostra il saldo, lo stato
+  \item L'utente sceglie il conto di liquidità da consultare; la Dashboard ne mostra il saldo, lo stato
   del budget, la ripartizione delle spese, i prestiti aperti, i confronti mensili e gli ultimi
   movimenti, e si aggiorna subito a ogni modifica.
   \item Per ogni conto di liquidità l'utente può fissare un budget mensile e una soglia di avviso
@@ -261,7 +261,7 @@ di conto, e ognuno accetta un solo tipo di movimento:
   unitario e la commissione.
 \end{itemize}
 
-\paragraph{Cruscotto}
+\paragraph{Dashboard}
 Ogni conto di liquidità ha un \textbf{budget} mensile (\texttt{BudgetSettings}), cioè un limite di spesa e
 una soglia di avviso. Confrontando la spesa del mese con il budget si ottiene lo \textbf{stato del budget}
 (\texttt{BudgetStatus}): nella norma, in avviso o critico (\texttt{BudgetMonitor}). Dai movimenti di
@@ -461,7 +461,7 @@ L'interfaccia \texttt{ExchangeRateAPI} espone i metodi \texttt{getLatestRates(ba
 \subsection{Monitoraggio dei Tassi, Allerte di Mercato e Watchlist Reattiva}
 
 \subsubsection*{1. Descrizione del problema}
-Un cruscotto finanziario completo richiede strumenti operativi di monitoraggio continuo:
+Una dashboard finanziaria completa richiede strumenti operativi di monitoraggio continuo:
 \begin{enumerate}
   \item \textbf{Tracciamento di Coppie Valutarie Dinamiche (\emph{Watchlist}):} L'utente deve poter fissare un insieme personalizzato di coppie di scambio preferite per consultarne il tasso in tempo reale senza dover reimpostare ogni volta i menu di conversione;
   \item \textbf{Allerte di Prezzo Reattive con Soglie Limite (\emph{Alerts}):} L'utente deve poter definire soglie di cambio critiche (es. notificare se $1\text{ EUR} > 1.10\text{ USD}$ oppure se $1\text{ BTC} < 60000\text{ USD}$), con direzione di attraversamento (\emph{ABOVE} o \emph{BELOW});
@@ -984,7 +984,7 @@ Diverse parti dell'applicazione devono reagire ai cambiamenti dei dati e al pass
 \subsubsection*{1. Descrizione del problema}
 La finestra principale ospita a turno le pagine dei diversi moduli, sviluppati in parallelo dai membri del gruppo:
 \begin{enumerate}
-    \item \textbf{Barra laterale unica per moduli diversi:} La barra laterale è la stessa per tutte le pagine, ma deve mostrare i conti del modulo corrente (conti di liquidità nel cruscotto, conti di investimento nel portafoglio) con il relativo totale, e inoltrare a quel modulo le azioni dell'utente: selezione, creazione, rinomina ed eliminazione di un conto.
+    \item \textbf{Barra laterale unica per moduli diversi:} La barra laterale è la stessa per tutte le pagine, ma deve mostrare i conti del modulo corrente (conti di liquidità nella Dashboard, conti di investimento nel Portfolio) con il relativo totale, e inoltrare a quel modulo le azioni dell'utente: selezione, creazione, rinomina ed eliminazione di un conto.
     \item \textbf{Ciclo di vita delle pagine:} Le pagine si iscrivono a eventi; quando l'utente passa a un'altra pagina, le iscrizioni della pagina chiusa vanno annullate, altrimenti la pagina resta in memoria e continua a reagire agli eventi.
     \item \textbf{Dipendenze dei controller FXML:} I controller delle pagine caricate da file FXML vengono normalmente creati da JavaFX con il costruttore senza argomenti; servono invece i servizi condivisi creati all'avvio (controller degli investimenti, servizio delle istantanee, moduli degli altri membri).
 \end{enumerate}
@@ -1003,7 +1003,7 @@ La finestra principale ospita a turno le pagine dei diversi moduli, sviluppati i
 \end{itemize}
 
 \subsubsection*{3. Schema UML e Interazioni}
-\texttt{MainViewController}, \texttt{DashboardViewController} e \texttt{InvestmentsViewController} estendono \texttt{BaseViewController}, che realizza \texttt{Disposable}. La finestra principale include la barra laterale, che lavora solo con l'interfaccia \texttt{SideBarDelegate}, implementata dalle pagine del cruscotto e del portafoglio. \texttt{ViewControllersFactory} crea i controller con le loro dipendenze (Figura~\ref{fig:dan-shell}).
+\texttt{MainViewController}, \texttt{DashboardViewController} e \texttt{InvestmentsViewController} estendono \texttt{BaseViewController}, che realizza \texttt{Disposable}. La finestra principale include la barra laterale, che lavora solo con l'interfaccia \texttt{SideBarDelegate}, implementata dalle pagine Dashboard e Portfolio. \texttt{ViewControllersFactory} crea i controller con le loro dipendenze (Figura~\ref{fig:dan-shell}).
 
 \begin{figure}[H]
 \centering
@@ -1014,7 +1014,7 @@ La finestra principale ospita a turno le pagine dei diversi moduli, sviluppati i
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
-    \item \textbf{Strategy (nella forma Delegate):} \texttt{SideBarDelegate} è la strategia con cui la barra laterale ottiene i dati e inoltra le azioni; le pagine del cruscotto e del portafoglio sono le strategie concrete, scelte a runtime dalla finestra principale.
+    \item \textbf{Strategy (nella forma Delegate):} \texttt{SideBarDelegate} è la strategia con cui la barra laterale ottiene i dati e inoltra le azioni; le pagine Dashboard e Portfolio sono le strategie concrete, scelte a runtime dalla finestra principale.
     \item \textbf{Template Method:} \texttt{dispose()} di \texttt{BaseViewController} esegue sempre l'annullamento delle iscrizioni e poi chiama il metodo \emph{hook} \texttt{onDispose()}, che le sottoclassi ridefiniscono per la propria pulizia.
     \item \textbf{Factory:} \texttt{ViewControllersFactory} accentra la creazione dei controller delle pagine con l'iniezione manuale delle dipendenze, senza ricorrere a un framework.
 \end{itemize}
@@ -1059,7 +1059,7 @@ Per la parte sviluppata da \textbf{Arianna Palmucci}, sono state implementate su
   \end{itemize}
 \end{itemize}
 
-Per la parte sviluppata da \textbf{Favour Osaretin Emuwahen}, il collaudo automatizzato si concentra sull'integrità del cruscotto contabile, sulle transazioni e sulle logiche algoritmiche di budget e trend:
+Per la parte sviluppata da \textbf{Favour Osaretin Emuwahen}, il collaudo automatizzato si concentra sull'integrità dei dati della Dashboard, sulle transazioni e sulle logiche algoritmiche di budget e trend:
 \begin{itemize}
   \item \textbf{Dashboard, Facciata e Snapshot Contabile:}
   \begin{itemize}
@@ -1211,7 +1211,7 @@ Nel corso del progetto UniBodget mi sono dedicato principalmente al nucleo conta
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
 \begin{itemize}
   \item \textbf{Calcoli sincroni sulla dashboard:} Il ricalcolo dei totali patrimoniali e il filtraggio avvengono attualmente sul thread chiamante; con moli di transazioni molto voluminose, delegare l'elaborazione a worker asincroni garantirebbe una reattività dell'interfaccia ancora più fluida.
-  \item \textbf{Conversione multivaluta diretta nel cruscotto:} La dashboard mostra i dati nella valuta base del portafoglio corrente; integrare direttamente nel cruscotto una visualizzazione a saldo convertito istantaneo su qualsiasi divisa internazionale arricchirebbe l'esperienza d'uso.
+  \item \textbf{Conversione multivaluta diretta nella Dashboard:} La Dashboard mostra i dati nella valuta base del portafoglio corrente; integrare direttamente nella Dashboard una visualizzazione a saldo convertito istantaneo su qualsiasi divisa internazionale arricchirebbe l'esperienza d'uso.
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
@@ -1273,7 +1273,7 @@ All'interno del progetto UniBodget mi sono occupato della progettazione, svilupp
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
-Oltre al modulo degli investimenti, mi sono occupato di buona parte dell'infrastruttura condivisa dai tre moduli: la finestra principale in cui vengono montate le pagine del cruscotto e del convertitore, la barra laterale con la gestione dei conti (creazione, rinomina ed eliminazione dal menu contestuale, ridimensionamento trascinando il divisore), il canale di eventi con il ciclo di vita delle iscrizioni delle pagine, il salvataggio automatico dei conti e la correzione della persistenza degli identificativi dei conti tra un avvio e l'altro. Ho curato inoltre buona parte dell'integrazione tra i moduli e l'unione dei rami di sviluppo nel ramo comune, risolvendo i conflitti e gli errori emersi nelle fasi di unione.
+Oltre al modulo degli investimenti, mi sono occupato di buona parte dell'infrastruttura condivisa dai tre moduli: la finestra principale in cui vengono montate le pagine della Dashboard e del convertitore, la barra laterale con la gestione dei conti (creazione, rinomina ed eliminazione dal menu contestuale, ridimensionamento trascinando il divisore), il canale di eventi con il ciclo di vita delle iscrizioni delle pagine, il salvataggio automatico dei conti e la correzione della persistenza degli identificativi dei conti tra un avvio e l'altro. Ho curato inoltre buona parte dell'integrazione tra i moduli e l'unione dei rami di sviluppo nel ramo comune, risolvendo i conflitti e gli errori emersi nelle fasi di unione.
 
 \subsubsection*{Sviluppi futuri specifici del modulo:}
 \begin{enumerate}[noitemsep,topsep=2pt]
