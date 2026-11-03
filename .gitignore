@@ -49,6 +49,6 @@ deleteme/
 *.out
 *.toc
 *.log
-*.synctex.gz
+*.synctex*
 *.bbl
 *.blg
