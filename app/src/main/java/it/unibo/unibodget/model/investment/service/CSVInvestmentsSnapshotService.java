@@ -32,13 +32,12 @@ import org.slf4j.LoggerFactory;
  * TransactionAddedEvent} via the {@link MessageBus} and automatically persists a new balance
  * snapshot whenever a transaction is added to an {@link InvestmentAccount}.
  *
- * <p>The default data directory is {@code ~/.unibodget/snapshots}.
+ * <p>The directory is chosen by the caller: the application uses {@code data/csv/snapshots}, next
+ * to the JSON files, so the whole {@code data/} folder can be copied with the chart history too.
  */
 public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVInvestmentsSnapshotService.class);
-    private static final Path DEFAULT_DATA_DIR =
-            Path.of(System.getProperty("user.home"), ".unibodget", "snapshots");
 
     private final Path dataDir;
 
@@ -59,11 +58,6 @@ public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService
 
         MessageBus.subscribe(TransactionAddedEvent.class, this::onTransactionAddedEvent);
         MessageBus.subscribe(WalletDeletedEvent.class, this::onWalletDeletedEvent);
-    }
-
-    /** Creates the service using the default data directory ({@code ~/.unibodget/snapshots}). */
-    public CSVInvestmentsSnapshotService() {
-        this(DEFAULT_DATA_DIR);
     }
 
     /**

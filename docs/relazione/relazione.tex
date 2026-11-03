@@ -199,8 +199,8 @@ applicazione, che lavora sul computer dell'utente senza richiedere l'accesso ai 
   \item L'utente sceglie una valuta di riferimento globale, in cui vengono mostrati i totali che
   riuniscono più conti.
   \item L'utente può passare tra tema chiaro e tema scuro e cambiare il carattere del testo; le modifiche
-  si vedono subito, senza riavviare l'applicazione.
-  \item L'applicazione ricorda dimensione e posizione della finestra tra un avvio e l'altro.
+    si vedono subito, senza riavviare l'applicazione.
+  \item L'applicazione ricorda la dimensione della finestra, e se era ingrandita a tutto schermo, tra un avvio e l'altro.
   \item L'utente può salvare la configurazione corrente e tornare in seguito a una configurazione
   salvata in precedenza.
 \end{itemize}
@@ -266,10 +266,9 @@ Ogni conto di liquidità ha un \textbf{budget} mensile (\texttt{BudgetSettings})
 una soglia di avviso. Confrontando la spesa del mese con il budget si ottiene lo \textbf{stato del budget}
 (\texttt{BudgetStatus}): nella norma, in avviso o critico (\texttt{BudgetMonitor}). Dai movimenti di
 liquidità si ricavano anche i \textbf{riepiloghi dei prestiti} (\texttt{FriendLoanSummary}), uno per
-amico, con quanto è stato prestato, quanto restituito e il saldo residuo
-(\texttt{FriendLoanSummary}), e i \textbf{confronti mensili} (\texttt{WalletInsight}), che dicono
-come spese, entrate e risparmi sono cambiati rispetto al mese precedente
-(\texttt{WalletInsight}). Queste informazioni non vengono memorizzate: si calcolano ogni volta dai
+amico, con quanto è stato prestato, quanto restituito e il saldo residuo, e i \textbf{confronti
+mensili} (\texttt{WalletInsight}), che dicono come spese, entrate e risparmi sono cambiati rispetto al
+mese precedente. Queste informazioni non vengono memorizzate: si calcolano ogni volta dai
 movimenti.
 
 \paragraph{Investimenti}
@@ -851,73 +850,173 @@ La tabella dei movimenti finanziari della Dashboard offre all'utente una barra d
 \clearpage
 \section{Design Dettagliato (Daniele Zappalà)}
 
-In questa sezione vengono presentati i quattro problemi di progettazione principali affrontati e risolti da \textbf{Daniele Zappalà}, riguardanti la gestione del modulo investimenti, la modellazione degli ordini e delle sorgenti di pagamento, il calcolo continuo di saldi e posizioni dallo storico, il canale di eventi disaccoppiato e la finestra principale con barra laterale condivisa.
+In questa sezione descrivo i quattro problemi di progettazione principali che ho affrontato: la modellazione degli ordini di compravendita con sorgenti di pagamento diverse, il calcolo di saldi e posizioni a partire dallo storico, il canale di eventi con il tempo dell'applicazione e i salvataggi automatici, e infine la finestra principale con la barra laterale condivisa da tutti i moduli.
 
+% ----------------------------------------------------------------------------
 \subsection{Ordini con Sorgenti di Pagamento Diverse}
 
 \subsubsection*{1. Descrizione del problema}
-Un acquisto di titoli può essere pagato con un conto di liquidità, con una stablecoin posseduta nello stesso conto di investimento, oppure con fondi esterni; lo stesso vale, al contrario, per il ricavato di una vendita. Ogni combinazione modifica conti diversi, e un ordine può fallire per motivi attesi (fondi insufficienti, quantità non posseduta, prezzo non disponibile). La view deve mostrare all'utente un messaggio preciso per ogni caso, e un ordine fallito non deve modificare nessun conto.
+Un ordine sul modulo investimenti coinvolge quasi sempre più di un conto, e il modo in cui li coinvolge dipende da dove arrivano (o dove finiscono) i soldi. Il problema presenta diversi vincoli:
+\begin{enumerate}
+    \item \textbf{Sorgenti di pagamento eterogenee:} Un acquisto può essere pagato con un conto di liquidità (anche in una valuta diversa da quella del conto di investimento), con una stablecoin già posseduta nello stesso conto di investimento, oppure con fondi esterni non gestiti dall'applicazione. Simmetricamente, il ricavato di una vendita può essere accreditato su un conto di liquidità, in stablecoin o all'esterno. A queste si aggiunge il trasferimento di un titolo tra due conti di investimento.
+    \item \textbf{Errori previsti e frequenti:} Un ordine può non essere eseguibile per motivi del tutto normali, ad esempio fondi insufficienti sulla sorgente o quantità da vendere maggiore di quella posseduta. La view deve poter mostrare un messaggio preciso per ogni caso, con i dati che lo spiegano (ad esempio importo richiesto e disponibile).
+    \item \textbf{Coerenza tra i conti:} Un ordine non eseguibile non deve lasciare nessun conto modificato a metà: o vengono registrate tutte le transazioni dell'ordine (sul conto di investimento e sulla sorgente), o nessuna.
+    \item \textbf{Estendibilità:} Deve essere possibile aggiungere in futuro nuove sorgenti di pagamento (ad esempio un conto di un broker esterno) senza che qualche combinazione resti dimenticata nel codice.
+\end{enumerate}
 
 \subsubsection*{2. Soluzione proposta e alternative}
-La sorgente di pagamento è modellata tramite un'interfaccia sigillata, \texttt{PaymentSource}, con tre implementazioni record: \texttt{CashAccountChannel}, \texttt{StableCoinPositionChannel} e \texttt{NoPaymentChannel}. Anche l'esito di un ordine è un'interfaccia sigillata, \texttt{OrderResult}, con un record per ogni successo (che contiene le transazioni create) e uno per ogni errore (che contiene i dati per spiegarlo, ad esempio importo richiesto e disponibile). \texttt{DefaultInvestmentController} controlla prima che l'ordine sia eseguibile e solo dopo registra le transazioni; nel codice, la scelta tra le sorgenti è gestita tramite uno \texttt{switch} sul tipo con pattern matching, che il compilatore verifica essere esaustivo e completo.
-
-Sono state valutate e scartate tre alternative:
 \begin{itemize}
-  \item \textbf{Alternativa scartata (Metodi dedicati per combinazione):} Definire un metodo diverso per ogni combinazione di operazione e sorgente avrebbe moltiplicato inutilmente i metodi del controller.
-  \item \textbf{Alternativa scartata (Uso di eccezioni):} Ricorrere alle eccezioni per i casi di errore previsto avrebbe appesantito il flusso per situazioni nominali di business, costringendo la view a gestire blocchi \texttt{try-catch} multipli.
-  \item \textbf{Alternativa scartata (Parametro generico non tipato):} Passare la sorgente come parametro generico (ad esempio un identificativo di conto) avrebbe disperso controlli \texttt{instanceof} non verificabili dal compilatore.
+    \item \textbf{Alternativa scartata A (Un metodo per ogni combinazione):} Definire metodi distinti come \texttt{buyWithCash}, \texttt{buyWithStable}, \texttt{sellToCash}, \dots{} avrebbe moltiplicato i metodi del controller per ogni nuova sorgente, duplicando la logica comune di verifica e registrazione dell'ordine.
+    \item \textbf{Alternativa scartata B (Eccezioni per gli errori previsti):} Segnalare fondi insufficienti o quantità non posseduta tramite eccezioni avrebbe trattato come eccezionali situazioni del tutto ordinarie, costringendo la view a una catena di blocchi \texttt{try-catch} per distinguere i casi e a ricostruire i dati del messaggio.
+    \item \textbf{Alternativa scartata C (Sorgente come identificativo generico):} Passare la sorgente come identificativo di conto o come stringa avrebbe richiesto controlli \texttt{instanceof} e cast sparsi nel codice, non verificabili dal compilatore.
+    \item \textbf{Soluzione adottata:} Sia la sorgente di pagamento sia l'esito dell'ordine sono modellati come tipi sigillati:
+    \begin{enumerate}
+        \item \emph{\texttt{PaymentSource}:} interfaccia sigillata con tre \texttt{record}: \texttt{CashAccountChannel} (il conto di liquidità da usare), \texttt{StableCoinPositionChannel} (il conto di investimento e la stablecoin) e \texttt{NoPaymentChannel} (fondi esterni). Ogni record contiene esattamente i dati necessari alla sua sorgente;
+        \item \emph{\texttt{OrderResult}:} interfaccia sigillata con un \texttt{record} per ogni esito: un successo per ogni coppia operazione/sorgente (che contiene le transazioni create) e un record per ogni errore previsto (\texttt{InsufficientFunds}, \texttt{InsufficientAssets}), che contiene i dati per spiegarlo. La gerarchia prevede anche \texttt{CurrencyConversionError}, pensato per un tasso di cambio non disponibile; nella versione attuale, però, questo caso non viene ancora restituito come esito, e l'errore del convertitore arriva come eccezione;
+        \item \emph{Verifica prima della scrittura:} \texttt{DefaultInvestmentController} calcola il costo dell'ordine nella valuta della sorgente scelta e controlla che l'ordine sia eseguibile (\texttt{canBuy}, \texttt{canSell}); solo dopo registra le transazioni sul conto di investimento e sulla sorgente. La stima del costo (\texttt{estimateOrderCost}) è usata anche dalla view per mostrare il totale mentre l'utente compila l'ordine;
+        \item \emph{Switch esaustivo:} la scelta del comportamento in base alla sorgente è uno \texttt{switch} con pattern matching sul tipo sigillato. Il compilatore verifica che tutti i casi siano gestiti, quindi l'aggiunta di una nuova sorgente segnala automaticamente tutti i punti del codice da aggiornare.
+    \end{enumerate}
 \end{itemize}
-Con i tipi sigillati, l'aggiunta di una nuova sorgente di pagamento obbliga il compilatore a segnalare tutti i punti del codice in cui va gestita.
 
-\subsubsection*{3. Pattern utilizzati e modellazione}
-Non si tratta di un pattern GoF tradizionale, bensì della modellazione con tipi sigillati (\emph{sealed interfaces}) e \texttt{record} (tipi algebrici di dati), che consente di trattare successi ed errori come valori ordinari e di sfruttare il pattern matching per switch con verifica statica di esaustività a compile-time.
+\subsubsection*{3. Schema UML e Interazioni}
+La view chiama l'interfaccia \texttt{InvestmentController}, passando la sorgente scelta dall'utente come istanza di \texttt{PaymentSource}. L'implementazione \texttt{DefaultInvestmentController} esamina la sorgente con uno \texttt{switch} esaustivo e restituisce sempre un \texttt{OrderResult}, mai un'eccezione per gli errori previsti. Il dialog dell'ordine pubblica l'esito sul canale di eventi (\texttt{OrderResultEvent}): la finestra principale lo riceve e, con uno \texttt{switch} con pattern matching, mostra un messaggio specifico (ad esempio importo richiesto e disponibile in caso di fondi insufficienti), mentre la pagina del portafoglio chiude il dialog se l'ordine è riuscito. La Figura~\ref{fig:dan-ordini} mostra le due gerarchie sigillate, con una selezione dei record di \texttt{OrderResult}.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{img/uml-dan-ordini.pdf}
+\caption{Ordini: sorgente di pagamento ed esito modellati come tipi sigillati.}
+\label{fig:dan-ordini}
+\end{figure}
+
+\subsubsection*{4. Pattern utilizzati e modellazione}
+\begin{itemize}
+    \item \textbf{Tipi algebrici di dati (sealed interface + record):} Non si tratta di un pattern GoF, ma della modellazione con tipi somma tipica della programmazione funzionale, resa disponibile in Java dalle interfacce sigillate e dai \texttt{record}. Successi ed errori diventano valori ordinari, e il pattern matching garantisce a tempo di compilazione che ogni caso venga gestito.
+    \item \textbf{Alternativa al pattern Visitor:} Lo \texttt{switch} esaustivo su una gerarchia chiusa ottiene lo stesso risultato di un Visitor (aggiungere comportamenti senza modificare le classi della gerarchia), con molto meno codice e con il controllo di completezza fatto dal compilatore.
+\end{itemize}
+
+% ----------------------------------------------------------------------------
 \subsection{Saldo e Posizioni Calcolati dallo Storico}
 
 \subsubsection*{1. Descrizione del problema}
-Il saldo di un conto di liquidità è la somma dei movimenti; quello di un conto di investimento dipende dai prezzi di mercato del momento, e richiede di calcolare per ogni titolo la quantità posseduta, il prezzo medio di carico e il profitto realizzato con le vendite. In entrambi i casi il saldo deve restare coerente con lo storico anche dopo correzioni e cancellazioni.
+I due tipi di conto hanno un saldo di natura molto diversa, ma devono comportarsi allo stesso modo rispetto alle modifiche dello storico:
+\begin{enumerate}
+    \item \textbf{Saldi di natura diversa:} Il saldo di un conto di liquidità è la somma dei suoi movimenti; quello di un conto di investimento è il valore di mercato delle posizioni aperte, che dipende dal prezzo del momento di ogni titolo, espresso nella valuta di riferimento del conto.
+    \item \textbf{Calcoli contabili non banali:} Con più acquisti dello stesso titolo a prezzi diversi e vendite parziali, bisogna ricavare per ogni titolo la quantità posseduta, il prezzo medio di carico, il profitto non realizzato (sulle quantità ancora possedute) e quello realizzato con le vendite.
+    \item \textbf{Coerenza dopo le correzioni:} Un movimento passato può essere corretto o eliminato (dall'interfaccia per i conti di liquidità; il conto offre le stesse operazioni anche per gli investimenti); saldo, posizioni e profitto/perdita devono restare coerenti con lo storico in ogni momento.
+    \item \textbf{Tipi di movimento separati:} Un acquisto di titoli non deve poter finire in un conto di liquidità, e viceversa.
+    \item \textbf{Prezzi esterni:} Le quotazioni arrivano da servizi esterni, che nei test devono poter essere sostituiti da prezzi fissi.
+\end{enumerate}
 
 \subsubsection*{2. Soluzione proposta e alternative}
-Il saldo non viene mai memorizzato in modo ridondante. La classe astratta \texttt{AbstractWallet<T extends AbstractTransaction>} contiene lo storico e gestisce tutte le modifiche (aggiunta, rimozione, sostituzione), pubblicando un evento sul bus per ciascuna; il metodo \texttt{getBalance()} è astratto e ogni tipo di conto lo calcola a modo suo. Il parametro generico lega ogni conto al proprio tipo di movimento: il compilatore impedisce a tempo di compilazione di aggiungere un acquisto di titoli a un conto di liquidità, senza richiedere controlli a runtime.
-
-\texttt{InvestmentAccount} raggruppa i movimenti per titolo, ricava le posizioni (\texttt{Position}) con il metodo contabile del costo medio ponderato e delega la richiesta del prezzo corrente a un \texttt{CurrencyConverter}. Il convertitore non viene salvato su file JSON: dopo la fase di caricamento i conti vengono ricollegati mediante il metodo \texttt{withProvider}. Memorizzare saldo e posizioni direttamente nello stato avrebbe reso le letture marginalmente più rapide, ma avrebbe imposto aggiornamenti a catena a ogni variazione dello storico, con alto rischio di disallineamento dei dati.
-
-\subsubsection*{3. Pattern utilizzati e reificazione}
 \begin{itemize}
-  \item \textbf{Template Method:} \texttt{AbstractWallet} definisce la gestione uniforme dello storico transazioni lasciando astratto il metodo primitivo \texttt{getBalance()}, specializzato rispettivamente da \texttt{CashAccount} e \texttt{InvestmentAccount}.
-  \item \textbf{Strategy Pattern:} \texttt{InvestmentAccount} usa un'istanza di \texttt{CurrencyConverter} come strategia intercambiabile per il recupero delle quotazioni correnti, consentendo nei test automatizzati la sostituzione trasparente con un provider a quotazioni prefissate deterministiche.
+    \item \textbf{Alternativa scartata A (Saldo e posizioni memorizzati):} Salvare saldo e posizioni come campi del conto avrebbe reso le letture più rapide, ma avrebbe richiesto di aggiornarli a catena a ogni aggiunta, correzione o cancellazione, con un alto rischio di valori non più coerenti con lo storico (in particolare dopo la modifica di un movimento passato).
+    \item \textbf{Alternativa scartata B (Un unico tipo di conto con controlli a runtime):} Un solo conto con una lista di transazioni generiche avrebbe richiesto controlli \texttt{instanceof} e cast per distinguere i movimenti, spostando a runtime errori che il compilatore può individuare.
+    \item \textbf{Soluzione adottata:} Il saldo non è mai memorizzato, ma sempre calcolato dallo storico:
+    \begin{enumerate}
+        \item \emph{Classe base generica:} \texttt{AbstractWallet<T extends AbstractTransaction>} contiene nome, valuta di riferimento e storico (\texttt{Historical<T>}), e gestisce tutte le modifiche (aggiunta, rimozione, sostituzione), pubblicando un evento per ciascuna. Il parametro di tipo lega ogni conto al proprio movimento: \texttt{CashAccount} accetta solo \texttt{CashTransaction}, \texttt{InvestmentAccount} solo \texttt{InvestmentTransaction}, e il compilatore impedisce gli scambi senza controlli a runtime;
+        \item \emph{Saldo astratto:} \texttt{getBalance()} è astratto e ogni tipo di conto lo calcola a modo suo; il codice comune (sidebar, totali aggregati) lavora solo con \texttt{AbstractWallet};
+        \item \emph{Posizioni dallo storico:} \texttt{InvestmentAccount} raggruppa i movimenti per titolo (stream con \texttt{groupingBy}) e ricava le posizioni (\texttt{Position}) con il metodo del costo medio ponderato; le vendite chiudono quote al prezzo medio di carico, e la differenza con il prezzo di vendita diventa profitto realizzato;
+        \item \emph{Prezzi da un convertitore iniettato:} il valore corrente delle posizioni è chiesto a un \texttt{CurrencyConverter}, ricevuto dall'esterno. Se il prezzo di un titolo non è disponibile, la posizione viene valutata al prezzo medio di carico e il problema viene registrato nel log, invece di bloccare l'intera pagina. Il convertitore non fa parte dei dati salvati in JSON: dopo il caricamento i conti vengono ricollegati con \texttt{withProvider}.
+    \end{enumerate}
 \end{itemize}
 
+\subsubsection*{3. Schema UML e Interazioni}
+\texttt{AbstractWallet} è composto da uno storico \texttt{Historical} e viene specializzato da \texttt{CashAccount} e \texttt{InvestmentAccount}, ciascuno con il proprio tipo di movimento. A ogni modifica dello storico il conto pubblica sul \texttt{MessageBus} un evento (\texttt{TransactionAddedEvent}, \texttt{TransactionRemovedEvent}, \texttt{TransactionReplacedEvent}), su cui si basano il salvataggio automatico e l'aggiornamento delle pagine. \texttt{InvestmentAccount} crea le \texttt{Position} a ogni richiesta, usando il \texttt{CurrencyConverter} come fonte dei prezzi (Figura~\ref{fig:dan-saldo}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{img/uml-dan-saldo.pdf}
+\caption{Saldo calcolato dallo storico: Template Method sul conto e prezzi da un convertitore.}
+\label{fig:dan-saldo}
+\end{figure}
+
+\subsubsection*{4. Pattern utilizzati e reificazione}
+\begin{itemize}
+    \item \textbf{Template Method:} \texttt{AbstractWallet} definisce le operazioni comuni sullo storico e la pubblicazione degli eventi, lasciando astratto il passo primitivo \texttt{getBalance()}, implementato da \texttt{CashAccount} (somma dei movimenti) e da \texttt{InvestmentAccount} (valore di mercato delle posizioni).
+    \item \textbf{Strategy:} \texttt{CurrencyConverter} è la strategia con cui \texttt{InvestmentAccount} ottiene i prezzi. In produzione è il convertitore basato sui servizi di mercato; nei test viene sostituito da una lambda con prezzi fissi, che rende i calcoli verificabili in modo deterministico.
+\end{itemize}
+
+% ----------------------------------------------------------------------------
 \subsection{Eventi, Tempo dell'Applicazione e Salvataggi Automatici}
 
 \subsubsection*{1. Descrizione del problema}
-Più componenti dell'applicazione devono reagire dinamicamente ai cambiamenti dello stato informativo: le viste grafiche devono aggiornarsi, i portafogli vanno persistiti su disco, e per il tracciamento del grafico di andamento il profitto/perdita dei conti di investimento va campionato dopo ogni operazione e a intervalli temporali regolari. Il modello di dominio, tuttavia, deve rimanere disaccoppiato dal toolkit JavaFX, che fornisce i timer sul thread dell'interfaccia.
+Diverse parti dell'applicazione devono reagire ai cambiamenti dei dati e al passare del tempo, senza conoscersi tra loro:
+\begin{enumerate}
+    \item \textbf{Reazioni multiple alle modifiche:} Quando un conto cambia, la pagina che lo mostra deve aggiornarsi, i conti devono essere salvati su file e, per i conti di investimento, va registrata un'istantanea del profitto/perdita. Il conto non deve conoscere nessuno di questi componenti.
+    \item \textbf{Tempo dell'applicazione senza JavaFX nel model:} Il grafico dell'andamento richiede istantanee anche a intervalli regolari, quando l'utente non fa nulla, e la pagina degli investimenti deve aggiornare periodicamente i prezzi. I timer che lavorano sul thread dell'interfaccia sono forniti da JavaFX, da cui il model non deve dipendere.
+    \item \textbf{Ciclo di vita delle iscrizioni:} Chi si iscrive agli eventi deve poter annullare l'iscrizione, altrimenti gli oggetti non più usati restano in memoria e continuano a ricevere eventi. In una versione precedente la pagina degli investimenti aveva un proprio timer che non veniva mai fermato e si duplicava a ogni apertura della pagina.
+    \item \textbf{Salvataggio senza dimenticanze:} Ogni modifica deve essere salvata subito, senza affidarsi a chiamate di salvataggio sparse nei controller, facili da dimenticare.
+\end{enumerate}
 
 \subsubsection*{2. Soluzione proposta e alternative}
-È stato realizzato un bus di eventi disaccoppiato, \texttt{MessageBus}: i mittenti pubblicano gli eventi senza conoscere i destinatari, e i sottoscrittori specificano la classe di evento d'interesse ricevendo un token per la deregistrazione. Il tempo dell'applicazione è astratto tramite l'interfaccia di dominio \texttt{AppTicker}; la sua implementazione concreta nella view, \texttt{FxAppTicker}, pubblica un \texttt{TickEvent} a intervalli regolari.
-
-\texttt{PeriodicSnapshotSaver} intercetta sia gli eventi di tick temporale sia le transazioni eseguite, salvando un'istantanea di saldo per ciascun conto di investimento a intervalli controllati tramite \texttt{InvestmentsSnapshotService} (su file CSV). Parallelamente, \texttt{WalletAutoSaver} ascolta gli eventi di mutazione e persiste i conti su disco; per ogni tipologia di portafoglio riceve una coppia \texttt{Supplier} / \texttt{Consumer} (lettura e salvataggio), rimanendo completamente agnostico rispetto ai tipi concreti di conto. Prima di questa architettura, la schermata degli investimenti manteneva un timer interno che non veniva rilasciato alla chiusura, provocando duplicazioni ad ogni riapertura.
-
-\subsubsection*{3. Pattern utilizzati e reificazione}
 \begin{itemize}
-  \item \textbf{Observer Pattern (Publish/Subscribe):} Il \texttt{MessageBus} centralizza la mediazione degli eventi applicativi: i portafogli e \texttt{FxAppTicker} agiscono da publisher, mentre \texttt{PeriodicSnapshotSaver}, \texttt{WalletAutoSaver} e le schermate della GUI operano come subscriber.
-  \item \textbf{Strategy Pattern:} L'interfaccia \texttt{InvestmentsSnapshotService} disaccoppia la strategia di memorizzazione delle serie temporali dei conti titoli dall'algoritmo di campionamento.
+    \item \textbf{Alternativa scartata A (Riferimenti diretti tra componenti):} Far chiamare al conto o al controller direttamente la pagina, il salvataggio e le istantanee avrebbe legato il model alla view e alla persistenza, e ogni nuovo componente interessato avrebbe richiesto di modificare chi produce i dati.
+    \item \textbf{Alternativa scartata B (Timer nel model):} Usare una \texttt{Timeline} JavaFX nel model avrebbe violato la separazione MVC; usare un thread separato (ad esempio uno \texttt{ScheduledExecutorService}) avrebbe introdotto accessi concorrenti a dati e componenti grafici pensati per un solo thread.
+    \item \textbf{Alternativa scartata C (Salvataggio esplicito nei controller):} Chiamare il salvataggio dopo ogni operazione avrebbe sparso la stessa responsabilità in tutti i controller, con il rischio di dimenticarla in qualche punto.
+    \item \textbf{Soluzione adottata:} Un canale di eventi e componenti che vi si iscrivono:
+    \begin{enumerate}
+        \item \emph{\texttt{MessageBus}:} gli iscritti sono raggruppati per classe dell'evento; \texttt{send} recapita l'evento a chi è iscritto alla sua classe; \texttt{subscribe} restituisce un riferimento (token) che serve poi ad annullare l'iscrizione;
+        \item \emph{Tempo come interfaccia del model:} \texttt{AppTicker} espone solo \texttt{start()} e \texttt{stop()}; la sua implementazione nella view, \texttt{FxAppTicker}, usa una \texttt{Timeline} JavaFX e pubblica un \texttt{TickEvent} ogni minuto (il primo subito all'avvio). Poiché i tick arrivano sul thread dell'interfaccia, gli iscritti possono aggiornare model e view senza problemi di concorrenza;
+        \item \emph{Istantanee periodiche:} \texttt{PeriodicSnapshotSaver} ascolta i tick e le nuove transazioni e salva un'istantanea per ogni conto di investimento al massimo ogni dieci minuti, tramite l'interfaccia \texttt{InvestmentsSnapshotService}. L'implementazione attuale scrive un file CSV per conto, solo in aggiunta; il file viene eliminato insieme al conto. Un errore di prezzo viene registrato nel log e l'istantanea viene ritentata al tick successivo;
+        \item \emph{Salvataggio automatico:} \texttt{WalletAutoSaver} si iscrive ai sei eventi che modificano i dati (conto aggiunto, rinominato, eliminato; transazione aggiunta, rimossa, sostituita) e a ognuno salva tutti i conti. Per ogni tipo di conto riceve una coppia \emph{da dove leggo i conti} / \emph{come li salvo} (\texttt{Supplier} e \texttt{Consumer}), quindi non conosce i tipi concreti: un nuovo tipo di conto si aggiunge con una sola chiamata a \texttt{register}. Il salvataggio di un tipo che fallisce non blocca gli altri, e l'errore viene notificato all'utente; alla chiusura l'applicazione esegue comunque un ultimo salvataggio completo.
+    \end{enumerate}
 \end{itemize}
 
+\subsubsection*{3. Schema UML e Interazioni}
+\texttt{FxAppTicker} realizza \texttt{AppTicker} e pubblica i \texttt{TickEvent} sul \texttt{MessageBus}. \texttt{PeriodicSnapshotSaver} e \texttt{WalletAutoSaver} sono iscritti al canale e non conoscono chi pubblica gli eventi; il primo delega la conservazione delle istantanee a \texttt{InvestmentsSnapshotService}, realizzato da \texttt{CSVInvestmentsSnapshotService} (Figura~\ref{fig:dan-tempo}). Tutti i componenti vengono creati e avviati all'avvio dell'applicazione, e fermati alla chiusura.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{img/uml-dan-tempo.pdf}
+\caption{Eventi e tempo dell'applicazione: il model dipende solo dall'interfaccia \texttt{AppTicker}.}
+\label{fig:dan-tempo}
+\end{figure}
+
+\subsubsection*{4. Pattern utilizzati e reificazione}
+\begin{itemize}
+    \item \textbf{Observer (nella forma Publish/Subscribe):} Il \texttt{MessageBus} è il canale; i conti e \texttt{FxAppTicker} sono i publisher; \texttt{PeriodicSnapshotSaver}, \texttt{WalletAutoSaver} e le pagine della GUI sono i subscriber. Rispetto all'Observer classico, publisher e subscriber non si conoscono: entrambi dipendono solo dal canale e dalla classe dell'evento.
+    \item \textbf{Strategy:} \texttt{InvestmentsSnapshotService} separa la scelta di \emph{quando} salvare un'istantanea (in \texttt{PeriodicSnapshotSaver}) da \emph{come} conservarla (CSV nell'implementazione attuale, sostituibile ad esempio con un database).
+\end{itemize}
+
+% ----------------------------------------------------------------------------
 \subsection{Finestra Principale e Barra Laterale Condivisa}
 
 \subsubsection*{1. Descrizione del problema}
-La finestra principale (\texttt{MainViewController}) ospita a turno le schermate dei diversi moduli dell'applicazione. La barra laterale di navigazione è unica e condivisa, ma deve visualizzare la lista dei conti pertinente al modulo attivo (portafogli di liquidità o conti titoli) e inoltrare al controller corrispondente le azioni dell'utente (selezione, creazione, rinomina ed eliminazione). Inoltre, le viste aperte si iscrivono a eventi sul bus, e le iscrizioni devono essere revocate tempestivamente alla chiusura per prevenire memory leak.
+La finestra principale ospita a turno le pagine dei diversi moduli, sviluppati in parallelo dai membri del gruppo:
+\begin{enumerate}
+    \item \textbf{Barra laterale unica per moduli diversi:} La barra laterale è la stessa per tutte le pagine, ma deve mostrare i conti del modulo corrente (conti di liquidità nel cruscotto, conti di investimento nel portafoglio) con il relativo totale, e inoltrare a quel modulo le azioni dell'utente: selezione, creazione, rinomina ed eliminazione di un conto.
+    \item \textbf{Ciclo di vita delle pagine:} Le pagine si iscrivono a eventi; quando l'utente passa a un'altra pagina, le iscrizioni della pagina chiusa vanno annullate, altrimenti la pagina resta in memoria e continua a reagire agli eventi.
+    \item \textbf{Dipendenze dei controller FXML:} I controller delle pagine caricate da file FXML vengono normalmente creati da JavaFX con il costruttore senza argomenti; servono invece i servizi condivisi creati all'avvio (controller degli investimenti, servizio delle istantanee, moduli degli altri membri).
+\end{enumerate}
 
 \subsubsection*{2. Soluzione proposta e alternative}
-La barra laterale (\texttt{SideBarViewController}) non mantiene riferimenti diretti ai singoli moduli: interagisce unicamente tramite l'interfaccia formale \texttt{SideBarDelegate}, implementata da ciascuna schermata; al cambio di vista, \texttt{MainViewController} provvede ad aggiornare il delegate corrente. L'aggiunta di un nuovo modulo con conti dedicati richiede unicamente l'implementazione di tale interfaccia.
-
-Tutti i controller delle viste estendono la classe comune \texttt{BaseViewController}, che registra centralmente le sottoscrizioni agli eventi e le rimuove in blocco nel metodo \texttt{dispose()}, invocato dalla finestra principale ad ogni transizione di pagina. I controller JavaFX vengono istanziati dalla factory \texttt{ViewControllersFactory}, che inietta a tempo di costruzione i servizi necessari. L'alternativa scartata (sviluppare barre laterali separate per ciascun modulo) avrebbe generato una cospicua duplicazione di codice e di stili grafici.
-
-\subsubsection*{3. Pattern utilizzati e reificazione}
 \begin{itemize}
-  \item \textbf{Strategy Pattern (nella variante Delegate):} L'interfaccia \texttt{SideBarDelegate} formalizza la strategia di comunicazione tra la barra laterale e la vista attiva, delegando a quest'ultima l'estrazione dei dati contabili e la gestione dei comandi.
-  \item \textbf{Factory Pattern:} La classe \texttt{ViewControllersFactory} accentra la creazione e l'inizializzazione dei controller delle viste con iniezione manuale delle dipendenze applicative.
+    \item \textbf{Alternativa scartata A (Una barra laterale per ogni pagina):} Avrebbe duplicato il codice e l'aspetto grafico, con il rischio di comportamenti diversi tra i moduli.
+    \item \textbf{Alternativa scartata B (Barra laterale che conosce i moduli):} Una barra laterale con un ramo \texttt{if} per ogni modulo avrebbe dovuto essere modificata per ogni nuovo modulo, e avrebbe dipeso da tutti i loro servizi.
+    \item \textbf{Alternativa scartata C (Servizi statici accessibili ovunque):} Rendere i servizi raggiungibili da metodi statici avrebbe semplificato la creazione dei controller, ma avrebbe nascosto le dipendenze e reso i controller difficili da testare.
+    \item \textbf{Soluzione adottata:}
+    \begin{enumerate}
+        \item \emph{Delegate:} \texttt{SideBarViewController} disegna la barra (elenco dei conti, totale, menu contestuale per modifica ed eliminazione, pulsante di creazione) ma ottiene i dati e inoltra le azioni tramite l'interfaccia \texttt{SideBarDelegate}. Ogni pagina con dei conti implementa l'interfaccia; quando l'utente cambia pagina, \texttt{MainViewController} imposta come delegate la nuova pagina. Per la pagina del convertitore, che non ha conti propri, la finestra principale continua a mostrare i conti del modulo precedente. Un nuovo modulo con dei conti deve solo implementare \texttt{SideBarDelegate};
+        \item \emph{Ciclo di vita:} tutti i controller delle pagine estendono \texttt{BaseViewController}, che offre un metodo \texttt{subscribe} che ricorda i token delle iscrizioni e le annulla tutte in \texttt{dispose()}, chiamato dalla finestra principale a ogni cambio di pagina. Le sottoclassi possono aggiungere la propria pulizia ridefinendo \texttt{onDispose()};
+        \item \emph{Creazione dei controller:} \texttt{ViewControllersFactory} viene passata al caricatore FXML e crea i controller passando loro i servizi ricevuti all'avvio; per i controller che non hanno dipendenze ricorre al costruttore senza argomenti tramite reflection.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection*{3. Schema UML e Interazioni}
+\texttt{MainViewController}, \texttt{DashboardViewController} e \texttt{InvestmentsViewController} estendono \texttt{BaseViewController}, che realizza \texttt{Disposable}. La finestra principale include la barra laterale, che lavora solo con l'interfaccia \texttt{SideBarDelegate}, implementata dalle pagine del cruscotto e del portafoglio. \texttt{ViewControllersFactory} crea i controller con le loro dipendenze (Figura~\ref{fig:dan-shell}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{img/uml-dan-shell.pdf}
+\caption{Finestra principale, barra laterale con delegate e ciclo di vita delle pagine.}
+\label{fig:dan-shell}
+\end{figure}
+
+\subsubsection*{4. Pattern utilizzati e reificazione}
+\begin{itemize}
+    \item \textbf{Strategy (nella forma Delegate):} \texttt{SideBarDelegate} è la strategia con cui la barra laterale ottiene i dati e inoltra le azioni; le pagine del cruscotto e del portafoglio sono le strategie concrete, scelte a runtime dalla finestra principale.
+    \item \textbf{Template Method:} \texttt{dispose()} di \texttt{BaseViewController} esegue sempre l'annullamento delle iscrizioni e poi chiama il metodo \emph{hook} \texttt{onDispose()}, che le sottoclassi ridefiniscono per la propria pulizia.
+    \item \textbf{Factory:} \texttt{ViewControllersFactory} accentra la creazione dei controller delle pagine con l'iniezione manuale delle dipendenze, senza ricorrere a un framework.
 \end{itemize}
 
 
@@ -979,19 +1078,23 @@ Per la parte sviluppata da \textbf{Favour Osaretin Emuwahen}, il collaudo automa
   \end{itemize}
 \end{itemize}
 
-Per la parte sviluppata da \textbf{Daniele Zappalà}, le attività di testing automatizzato coprono il modulo investimenti, i contratti di esecuzione degli ordini e le componenti infrastrutturali:
+Per la parte sviluppata da \textbf{Daniele Zappalà}, i test riguardano il modulo investimenti, la gestione e il salvataggio dei conti, le istantanee del profitto/perdita e i prezzi delle criptovalute. Dove servono prezzi o tassi di cambio si usano valori fissi scritti nel test, quindi nessun test dipende dalla rete:
 \begin{itemize}
-  \item \textbf{Investimenti e Rendicontazione Portafoglio Titoli:}
-  \begin{itemize}
-    \item \texttt{InvestmentAccountTest}: verifica del calcolo delle posizioni contabili, del prezzo medio ponderato di carico, del profitto/perdita non realizzato e del profitto realizzato a fronte di vendite parziali.
-    \item \texttt{DefaultInvestmentControllerTest}: collaudo esaustivo degli ordini di acquisto, vendita e trasferimento con tutte le sorgenti di pagamento (\texttt{PaymentSource}), gestendo sia gli esiti nominali sia le condizioni anomale (fondi insufficienti, disponibilità titoli carente, conversioni tra valute diverse).
-    \item \texttt{InvestmentAccountPersistenceTest}: test di persistenza e ricaricamento da file JSON con conservazione dell'identificativo UUID.
-  \end{itemize}
-  \item \textbf{Campionamento Temporale e Fonti Dati:}
-  \begin{itemize}
-    \item \texttt{PeriodicSnapshotSaverTest}: verifica del salvataggio periodico delle istantanee temporali mediante ticker simulato deterministico.
-    \item \texttt{CryptoPriceBatchTest}: test di deserializzazione delle quotazioni da payload memorizzati, compresa la gestione di rate limit e quote esaurite.
-  \end{itemize}
+    \item \textbf{Conti di investimento e ordini:}
+    \begin{itemize}
+        \item \texttt{InvestmentAccountTest}: a partire da acquisti e vendite di esempio, verifica che il conto calcoli correttamente le posizioni (quantità posseduta e prezzo medio di carico, anche dopo più acquisti dello stesso titolo), il saldo al valore di mercato, il profitto/perdita non realizzato, quello realizzato con le vendite e quello totale; controlla inoltre che non si possa vendere più di quanto si possiede e che una quantità negativa venga rifiutata.
+        \item \texttt{DefaultInvestmentControllerTest}: verifica il controller degli investimenti con prezzi e tassi fissi. Controlla la selezione dei conti, i saldi (anche convertiti in una seconda valuta), la stima del costo degli ordini e i controlli preliminari (\texttt{canBuy}, \texttt{canSell}, \texttt{canTransfer}). Esegue poi acquisti, vendite e trasferimenti con le diverse sorgenti di pagamento (conto di liquidità, stablecoin, nessun pagamento), verificando sia i casi riusciti (con i saldi aggiornati) sia gli errori previsti: fondi insufficienti, titolo non posseduto, quantità insufficiente, trasferimento verso lo stesso conto. Alcuni test controllano che, pagando o incassando in stablecoin, il prezzo registrato sia quello di una sola moneta nella valuta del conto, per evitare un errore trovato e corretto durante lo sviluppo.
+    \end{itemize}
+    \item \textbf{Gestione e salvataggio dei conti:}
+    \begin{itemize}
+        \item \texttt{InvestmentAccountPersistenceTest}: salva un conto di investimento su file JSON, lo ricarica e verifica che abbia lo stesso identificativo; questo è importante perché le istantanee del profitto/perdita sono salvate per identificativo del conto. Il file dei dati viene copiato prima di ogni test e ripristinato alla fine.
+        \item \texttt{WalletRenameDeleteTest}: verifica la rinomina e l'eliminazione dei conti. Il nuovo nome viene ripulito dagli spazi, un nome vuoto viene rifiutato, un identificativo inesistente non modifica nulla; quando si elimina il conto selezionato, viene selezionato il primo conto rimasto. Il test controlla anche che ogni operazione riuscita pubblichi sul canale di eventi il proprio evento (\texttt{WalletRenamedEvent}, \texttt{WalletDeletedEvent}), e che le operazioni non riuscite non ne pubblichino.
+    \end{itemize}
+    \item \textbf{Istantanee e prezzi:}
+    \begin{itemize}
+        \item \texttt{PeriodicSnapshotSaverTest}: verifica ogni quanto viene salvata l'istantanea del profitto/perdita. Il test non usa un timer vero: chiama direttamente il metodo che riceve il tick, passando orari scelti nel test, e salva le istantanee in memoria invece che su file. Controlla che al primo tick venga salvata un'istantanea, che i tick successivi non ne salvino altre finché non sono passati 10 minuti dall'ultima, e che dopo un riavvio dell'applicazione venga considerata l'ultima istantanea già salvata (se era di 3 minuti prima, la successiva arriva dopo altri 7 minuti).
+        \item \texttt{CryptoPriceBatchTest}: verifica che i prezzi di tutte le criptovalute vengano chiesti a CoinGecko con una sola richiesta e poi tenuti in cache, così le richieste successive non usano la rete. Il test non si collega al servizio reale, ma usa risposte JSON di esempio scritte nel test: controlla che i prezzi presenti nella risposta vengano letti correttamente, che una risposta di errore per troppe richieste (codice 429) non produca nessun prezzo e che, in quel caso, il servizio segnali l'errore invece di restituire un prezzo inventato.
+    \end{itemize}
 \end{itemize}
 
 Tutti i test vengono eseguiti automaticamente dal task \texttt{./gradlew check}. Il codice rispetta rigorosamente i controlli statici di Checkstyle, PMD e SpotBugs con zero violazioni.
@@ -1051,27 +1154,45 @@ Nello sviluppo del modulo di gestione delle valute, quotazioni, persistenza JSON
 \clearpage
 \subsection{Daniele Zappalà}
 
-Nello sviluppo del modulo investimenti, del canale di eventi disaccoppiato e dell'infrastruttura condivisa sono state adottate le seguenti caratteristiche avanzate del linguaggio Java 21:
+Di seguito si riportano le caratteristiche avanzate del linguaggio Java (versione 21 LTS) e le librerie utilizzate per lo sviluppo del modulo investimenti, del canale di eventi e della finestra principale, ciascuna con una breve descrizione e il permalink al punto del codice in cui è usata:
 
 \begin{itemize}[itemsep=5pt,topsep=3pt]
-  \item \textbf{Tipi Sigillati e Pattern Matching per Switch:} Modellazione gerarchica delle sorgenti di pagamento e degli esiti degli ordini tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}) e record immutabili, gestiti nei controller mediante switch esaustivi con decostruzione dei tipi verificati a tempo di compilazione.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java#L23-L52}
+    \item \textbf{Interfacce \texttt{sealed} e \texttt{record} per modellare le sorgenti di pagamento:} Le tre sorgenti di pagamento di un ordine sono \texttt{record} che implementano un'interfaccia sigillata: la gerarchia è chiusa e ogni record contiene solo i dati della propria sorgente.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/investment/PaymentSource.java#L23-L52}
 
-  \item \textbf{Generici con Type Token e Programmazione Funzionale (\texttt{MessageBus}):} Implementazione del bus applicativo disaccoppiato tramite un metodo generico limitato (\texttt{<T extends MessageEvent>}) basato su type token (\texttt{Class<T>}) e consumatori funzionali (\texttt{Consumer<T>}), garantendo type-safety a runtime nella distribuzione degli eventi.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java#L59-L63}
+    \item \textbf{Pattern matching nello \texttt{switch} su tipi sigillati:} Uno \texttt{switch} con pattern di tipo e di record (\texttt{case PaymentSource.NoPaymentChannel()}) sceglie come pagare l'ordine; il compilatore verifica che tutte le sorgenti siano gestite.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/controller/investments/DefaultInvestmentController.java#L511-L520}
 
-  \item \textbf{Stream API con \texttt{Collectors.groupingBy} e Riduzioni Complesse:} Calcolo delle posizioni di portafoglio aperte e determinazione contabile del costo medio ponderato aggregando le transazioni storiche tramite raggruppamento funzionale con \texttt{Collectors.groupingBy} in \texttt{InvestmentAccount}.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java#L146-L154}
+    \item \textbf{Metodo generico con tipo limitato e \emph{type token} (\texttt{<T extends MessageEvent>}):} L'iscrizione al canale di eventi riceve la classe dell'evento (\texttt{Class<T>}) e un \texttt{Consumer<T>} dello stesso tipo, così chi si iscrive riceve già l'evento con il tipo corretto, senza cast.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/utils/MessageBus.java#L59-L63}
 
-  \item \textbf{Astrazione del Tempo Applicativo con JavaFX \texttt{Timeline}:} Separazione netta della sorgente temporale mediante l'astrazione di dominio \texttt{AppTicker}, la cui implementazione grafica sfrutta una \texttt{Timeline} JavaFX per scandire i cicli periodici di snapshot e aggiornamento.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java#L29-L39}
+    \item \textbf{Metodo generico con interfacce funzionali (\texttt{Supplier}, \texttt{Consumer}):} Il salvataggio automatico registra, per ogni tipo di conto \texttt{W}, una coppia \texttt{Supplier<List<W>>} / \texttt{Consumer<List<W>>} passata con method reference, senza conoscere i tipi concreti dei conti.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java#L59-L65}
 
-  \item \textbf{I/O Tabellare con Apache Commons CSV e Salvataggio Automatico:} Serializzazione e storicizzazione delle istantanee patrimoniali su file CSV tramite la libreria Commons CSV, integrata con un motore di salvataggio automatico (\texttt{WalletAutoSaver}) basato su \texttt{Supplier} e \texttt{Consumer}.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/persistency/WalletAutoSaver.java#L59-L65}
+    \item \textbf{Stream con \texttt{Collectors.groupingBy} per calcolare le posizioni:} Le posizioni di un conto di investimento vengono ricavate dallo storico con una pipeline di stream che raggruppa i movimenti per titolo e calcola una posizione per gruppo.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/wallet/InvestmentAccount.java#L146-L154}
 
-  \item \textbf{Reflection e Inizializzazione Dinamica dei Controller FXML:} Istanziazione centralizzata dei controller di vista in \texttt{ViewControllersFactory} tramite reflection controllata per iniettare programmaticamente le dipendenze applicative nei moduli caricati a runtime.
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java#L64-L91}
+    \item \textbf{\texttt{Optional} e \texttt{Comparator} con method reference (miglior e peggior titolo):} Il titolo con il rendimento migliore e peggiore è cercato con \texttt{max}/\texttt{min} su uno stream di posizioni e \texttt{Comparator.comparing(Position::getUnrealizedProfitLossPercentage)}; il risultato è un \texttt{Optional}, vuoto se il conto non ha posizioni.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/controller/investments/DefaultInvestmentController.java#L667-L677}
+
+    \item \textbf{Reflection per creare i controller delle pagine FXML:} La factory passata al caricatore FXML crea i controller con le loro dipendenze e, per quelli senza dipendenze, usa \texttt{getDeclaredConstructor().newInstance()}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/main/ViewControllersFactory.java#L64-L91}
+
+    \item \textbf{API \texttt{java.time} (\texttt{ChronoUnit}) per il formato delle date del grafico:} Il formato delle etichette dell'asse del tempo cambia con l'intervallo mostrato (meno di un'ora, di un giorno, di un mese), calcolato con \texttt{ChronoUnit.between}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/investments/InvestmentsViewController.java#L274-L285}
+
+    \item \textbf{Metodo generico con lambda per le colonne numeriche delle tabelle JavaFX:} Un unico metodo generico configura tutte le colonne numeriche delle tabelle: riceve come lambda una funzione per il testo mostrato e una per il valore numerico usato nell'ordinamento (\texttt{Comparator.comparing}), e può colorare le celle in base al segno.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/investments/InvestmentsViewController.java#L382-L406}
+
+    \item \textbf{Libreria Apache Commons CSV per le istantanee del profitto/perdita:} Le istantanee di ogni conto sono lette da file CSV con \texttt{CSVFormat} e \texttt{CSVParser} in un blocco \emph{try-with-resources}.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/investment/service/CSVInvestmentsSnapshotService.java#L151-L171}
+
+    \item \textbf{Libreria JavaFX: \texttt{Timeline} per il tempo dell'applicazione:} Il tempo dell'applicazione è una \texttt{Timeline} con due \texttt{KeyFrame} (il primo a tempo zero, per avere subito un tick) ripetuta all'infinito; ogni tick viene pubblicato come evento.
+    \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/view/utils/FxAppTicker.java#L29-L39}
 \end{itemize}
+
+\noindent
+Nella mia parte non è stato utilizzato codice proveniente da fonti esterne. Per lo studio dei pattern e delle API ho consultato i testi e i siti indicati in bibliografia, in particolare \cite{Horstmann} e \cite{RefactoringGuru}.
 
 \chapter{Commenti finali}
 
@@ -1133,29 +1254,33 @@ Nel lavoro di squadra mi sono concentrata sulla definizione delle basi multivalu
 
 \clearpage
 \subsection{Daniele Zappalà}
-\enlargethispage{1.5\baselineskip}
-Nel progetto mi sono dedicato alla progettazione e implementazione del modulo investimenti (\texttt{InvestmentAccount}, gestione degli ordini di acquisto e vendita con molteplici sorgenti di pagamento, calcolo delle posizioni aperte e del profitto/perdita), oltre ad aver realizzato la finestra principale (\texttt{MainViewController}) con la barra laterale condivisa a navigazione delegata, il bus di eventi disaccoppiato (\texttt{MessageBus}), l'astrazione temporale (\texttt{AppTicker}) e il salvataggio automatico periodico.
+
+All'interno del progetto UniBodget mi sono occupato della progettazione, sviluppo e collaudo del modulo degli investimenti: conti di investimento (\texttt{InvestmentAccount}), calcolo continuo di posizioni e profitto/perdita, ordini di acquisto, vendita e trasferimento titoli con le diverse sorgenti di pagamento (\texttt{PaymentSource}), istantanee periodiche temporali (\texttt{BalanceSnapshot}), grafico di andamento e pagina \emph{Portfolio}. Ho inoltre realizzato la finestra principale (\texttt{MainViewController}) con la barra laterale condivisa con pattern Delegate, in cui sono integrate a runtime le pagine degli altri moduli, il canale disaccoppiato di eventi (\texttt{MessageBus}), il tempo dell'applicazione (\texttt{AppTicker}) e il sottosistema di salvataggio automatico dei portafogli (\texttt{WalletAutoSaver}).
 
 \subsubsection*{Punti di forza del contributo:}
 \begin{itemize}[noitemsep,topsep=2pt]
-  \item \textbf{Espressività dei tipi sigillati e pattern matching:} Modellare sorgenti ed esiti delle transazioni tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}) e record ha reso il flusso operativo estremamente leggibile e sicuro: il compilatore verifica l'esaustività degli switch, eliminando la necessità di ricorrere a eccezioni per gestire esiti nominali di business (come fondi insufficienti).
-  \item \textbf{Integrità contabile derivata dallo storico:} La decisione di non salvare saldo e posizioni come campi mutabili volatili, ma di ricavarli in modo trasparente e dinamico dallo storico delle operazioni con il metodo a costo medio ponderato, ha azzerato i rischi di disallineamento matematico dei dati anche a seguito di modifiche o cancellazioni retroattive.
-  \item \textbf{Indipendenza del modello dal framework grafico:} La logica finanziaria e la scansione del tempo sono del tutto slegate da JavaFX, rendendo il core applicativo pienamente collaudabile in modo deterministico nei test automatici.
+    \item \textbf{Tipi sigillati per ordini ed esiti contabili:} Le sorgenti di pagamento e gli esiti degli ordini sono modellati tramite interfacce sigillate (\texttt{PaymentSource}, \texttt{OrderResult}): il compilatore verifica a tempo di compilazione l'esaustività dello \texttt{switch}, e gli errori previsti giungono alla view come strutture dati descrittive, eliminando eccezioni e logiche imperativo-procedurali.
+    \item \textbf{Integrità contabile e ricalcolo dallo storico:} Saldi, posizioni e profitto/perdita sono sempre calcolati a partire dallo storico delle transazioni con metodo contabile a costo medio ponderato, garantendo coerenza anche dopo modifiche o cancellazioni retroattive.
+    \item \textbf{Disaccoppiamento del model da JavaFX:} Il modello degli investimenti non dipende dal toolkit grafico; anche il tempo dell'applicazione è un'astrazione del model (\texttt{AppTicker}), implementata nella view tramite \texttt{FxAppTicker}.
+    \item \textbf{Copertura di test e determinismo:} Il controller degli investimenti e i conti sono coperti da test approfonditi sulle diverse combinazioni di operazioni e sorgenti di pagamento, adottando convertitori deterministici a quotazioni fisse indipendenti dalla rete.
 \end{itemize}
 
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
 \begin{itemize}[noitemsep,topsep=2pt]
-  \item \textbf{Canale eventi globale:} Il \texttt{MessageBus} adotta un pattern ad accesso statico: una soluzione immediata ed efficace per connettere viste e controller disaccoppiati, ma che richiede particolare pulizia nei test unitari per non condividere accidentalmente subscriber tra suite diverse; un'iniezione esplicita per istanza avrebbe garantito un isolamento ancora più rigoroso.
-  \item \textbf{Ricalcolo retroattivo degli snapshot storici:} Le serie storiche salvate periodicamente su file CSV registrano lo stato patrimoniale al momento del campionamento; modificare ordini passati non rigenera in automatico i vecchi punti del grafico.
+    \item \textbf{Canale eventi globale:} Il \texttt{MessageBus} adotta un pattern ad accesso statico: una soluzione immediata ed efficace per connettere viste e controller disaccoppiati, ma che richiede particolare pulizia nei test unitari per non condividere accidentalmente subscriber tra suite diverse; un'iniezione esplicita per istanza avrebbe garantito un isolamento ancora più rigoroso.
+    \item \textbf{Tasso di cambio mancante non gestito come esito:} \texttt{OrderResult} prevede l'errore \texttt{CurrencyConversionError}, ma il controller non lo restituisce ancora: se manca il tasso di cambio tra la valuta della sorgente e quella del conto, l'errore arriva come eccezione invece che come messaggio chiaro per l'utente.
+    \item \textbf{Ordini passati non correggibili:} Nella pagina \emph{Portfolio} un ordine già eseguito non si può modificare né cancellare. Inoltre le istantanee del grafico, salvate su file CSV, contengono il profitto/perdita del momento in cui sono state salvate e non vengono mai ricalcolate: per permettere la correzione degli ordini andrebbe gestito anche questo ricalcolo.
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
-Oltre allo sviluppo della sezione investimenti, ho curato la cornice principale dell'interfaccia con la barra laterale unificata in cui convergono le schermate dei vari moduli. Mi sono inoltre fatto carico della gestione del canale eventi comune e ho coordinato buona parte dell'integrazione del codice su Git, facilitando la risoluzione dei conflitti e la convergenza dei rami di lavoro.
+Oltre al modulo degli investimenti, mi sono occupato di buona parte dell'infrastruttura condivisa dai tre moduli: la finestra principale in cui vengono montate le pagine del cruscotto e del convertitore, la barra laterale con la gestione dei conti (creazione, rinomina ed eliminazione dal menu contestuale, ridimensionamento trascinando il divisore), il canale di eventi con il ciclo di vita delle iscrizioni delle pagine, il salvataggio automatico dei conti e la correzione della persistenza degli identificativi dei conti tra un avvio e l'altro. Ho curato inoltre buona parte dell'integrazione tra i moduli e l'unione dei rami di sviluppo nel ramo comune, risolvendo i conflitti e gli errori emersi nelle fasi di unione.
 
 \subsubsection*{Sviluppi futuri specifici del modulo:}
 \begin{enumerate}[noitemsep,topsep=2pt]
-  \item \textbf{Analitica temporale avanzata dei grafici:} Selezione dinamica del timeframe (settimanale, mensile, annuale) e visualizzazione della curva di rendimento per ogni singolo strumento in portafoglio.
-  \item \textbf{Rigenerazione retroattiva degli snapshot:} Algoritmo di ricalcolo automatico della serie storica CSV per riallineare i dati in caso di modifiche o eliminazioni di ordini passati.
+    \item \textbf{Caricamento asincrono delle quotazioni:} Recupero dei prezzi di mercato in background con \texttt{CompletableFuture} per azzerare i tempi di attesa al primo avvio della vista.
+    \item \textbf{Personalizzazione temporale e analitica dei grafici:} Introduzione nel grafico di performance della selezione dinamica dell'intervallo temporale (giorno, settimana, mese, anno) e grafici di andamento per i singoli titoli in portafoglio.
+    \item \textbf{Correzione degli ordini passati e ricalcolo del grafico:} Oggi, nella pagina \emph{Portfolio}, un ordine già eseguito non si può modificare né cancellare. Per aggiungere questa funzione non basterebbe cambiare lo storico del conto: il grafico dell'andamento è costruito dalle istantanee salvate nel tempo, e ognuna contiene il profitto/perdita calcolato nel momento in cui è stata salvata. Dopo una correzione, quindi, andrebbero ricalcolate anche tutte le istantanee successive alla data dell'ordine, altrimenti il grafico continuerebbe a mostrare i valori vecchi.
+    \item \textbf{Versione web e app mobile:} In futuro vorrei portare l'applicazione sul web, con account e registrazione degli utenti, e anche su dispositivi mobili, come app per iOS e Android. Model e controller non dipendono da JavaFX, quindi si potrebbero riusare quasi senza modifiche, ad esempio rendendoli accessibili tramite servizi REST usati sia dal sito sia dall'app mobile. Con molti utenti contemporanei, il \texttt{MessageBus} dovrebbe diventare un'istanza separata per ogni sessione utente invece di un unico canale statico, e i file JSON andrebbero sostituiti da un database.
 \end{enumerate}
 
 \subsection{Sviluppi Futuri Comuni}
@@ -1196,7 +1321,7 @@ Per compilare ed eseguire l'applicazione desktop, è sufficiente posizionarsi ne
 \end{lstlisting}
 In alternativa è possibile creare il pacchetto eseguibile autocontenuto con \texttt{./gradlew jar} e avviarlo con \texttt{java -jar UniBodget.jar}. Il runtime JavaFX provvederà a caricare le preferenze utente persistite, ripristinare i conti, le transazioni e le impostazioni, e visualizzare la finestra principale dell'applicazione, suddivisa tra la barra laterale di navigazione (\emph{Sidebar}) e l'area centrale, impostata di default sulla Dashboard.
 
-Per il recupero delle quotazioni di mercato è richiesta una connessione a Internet; per l'accesso ai titoli azionari tramite provider esterno è supportata una chiave API personale configurabile tramite la variabile d'ambiente \texttt{ALPHA\_VANTAGE\_API\_KEY}. Le serie temporali delle istantanee del portafoglio titoli vengono memorizzate all'interno della cartella di persistenza (\texttt{\textasciitilde/.unibodget/snapshots} o \texttt{data/}).
+Per il recupero delle quotazioni di mercato è richiesta una connessione a Internet; per l'accesso ai titoli azionari tramite provider esterno è supportata una chiave API personale configurabile tramite la variabile d'ambiente \texttt{ALPHA\_VANTAGE\_API\_KEY}. Le istantanee del profitto/perdita dei conti di investimento, usate per il grafico dell'andamento, vengono salvate in file CSV nella cartella \texttt{data/csv/snapshots}, insieme agli altri dati dell'applicazione, un file per ogni conto.
 
 \section*{Panoramica della Dashboard}
 La schermata principale della Dashboard è organizzata in aree logiche ad alta densità informativa:
@@ -1243,18 +1368,20 @@ La schermata principale della Dashboard è organizzata in aree logiche ad alta d
 \end{enumerate}
 
 \subsection*{Portfolio e Gestione degli Investimenti}
-La schermata \textbf{Portfolio} consente di monitorare i conti titoli, visualizzare l'andamento del patrimonio investito ed eseguire ordini di borsa:
+La schermata \textbf{Portfolio}, che si apre con il pulsante \texttt{"Portfolio"} della barra laterale, consente di gestire i conti di investimento, seguire l'andamento del loro valore ed eseguire ordini di acquisto, vendita e trasferimento:
 \begin{enumerate}
-  \item \textbf{Indicatori Patrimoniali del Conto:} La parte superiore mostra il valore di mercato totale del conto, il profitto/perdita complessivo (sia in valore monetario sia in percentuale), il costo storico di carico e i titoli che registrano il rendimento migliore e peggiore.
-  \item \textbf{Grafici di Performance e Asset Allocation:} Il grafico ad area/linea temporale (\emph{Performance}) traccia l'andamento del profitto/perdita nel tempo campionando le istantanee; due grafici a torta visualizzano la ripartizione del portafoglio tra i diversi asset per valore monetario e per quantità posseduta.
-  \item \textbf{Emissione di Ordini (\texttt{"+ Add transaction"}):} Premendo il pulsante dedicato si apre una finestra di dialogo modale articolata su tre schede:
-  \begin{itemize}
-    \item \emph{BUY (Acquisto):} Permette di selezionare il titolo (il prezzo corrente viene precompilato automaticamente), la quantità, le commissioni e la sorgente di pagamento: un conto di liquidità (\emph{Cash account}), saldo in stablecoin del conto stesso (\emph{Stable coin}) o fondo esterno (\emph{No payment}). Il totale dovuto si aggiorna dinamicamente durante l'inserimento.
-    \item \emph{SELL (Vendita):} Analogo all'acquisto, mette a disposizione il pulsante rapido \emph{MAX} per liquidare l'intera posizione; il controvalore netto ricavato viene accreditato sulla sorgente selezionata.
-    \item \emph{TRANSFER (Trasferimento):} Sposta quote di un asset verso un altro conto di investimento senza generare compravendite fittizie.
-  \end{itemize}
-  Se un ordine non può essere eseguito (ad esempio per fondi insufficienti, quantità da vendere superiore a quella posseduta o assenza di quotazione), l'applicazione mostra un messaggio diagnostico esplicativo e l'ordine viene respinto senza alterare alcun conto.
-  \item \textbf{Tabelle Posizioni e Movimenti:} Le tabelle \emph{Assets} e \emph{Transactions} elencano le posizioni aperte e lo storico dei movimenti eseguiti, con supporto all'ordinamento interattivo per colonna. Il pulsante \emph{Export CSV} consente di esportare l'intero storico su foglio di calcolo.
+    \item \textbf{Conti di investimento nella barra laterale:} Con la pagina Portfolio aperta, la barra laterale elenca i conti di investimento e, in basso, il loro valore totale (\emph{Total}); un clic su un conto lo seleziona e la pagina mostra i suoi dati. Il pulsante \texttt{"+"} apre la finestra \texttt{"Add New Wallet"}, in cui si inseriscono il nome e la valuta preferita del nuovo conto. Facendo clic con il tasto destro su un conto si apre un menu con \texttt{"Edit"}, per rinominarlo, e \texttt{"Delete"}, per eliminarlo dopo una richiesta di conferma.
+    \item \textbf{Indicatori del conto:} In alto sono mostrati il nome del conto selezionato e il suo valore di mercato attuale. Sotto si trovano il profitto/perdita totale (\emph{All-time profit}, in valore e in percentuale), il costo di carico, cioè quanto è stato speso per i titoli posseduti (\emph{Cost basis}), e i titoli con il rendimento migliore e peggiore (\emph{Best performer} e \emph{Worst performer}).
+    \item \textbf{Grafici:} Il grafico a linee \emph{Performance} mostra l'andamento del profitto/perdita nel tempo; è costruito con le istantanee che l'applicazione salva ogni 10 minuti e dopo ogni ordine. Il grafico a torta \emph{Allocation} mostra come è diviso il portafoglio tra i titoli: l'interruttore \emph{Value}/\emph{Quantity} sceglie se dividerlo per valore o per quantità posseduta.
+    \item \textbf{Inserimento di un ordine (\texttt{"+ Add transaction"}):} Il pulsante apre una finestra con tre schede:
+    \begin{itemize}
+        \item \emph{BUY (acquisto):} si scelgono il titolo, la quantità, il prezzo per unità, la data, le commissioni (\emph{Fee}) ed eventuali note. Quando si sceglie il titolo, il prezzo di mercato attuale viene inserito automaticamente; se il prezzo non è disponibile (ad esempio perché il servizio dei prezzi non risponde o è stato superato il limite di richieste), il campo resta vuoto e il prezzo va scritto a mano. Si sceglie poi come pagare: con un conto di liquidità (\emph{Cash account}), con una stablecoin posseduta nello stesso conto di investimento (\emph{Stable coin}) oppure con fondi esterni, senza addebitare nessun conto (\emph{No payment}). Per le prime due opzioni un menu a tendina permette di scegliere quale conto o quale stablecoin usare. L'opzione \emph{Stable coin} è disattivata se il conto non possiede stablecoin; se invece ne possiede, è quella selezionata all'apertura. Il totale da pagare (\emph{Total Spent}) si aggiorna mentre si scrive.
+        \item \emph{SELL (vendita):} funziona come l'acquisto, ma si possono scegliere solo i titoli posseduti e il ricavato, al netto delle commissioni (\emph{Total Received}), va sulla sorgente scelta. Il pulsante \emph{MAX} inserisce tutta la quantità posseduta.
+        \item \emph{TRANSFER (trasferimento):} sposta una quantità di un titolo verso un altro conto di investimento, scelto tra quelli diversi dal conto attuale, senza acquisti né vendite. Anche qui il pulsante \emph{MAX} inserisce tutta la quantità posseduta.
+    \end{itemize}
+    Se l'ordine riesce, compare una notifica di conferma. Se non può essere eseguito, compare una notifica di errore che indica quanto serviva e quanto era disponibile: fondi insufficienti (\emph{Insufficient funds}) oppure quantità del titolo insufficiente (\emph{Insufficient assets}). In questo caso nessun conto viene modificato.
+    \item \textbf{Tabelle:} La scheda \emph{Assets} elenca le posizioni aperte (nome del titolo, prezzo attuale, quantità posseduta, costo totale, profitto/perdita); la scheda \emph{Transactions} elenca i movimenti del conto (data, titolo, quantità, prezzo per unità, commissione, note). Facendo clic sull'intestazione di una colonna si ordinano le righe secondo quella colonna.
+    \item \textbf{Esportazione (\texttt{"Export CSV"}):} Il pulsante chiede dove salvare il file ed esporta in formato CSV tutti i movimenti del conto selezionato, con data, descrizione, categoria, titolo, quantità, prezzo per unità, commissione e note.
 \end{enumerate}
 
 \subsection*{Convertitore di Valute e Servizi di Mercato}
@@ -1289,9 +1416,9 @@ Tutte le informazioni create e modificate dall'utente durante l'utilizzo di UniB
 
 Per un corretto utilizzo quotidiano, l'utente deve tenere a mente le seguenti semplici indicazioni operative:
 \begin{itemize}
-  \item \textbf{Portabilità e copie di sicurezza (Backup):} Se si desidera fare una copia di riserva dei propri dati finanziari, trasferire il programma su una chiavetta USB o eseguirlo su un computer diverso continuando da dove si era rimasti, \textbf{è fondamentale portarsi sempre dietro l'intera cartella \texttt{data/}} assieme all'applicazione.
-  \item \textbf{Ricerca automatica della cartella:} All'avvio, l'applicazione cerca autonomamente la cartella \texttt{data/} nella posizione in cui si trova il programma. Se l'utente dovesse avviare l'eseguibile da un percorso leggermente diverso o spostare i file in una sottocartella, il software è abbastanza intelligente da scansionare in autonomia le cartelle vicine e superiori per rintracciare i propri file di configurazione senza richiedere interventi manuali.
-  \item \textbf{Cosa succede se la cartella manca (Ripartenza da zero):} Qualora la cartella \texttt{data/} non dovesse essere trovata in nessun percorso adiacente (ad esempio perché è stata rimossa, non è stata copiata assieme al software o il programma è stato avviato in una cartella completamente vuota), UniBodget non andrà in crash: provvederà invece a \textbf{creare automaticamente una nuova cartella \texttt{data/} vergine}, inizializzandola con i dati di esempio e le impostazioni predefinite di fabbrica. In questa situazione, l'utente si ritroverà l'applicazione pulita e \textbf{si ripartirà da zero}, senza vedere lo storico precedentemente memorizzato. Se ciò dovesse accadere accidentalmente, sarà sufficiente richiudere l'applicazione, ripristinare la cartella \texttt{data/} originale accanto al programma e riavviarlo per ritrovare immediatamente tutti i propri movimenti intatti.
+    \item \textbf{Portabilità e copie di sicurezza (Backup):} Se si desidera fare una copia di riserva dei propri dati finanziari, trasferire il programma su una chiavetta USB o eseguirlo su un computer diverso continuando da dove si era rimasti, \textbf{è fondamentale portarsi sempre dietro l'intera cartella \texttt{data/}} assieme all'applicazione. La cartella contiene anche le istantanee usate per il grafico del Portfolio (\texttt{data/csv/snapshots}), quindi copiandola si conserva anche lo storico del grafico.
+    \item \textbf{Ricerca automatica della cartella:} All'avvio, l'applicazione cerca autonomamente la cartella \texttt{data/} nella posizione in cui si trova il programma. Se l'utente dovesse avviare l'eseguibile da un percorso leggermente diverso o spostare i file in una sottocartella, il software è abbastanza intelligente da scansionare in autonomia le cartelle vicine e superiori per rintracciare i propri file di configurazione senza richiedere interventi manuali.
+    \item \textbf{Cosa succede se la cartella manca (Ripartenza da zero):} Qualora la cartella \texttt{data/} non dovesse essere trovata in nessun percorso adiacente (ad esempio perché è stata rimossa, non è stata copiata assieme al software o il programma è stato avviato in una cartella completamente vuota), UniBodget non andrà in crash: provvederà invece a \textbf{creare automaticamente una nuova cartella \texttt{data/} vergine}, inizializzandola con i dati di esempio e le impostazioni predefinite di fabbrica. In questa situazione, l'utente si ritroverà l'applicazione pulita e \textbf{si ripartirà da zero}, senza vedere lo storico precedentemente memorizzato. Se ciò dovesse accadere accidentalmente, sarà sufficiente richiudere l'applicazione, ripristinare la cartella \texttt{data/} originale accanto al programma e riavviarlo per ritrovare immediatamente tutti i propri movimenti intatti.
 \end{itemize}
 
 \chapter{Esercitazioni di Laboratorio}
@@ -1319,20 +1446,8 @@ Di seguito si riportano i riferimenti delle consegne settimanali relative all'in
 \end{itemize}
 
 \subsection*{Daniele Zappalà (\texttt{daniele.zappala3@studio.unibo.it})}
-\begin{itemize}
-  \item \textbf{Laboratorio 01:}
-  \item \textbf{Laboratorio 02:}
-  \item \textbf{Laboratorio 03:}
-  \item \textbf{Laboratorio 04:}
-  \item \textbf{Laboratorio 05:}
-  \item \textbf{Laboratorio 06:}
-  \item \textbf{Laboratorio 07:}
-  \item \textbf{Laboratorio 08:}
-  \item \textbf{Laboratorio 09:}
-  \item \textbf{Laboratorio 10:}
-  \item \textbf{Laboratorio 11:}
-  \item \textbf{Laboratorio 12:}
-\end{itemize}
+\noindent
+Nessuna consegna sul forum di Virtuale: le esercitazioni di laboratorio, non obbligatorie, sono state svolte in autonomia oppure mostrate in presenza durante le ore di laboratorio.
 
 
 % ============================================================================
@@ -1350,10 +1465,15 @@ Di seguito si riportano i riferimenti delle consegne settimanali relative all'in
   \newblock \emph{Effective Java (3rd Edition)}.
   \newblock Addison-Wesley Professional, 2018.
 
-  \bibitem{JavaFX}
-  OpenJFX Documentation.
-  \newblock \emph{Client Application Framework for Java}.
-  \newblock \url{https://openjfx.io/}
+\bibitem{Horstmann}
+Cay S. Horstmann.
+\newblock \emph{Core Java, Volume I: Fundamentals}.
+\newblock Pearson.
+
+\bibitem{JavaFX}
+OpenJFX Documentation.
+\newblock \emph{Client Application Framework for Java}.
+\newblock \url{https://openjfx.io/}
 
   \bibitem{Jackson}
   FasterXML.

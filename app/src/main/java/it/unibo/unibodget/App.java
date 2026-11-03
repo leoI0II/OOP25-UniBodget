@@ -17,6 +17,7 @@ import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.utils.AppTicker;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
@@ -35,9 +36,7 @@ import javafx.stage.Stage;
 /**
  * JavaFX application entry point for UniBodget.
  *
- * <p>
- * Bootstraps services and controllers, loads the main view and persists
- * application data when
+ * <p>Bootstraps services and controllers, loads the main view and persists application data when
  * the application stops.
  */
 public final class App extends Application {
@@ -45,11 +44,9 @@ public final class App extends Application {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(App.class);
     private static final double MIN_WINDOW_WIDTH = 900.0;
     private static final double MIN_WINDOW_HEIGHT = 600.0;
-    // time between two ticks of the app (e.g. the portfolio page refreshes the
-    // prices)
+    // time between two ticks of the app (e.g. the portfolio page refreshes the prices)
     private static final Duration TICK_INTERVAL = Duration.ofMinutes(1);
-    // how often a P/L snapshot of each investment account is saved while the app is
-    // open
+    // how often a P/L snapshot of each investment account is saved while the app is open
     private static final Duration SNAPSHOT_INTERVAL = Duration.ofMinutes(10);
     private WalletAutoSaver walletSaver;
     private PeriodicSnapshotSaver snapshotSaver;
@@ -61,10 +58,11 @@ public final class App extends Application {
     /** {@inheritDoc} */
     @Override
     public void start(final Stage stage) throws Exception {
-        final UniversalPriceService priceService = new UniversalPriceService(
-                new ExchangeRateAPIImpl(),
-                new CoinGeckoPriceProvider(),
-                new AlphaPriceProvider());
+        final UniversalPriceService priceService =
+                new UniversalPriceService(
+                        new ExchangeRateAPIImpl(),
+                        new CoinGeckoPriceProvider(),
+                        new AlphaPriceProvider());
 
         final BasicCurrencyConverter currencyConverter = new BasicCurrencyConverter(priceService);
 
@@ -81,39 +79,49 @@ public final class App extends Application {
         loadedCashAccounts.forEach(cashAccountsService::addWallet);
         loadedInvestmentAccounts.forEach(investmentsService::addWallet);
 
-        walletSaver = new WalletAutoSaver()
-                .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
-                .register(
-                        investmentsService::getWallets, investmentAccountManager::saveAll);
+        walletSaver =
+                new WalletAutoSaver()
+                        .register(cashAccountsService::getWallets, cashAccountManager::saveAll)
+                        .register(
+                                investmentsService::getWallets, investmentAccountManager::saveAll);
 
         final Settings settings = settingsController.getSettings();
-        final var snapshotService = new CSVInvestmentsSnapshotService();
+        // the snapshot files are named with the account ids saved in the json files,
+        // so they stay together inside data/ (data/csv/snapshots)
+        final var snapshotService =
+                new CSVInvestmentsSnapshotService(AppDataPathResolver.resolveCsv("snapshots"));
         snapshotSaver = new PeriodicSnapshotSaver(
-                investmentsService::getWallets, snapshotService, SNAPSHOT_INTERVAL);
+                        investmentsService::getWallets, snapshotService, SNAPSHOT_INTERVAL
+        );
         snapshotSaver.start();
 
-        final var investmentsController = new DefaultInvestmentController(
-                investmentsService,
-                cashAccountsService,
-                currencyConverter,
-                settings,
-                snapshotService);
+        final var investmentsController =
+                new DefaultInvestmentController(
+                        investmentsService,
+                        cashAccountsService,
+                        currencyConverter,
+                        settings,
+                        snapshotService);
 
-        final var dashboardModule = new DashboardModule(currencyConverter, settings, cashAccountsService);
+        final var dashboardModule =
+                new DashboardModule(currencyConverter, settings, cashAccountsService);
 
-        final var converterModule = new CurrencyConverterModule(new ExchangeRateAPIImpl(), currencyConverter);
+        final var converterModule =
+                new CurrencyConverterModule(new ExchangeRateAPIImpl(), currencyConverter);
 
-        final FXMLLoader mainViewPage = new FXMLLoader(
-                getClass()
-                        .getResource(
-                                "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"));
+        final FXMLLoader mainViewPage =
+                new FXMLLoader(
+                        getClass()
+                                .getResource(
+                                        "/it/unibo/unibodget/view/jfx/fxml/main/MainView.fxml"));
 
-        final var factory = new ViewControllersFactory(
-                investmentsController,
-                snapshotService,
-                dashboardModule,
-                converterModule,
-                settingsController);
+        final var factory =
+                new ViewControllersFactory(
+                        investmentsController,
+                        snapshotService,
+                        dashboardModule,
+                        converterModule,
+                        settingsController);
 
         mainViewPage.setControllerFactory(factory::create);
         final Parent root = mainViewPage.load();
@@ -136,8 +144,7 @@ public final class App extends Application {
 
         persistenceReady = true;
         walletSaver.start();
-        // the first tick is sent right away: the snapshots are saved and so the prices
-        // are
+        // the first tick is sent right away: the snapshots are saved and so the prices are
         // downloaded now, and not when the user opens the portfolio page
         ticker = new FxAppTicker(TICK_INTERVAL);
         ticker.start();
@@ -195,8 +202,7 @@ public final class App extends Application {
     /**
      * Stops automatic saving and persists wallets and window preferences.
      *
-     * <p>
-     * Saving is skipped if application startup did not complete.
+     * <p>Saving is skipped if application startup did not complete.
      */
     @Override
     public void stop() {
@@ -207,16 +213,18 @@ public final class App extends Application {
 
         IllegalStateException failure = null;
 
-        for (final Runnable save : List.<Runnable>of(
-                ticker::stop,
-                snapshotSaver::stop,
-                walletSaver::stop,
-                walletSaver::saveAll,
-                () -> {
-                    if (primaryStage != null) {
-                        saveWindowPreferences(primaryStage);
-                    }
-                })) {
+        for (final Runnable save
+                : List.<Runnable>of(
+                        ticker::stop,
+                        snapshotSaver::stop,
+                        walletSaver::stop,
+                        walletSaver::saveAll,
+                        () -> {
+                            if (primaryStage != null) {
+                                saveWindowPreferences(primaryStage);
+                            }
+                        })) {
+
             try {
                 save.run();
             } catch (final IllegalStateException | IllegalArgumentException ex) {
