@@ -17,6 +17,7 @@ import it.unibo.unibodget.model.settings.WindowPreferences;
 import it.unibo.unibodget.model.utils.AppTicker;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
@@ -56,7 +57,7 @@ public final class App extends Application {
 
     /** {@inheritDoc} */
     @Override
-    public void start(final Stage primaryStage) throws Exception {
+    public void start(final Stage stage) throws Exception {
         final UniversalPriceService priceService =
                 new UniversalPriceService(
                         new ExchangeRateAPIImpl(),
@@ -85,7 +86,10 @@ public final class App extends Application {
                                 investmentsService::getWallets, investmentAccountManager::saveAll);
 
         final Settings settings = settingsController.getSettings();
-        final var snapshotService = new CSVInvestmentsSnapshotService();
+        // the snapshot files are named with the account ids saved in the json files,
+        // so they stay together inside data/ (data/csv/snapshots)
+        final var snapshotService =
+                new CSVInvestmentsSnapshotService(AppDataPathResolver.resolveCsv("snapshots"));
         snapshotSaver = new PeriodicSnapshotSaver(
                         investmentsService::getWallets, snapshotService, SNAPSHOT_INTERVAL
         );
@@ -125,18 +129,18 @@ public final class App extends Application {
         final Scene scene = new Scene(root);
         ThemeManager.applyThemeToScene(scene);
 
-        this.primaryStage = primaryStage;
+        this.primaryStage = stage;
 
-        primaryStage.setScene(scene);
-        primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
-        primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
-        primaryStage.setWidth(Math.max(MIN_WINDOW_WIDTH, settings.getWindowPrefs().getWidth()));
-        primaryStage.setHeight(Math.max(MIN_WINDOW_HEIGHT, settings.getWindowPrefs().getHeight()));
-        primaryStage.setMaximized(settings.getWindowPrefs().isMaximized());
-        primaryStage.setTitle("UniBodget");
-        primaryStage.show();
+        stage.setScene(scene);
+        stage.setMinWidth(MIN_WINDOW_WIDTH);
+        stage.setMinHeight(MIN_WINDOW_HEIGHT);
+        stage.setWidth(Math.max(MIN_WINDOW_WIDTH, settings.getWindowPrefs().getWidth()));
+        stage.setHeight(Math.max(MIN_WINDOW_HEIGHT, settings.getWindowPrefs().getHeight()));
+        stage.setMaximized(settings.getWindowPrefs().isMaximized());
+        stage.setTitle("UniBodget");
+        stage.show();
 
-        updateWindowProperty(primaryStage);
+        updateWindowProperty(stage);
 
         persistenceReady = true;
         walletSaver.start();
@@ -220,7 +224,7 @@ public final class App extends Application {
                                 saveWindowPreferences(primaryStage);
                             }
                         })) {
-                            
+
             try {
                 save.run();
             } catch (final IllegalStateException | IllegalArgumentException ex) {
