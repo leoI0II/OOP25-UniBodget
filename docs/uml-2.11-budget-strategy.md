@@ -1,45 +1,62 @@
+```mermaid
 classDiagram
-direction TB
+    direction TB
 
-class DefaultBudgetMonitor {
-    -BudgetAlertStrategy strategy
-    +void setStrategy(BudgetAlertStrategy strategy)
-    +BudgetStatus getBudgetStatus(BigDecimal spent, BudgetSettings settings)
-}
+    class BudgetMonitor {
+        <<interface>>
+        +getBudgetStatus(BigDecimal currentValue, BudgetSettings settings) BudgetStatus
+    }
 
-class BudgetAlertStrategy {
-    <<interface>>
-    +BudgetStatus evaluate(BigDecimal spent, BigDecimal limit, double warningThreshold)
-}
+    class DefaultBudgetMonitor {
+        -List~BudgetAlertStrategy~ strategies
+        +getBudgetStatus(...) BudgetStatus
+    }
 
-class AbstractBudgetAlertStrategy {
-    <<abstract>>
-    #double getThresholdMultiplier()
-    +BudgetStatus evaluate(BigDecimal spent, BigDecimal limit, double warningThreshold)
-}
+    class BudgetAlertStrategy {
+        <<interface>>
+        +applies(BigDecimal currentValue, BudgetSettings settings) boolean
+        +evaluate(BigDecimal currentValue, BudgetSettings settings) BudgetStatus
+    }
 
-class StrictBudgetAlertStrategy {
-    #double getThresholdMultiplier()
-}
+    class AbstractBudgetAlertStrategy {
+        <<abstract>>
+        #computeRatio(BigDecimal currentValue, BudgetSettings settings) Optional~BigDecimal~
+    }
 
-class WarningBudgetAlertStrategy {
-    #double getThresholdMultiplier()
-}
+    class SafeBudgetStrategy {
+        +applies(...) boolean // fallback (always true)
+        +evaluate(...) BudgetStatus // SAFE
+    }
 
-class LenientBudgetAlertStrategy {
-    #double getThresholdMultiplier()
-}
+    class WarningBudgetStrategy {
+        +applies(...) boolean // ratio >= warningThreshold
+        +evaluate(...) BudgetStatus // WARNING
+    }
 
-class BudgetStatus {
-    <<record>>
-    +boolean isOverBudget
-    +boolean isNearLimit
-    +BigDecimal remaining
-}
+    class CriticalBudgetStrategy {
+        +applies(...) boolean // ratio >= 1.0 (100%)
+        +evaluate(...) BudgetStatus // CRITICAL
+    }
 
-DefaultBudgetMonitor o-- BudgetAlertStrategy : uses
-BudgetAlertStrategy <|.. AbstractBudgetAlertStrategy
-AbstractBudgetAlertStrategy <|-- StrictBudgetAlertStrategy
-AbstractBudgetAlertStrategy <|-- WarningBudgetAlertStrategy
-AbstractBudgetAlertStrategy <|-- LenientBudgetAlertStrategy
-AbstractBudgetAlertStrategy ..> BudgetStatus : creates
+    class BudgetStatus {
+        <<enumeration>>
+        SAFE
+        WARNING
+        CRITICAL
+    }
+
+    class BudgetSettings {
+        <<interface>>
+        +getLimitValue() BigDecimal
+        +getWarningThreshold() BigDecimal
+    }
+
+    BudgetMonitor <|.. DefaultBudgetMonitor : implements
+    DefaultBudgetMonitor o-- BudgetAlertStrategy : evaluates chain of strategies
+    BudgetAlertStrategy <|.. AbstractBudgetAlertStrategy : implements
+    AbstractBudgetAlertStrategy <|-- SafeBudgetStrategy : extends
+    AbstractBudgetAlertStrategy <|-- WarningBudgetStrategy : extends
+    AbstractBudgetAlertStrategy <|-- CriticalBudgetStrategy : extends
+    BudgetAlertStrategy ..> BudgetStatus : returns
+    BudgetAlertStrategy ..> BudgetSettings : inspects
+```

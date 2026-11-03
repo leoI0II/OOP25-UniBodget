@@ -1,66 +1,66 @@
 ```mermaid
 classDiagram
-direction TB
+    direction TB
 
-class DefaultDashboardController {
-  -DashboardFacade facade
-  -DashboardView view
-  +loadDashboard() void
-  +onWalletChanged(wallet) void
-}
+    class DashboardFacade {
+        <<interface>>
+        +loadDashboard() DashboardSnapshot
+        +getAggregatedBalance() Asset
+        +selectWallet(UUID) void
+    }
 
-class DashboardFacade {
-  <<interface>>
-  +loadDashboard() DashboardSnapshot
-  +filterHistory(TransactionFilterCriteria) List~CashTransaction~
-  +addCashTransaction(NewTransactionRequest) void
-  +createWallet(String, String) void
-  +switchWallet(int) void
-}
+    class DefaultDashboardFacade {
+        -CashAccountService walletService
+        -BudgetMonitor budgetMonitor
+        -WalletInsightService insightService
+        -FriendLoanSummaryService friendLoanService
+        +loadDashboard() DashboardSnapshot
+    }
 
-class DashboardView {
-  <<interface>>
-  +render(DashboardViewState) void
-  +bindActions(DashboardViewActions) void
-}
+    class DashboardSnapshot {
+        <<interface>>
+        +getTotalBalance() BigDecimal
+        +getRecentTransactions() List~AbstractTransaction~
+        +getBudgetStatus() BudgetStatus
+        +getMonthlyInsights() List~WalletInsight~
+    }
 
-class DefaultDashboardFacade {
-  -CashAccountService walletService
-  -CategoryService categoryService
-  -BudgetMonitor budgetMonitor
-  -WalletInsightService insightService
-  -FriendLoanSummaryService loanService
-  +loadDashboard() DashboardSnapshot
-  +filterHistory(TransactionFilterCriteria) List~CashTransaction~
-}
+    class DefaultDashboardSnapshot {
+        -BigDecimal totalBalance
+        -List~AbstractTransaction~ recentTransactions
+        -BudgetStatus budgetStatus
+    }
 
-class DefaultDashboardView {
-  +render(DashboardViewState) void
-}
+    class DefaultDashboardController {
+        -DashboardFacade facade
+        -DashboardView view
+        +onViewOpened() void
+        +onWalletSelected(UUID) void
+    }
 
-class DashboardSnapshot {
-  <<record>>
-  +totalBalance BigDecimal
-  +recentTransactions List~CashTransaction~
-  +categorySummaries Map~String, BigDecimal~
-  +budgetStatus BudgetStatus
-  +monthlyInsights List~WalletInsight~
-}
+    class DashboardView {
+        <<interface>>
+        +bindActions(DashboardViewActions) void
+        +render(DashboardViewState) void
+    }
 
-class DashboardViewState {
-  <<record>>
-  +headerState HeaderCardState
-  +balanceState BalanceCardState
-  +budgetState BudgetCardState
-  +expenseBreakdown ExpenseBreakdownCardState
-}
+    class DefaultDashboardView
 
-DefaultDashboardController --> DashboardFacade : interroga
-DefaultDashboardController --> DashboardView : consegna ViewState
-DefaultDashboardFacade ..|> DashboardFacade : implementa
-DefaultDashboardView ..|> DashboardView : implementa
-DefaultDashboardFacade ..> DashboardSnapshot : istanzia
-DefaultDashboardController ..> DashboardSnapshot : mappa in
-DefaultDashboardController ..> DashboardViewState : costruisce
-DefaultDashboardView ..> DashboardViewState : renderizza
+    class DashboardViewState {
+        <<record>>
+        +header: HeaderViewState
+        +balanceCard: BalanceCardViewState
+        +budgetCard: BudgetCardViewState
+        +insightCards: List~InsightCardViewState~
+        +transactionSection: TransactionSectionViewState
+    }
+
+    DashboardFacade <|.. DefaultDashboardFacade : implements
+    DashboardSnapshot <|.. DefaultDashboardSnapshot : implements
+    DefaultDashboardFacade ..> DefaultDashboardSnapshot : instantiates
+    DefaultDashboardController --> DashboardFacade : queries
+    DefaultDashboardController --> DashboardView : updates
+    DashboardView <|.. DefaultDashboardView : implements
+    DefaultDashboardController ..> DashboardViewState : maps snapshot to
+    DefaultDashboardView ..> DashboardViewState : renders
 ```

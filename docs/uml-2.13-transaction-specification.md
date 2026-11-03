@@ -1,61 +1,62 @@
+```mermaid
 classDiagram
-direction TB
+    direction TB
 
-class DefaultTransactionHistoryFilterService {
-    +List~CashTransaction~ filterTransactions(List~CashTransaction~ transactions, TransactionFilterCriteria criteria)
-}
+    class TransactionSpecification {
+        <<interface / Predicate>>
+        +isSatisfiedBy(CashTransaction transaction) boolean
+        +and(TransactionSpecification other) TransactionSpecification
+        +or(TransactionSpecification other) TransactionSpecification
+        +not() TransactionSpecification
+    }
 
-class TransactionSpecifications {
-    <<utility>>
-    +TransactionSpecification byCategoryName(String categoryName)
-    +TransactionSpecification byCategoryType(String categoryType)
-    +TransactionSpecification byDateRange(LocalDate startDate, LocalDate endDate)
-    +TransactionSpecification byKeyword(String keyword)
-}
+    class CategoryNameSpecification
+    class CategoryTypeSpecification
+    class DateRangeSpecification
+    class KeywordSpecification
 
-class TransactionSpecification {
-    <<interface>>
-    +boolean isSatisfiedBy(CashTransaction transaction)
-}
+    class TransactionSpecifications {
+        <<utility factory>>
+        +categoryName(String categoryName)$ TransactionSpecification
+        +categoryType(CategoryType categoryType)$ TransactionSpecification
+        +dateBetween(LocalDate fromDate, LocalDate toDate)$ TransactionSpecification
+        +keyword(String keyword)$ TransactionSpecification
+        +fromCriteria(TransactionFilterCriteria criteria)$ TransactionSpecification
+    }
 
-class CategoryNameSpecification {
-    -String categoryName
-    +boolean isSatisfiedBy(CashTransaction transaction)
-}
+    class DefaultTransactionHistoryFilterService {
+        +filter(List~CashTransaction~, TransactionFilterCriteria) List~CashTransaction~
+        +filter(List~CashTransaction~, TransactionSpecification, TransactionSortOrder) List~CashTransaction~
+    }
 
-class CategoryTypeSpecification {
-    -String categoryType
-    +boolean isSatisfiedBy(CashTransaction transaction)
-}
+    class TransactionFilterCriteria {
+        -CategoryType categoryType
+        -LocalDate fromDate
+        -LocalDate toDate
+        -String keyword
+        -TransactionSortOrder sortOrder
+        +getCategoryType() Optional~CategoryType~
+        +getFromDate() Optional~LocalDate~
+        +getToDate() Optional~LocalDate~
+        +getKeyword() Optional~String~
+        +getSortOrder() TransactionSortOrder
+    }
 
-class DateRangeSpecification {
-    -LocalDate startDate
-    -LocalDate endDate
-    +boolean isSatisfiedBy(CashTransaction transaction)
-}
+    class TransactionSortOrder {
+        <<enumeration>>
+        NEWEST_FIRST
+        OLDEST_FIRST
+        HIGHEST_AMOUNT_FIRST
+    }
 
-class KeywordSpecification {
-    -String keyword
-    +boolean isSatisfiedBy(CashTransaction transaction)
-}
+    TransactionSpecification <|.. CategoryNameSpecification : implements
+    TransactionSpecification <|.. CategoryTypeSpecification : implements
+    TransactionSpecification <|.. DateRangeSpecification : implements
+    TransactionSpecification <|.. KeywordSpecification : implements
 
-class TransactionFilterCriteria {
-    <<record>>
-    +String categoryName
-    +String categoryType
-    +LocalDate startDate
-    +LocalDate endDate
-    +String keyword
-}
-
-class CashTransaction
-
-DefaultTransactionHistoryFilterService ..> TransactionSpecifications : uses
-DefaultTransactionHistoryFilterService ..> TransactionFilterCriteria : reads
-DefaultTransactionHistoryFilterService ..> TransactionSpecification : applies
-TransactionSpecifications ..> TransactionSpecification : creates
-TransactionSpecification <|.. CategoryNameSpecification
-TransactionSpecification <|.. CategoryTypeSpecification
-TransactionSpecification <|.. DateRangeSpecification
-TransactionSpecification <|.. KeywordSpecification
-TransactionSpecification ..> CashTransaction : evaluates
+    TransactionSpecifications ..> TransactionSpecification : instantiates & composes
+    DefaultTransactionHistoryFilterService ..> TransactionSpecifications : builds filter using
+    DefaultTransactionHistoryFilterService ..> TransactionFilterCriteria : accepts
+    DefaultTransactionHistoryFilterService ..> TransactionSortOrder : sorts by
+    TransactionFilterCriteria --> TransactionSortOrder : defaults to
+```
