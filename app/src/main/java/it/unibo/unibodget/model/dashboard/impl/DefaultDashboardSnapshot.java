@@ -28,6 +28,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     private final List<FriendLoanSummary> friendLoanSummaries;
     private final List<WalletInsight> walletInsights;
     private final List<CashAccount> allWallets;
+    private final BigDecimal currentMonthBudgetUsage;
 
     /**
      * Creates a new dashboard snapshot.
@@ -124,6 +125,67 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
             final List<FriendLoanSummary> friendLoanSummaries,
             final List<WalletInsight> walletInsights,
             final List<CashAccount> allWallets) {
+        this(
+                walletName,
+                walletCurrency,
+                totalBalance,
+                recentTransactions,
+                categorySummaries,
+                expenseCategorySummaries,
+                budgetLimit,
+                warningThreshold,
+                budgetStatus,
+                friendLoanSummaries,
+                walletInsights,
+                allWallets,
+                BigDecimal.ZERO
+        );
+    }
+
+    /**
+     * Creates a new dashboard snapshot with all details including current month budget usage.
+     *
+     * @param walletName
+     *            the name of the currently selected wallet
+     * @param walletCurrency
+     *            the textual representation of the wallet base currency
+     * @param totalBalance
+     *            the total balance shown in the dashboard
+     * @param recentTransactions
+     *            the recent transactions shown in the dashboard
+     * @param categorySummaries
+     *            the aggregated values by category
+     * @param expenseCategorySummaries
+     *            the aggregated expenditure values by category
+     * @param budgetLimit
+     *            the configured budget limit of the current wallet
+     * @param warningThreshold
+     *            the configured warning threshold of the current wallet
+     * @param budgetStatus
+     *            the current budget status
+     * @param friendLoanSummaries
+     *            the friend-loan summaries associated with the current wallet
+     * @param walletInsights
+     *            the dashboard insights associated with the current wallet
+     * @param allWallets
+     *            all available cash accounts
+     * @param currentMonthBudgetUsage
+     *            the budget usage amount for the current month
+     */
+    public DefaultDashboardSnapshot(
+            final String walletName,
+            final String walletCurrency,
+            final BigDecimal totalBalance,
+            final List<AbstractTransaction> recentTransactions,
+            final Map<String, BigDecimal> categorySummaries,
+            final Map<String, BigDecimal> expenseCategorySummaries,
+            final BigDecimal budgetLimit,
+            final BigDecimal warningThreshold,
+            final BudgetStatus budgetStatus,
+            final List<FriendLoanSummary> friendLoanSummaries,
+            final List<WalletInsight> walletInsights,
+            final List<CashAccount> allWallets,
+            final BigDecimal currentMonthBudgetUsage) {
         this.walletName = Objects.requireNonNull(walletName);
         this.walletCurrency = Objects.requireNonNull(walletCurrency);
         this.totalBalance = Objects.requireNonNull(totalBalance);
@@ -136,6 +198,7 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
         this.friendLoanSummaries = List.copyOf(Objects.requireNonNull(friendLoanSummaries));
         this.walletInsights = List.copyOf(Objects.requireNonNull(walletInsights));
         this.allWallets = List.copyOf(Objects.requireNonNull(allWallets));
+        this.currentMonthBudgetUsage = currentMonthBudgetUsage != null ? currentMonthBudgetUsage : BigDecimal.ZERO;
     }
 
     @Override
@@ -196,5 +259,10 @@ public final class DefaultDashboardSnapshot implements DashboardSnapshot {
     @Override
     public List<CashAccount> getAllWallets() {
         return Collections.unmodifiableList(allWallets);
+    }
+
+    @Override
+    public BigDecimal getCurrentMonthBudgetUsage() {
+        return currentMonthBudgetUsage;
     }
 }

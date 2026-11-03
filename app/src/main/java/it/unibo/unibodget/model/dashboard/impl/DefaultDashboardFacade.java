@@ -118,7 +118,8 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 budgetStatus,
                 friendLoanSummaries,
                 walletInsights,
-                allWallets
+                allWallets,
+                monthlyBudgetUsage
         );
     }
 
@@ -194,7 +195,8 @@ public final class DefaultDashboardFacade implements DashboardFacade {
                 .filter(transaction -> transaction.getDate().getMonth() == now.getMonth())
                 .filter(transaction -> {
                     final CategoryType type = transaction.getCategory().getType();
-                    return type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN;
+                    final BigDecimal amount = transaction.getAsset().amount();
+                    return (type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN) && amount.signum() < 0;
                 })
                 .map(transaction -> transaction.getAsset().amount().abs())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

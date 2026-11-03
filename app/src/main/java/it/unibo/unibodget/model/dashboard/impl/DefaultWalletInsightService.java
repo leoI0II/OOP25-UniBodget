@@ -84,10 +84,15 @@ public final class DefaultWalletInsightService implements WalletInsightService {
             final int year,
             final int month) {
         return transactions.stream()
+                .filter(Objects::nonNull)
+                .filter(transaction -> transaction.getDate() != null)
+                .filter(transaction -> transaction.getCategory() != null)
+                .filter(transaction -> transaction.getAsset() != null && transaction.getAsset().amount() != null)
                 .filter(transaction -> isInMonth(transaction, year, month))
                 .filter(transaction -> {
                     final CategoryType type = transaction.getCategory().getType();
-                    return type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN;
+                    final BigDecimal amount = transaction.getAsset().amount();
+                    return (type == CategoryType.EXPENSE || type == CategoryType.FRIEND_LOAN) && amount.signum() < 0;
                 })
                 .map(transaction -> transaction.getAsset().amount().abs())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -114,6 +119,10 @@ public final class DefaultWalletInsightService implements WalletInsightService {
             final int year,
             final int month) {
         return transactions.stream()
+                .filter(Objects::nonNull)
+                .filter(transaction -> transaction.getDate() != null)
+                .filter(transaction -> transaction.getCategory() != null)
+                .filter(transaction -> transaction.getAsset() != null && transaction.getAsset().amount() != null)
                 .filter(transaction -> isInMonth(transaction, year, month))
                 .filter(transaction -> transaction.getCategory().getType() == CategoryType.INCOME)
                 .map(transaction -> transaction.getAsset().amount().abs())

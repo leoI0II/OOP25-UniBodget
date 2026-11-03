@@ -1,5 +1,6 @@
 package it.unibo.unibodget;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unibo.unibodget.controller.settings.SettingsController;
 import it.unibo.unibodget.model.currency.api.ExchangeRateAPIImpl;
 import it.unibo.unibodget.model.currency.api.provider.AlphaPriceProvider;
@@ -56,6 +57,9 @@ public final class App extends Application {
     private Stage primaryStage;
 
     /** {@inheritDoc} */
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "JavaFX Application requires holding a reference to the primary Stage")
     @Override
     public void start(final Stage stage) throws Exception {
         final UniversalPriceService priceService =

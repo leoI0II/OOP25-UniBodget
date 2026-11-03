@@ -110,6 +110,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final String CSS_QUOTE_SEMICOLON = "';";
     private static final String CSS_FONT_SIZE_PREFIX = "-fx-font-size: ";
     private static final String CSS_PX_SEMICOLON = "px;";
+    private static final String CSS_TEXT_FILL_PREFIX = "-fx-text-fill: ";
 
     /**
      * Preferred visible height for the scrollable insights area.
@@ -141,6 +142,9 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
     private static final double MIN_PIE_SLICE_PERCENTAGE = 0.01;
     private static final double RANK_LABEL_MIN_WIDTH = 24.0;
     private static final double BUDGET_WARN_PERCENT = 80.0;
+    private static final String COLOR_SAFE_HEX = "#5EDC90";
+    private static final String COLOR_WARNING_HEX = "#F6C85F";
+    private static final String COLOR_CRITICAL_HEX = "#FF7B7B";
     private static final int BUDGET_BOX_SPACING = 4;
     private static final int TOOLTIP_DELAY_MILLIS = 100;
 
@@ -758,7 +762,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
                 final Label amountLabel = new Label(item.amountText());
                 amountLabel.getProperties().put(PROP_BOLD_BY_DEFAULT, Boolean.TRUE);
                 amountLabel.setStyle(
-                        "-fx-text-fill: " + (item.positiveAmount() ? "#5EDC90" : "#FF7B7B") + ";"
+                        CSS_TEXT_FILL_PREFIX + (item.positiveAmount() ? COLOR_SAFE_HEX : COLOR_CRITICAL_HEX) + ";"
                         + CSS_FONT_FAMILY_PREFIX + ThemeManager.getTheme().getFontFamily() + CSS_QUOTE_SEMICOLON
                         + "-fx-font-weight: bold;"
                 );
@@ -1078,18 +1082,30 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         this.budgetThresholdLabel.setText(state.warningThresholdText());
         this.editBudgetButton.setText(state.actionLabel());
 
-        final double percentage = Math.max(0.0, Math.min(100.0, state.usagePercentage()));
+        final double progressPercent = Math.max(0.0, Math.min(100.0, state.usagePercentage()));
         final double circumference = 2 * Math.PI * this.budgetCircleProgress.getRadius();
-        this.budgetCircleProgress.setStrokeDashOffset(circumference * (1.0 - (percentage / 100.0)));
-        this.budgetCirclePercentageLabel.setText((int) Math.round(percentage) + "%");
+        this.budgetCircleProgress.setStrokeDashOffset(circumference * (1.0 - (progressPercent / 100.0)));
+        this.budgetCirclePercentageLabel.setText((int) Math.round(Math.max(0.0, state.usagePercentage())) + "%");
 
-        if (percentage < BUDGET_WARN_PERCENT) {
-            this.budgetCircleProgress.setStroke(Color.web("#5EDC90"));
-        } else if (percentage < 100.0) {
-            this.budgetCircleProgress.setStroke(Color.web("#F6C85F"));
+        final String statusColor;
+        if ("CRITICAL".equalsIgnoreCase(state.statusLabel())) {
+            statusColor = COLOR_CRITICAL_HEX;
+        } else if ("WARNING".equalsIgnoreCase(state.statusLabel())) {
+            statusColor = COLOR_WARNING_HEX;
+        } else if (state.usagePercentage() >= 100.0) {
+            statusColor = COLOR_CRITICAL_HEX;
+        } else if (state.usagePercentage() >= BUDGET_WARN_PERCENT) {
+            statusColor = COLOR_WARNING_HEX;
         } else {
-            this.budgetCircleProgress.setStroke(Color.web("#FF7B7B"));
+            statusColor = COLOR_SAFE_HEX;
         }
+
+        this.budgetCircleProgress.setStroke(Color.web(statusColor));
+        this.budgetStatusLabel.setStyle(
+                CSS_TEXT_FILL_PREFIX + statusColor + ";"
+                + CSS_FONT_FAMILY_PREFIX + ThemeManager.getTheme().getFontFamily() + CSS_QUOTE_SEMICOLON
+                + "-fx-font-weight: bold;"
+        );
     }
 
     /**
@@ -1288,7 +1304,7 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             label.getProperties().remove(PROP_THEME_APPLIED_BOLD);
         }
         label.setStyle(
-                "-fx-text-fill: " + color + ";"
+                CSS_TEXT_FILL_PREFIX + color + ";"
                 + CSS_FONT_FAMILY_PREFIX + ThemeManager.getTheme().getFontFamily() + CSS_QUOTE_SEMICOLON
                 + "-fx-font-size: " + size + "px;"
                 + "-fx-font-weight: " + (effectiveBold ? "bold" : "normal") + ";"

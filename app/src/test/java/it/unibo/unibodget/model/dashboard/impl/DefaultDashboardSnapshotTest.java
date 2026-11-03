@@ -19,6 +19,14 @@ import it.unibo.unibodget.model.wallet.CashAccount;
  */
 class DefaultDashboardSnapshotTest {
 
+    private static final String FOOD = "Food";
+    private static final String S_300 = "300.00";
+    private static final String S_1700 = "1700.00";
+    private static final String S_1000 = "1000.00";
+    private static final String S_0_80 = "0.80";
+    private static final String MAIN_WALLET = "Main wallet";
+    private static final String EUR = "EUR";
+
     @Test
     void shouldExposeFriendLoanSummariesAndWalletInsightsAndKeepCollectionsImmutable() {
         final FriendLoanSummary summary = new FriendLoanSummary(
@@ -38,13 +46,13 @@ class DefaultDashboardSnapshotTest {
         );
 
         final DefaultDashboardSnapshot snapshot = new DefaultDashboardSnapshot(
-                "Main wallet",
-                "EUR",
-                new BigDecimal("1700.00"),
+                MAIN_WALLET,
+                EUR,
+                new BigDecimal(S_1700),
                 List.<AbstractTransaction>of(),
-                Map.of("Food", new BigDecimal("300.00")),
-                new BigDecimal("1000.00"),
-                new BigDecimal("0.80"),
+                Map.of(FOOD, new BigDecimal(S_300)),
+                new BigDecimal(S_1000),
+                new BigDecimal(S_0_80),
                 BudgetStatus.SAFE,
                 List.of(summary),
                 List.of(insight),
@@ -58,6 +66,24 @@ class DefaultDashboardSnapshotTest {
         assertEquals("Spending", snapshot.getWalletInsights().get(0).title());
 
         assertEquals(0, snapshot.getAllWallets().size());
+        assertEquals(BigDecimal.ZERO, snapshot.getCurrentMonthBudgetUsage());
+
+        final DefaultDashboardSnapshot snapshotWithUsage = new DefaultDashboardSnapshot(
+                MAIN_WALLET,
+                EUR,
+                new BigDecimal(S_1700),
+                List.<AbstractTransaction>of(),
+                Map.of(FOOD, new BigDecimal(S_300)),
+                Map.of(FOOD, new BigDecimal(S_300)),
+                new BigDecimal(S_1000),
+                new BigDecimal(S_0_80),
+                BudgetStatus.SAFE,
+                List.of(summary),
+                List.of(insight),
+                List.<CashAccount>of(),
+                new BigDecimal("250.00")
+        );
+        assertEquals(new BigDecimal("250.00"), snapshotWithUsage.getCurrentMonthBudgetUsage());
 
         assertThrows(
                 UnsupportedOperationException.class,

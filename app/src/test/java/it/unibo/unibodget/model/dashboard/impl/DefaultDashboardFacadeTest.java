@@ -107,6 +107,7 @@ class DefaultDashboardFacadeTest {
         assertEquals(0, new BigDecimal("300.00").compareTo(snapshot.getCategorySummaries().get(FOOD)));
         assertEquals(0, new BigDecimal(S_1000).compareTo(snapshot.getBudgetLimit()));
         assertEquals(0, new BigDecimal(S_0_80).compareTo(snapshot.getWarningThreshold()));
+        assertEquals(0, new BigDecimal("300.00").compareTo(snapshot.getCurrentMonthBudgetUsage()));
         assertEquals(BudgetStatus.SAFE, snapshot.getBudgetStatus());
         assertEquals(0, snapshot.getFriendLoanSummaries().size());
         assertEquals(3, snapshot.getWalletInsights().size());

@@ -23,6 +23,7 @@ import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.categories.CategoryType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
 import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
 import it.unibo.unibodget.model.dashboard.api.DashboardFacade;
 import it.unibo.unibodget.model.dashboard.api.DashboardSnapshot;
 import it.unibo.unibodget.model.dashboard.impl.DefaultBudgetSettings;
@@ -84,6 +85,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private static final int MAX_CATEGORY_ROWS = 4;
     private static final String DEFAULT_CATEGORY_COLOR = "#7F8CFF";
     private static final String DEFAULT_SORT_ORDER_LABEL = "Newest first";
+    private static final String ZERO_PERCENT = "0%";
     private static final String ERR_UNABLE_TO_SWITCH_WALLET = "Unable to switch wallet.";
     private static final String ERR_UNABLE_TO_CREATE_WALLET = "Unable to create wallet.";
     private static final String ERR_UNABLE_TO_DELETE_TRANSACTION = "Unable to delete transaction.";
@@ -744,9 +746,15 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 .toList();
 
         final BigDecimal budgetLimit = snapshot.getBudgetLimit();
-        final BigDecimal spentAmount = totalExpense;
+        final BigDecimal spentAmount = snapshot.getCurrentMonthBudgetUsage();
         final BigDecimal remainingAmount = budgetLimit.subtract(spentAmount);
         final double budgetUsagePercentage = computeUsagePercentage(spentAmount, budgetLimit);
+        final BudgetStatus budgetStatus = evaluateBudgetStatus(
+                spentAmount,
+                budgetLimit,
+                snapshot.getWarningThreshold(),
+                snapshot.getBudgetStatus()
+        );
 
         return new DashboardViewState(
                 new HeaderViewState(
@@ -772,7 +780,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 ),
                 new BudgetCardViewState(
                         "Monthly Budget",
-                        snapshot.getBudgetStatus().name(),
+                        budgetStatus.name(),
                         formatAmountWithCurrency(spentAmount, selectedWalletCurrency)
                                 + " / "
                                 + formatAmountWithCurrency(budgetLimit, selectedWalletCurrency),
@@ -826,7 +834,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         entry.getKey(),
                         formatAmountWithCurrency(entry.getValue(), currency),
                         total.signum() == 0
-                                ? "0%"
+                                ? ZERO_PERCENT
                                 : formatPercentage(entry.getValue().divide(total, 4, RoundingMode.HALF_UP)),
                         total.signum() == 0
                                 ? 0.0
@@ -871,7 +879,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                             String.valueOf(index + 1),
                             entry.getKey(),
                             formatAmountWithCurrency(entry.getValue(), currency),
-                            total.signum() == 0 ? "0%" : formatPercentage(ratio),
+                            total.signum() == 0 ? ZERO_PERCENT : formatPercentage(ratio),
                             ratio.multiply(BigDecimal.valueOf(100)).doubleValue(),
                             resolveCategoryColor(entry.getKey())
                     );
@@ -981,6 +989,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * @return the formatted percentage string
      */
     private String formatPercentage(final BigDecimal value) {
+        if (value == null) {
+            return ZERO_PERCENT;
+        }
         return value.multiply(BigDecimal.valueOf(100)).stripTrailingZeros().toPlainString() + "%";
     }
 
@@ -994,12 +1005,45 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * @return the percentage value
      */
     private double computeUsagePercentage(final BigDecimal spentAmount, final BigDecimal budgetLimit) {
-        if (budgetLimit == null || budgetLimit.signum() == 0) {
+        if (budgetLimit == null || budgetLimit.compareTo(BigDecimal.ZERO) <= 0 || spentAmount == null) {
             return 0.0;
         }
         return spentAmount.divide(budgetLimit, 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100))
                 .doubleValue();
+    }
+
+    /**
+     * Evaluates the budget status based on the current spent amount and wallet settings.
+     *
+     * @param spentAmount
+     *            the spent amount
+     * @param budgetLimit
+     *            the budget limit
+     * @param warningThreshold
+     *            the warning threshold ratio
+     * @param fallbackStatus
+     *            the fallback status from snapshot
+     * @return the evaluated budget status
+     */
+    private static BudgetStatus evaluateBudgetStatus(
+            final BigDecimal spentAmount,
+            final BigDecimal budgetLimit,
+            final BigDecimal warningThreshold,
+            final BudgetStatus fallbackStatus) {
+        if (budgetLimit == null || budgetLimit.compareTo(BigDecimal.ZERO) <= 0 || spentAmount == null) {
+            return fallbackStatus != null ? fallbackStatus : BudgetStatus.SAFE;
+        }
+        if (spentAmount.compareTo(budgetLimit) >= 0) {
+            return BudgetStatus.CRITICAL;
+        }
+        if (warningThreshold != null && warningThreshold.compareTo(BigDecimal.ZERO) > 0) {
+            final BigDecimal ratio = spentAmount.divide(budgetLimit, 8, RoundingMode.HALF_UP);
+            if (ratio.compareTo(warningThreshold) >= 0) {
+                return BudgetStatus.WARNING;
+            }
+        }
+        return BudgetStatus.SAFE;
     }
 
     /**

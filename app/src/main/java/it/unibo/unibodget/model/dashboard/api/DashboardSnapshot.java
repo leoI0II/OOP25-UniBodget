@@ -110,4 +110,17 @@ public interface DashboardSnapshot {
     default List<WalletInsight> getWalletInsights() {
         return List.of();
     }
+
+    /**
+     * Returns the budget usage amount for the current month.
+     *
+     * <p>
+     * This method is defined as a default method to preserve compatibility with
+     * existing implementations of the interface.</p>
+     *
+     * @return the current month's budget usage
+     */
+    default BigDecimal getCurrentMonthBudgetUsage() {
+        return BigDecimal.ZERO;
+    }
 }
