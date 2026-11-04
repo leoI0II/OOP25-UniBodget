@@ -41,6 +41,11 @@ public record DashboardViewState(
         TransactionSectionViewState transactionSection) {
 
     /**
+     * Text indicating that no wallet is currently active.
+     */
+    public static final String NO_ACTIVE_WALLET = "No active wallet";
+
+    /**
      * Compact canonical constructor with null-safety.
      *
      * @param header
@@ -69,6 +74,15 @@ public record DashboardViewState(
         Objects.requireNonNull(friendLoanCard);
         insightCards = List.copyOf(Objects.requireNonNull(insightCards));
         Objects.requireNonNull(transactionSection);
+    }
+
+    /**
+     * Checks whether an active wallet is present in this view state.
+     *
+     * @return {@code true} if an active wallet is present, {@code false} otherwise
+     */
+    public boolean hasActiveWallet() {
+        return !NO_ACTIVE_WALLET.equals(header.activeWalletText());
     }
 
     /**

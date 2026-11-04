@@ -79,7 +79,8 @@ import it.unibo.unibodget.view.dashboard.state.TransactionFilterInput;
  */
 @SuppressFBWarnings(
         value = "EI_EXPOSE_REP2",
-        justification = "Controller holds references to shared model services and application settings")
+        justification = "Controller holds references to shared model services and application settings"
+)
 public final class DefaultDashboardController implements DashboardViewActions, WalletObserver {
 
     private static final int MAX_CATEGORY_ROWS = 4;
@@ -91,8 +92,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private static final String ERR_UNABLE_TO_DELETE_TRANSACTION = "Unable to delete transaction.";
     private static final String ERR_UNABLE_TO_CREATE_TRANSACTION = "Unable to create transaction.";
     private static final String ERR_UNABLE_TO_EDIT_TRANSACTION = "Unable to edit transaction.";
-    private static final String ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND =
-            "Unable to rename wallet: wallet not found.";
+    private static final String ERR_UNABLE_TO_RENAME_WALLET_NOT_FOUND = "Unable to rename wallet: wallet not found.";
 
     private final DashboardView view;
     private final DashboardFacade dashboardFacade;
@@ -102,22 +102,26 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     private final DefaultTransactionHistoryFilterService transactionHistoryFilterService;
 
     private TransactionFilterInput currentFilterInput;
-    private Runnable onDashboardRefreshed = () -> { };
+    private Runnable onDashboardRefreshed = () -> {
+    };
     private boolean refreshing;
 
     /**
      * Creates a new dashboard controller.
      *
      * @param view
-     *            the dashboard view; must not be {@code null}
+     *                               the dashboard view; must not be {@code null}
      * @param dashboardFacade
-     *            the dashboard facade; must not be {@code null}
+     *                               the dashboard facade; must not be {@code null}
      * @param cashAccountService
-     *            the cash-account service; must not be {@code null}
+     *                               the cash-account service; must not be
+     *                               {@code null}
      * @param settings
-     *            the application settings; must not be {@code null}
+     *                               the application settings; must not be
+     *                               {@code null}
      * @param cashTransactionFactory
-     *            the transaction factory; must not be {@code null}
+     *                               the transaction factory; must not be
+     *                               {@code null}
      */
     public DefaultDashboardController(
             final DashboardView view,
@@ -132,8 +136,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         this.cashTransactionFactory = Objects.requireNonNull(cashTransactionFactory);
         this.transactionHistoryFilterService = new DefaultTransactionHistoryFilterService();
         this.currentFilterInput = new TransactionFilterInput(
-                null, null, null, null, null, DEFAULT_SORT_ORDER_LABEL
-        );
+                null, null, null, null, null, DEFAULT_SORT_ORDER_LABEL);
         this.cashAccountService.addObserver(this);
     }
 
@@ -148,9 +151,12 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Registers a callback invoked after every dashboard refresh (i.e. after any
      * mutation such as add/edit/delete transaction, wallet or budget change).
      *
-     * <p>Used by the shell to keep the shared sidebar in sync with dashboard data.</p>
+     * <p>
+     * Used by the shell to keep the shared sidebar in sync with dashboard data.
+     * </p>
      *
-     * @param callback the callback to run after each refresh; must not be {@code null}
+     * @param callback the callback to run after each refresh; must not be
+     *                 {@code null}
      */
     public void setOnDashboardRefreshed(final Runnable callback) {
         this.onDashboardRefreshed = Objects.requireNonNull(callback);
@@ -228,7 +234,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     /**
      * Exports the filtered transactions of the given wallet to a CSV file.
      *
-     * @param file the destination CSV file
+     * @param file   the destination CSV file
      * @param wallet the cash wallet whose transactions are exported
      * @return {@code true} if export succeeded, {@code false} otherwise
      */
@@ -239,8 +245,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         final TransactionFilterCriteria filterCriteria = toFilterCriteria(currentFilterInput);
         final List<CashTransaction> filtered = transactionHistoryFilterService.filter(
                 wallet.getHistory().getTransactions(),
-                filterCriteria
-        );
+                filterCriteria);
 
         try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
                 CSVPrinter printer = new CSVPrinter(writer, CsvExportFormat.getFormat())) {
@@ -278,9 +283,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     /**
      * Checks whether a wallet with the given name and currency already exists.
      *
-     * @param name the wallet name to check
-     * @param currency the wallet currency to check
-     * @param excludeWalletId optional wallet id to exclude from the check (e.g. during renaming), or null
+     * @param name            the wallet name to check
+     * @param currency        the wallet currency to check
+     * @param excludeWalletId optional wallet id to exclude from the check (e.g.
+     *                        during renaming), or null
      * @return true if a duplicate wallet with identical name and currency exists
      */
     public boolean isWalletDuplicate(
@@ -325,12 +331,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     }
 
     /**
-     * Renames the cash wallet with the given identifier and refreshes the dashboard.
+     * Renames the cash wallet with the given identifier and refreshes the
+     * dashboard.
      *
      * @param walletId the wallet identifier
      * @param newName  the new display name
      * @throws IllegalArgumentException if the name breaks the wallet naming rules;
-     *                                  left to the caller, which asks the user again
+     *                                  left to the caller, which asks the user
+     *                                  again
      */
     public void renameWallet(final UUID walletId, final String newName) {
         final Optional<CashAccount> target = cashAccountService.getWallets().stream()
@@ -363,8 +371,10 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     /**
      * {@inheritDoc}
      *
-     * <p>Removes the cash wallet and its whole history. If it was the selected wallet,
-     * the first remaining one becomes current.</p>
+     * <p>
+     * Removes the cash wallet and its whole history. If it was the selected wallet,
+     * the first remaining one becomes current.
+     * </p>
      */
     @Override
     public void onDeleteWalletRequested(final UUID walletId) {
@@ -391,17 +401,15 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     currentWallet.getBaseCurrency(),
                     dashboardFacade.getCategoryCatalog(),
                     openFriendLoans,
-                    this::createCustomCategory
-            ).ifPresent(request -> {
-                validateFriendLoanRequest(request, openFriendLoans);
-                final CashTransaction transaction = toCashTransaction(
-                        request,
-                        currentWallet.getBaseCurrency(),
-                        openFriendLoans
-                );
-                cashAccountService.addTransaction(transaction);
-                MessageBus.send(new MainInfoNotificationEvent("Transaction added successfully!"));
-            });
+                    this::createCustomCategory).ifPresent(request -> {
+                        validateFriendLoanRequest(request, openFriendLoans);
+                        final CashTransaction transaction = toCashTransaction(
+                                request,
+                                currentWallet.getBaseCurrency(),
+                                openFriendLoans);
+                        cashAccountService.addTransaction(transaction);
+                        MessageBus.send(new MainInfoNotificationEvent("Transaction added successfully!"));
+                    });
         } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
             MessageBus.send(new MainErrorNotificationEvent(exception.getMessage()));
@@ -437,18 +445,16 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     dashboardFacade.getCategoryCatalog(),
                     openFriendLoans,
                     this::createCustomCategory,
-                    originalTransaction
-            ).ifPresent(request -> {
-                validateFriendLoanRequest(request, openFriendLoans);
-                final CashTransaction replacement = toCashTransactionPreservingId(
-                        request,
-                        originalTransaction,
-                        currentWallet.getBaseCurrency(),
-                        openFriendLoans
-                );
-                cashAccountService.replaceTransaction(originalTransaction, replacement);
-                MessageBus.send(new MainInfoNotificationEvent("Transaction updated successfully!"));
-            });
+                    originalTransaction).ifPresent(request -> {
+                        validateFriendLoanRequest(request, openFriendLoans);
+                        final CashTransaction replacement = toCashTransactionPreservingId(
+                                request,
+                                originalTransaction,
+                                currentWallet.getBaseCurrency(),
+                                openFriendLoans);
+                        cashAccountService.replaceTransaction(originalTransaction, replacement);
+                        MessageBus.send(new MainInfoNotificationEvent("Transaction updated successfully!"));
+                    });
         } catch (final IllegalArgumentException exception) {
             view.showError(exception.getMessage());
             MessageBus.send(new MainErrorNotificationEvent(exception.getMessage()));
@@ -502,8 +508,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             view.promptEditBudget(currentWallet.getBudgetSettings()).ifPresent(request -> {
                 currentWallet.setBudgetSettings(new DefaultBudgetSettings(
                         request.limitValue(),
-                        request.warningThreshold()
-                ));
+                        request.warningThreshold()));
                 cashAccountService.notifyObservers();
                 MessageBus.send(new MainInfoNotificationEvent("Monthly budget updated successfully!"));
             });
@@ -517,9 +522,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Creates and stores a custom category.
      *
      * @param request
-     *            the category creation request
+     *                the category creation request
      * @param type
-     *            the category type
+     *                the category type
      * @return the created category, if successful
      */
     private Optional<Category> createCustomCategory(
@@ -529,8 +534,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             final Category createdCategory = new Category(
                     request.name(),
                     new ARGBColor(request.colorHex()),
-                    type
-            );
+                    type);
             dashboardFacade.getCategoryCatalog().addCustomCategory(createdCategory);
             MessageBus.send(new MainInfoNotificationEvent(
                     "Category '" + createdCategory.getName() + "' created successfully!"));
@@ -546,9 +550,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Validates friend-loan-specific transaction requests.
      *
      * @param request
-     *            the request to validate
+     *                        the request to validate
      * @param openFriendLoans
-     *            currently open friend loans
+     *                        currently open friend loans
      */
     private void validateFriendLoanRequest(
             final NewTransactionRequest request,
@@ -573,11 +577,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Converts a dialog request into a new transaction.
      *
      * @param request
-     *            the dialog request
+     *                        the dialog request
      * @param walletCurrency
-     *            the current wallet currency
+     *                        the current wallet currency
      * @param openFriendLoans
-     *            currently open friend loans
+     *                        currently open friend loans
      * @return the new transaction
      */
     CashTransaction toCashTransaction(
@@ -600,8 +604,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         request.description(),
                         request.notes(),
                         targetLoan.getFriendName(),
-                        targetLoan.getFriendLoanId()
-                );
+                        targetLoan.getFriendLoanId());
             }
 
             final String requestedFriendName = request.friendName() == null ? "" : request.friendName().trim();
@@ -621,8 +624,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                     request.description(),
                     request.notes(),
                     friendName,
-                    loanId
-            );
+                    loanId);
         }
 
         return this.cashTransactionFactory.create(
@@ -632,8 +634,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 request.category(),
                 request.date(),
                 request.description(),
-                request.notes()
-        );
+                request.notes());
     }
 
     /**
@@ -641,13 +642,13 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * the original identifier.
      *
      * @param request
-     *            the edited request
+     *                            the edited request
      * @param originalTransaction
-     *            the transaction being replaced
+     *                            the transaction being replaced
      * @param walletCurrency
-     *            the current wallet currency
+     *                            the current wallet currency
      * @param openFriendLoans
-     *            currently open friend loans
+     *                            currently open friend loans
      * @return the replacement transaction
      */
     private CashTransaction toCashTransactionPreservingId(
@@ -672,7 +673,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         this.refreshing = true;
         try {
             if (dashboardFacade.getAllCashAccounts().isEmpty()) {
-                view.showError("No wallet yet — use \"+ Add wallet\" to create one.");
+                view.render(toEmptyViewState());
                 onDashboardRefreshed.run();
                 return;
             }
@@ -695,7 +696,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Maps a dashboard snapshot into immutable dashboard view state.
      *
      * @param snapshot
-     *            the dashboard snapshot
+     *                 the dashboard snapshot
      * @return the corresponding view state
      */
     private DashboardViewState toViewState(final DashboardSnapshot snapshot) {
@@ -709,11 +710,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
         final BigDecimal totalExpense = expenseCategorySummaries.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        final List<CategoryBreakdownItemViewState> ripartitionCategories =
-                buildRipartitionCategoryBreakdown(expenseCategorySummaries, totalExpense, selectedWalletCurrency);
+        final List<CategoryBreakdownItemViewState> ripartitionCategories = buildRipartitionCategoryBreakdown(
+                expenseCategorySummaries, totalExpense, selectedWalletCurrency);
 
-        final List<CategoryBreakdownItemViewState> rankedCategories =
-                buildRankedCategoryBreakdown(expenseCategorySummaries, totalExpense, selectedWalletCurrency);
+        final List<CategoryBreakdownItemViewState> rankedCategories = buildRankedCategoryBreakdown(
+                expenseCategorySummaries, totalExpense, selectedWalletCurrency);
 
         final TransactionFilterCriteria filterCriteria = toFilterCriteria(currentFilterInput);
 
@@ -723,8 +724,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                                 .filter(CashTransaction.class::isInstance)
                                 .map(CashTransaction.class::cast)
                                 .toList(),
-                        filterCriteria
-                )
+                        filterCriteria)
                 .stream()
                 .map(transaction -> new TransactionRowViewState(
                         transaction.getId(),
@@ -733,16 +733,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         transaction.getCategory().getName(),
                         formatSignedAmount(transaction),
                         toCssHex(transaction.getCategory().getColorHex()),
-                        isPositiveTransaction(transaction)
-                ))
+                        isPositiveTransaction(transaction)))
                 .toList();
 
         final List<InsightCardViewState> insights = snapshot.getWalletInsights().stream()
                 .map(insight -> new InsightCardViewState(
                         insight.title(),
                         insight.message(),
-                        insight.trend().name()
-                ))
+                        insight.trend().name()))
                 .toList();
 
         final BigDecimal budgetLimit = snapshot.getBudgetLimit();
@@ -753,31 +751,26 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 spentAmount,
                 budgetLimit,
                 snapshot.getWarningThreshold(),
-                snapshot.getBudgetStatus()
-        );
+                snapshot.getBudgetStatus());
 
         return new DashboardViewState(
                 new HeaderViewState(
                         "Financial Overview",
                         "Active wallet: " + snapshot.getWalletName(),
-                        "Summary of the current wallet and aggregated totals"
-                ),
+                        "Summary of the current wallet and aggregated totals"),
                 new BalanceCardViewState(
                         "Wallet Net Balance",
                         formatSignedAmount(snapshot.getTotalBalance(), selectedWalletCurrency),
-                        walletCurrencyLabel
-                ),
+                        walletCurrencyLabel),
                 new ExpenseRipartitionCardViewState(
                         "Expense Ripartition",
                         formatAmountWithCurrency(totalExpense, selectedWalletCurrency),
                         ripartitionCategories,
-                        "No expense data available."
-                ),
+                        "No expense data available."),
                 new ExpenseBreakdownCardViewState(
                         "Top Expense Categories",
                         formatAmountWithCurrency(totalExpense, selectedWalletCurrency),
-                        rankedCategories
-                ),
+                        rankedCategories),
                 new BudgetCardViewState(
                         "Monthly Budget",
                         budgetStatus.name(),
@@ -789,16 +782,13 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         budgetUsagePercentage,
                         formatAmountWithCurrency(spentAmount, selectedWalletCurrency),
                         formatAmountWithCurrency(budgetLimit, selectedWalletCurrency),
-                        formatSignedAmount(remainingAmount, selectedWalletCurrency)
-                ),
+                        formatSignedAmount(remainingAmount, selectedWalletCurrency)),
                 new FriendLoanCardViewState(
                         "Friend Loans",
                         formatAmountWithCurrency(
                                 sumFriendLoanOutstanding(snapshot.getFriendLoanSummaries()),
-                                selectedWalletCurrency
-                        ),
-                        buildFriendLoanMessage(snapshot.getFriendLoanSummaries(), selectedWalletCurrency)
-                ),
+                                selectedWalletCurrency),
+                        buildFriendLoanMessage(snapshot.getFriendLoanSummaries(), selectedWalletCurrency)),
                 insights,
                 new TransactionSectionViewState(
                         "Wallet Transactions",
@@ -806,21 +796,69 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                         new TransactionTableViewState(
                                 transactionRows,
                                 "No transactions available.",
-                                currentFilterInput
-                        )
-                )
-        );
+                                currentFilterInput)));
+    }
+
+    /**
+     * Creates an empty dashboard view state used when no wallets are available.
+     *
+     * @return the empty dashboard view state
+     */
+    private DashboardViewState toEmptyViewState() {
+        final CurrencyUnit baseCurrency = settings.getBaseCurrencyUnit();
+        return new DashboardViewState(
+                new HeaderViewState(
+                        "Financial Overview",
+                        DashboardViewState.NO_ACTIVE_WALLET,
+                        "No wallet yet — use \"+ Add wallet\" to create one."),
+                new BalanceCardViewState(
+                        "Wallet Net Balance",
+                        formatSignedAmount(BigDecimal.ZERO, baseCurrency),
+                        baseCurrency.getShortName()),
+                new ExpenseRipartitionCardViewState(
+                        "Expense Ripartition",
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        List.of(),
+                        "No wallet created yet."),
+                new ExpenseBreakdownCardViewState(
+                        "Top Expense Categories",
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        List.of()),
+                new BudgetCardViewState(
+                        "Monthly Budget",
+                        BudgetStatus.SAFE.name(),
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency)
+                                + " / "
+                                + formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        "No budget configured",
+                        "Edit budget",
+                        0.0,
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        formatSignedAmount(BigDecimal.ZERO, baseCurrency)),
+                new FriendLoanCardViewState(
+                        "Friend Loans",
+                        formatAmountWithCurrency(BigDecimal.ZERO, baseCurrency),
+                        "No friend loans recorded."),
+                List.of(),
+                new TransactionSectionViewState(
+                        "Wallet Transactions",
+                        "Export CSV",
+                        new TransactionTableViewState(
+                                List.of(),
+                                "No transactions recorded yet — add a wallet to get started.",
+                                currentFilterInput)));
     }
 
     /**
      * Builds the full expense ripartition breakdown list.
      *
      * @param categorySummaries
-     *            per-category expense totals
+     *                          per-category expense totals
      * @param total
-     *            total expense amount
+     *                          total expense amount
      * @param currency
-     *            the selected wallet currency
+     *                          the selected wallet currency
      * @return the breakdown rows
      */
     private List<CategoryBreakdownItemViewState> buildRipartitionCategoryBreakdown(
@@ -842,8 +880,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                                         .divide(total, 4, RoundingMode.HALF_UP)
                                         .multiply(BigDecimal.valueOf(100))
                                         .doubleValue(),
-                        resolveCategoryColor(entry.getKey())
-                ))
+                        resolveCategoryColor(entry.getKey())))
                 .toList();
     }
 
@@ -852,11 +889,11 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * of rows.
      *
      * @param categorySummaries
-     *            per-category expense totals
+     *                          per-category expense totals
      * @param total
-     *            total expense amount
+     *                          total expense amount
      * @param currency
-     *            the selected wallet currency
+     *                          the selected wallet currency
      * @return the ranked breakdown rows
      */
     private List<CategoryBreakdownItemViewState> buildRankedCategoryBreakdown(
@@ -881,8 +918,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                             formatAmountWithCurrency(entry.getValue(), currency),
                             total.signum() == 0 ? ZERO_PERCENT : formatPercentage(ratio),
                             ratio.multiply(BigDecimal.valueOf(100)).doubleValue(),
-                            resolveCategoryColor(entry.getKey())
-                    );
+                            resolveCategoryColor(entry.getKey()));
                 })
                 .toList();
     }
@@ -891,9 +927,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Builds a textual message describing current open friend loans.
      *
      * @param summaries
-     *            friend-loan summaries
+     *                  friend-loan summaries
      * @param currency
-     *            selected wallet currency
+     *                  selected wallet currency
      * @return the message to display
      */
     private String buildFriendLoanMessage(
@@ -918,7 +954,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Sums all outstanding positive friend-loan balances.
      *
      * @param summaries
-     *            friend-loan summaries
+     *                  friend-loan summaries
      * @return the total outstanding amount
      */
     private BigDecimal sumFriendLoanOutstanding(final List<FriendLoanSummary> summaries) {
@@ -933,7 +969,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Formats a raw amount without sign decoration.
      *
      * @param amount
-     *            the amount to format
+     *               the amount to format
      * @return the formatted amount text
      */
     private String formatAmount(final BigDecimal amount) {
@@ -944,9 +980,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Formats an absolute amount with currency symbol.
      *
      * @param amount
-     *            the amount to format
+     *                 the amount to format
      * @param currency
-     *            the currency
+     *                 the currency
      * @return the formatted amount text
      */
     private String formatAmountWithCurrency(final BigDecimal amount, final CurrencyUnit currency) {
@@ -957,7 +993,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Formats a transaction amount with its explicit sign and currency symbol.
      *
      * @param transaction
-     *            the transaction to format
+     *                    the transaction to format
      * @return the formatted amount text
      */
     private String formatSignedAmount(final CashTransaction transaction) {
@@ -971,9 +1007,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Formats a signed amount with currency symbol.
      *
      * @param amount
-     *            the amount to format
+     *                 the amount to format
      * @param currency
-     *            the currency
+     *                 the currency
      * @return the formatted amount text
      */
     private String formatSignedAmount(final BigDecimal amount, final CurrencyUnit currency) {
@@ -985,7 +1021,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Formats a ratio as percentage text.
      *
      * @param value
-     *            the ratio value, where {@code 1.0} means 100%
+     *              the ratio value, where {@code 1.0} means 100%
      * @return the formatted percentage string
      */
     private String formatPercentage(final BigDecimal value) {
@@ -999,9 +1035,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Computes budget usage percentage.
      *
      * @param spentAmount
-     *            the spent amount
+     *                    the spent amount
      * @param budgetLimit
-     *            the budget limit
+     *                    the budget limit
      * @return the percentage value
      */
     private double computeUsagePercentage(final BigDecimal spentAmount, final BigDecimal budgetLimit) {
@@ -1014,16 +1050,17 @@ public final class DefaultDashboardController implements DashboardViewActions, W
     }
 
     /**
-     * Evaluates the budget status based on the current spent amount and wallet settings.
+     * Evaluates the budget status based on the current spent amount and wallet
+     * settings.
      *
      * @param spentAmount
-     *            the spent amount
+     *                         the spent amount
      * @param budgetLimit
-     *            the budget limit
+     *                         the budget limit
      * @param warningThreshold
-     *            the warning threshold ratio
+     *                         the warning threshold ratio
      * @param fallbackStatus
-     *            the fallback status from snapshot
+     *                         the fallback status from snapshot
      * @return the evaluated budget status
      */
     private static BudgetStatus evaluateBudgetStatus(
@@ -1050,7 +1087,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Returns whether the transaction should be rendered as positive.
      *
      * @param transaction
-     *            the transaction to inspect
+     *                    the transaction to inspect
      * @return {@code true} if the amount is non-negative
      */
     private boolean isPositiveTransaction(final CashTransaction transaction) {
@@ -1061,7 +1098,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Resolves the color associated with a category name.
      *
      * @param categoryName
-     *            the category name
+     *                     the category name
      * @return the CSS hexadecimal color string
      */
     private String resolveCategoryColor(final String categoryName) {
@@ -1077,7 +1114,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Converts an {@link ARGBColor} into a CSS RGB hexadecimal string.
      *
      * @param color
-     *            the color to convert
+     *              the color to convert
      * @return the CSS hexadecimal string
      */
     private String toCssHex(final ARGBColor color) {
@@ -1091,7 +1128,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Converts view-side filter input into model-side filter criteria.
      *
      * @param input
-     *            the filter input
+     *              the filter input
      * @return the filter criteria
      */
     private TransactionFilterCriteria toFilterCriteria(final TransactionFilterInput input) {
@@ -1105,15 +1142,14 @@ public final class DefaultDashboardController implements DashboardViewActions, W
                 safeInput.fromDate(),
                 safeInput.toDate(),
                 normalizeBlank(safeInput.keyword()),
-                parseSortOrder(safeInput.sortOrder())
-        );
+                parseSortOrder(safeInput.sortOrder()));
     }
 
     /**
      * Parses a category type label coming from the view.
      *
      * @param rawType
-     *            the raw type label
+     *                the raw type label
      * @return the parsed type or {@code null}
      */
     private CategoryType parseCategoryType(final String rawType) {
@@ -1128,7 +1164,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Parses a transaction sort-order label coming from the view.
      *
      * @param rawSortOrder
-     *            the raw sort-order label
+     *                     the raw sort-order label
      * @return the parsed sort order
      */
     private TransactionSortOrder parseSortOrder(final String rawSortOrder) {
@@ -1141,7 +1177,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
             case "newest first", "newest" -> TransactionSortOrder.NEWEST_FIRST;
             case "oldest first", "oldest" -> TransactionSortOrder.OLDEST_FIRST;
             case "highest amount", "highest amount first", "highest" ->
-                    TransactionSortOrder.HIGHEST_AMOUNT_FIRST;
+                TransactionSortOrder.HIGHEST_AMOUNT_FIRST;
             default -> TransactionSortOrder.NEWEST_FIRST;
         };
     }
@@ -1150,7 +1186,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Normalizes blank strings to {@code null}.
      *
      * @param value
-     *            the raw value
+     *              the raw value
      * @return the trimmed value or {@code null}
      */
     private String normalizeBlank(final String value) {
@@ -1165,7 +1201,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      *
      * @return the selected wallet
      * @throws IllegalStateException
-     *             if no wallet is currently selected
+     *                               if no wallet is currently selected
      */
     private CashAccount getRequiredCurrentWallet() {
         return cashAccountService.getCurrentWallet()
@@ -1176,9 +1212,9 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Finds a transaction by identifier inside the given wallet.
      *
      * @param wallet
-     *            the wallet to inspect
+     *                      the wallet to inspect
      * @param transactionId
-     *            the target transaction identifier
+     *                      the target transaction identifier
      * @return the matching transaction, if found
      */
     private Optional<CashTransaction> findTransactionById(
@@ -1193,7 +1229,7 @@ public final class DefaultDashboardController implements DashboardViewActions, W
      * Extracts currently open friend loans from the snapshot.
      *
      * @param snapshot
-     *            the dashboard snapshot
+     *                 the dashboard snapshot
      * @return the list of open friend loans
      */
     private List<FriendLoanSummary> getOpenFriendLoans(final DashboardSnapshot snapshot) {

@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,9 +64,11 @@ class DefaultDashboardControllerTest {
 
     private CashAccountService cashAccountService;
     private DefaultDashboardController controller;
+    private final AtomicReference<DashboardViewState> lastRenderedState = new AtomicReference<>();
 
     @BeforeEach
     void setUp() {
+        lastRenderedState.set(null);
         cashAccountService = new CashAccountService();
         final DefaultCategoryService categoryService = new DefaultCategoryService();
         final DefaultBudgetMonitor budgetMonitor = new DefaultBudgetMonitor();
@@ -94,6 +97,7 @@ class DefaultDashboardControllerTest {
 
             @Override
             public void render(final DashboardViewState state) {
+                lastRenderedState.set(state);
             }
 
             @Override
@@ -291,6 +295,40 @@ class DefaultDashboardControllerTest {
         assertTrue(transaction.isFriendLoanTransaction());
         assertTrue(transaction.getFriendLoanId().isPresent());
         assertEquals("Alice", transaction.getFriendName().orElseThrow());
+    }
+
+    @Test
+    void shouldRenderEmptyViewStateWhenNoWalletsExist() {
+        controller.onViewOpened();
+
+        final DashboardViewState state = lastRenderedState.get();
+        assertNotNull(state);
+        assertFalse(state.hasActiveWallet());
+        assertEquals(DashboardViewState.NO_ACTIVE_WALLET, state.header().activeWalletText());
+        assertTrue(state.expenseRipartitionCard().categories().isEmpty());
+        assertTrue(state.expenseBreakdownCard().categories().isEmpty());
+        assertTrue(state.transactionSection().table().rows().isEmpty());
+        assertEquals(0.0, state.budgetCard().usagePercentage());
+    }
+
+    @Test
+    void shouldRenderEmptyViewStateWhenAllWalletsAreRemoved() {
+        final CashAccount wallet = new CashAccount(WALLET_NAME, FiatCurrency.EUR);
+        cashAccountService.addWallet(wallet);
+        cashAccountService.selectWallet(wallet.getId());
+
+        controller.onViewOpened();
+        assertNotNull(lastRenderedState.get());
+        assertTrue(lastRenderedState.get().hasActiveWallet());
+
+        controller.onDeleteWalletRequested(wallet.getId());
+
+        final DashboardViewState state = lastRenderedState.get();
+        assertNotNull(state);
+        assertFalse(state.hasActiveWallet());
+        assertEquals(DashboardViewState.NO_ACTIVE_WALLET, state.header().activeWalletText());
+        assertTrue(state.expenseRipartitionCard().categories().isEmpty());
+        assertTrue(state.transactionSection().table().rows().isEmpty());
     }
 
     private static List<String> readLines(final File file) throws IOException {

@@ -281,6 +281,17 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
         this.clearFiltersButton.getStyleClass().add(STYLE_BUTTON_SECONDARY);
         this.editBudgetButton.getStyleClass().addAll(STYLE_BUTTON_SECONDARY, "budget-edit-button");
 
+        this.createTransactionButton.setDisable(true);
+        this.exportCsvButton.setDisable(true);
+        this.editBudgetButton.setDisable(true);
+        this.transactionKeywordField.setDisable(true);
+        this.transactionCategoryField.setDisable(true);
+        this.transactionCategoryTypeBox.setDisable(true);
+        this.transactionFromDatePicker.setDisable(true);
+        this.transactionToDatePicker.setDisable(true);
+        this.transactionSortOrderBox.setDisable(true);
+        this.clearFiltersButton.setDisable(true);
+
         buildLayout();
         configureTable();
         configureActions();
@@ -307,6 +318,18 @@ public final class DefaultDashboardView extends BorderPane implements DashboardV
             Platform.runLater(() -> render(state));
             return;
         }
+
+        final boolean hasActiveWallet = state.hasActiveWallet();
+        this.createTransactionButton.setDisable(!hasActiveWallet);
+        this.editBudgetButton.setDisable(!hasActiveWallet);
+        this.exportCsvButton.setDisable(!hasActiveWallet);
+        this.transactionKeywordField.setDisable(!hasActiveWallet);
+        this.transactionCategoryField.setDisable(!hasActiveWallet);
+        this.transactionCategoryTypeBox.setDisable(!hasActiveWallet);
+        this.transactionFromDatePicker.setDisable(!hasActiveWallet);
+        this.transactionToDatePicker.setDisable(!hasActiveWallet);
+        this.transactionSortOrderBox.setDisable(!hasActiveWallet);
+        this.clearFiltersButton.setDisable(!hasActiveWallet);
 
         renderHeader(state.header());
         renderBalanceCard(state.balanceCard());
