@@ -235,6 +235,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
         setupHistoryTable();
         setupPieToggle();
         setupPerformanceChart();
+        if (addTransactionButton != null) {
+            addTransactionButton.setDisable(investmentController.getCurrentInvestmentAccount().isEmpty());
+        }
     }
 
     /**
@@ -643,6 +646,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
      */
     @FXML
     public void handleAddTransactionButtonClicked() {
+        if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
+            return;
+        }
         try {
             final FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/it/unibo/unibodget/view/jfx/fxml/investments/AddTransactionDialog.fxml"));
@@ -693,6 +699,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private void refreshMainPanel() {
         if (investmentController.getCurrentInvestmentAccount().isEmpty()) {
             return;
+        }
+        if (addTransactionButton != null) {
+            addTransactionButton.setDisable(false);
         }
         changeCurrentWalletName();
 
@@ -801,6 +810,9 @@ public final class InvestmentsViewController extends BaseViewController implemen
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
         plSeries.getData().clear();
+        if (addTransactionButton != null) {
+            addTransactionButton.setDisable(true);
+        }
     }
 
     /**
