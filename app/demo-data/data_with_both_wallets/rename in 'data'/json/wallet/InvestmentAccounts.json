@@ -1,0 +1,420 @@
+{
+  "investmentAccounts" : [ {
+    "id" : "61d2439c-e52b-4740-8cbe-a59e4f306de8",
+    "name" : "Binance",
+    "baseCurrency" : "USDT",
+    "history" : {
+      "transactions" : [ {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "BTC",
+          "amount" : 0.02,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-09-07",
+        "description" : "Buy 0.02 BTC @ Asset[currency=USDT, amount=60600.15368531]",
+        "notes" : "first buy",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 60600.15368531,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 1.21,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "bbcb462e-7327-4a40-a608-7709293f7586"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "ETH",
+          "amount" : 1.5,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-09-10",
+        "description" : "Buy 1.5 ETH @ Asset[currency=USDT, amount=1977.69096075]",
+        "notes" : "",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 1977.69096075,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 2.97,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "56452e58-d4ae-4e9d-8fd4-97106cc576b5"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "SOL",
+          "amount" : 25,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-09-16",
+        "description" : "Buy 25 SOL @ Asset[currency=USDT, amount=106.21821083]",
+        "notes" : "",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 106.21821083,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 2.66,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "44df553c-e728-45a9-9f30-78818eb5a8c2"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "BTC",
+          "amount" : 0.01,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-09-24",
+        "description" : "Buy 0.01 BTC @ Asset[currency=USDT, amount=75102.27426918]",
+        "notes" : "buy the dip",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 75102.27426918,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 0.75,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "96e2ff40-f4b5-4af8-86dc-013e5bc63345"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "ETH",
+          "amount" : -0.6,
+          "zero" : false,
+          "negative" : true,
+          "positive" : false
+        },
+        "category" : {
+          "name" : "Investment Sell",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "INCOME",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-10-02",
+        "description" : "Sell 0.6 ETH @ Asset[currency=USDT, amount=1965.32314367]",
+        "notes" : "take profit",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 1965.32314367,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 1.18,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "d4c1783c-dfba-4abe-82d7-2d8d68af5cde"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "SOL",
+          "amount" : 15,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-10-09",
+        "description" : "Buy 15 SOL @ Asset[currency=USDT, amount=81.17856438]",
+        "notes" : "monthly buy",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 81.17856438,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 1.22,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "e83dedf9-f4c7-4205-bd47-3c8f34ff8d2e"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "BTC",
+          "amount" : -0.008,
+          "zero" : false,
+          "negative" : true,
+          "positive" : false
+        },
+        "category" : {
+          "name" : "Investment Sell",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "INCOME",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-10-17",
+        "description" : "Sell 0.008 BTC @ Asset[currency=USDT, amount=74764.40184301]",
+        "notes" : "take profit",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 74764.40184301,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 0.6,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "1165671e-8e86-4c92-b95b-8f1e5afd0c78"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "ETH",
+          "amount" : 0.4,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-10-24",
+        "description" : "Buy 0.4 ETH @ Asset[currency=USDT, amount=2762.10154359]",
+        "notes" : "",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 2762.10154359,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 1.1,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "32c37bb5-0a17-472d-a2bf-7ac194edce66"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "SOL",
+          "amount" : -1E+1,
+          "zero" : false,
+          "negative" : true,
+          "positive" : false
+        },
+        "category" : {
+          "name" : "Investment Sell",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "INCOME",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-10-29",
+        "description" : "Sell 10 SOL @ Asset[currency=USDT, amount=92.01817285]",
+        "notes" : "cut the loss",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 92.01817285,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 0.92,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "0129a382-eb17-48e2-b521-0d0ebe7db5b6"
+      }, {
+        "transactionType" : "investment",
+        "asset" : {
+          "currency" : "BTC",
+          "amount" : 0.004,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "category" : {
+          "name" : "Investment Buy",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 193,
+            "blue" : 7
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "default" : true,
+          "custom" : false
+        },
+        "date" : "2026-11-02",
+        "description" : "Buy 0.004 BTC @ Asset[currency=USDT, amount=83940.46159755]",
+        "notes" : "monthly buy",
+        "unitPrice" : {
+          "currency" : "USDT",
+          "amount" : 83940.46159755,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "fee" : {
+          "currency" : "USDT",
+          "amount" : 0.34,
+          "zero" : false,
+          "negative" : false,
+          "positive" : true
+        },
+        "id" : "059f2c9e-67e7-4226-a140-547dec70953f"
+      } ]
+    }
+  } ]
+}
