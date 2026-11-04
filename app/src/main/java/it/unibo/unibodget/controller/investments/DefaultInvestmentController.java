@@ -186,6 +186,18 @@ public class DefaultInvestmentController implements InvestmentController {
 
     /** {@inheritDoc} */
     @Override
+    public Asset getCurrentUnrealizedProfitLoss() {
+        return getCurrentAccountOrThrow().getUnrealizedProfitLoss();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Asset getCurrentRealizedProfitLoss() {
+        return getCurrentAccountOrThrow().getRealizedProfitLoss();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public BigDecimal getCurrentAllTimeProfitLossPercentage() {
         return getCurrentAccountOrThrow().getTotalProfitLossPercentage();
     }

@@ -97,6 +97,11 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private static final String PROFIT_STYLE = "positive";
     private static final String LOSS_STYLE = "negative";
     private static final int TOOLTIP_DELAY_MILLIS = 100;
+    // the y axis of the P/L chart shows at least 100 units of the last decimal of the currency
+    // (1.00 for EUR or USDT), so a P/L of -0.001 after a buy is not zoomed like a real loss
+    private static final int MIN_Y_SPAN_IN_LAST_DECIMALS = 100;
+    private static final int Y_TICKS = 4;
+    private static final BigDecimal TWO = BigDecimal.valueOf(2);
     // one color for each tradeable asset (7 stocks + 17 crypto), so two assets never have the same one
     private static final List<String> ASSET_COLORS = List.of(
             "#3861FB", "#F7A64B", "#16C784", "#EA3943", "#8E6CEF", "#2FC0D6",
@@ -126,6 +131,8 @@ public final class InvestmentsViewController extends BaseViewController implemen
     @FXML
     private Label allTimeProfitPercentage;
     @FXML
+    private Label profitSplitLabel;
+    @FXML
     private Label costBasisValue;
 
     @FXML
@@ -145,6 +152,8 @@ public final class InvestmentsViewController extends BaseViewController implemen
     private LineChart<Number, Number> performanceChart;
     @FXML
     private NumberAxis chartXAxis;
+    @FXML
+    private NumberAxis chartYAxis;
     @FXML
     private PieChart allocationPieChart;
     @FXML
@@ -353,8 +362,20 @@ public final class InvestmentsViewController extends BaseViewController implemen
                             pl.amount().setScale(decimals, RoundingMode.HALF_UP).toPlainString(),
                             p.getUnrealizedProfitLossPercentage());
                 },
-                p -> p.getUnrealizedProfitLoss().amount(),
+                // the shown value, so -0.0009 (shown 0.00) has no color
+                p -> shownAmount(p.getUnrealizedProfitLoss()),
                 true);
+    }
+
+    /**
+     * Returns the amount rounded to the display decimals of its currency, that is the value the user
+     * sees. Used for the colors: a P/L of -0.001 is shown as 0.00, so it must not be red.
+     *
+     * @param value the amount
+     * @return the amount with the display decimals of its currency
+     */
+    private static BigDecimal shownAmount(final Asset value) {
+        return value.amount().setScale(value.currency().getDisplayDecimals(), RoundingMode.HALF_UP);
     }
 
     /**
@@ -401,8 +422,10 @@ public final class InvestmentsViewController extends BaseViewController implemen
                     return;
                 }
                 setText(toText.apply(item));
-                if (colorBySign) {
-                    getStyleClass().add(number.apply(item).signum() < 0 ? LOSS_STYLE : PROFIT_STYLE);
+                // zero has no color (e.g. a P/L of 0.00 right after a buy)
+                final int sign = number.apply(item).signum();
+                if (colorBySign && sign != 0) {
+                    getStyleClass().add(sign < 0 ? LOSS_STYLE : PROFIT_STYLE);
                 }
             }
         });
@@ -457,8 +480,51 @@ public final class InvestmentsViewController extends BaseViewController implemen
         }
         // the format must be ready before the new points, the axis draws the labels after them
         chartDateFormat = chartDateFormat(snapshots.getFirst().timestamp(), snapshots.getLast().timestamp());
+        updateYAxis(snapshots, account.getBaseCurrency().getDisplayDecimals());
         // same series, only new points, so the colors stay the same
         plSeries.getData().setAll(plPoints);
+    }
+
+    /**
+     * Sets the y axis of the P/L chart: labels with the decimals of the account currency and, when
+     * all the values are very close, a fixed range around them instead of the automatic one.
+     *
+     * @param snapshots the points shown in the chart
+     * @param decimals the display decimals of the account currency
+     */
+    private void updateYAxis(final List<BalanceSnapshot> snapshots, final int decimals) {
+        chartYAxis.setTickLabelFormatter(new StringConverter<>() {
+            @Override
+            public String toString(final Number value) {
+                return BigDecimal.valueOf(value.doubleValue()).setScale(decimals, RoundingMode.HALF_UP).toPlainString();
+            }
+
+            @Override
+            public Number fromString(final String text) {
+                throw new UnsupportedOperationException("the axis labels are only shown");
+            }
+        });
+
+        final BigDecimal min = snapshots.stream().map(BalanceSnapshot::totalPL)
+                .min(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
+        final BigDecimal max = snapshots.stream().map(BalanceSnapshot::totalPL)
+                .max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
+        final BigDecimal minSpan = BigDecimal.ONE.movePointLeft(decimals)
+                .multiply(BigDecimal.valueOf(MIN_Y_SPAN_IN_LAST_DECIMALS));
+
+        if (max.subtract(min).compareTo(minSpan) >= 0) {
+            // real changes: the axis follows the values
+            chartYAxis.setAutoRanging(true);
+            return;
+        }
+        // only rounding noise (e.g. -0.001 after a buy): the auto range would zoom on it and the line
+        // would look like a big loss, so the axis shows minSpan around the middle of the values
+        final BigDecimal middle = max.add(min).divide(TWO, decimals, RoundingMode.HALF_UP);
+        final BigDecimal halfSpan = minSpan.divide(TWO, decimals, RoundingMode.HALF_UP);
+        chartYAxis.setAutoRanging(false);
+        chartYAxis.setLowerBound(middle.subtract(halfSpan).doubleValue());
+        chartYAxis.setUpperBound(middle.add(halfSpan).doubleValue());
+        chartYAxis.setTickUnit(minSpan.divide(BigDecimal.valueOf(Y_TICKS), decimals + 2, RoundingMode.HALF_UP).doubleValue());
     }
 
     /**
@@ -713,7 +779,12 @@ public final class InvestmentsViewController extends BaseViewController implemen
         allTimeProfitPercentage.setText(
                 AssetFormatter.ofPercentage(investmentController.getCurrentAllTimeProfitLossPercentage())
         );
-        setProfitColor(allTimeProfit.isNegative(), allTimeProfitValue, allTimeProfitPercentage);
+        setProfitColor(shownAmount(allTimeProfit).signum(), allTimeProfitValue, allTimeProfitPercentage);
+        // without this split balance - cost basis looks wrong: it is only the unrealized part,
+        // the realized one left the account with the sells
+        profitSplitLabel.setText(
+                "Unrealized " + AssetFormatter.ofAsset(investmentController.getCurrentUnrealizedProfitLoss())
+                + "  ·  Realized " + AssetFormatter.ofAsset(investmentController.getCurrentRealizedProfitLoss()));
         costBasisValue.setText(
                 AssetFormatter.ofAsset(investmentController.getCurrentTotalCostBasis())
         );
@@ -727,7 +798,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
             bestPerformerPositionPercentage.setText(
                     AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage())
             );
-            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+            setProfitColor(shownAmount(p.getUnrealizedProfitLoss()).signum(),
                     bestPerformerPositionValue, bestPerformerPositionPercentage);
         }, () -> clearPerformer(bestPerformerPositionName, bestPerformerPositionValue,
                 bestPerformerPositionPercentage));
@@ -736,7 +807,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
             worstPerformerPositionName.setText(p.asset().getShortName());
             worstPerformerPositionValue.setText(AssetFormatter.ofAsset(p.getUnrealizedProfitLoss()));
             worstPerformerPositionPercentage.setText(AssetFormatter.ofPercentage(p.getUnrealizedProfitLossPercentage()));
-            setProfitColor(p.getUnrealizedProfitLoss().isNegative(),
+            setProfitColor(shownAmount(p.getUnrealizedProfitLoss()).signum(),
                     worstPerformerPositionValue, worstPerformerPositionPercentage);
         }, () -> clearPerformer(worstPerformerPositionName, worstPerformerPositionValue,
                 worstPerformerPositionPercentage));
@@ -802,6 +873,7 @@ public final class InvestmentsViewController extends BaseViewController implemen
         walletBalance.setText("");
         allTimeProfitValue.setText("");
         allTimeProfitPercentage.setText("");
+        profitSplitLabel.setText("");
         costBasisValue.setText("");
         positionTableView.getItems().clear();
         investmentTransactionTableView.getItems().clear();
@@ -830,17 +902,19 @@ public final class InvestmentsViewController extends BaseViewController implemen
     }
 
     /**
-     * Colors the given labels green for a profit or red for a loss,
-     * using the style classes of {@code theme.css}.
+     * Colors the given labels green for a profit or red for a loss, using the style classes of
+     * {@code theme.css}. A zero value has no color.
      *
-     * @param loss   {@code true} if the value is a loss
+     * @param sign   the sign of the shown value (-1, 0 or 1)
      * @param labels the labels to color
      */
-    private static void setProfitColor(final boolean loss, final Label... labels) {
+    private static void setProfitColor(final int sign, final Label... labels) {
         for (final Label label : labels) {
             // remove the old one first, otherwise both classes stay on the label
             label.getStyleClass().removeAll(PROFIT_STYLE, LOSS_STYLE);
-            label.getStyleClass().add(loss ? LOSS_STYLE : PROFIT_STYLE);
+            if (sign != 0) {
+                label.getStyleClass().add(sign < 0 ? LOSS_STYLE : PROFIT_STYLE);
+            }
         }
     }
 

@@ -88,6 +88,22 @@ public interface InvestmentController {
     Asset getCurrentAllTimeProfitLoss();
 
     /**
+     * Returns the unrealized profit/loss of the current account: the gain or loss "on paper" of the
+     * assets still held (market value minus cost basis).
+     *
+     * @return the unrealized P/L as an {@link Asset} in the base currency
+     */
+    Asset getCurrentUnrealizedProfitLoss();
+
+    /**
+     * Returns the realized profit/loss of the current account: the gain or loss closed with the
+     * sells, that does not change anymore with the prices.
+     *
+     * @return the realized P/L as an {@link Asset} in the base currency
+     */
+    Asset getCurrentRealizedProfitLoss();
+
+    /**
      * Returns the all-time profit/loss of the current account as a percentage of the total cost
      * basis.
      *

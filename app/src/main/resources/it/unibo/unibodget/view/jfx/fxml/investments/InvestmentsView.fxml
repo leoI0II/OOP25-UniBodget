@@ -109,6 +109,8 @@
                         <Label styleClass="card-title" text="All-time profit" />
                         <Label fx:id="allTimeProfitValue" styleClass="stat-value" text="\$00.00" />
                         <Label fx:id="allTimeProfitPercentage" styleClass="stat-change" text="0%" />
+                        <!-- split of the all-time profit: balance - cost basis is only the unrealized part -->
+                        <Label fx:id="profitSplitLabel" styleClass="card-title" text="" />
                      </children>
                   </VBox>
                   <VBox styleClass="card" HBox.hgrow="ALWAYS">

@@ -1099,6 +1099,22 @@
     -fx-text-fill: #ef4444;
 }
 
+/* table cells and card labels colored by sign (portfolio page): more specific than
+   ".theme-x .table-view .table-cell" and ".theme-x .card .label", that set the same text color for all */
+.theme-dark .table-view .table-cell.positive,
+.theme-light .table-view .table-cell.positive,
+.theme-dark .card .label.positive,
+.theme-light .card .label.positive {
+    -fx-text-fill: #10b981;
+}
+
+.theme-dark .table-view .table-cell.negative,
+.theme-light .table-view .table-cell.negative,
+.theme-dark .card .label.negative,
+.theme-light .card .label.negative {
+    -fx-text-fill: #ef4444;
+}
+
 /* Card Separator */
 .theme-dark .card .separator:vertical .line {
     -fx-border-color: rgba(255, 255, 255, 0.10);

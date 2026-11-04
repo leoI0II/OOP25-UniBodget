@@ -449,6 +449,28 @@ final class DefaultInvestmentControllerTest {
     }
 
     @Test
+    void testRealizedAndUnrealizedProfitLossAfterPartialSell() {
+        // 10 AAPL bought @ $100 (cost 1000), market price $150
+        buyAapl(BigDecimal.TEN, new BigDecimal(S_100));
+        // sell 5 @ $150 with $5 fee: realized = (150 - 100) * 5 - 5 = 245
+        controller.executeSellOrder(
+            account, new PaymentSource.CashAccountChannel(cashAccount),
+            StockMarketCurrency.AAPL, BigDecimal.valueOf(I_5),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_150)),
+            Asset.of(FiatCurrency.USD, new BigDecimal(S_5)),
+            TODAY, "partial sell"
+        );
+        final BigDecimal unrealized = controller.getCurrentUnrealizedProfitLoss().amount();
+        // 5 still held: cost 500, value 5 * 150 = 750, so unrealized = 250
+        assertEquals(0, new BigDecimal("245").compareTo(controller.getCurrentRealizedProfitLoss().amount()));
+        assertEquals(0, new BigDecimal("250").compareTo(unrealized));
+        // all-time = realized + unrealized, while balance - cost basis is only the unrealized part
+        assertEquals(0, new BigDecimal("495").compareTo(controller.getCurrentAllTimeProfitLoss().amount()));
+        assertEquals(0, unrealized.compareTo(
+            controller.getCurrentBalance().amount().subtract(controller.getCurrentTotalCostBasis().amount())));
+    }
+
+    @Test
     void testExecuteSellOrderToStableCoinUsesPriceInBaseCurrency() {
         // account in EUR that holds 10 AAPL bought @ 100 EUR
         final var eurAccount = new InvestmentAccount("EUR Portfolio", FiatCurrency.EUR, exchangeRateProvider);
