@@ -1,6 +1,9 @@
 package it.unibo.unibodget.model.currency.api;
 
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,6 +46,9 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /** Base currency associated with the cached rates. */
     private String cachedBaseCode;
 
+    /** Flag to prevent flooding UI notifications when running in offline fallback mode. */
+    private boolean offlineNotified;
+
     /**
      * Returns the latest exchange rates relative to the given base currency.
      *
@@ -67,6 +73,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             cachedRates = new HashMap<>(fetchedRates);
             cachedBaseCode = base.getCode();
             lastUpdate = Instant.now();
+            offlineNotified = false;
             return Map.copyOf(cachedRates);
         }
         // Keep previous rates if the refresh fails
@@ -74,8 +81,46 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             LOGGER.warn("[FIAT CACHE] Request failed: using previous rates.");
             return Map.copyOf(cachedRates);
         }
-        LOGGER.warn("[FIAT CACHE] No rates available for {}", base.getCode());
-        return Map.of();
+        LOGGER.warn("[FIAT CACHE] No network connection and empty cache: using fallback mock rates for {}",
+                base.getCode());
+        if (!offlineNotified) {
+            MessageBus.send(new MainInfoNotificationEvent(
+                    "Offline mode: simulated exchange rates applied (no connection)."));
+            offlineNotified = true;
+        }
+        return getMockFallbackRates(base);
+    }
+
+    /**
+     * Generates deterministic mock exchange rates relative to the requested base currency
+     * when network access is unavailable and no previous cache exists.
+     *
+     * @param base the requested base currency
+     * @return a map of mock exchange rates
+     */
+    private Map<CurrencyUnit, Double> getMockFallbackRates(final CurrencyUnit base) {
+        final Map<CurrencyUnit, Double> usdRates = new HashMap<>(Map.ofEntries(
+                Map.entry(FiatCurrency.USD, 1.0),
+                Map.entry(FiatCurrency.EUR, 0.92),
+                Map.entry(FiatCurrency.GBP, 0.79),
+                Map.entry(FiatCurrency.CHF, 0.89),
+                Map.entry(FiatCurrency.JPY, 155.0),
+                Map.entry(FiatCurrency.CAD, 1.38),
+                Map.entry(FiatCurrency.AUD, 1.52),
+                Map.entry(FiatCurrency.CNY, 7.24),
+                Map.entry(FiatCurrency.HKD, 7.80),
+                Map.entry(FiatCurrency.INR, 84.0),
+                Map.entry(FiatCurrency.RUB, 95.0)
+        ));
+
+        if ("USD".equalsIgnoreCase(base.getCode())) {
+            return usdRates;
+        }
+
+        final double baseRate = usdRates.getOrDefault(base, 1.0);
+        final Map<CurrencyUnit, Double> result = new HashMap<>();
+        usdRates.forEach((unit, rate) -> result.put(unit, rate / baseRate));
+        return result;
     }
 
     /**

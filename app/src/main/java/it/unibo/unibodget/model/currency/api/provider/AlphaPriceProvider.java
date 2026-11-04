@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unibo.unibodget.model.currency.CurrencyType;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Locale;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,14 +25,27 @@ import org.slf4j.LoggerFactory;
 public class AlphaPriceProvider implements PriceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlphaPriceProvider.class);
+    private static final int HTTP_OK = 200;
     private static final String NOTE_KEY = "Note";
     private static final String API_URL = "https://www.alphavantage.co/query";
     private static final String ALPHA_KEY_VARIABLE = "ALPHA_VANTAGE_API_KEY";
     private static final String DEFAULT_ALPHA_KEY = "B56AX33NF4F29HHZ";
 
+    private static final BigDecimal DEFAULT_STOCK_FALLBACK = new BigDecimal("150.0");
+    private static final Map<String, BigDecimal> FALLBACK_STOCK_PRICES = Map.of(
+            "AAPL", new BigDecimal("200.0"),
+            "MSFT", new BigDecimal("420.0"),
+            "NVDA", new BigDecimal("130.0"),
+            "AMZN", new BigDecimal("190.0"),
+            "GOOGL", new BigDecimal("170.0"),
+            "META", new BigDecimal("580.0"),
+            "TSLA", new BigDecimal("250.0")
+    );
+
     private final String apiKey;
     private final HttpClient client;
     private final ObjectMapper mapper;
+    private volatile boolean offlineNotified;
 
     /**
      * Creates a provider using a system property, environment variable or the default API key, in
@@ -84,7 +101,7 @@ public class AlphaPriceProvider implements PriceProvider {
      * @throws IllegalArgumentException if the asset type is not {@link CurrencyType#STOCK}
      */
     @Override
-    public BigDecimal getPriceInUSD(final CurrencyUnit unit) {
+    public synchronized BigDecimal getPriceInUSD(final CurrencyUnit unit) {
         if (unit.getType() != CurrencyType.STOCK) {
             throw new IllegalArgumentException("Alpha Vantage supports STOCK assets only.");
         }
@@ -103,15 +120,50 @@ public class AlphaPriceProvider implements PriceProvider {
             final HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            return parsePrice(response.body());
+            if (response.statusCode() == HTTP_OK) {
+                final BigDecimal parsedPrice = parsePrice(response.body());
+                if (parsedPrice.signum() > 0) {
+                    offlineNotified = false;
+                    return parsedPrice;
+                }
+            }
+
+            LOGGER.warn("[ALPHA] Response status {} or price unavailable: using fallback mock stock price.",
+                    response.statusCode());
+            notifyOffline();
+            return getMockFallbackPrice(unit);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             LOGGER.warn("[ALPHA] Richiesta interrotta.");
             return BigDecimal.ZERO;
         } catch (final IOException e) {
-            LOGGER.error("[ALPHA] Errore di connessione: {}", e.getMessage());
-            return BigDecimal.ZERO;
+            LOGGER.warn("[ALPHA] Errore di connessione: using fallback mock stock price (no connection).", e);
+            notifyOffline();
+            return getMockFallbackPrice(unit);
         }
+    }
+
+    /**
+     * Sends an offline mode notification via {@link MessageBus} once.
+     */
+    private void notifyOffline() {
+        if (!offlineNotified) {
+            MessageBus.send(new MainInfoNotificationEvent(
+                    "Offline mode: simulated stock prices applied (no connection)."));
+            offlineNotified = true;
+        }
+    }
+
+    /**
+     * Resolves a deterministic fallback price for the requested stock currency.
+     *
+     * @param unit the stock currency
+     * @return the fallback USD price
+     */
+    private BigDecimal getMockFallbackPrice(final CurrencyUnit unit) {
+        return FALLBACK_STOCK_PRICES.getOrDefault(
+                unit.getCode().toUpperCase(Locale.ROOT),
+                DEFAULT_STOCK_FALLBACK);
     }
 
     /**

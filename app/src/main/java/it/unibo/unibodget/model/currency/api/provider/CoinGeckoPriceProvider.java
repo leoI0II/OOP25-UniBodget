@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unibo.unibodget.model.currency.CryptoCurrency;
 import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -14,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Retrieves cryptocurrency prices from CoinGecko.
@@ -22,10 +26,34 @@ import java.util.stream.Collectors;
  */
 public class CoinGeckoPriceProvider implements PriceProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CoinGeckoPriceProvider.class);
+    private static final int HTTP_OK = 200;
     private static final String API_URL = "https://api.coingecko.com/api/v3/simple/price";
+
+    private static final BigDecimal DEFAULT_CRYPTO_FALLBACK = new BigDecimal("10.0");
+    private static final Map<CryptoCurrency, BigDecimal> FALLBACK_PRICES = Map.ofEntries(
+            Map.entry(CryptoCurrency.BTC, new BigDecimal("68000.0")),
+            Map.entry(CryptoCurrency.ETH, new BigDecimal("2600.0")),
+            Map.entry(CryptoCurrency.SOL, new BigDecimal("180.0")),
+            Map.entry(CryptoCurrency.USDT, new BigDecimal("1.0")),
+            Map.entry(CryptoCurrency.USDC, new BigDecimal("1.0")),
+            Map.entry(CryptoCurrency.EURC, new BigDecimal("1.08")),
+            Map.entry(CryptoCurrency.XMR, new BigDecimal("160.0")),
+            Map.entry(CryptoCurrency.ADA, new BigDecimal("0.35")),
+            Map.entry(CryptoCurrency.XRP, new BigDecimal("0.50")),
+            Map.entry(CryptoCurrency.DOT, new BigDecimal("4.50")),
+            Map.entry(CryptoCurrency.DOGE, new BigDecimal("0.15")),
+            Map.entry(CryptoCurrency.AVAX, new BigDecimal("25.0")),
+            Map.entry(CryptoCurrency.MATIC, new BigDecimal("0.38")),
+            Map.entry(CryptoCurrency.LTC, new BigDecimal("70.0")),
+            Map.entry(CryptoCurrency.XLM, new BigDecimal("0.10")),
+            Map.entry(CryptoCurrency.LINK, new BigDecimal("12.0")),
+            Map.entry(CryptoCurrency.UNI, new BigDecimal("8.0"))
+    );
 
     private final HttpClient client;
     private final ObjectMapper mapper;
+    private volatile boolean offlineNotified;
 
     /** Creates a new CoinGecko provider. */
     public CoinGeckoPriceProvider() {
@@ -55,10 +83,14 @@ public class CoinGeckoPriceProvider implements PriceProvider {
      * for the rate limit of CoinGecko it counts as one call, not one per coin.</p>
      *
      * @throws IllegalArgumentException if one of the assets is not a {@link CryptoCurrency}
-     * @throws IllegalStateException if the request fails
+     * @throws IllegalStateException if the request fails unexpectedly
      */
     @Override
-    public Map<CurrencyUnit, BigDecimal> getPricesInUSD(final List<? extends CurrencyUnit> units) {
+    public synchronized Map<CurrencyUnit, BigDecimal> getPricesInUSD(final List<? extends CurrencyUnit> units) {
+        if (units == null || units.isEmpty()) {
+            return Map.of();
+        }
+
         final List<CryptoCurrency> cryptos = units.stream()
                 .map(CoinGeckoPriceProvider::asCrypto)
                 .toList();
@@ -75,13 +107,52 @@ public class CoinGeckoPriceProvider implements PriceProvider {
             final HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
             final HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
-            return parsePrices(response.body(), cryptos);
+
+            if (response.statusCode() == HTTP_OK) {
+                final Map<CurrencyUnit, BigDecimal> prices = parsePrices(response.body(), cryptos);
+                if (!prices.isEmpty()) {
+                    offlineNotified = false;
+                    return prices;
+                }
+            }
+
+            LOGGER.warn("[COINGECKO] Request failed or rate limited (status {}): using fallback mock prices.",
+                    response.statusCode());
+            notifyOffline();
+            return getMockFallbackPrices(cryptos);
         } catch (final IOException e) {
-            throw new IllegalStateException("Failed to retrieve CoinGecko data.", e);
+            LOGGER.warn("[COINGECKO] Network error: using fallback mock prices (no connection).", e);
+            notifyOffline();
+            return getMockFallbackPrices(cryptos);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to retrieve CoinGecko data.", e);
         }
+    }
+
+    /**
+     * Sends an offline mode notification via {@link MessageBus} once.
+     */
+    private void notifyOffline() {
+        if (!offlineNotified) {
+            MessageBus.send(new MainInfoNotificationEvent(
+                    "Offline mode: simulated cryptocurrency prices applied (no connection)."));
+            offlineNotified = true;
+        }
+    }
+
+    /**
+     * Returns fallback mock prices for the requested cryptocurrencies.
+     *
+     * @param cryptos requested cryptos
+     * @return map of simulated USD prices
+     */
+    private Map<CurrencyUnit, BigDecimal> getMockFallbackPrices(final List<CryptoCurrency> cryptos) {
+        final Map<CurrencyUnit, BigDecimal> result = new HashMap<>();
+        for (final CryptoCurrency crypto : cryptos) {
+            result.put(crypto, FALLBACK_PRICES.getOrDefault(crypto, DEFAULT_CRYPTO_FALLBACK));
+        }
+        return result;
     }
 
     /**
