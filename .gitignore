@@ -8,6 +8,7 @@ build/
 # --- File di Java ---
 *.class
 *.log
+hs_err_pid*.log
 
 # --- IntelliJ IDEA ---
 .idea/

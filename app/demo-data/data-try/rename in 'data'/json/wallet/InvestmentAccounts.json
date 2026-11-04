@@ -1,0 +1,17 @@
+{
+  "investmentAccounts" : [ {
+    "id" : "0dbebd41-4185-423d-b89d-8581bcc67f85",
+    "name" : "Investment wallet",
+    "baseCurrency" : "AAPL",
+    "history" : {
+      "transactions" : [ ]
+    }
+  }, {
+    "id" : "40f9a434-d4cb-4fa8-8729-ff9cf073a8e3",
+    "name" : "Wallet for family",
+    "baseCurrency" : "META",
+    "history" : {
+      "transactions" : [ ]
+    }
+  } ]
+}

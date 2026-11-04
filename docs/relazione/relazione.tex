@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \geometry{a4paper, top=3cm, bottom=3cm, left=3cm, right=3cm}
 \usepackage{graphicx}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
@@ -26,7 +27,6 @@ citecolor=blue!70!black,
 urlcolor=blue!70!black,
 breaklinks=true
 }
-\usepackage{xurl}
 
 \lstset{
 basicstyle=\small\ttfamily,
@@ -293,7 +293,13 @@ convertitore ma non fanno parte del problema.
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-1.pdf}
+  \makebox[\textwidth][c]{%
+    \includegraphics[
+      width=1.15\textwidth,
+      height=1\textheight,
+      keepaspectratio
+    ]{img/uml-dominio-1.pdf}%
+  }
   \caption{Schema UML del dominio (Parte 1): conti, storico transazioni, posizioni e gestione del budget.}
   \label{fig:dominio-conti}
 \end{figure}
@@ -302,7 +308,13 @@ convertitore ma non fanno parte del problema.
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{img/uml-dominio-2.pdf}
+  \makebox[\textwidth][c]{%
+  \includegraphics[
+    width=1.15\linewidth,
+    height=1\textheight,
+    keepaspectratio
+    ]{img/uml-dominio-2.pdf}%
+  }
   \caption{Schema UML del dominio (Parte 2): mercati, tassi di cambio, watchlist, banche e conversioni valutarie.}
   \label{fig:dominio-mercato}
 \end{figure}
@@ -359,12 +371,18 @@ Il disaccoppiamento è garantito dall'adozione del principio di inversione delle
   \item La sostituzione completa del framework grafico (ad esempio verso Swing o una web UI) richiederebbe unicamente la riscrittura del layer View, lasciando immutati sia il Controller sia l'intero Model.
 \end{itemize}
 
-\begin{figure}[H]
+\clearpage
+
+\begin{figure}[p]
   \centering
-  \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{img/uml-architettura.pdf}
+  \makebox[\linewidth][c]{%
+    \includegraphics[width=1.28\linewidth,height=0.88\textheight,keepaspectratio]{img/uml-architettura.pdf}%
+  }
   \caption{Rappresentazione ad alto livello dell'architettura MVC e del MessageBus disaccoppiato.}
   \label{fig:architecture}
 \end{figure}
+
+\clearpage
 
 % ============================================================================
 % 2.2 DESIGN DETTAGLIATO (ARIANNA PALMUCCI)
@@ -605,11 +623,11 @@ Nelle prime versioni dell'applicazione, ciascuna classe responsabile della persi
   \item \textbf{Soluzione adottata:} Centralizzazione della risoluzione in una classe dedicata, \texttt{AppDataPathResolver}, fondata su una gerarchia rigorosa a quattro livelli di priorità:
   \begin{enumerate}
     \item \textbf{Passo 1 (Data locale standard):} Se la directory \texttt{./data} esiste nella cartella di lavoro corrente, viene selezionata ed impiegata immediatamente. Questa scelta azzera qualsiasi latenza di scansione (\emph{zero search overhead}) e assicura il 100\% di continuità e stabilità rispetto al comportamento standard.
-    \item \textbf{Passo 2 (Ricerca euristica intelligente delimitata):} Qualora la cartella locale non sia presente, il resolver innesca un'indagine controllata e protetta da vincoli stringenti:
+    \item \textbf{Passo 2 (Fallback ricerca delimitata):} Qualora la cartella locale non sia presente, il resolver innesca un'indagine controllata e protetta da vincoli stringenti:
     \begin{itemize}
       \item Esamina percorsi adiacenti frequenti (\texttt{../data}, \texttt{../../data}, \texttt{app/data}, \texttt{\textasciitilde/.unibodget/data}).
       \item Scansiona le directory utente canoniche (Desktop, Documents, Downloads e radice superiore) con profondità massima limitata a 3 livelli (\texttt{MAX\_SEARCH\_DEPTH = 3}), fermando l'ispezione al raggiungimento di 500 cartelle visitate e saltando a priori rami nascosti (\texttt{.git}, \texttt{.gradle}) e cartelle di build (\texttt{build}, \texttt{bin}, \texttt{target}, \texttt{node\_modules}, \texttt{Library}).
-      \item Sottopone ciascun candidato a \textbf{validazione semantica}: il file \texttt{json/settings/Settings.json} deve esistere, essere leggibile e contenere campi JSON proprietari di UniBodget (\texttt{baseCurrency}, \texttt{theme}), eliminando alla radice il rischio di falsi positivi su cartelle omonime di terze parti.
+      \item Sottopone ciascun candidato a \textbf{validazione semantica}: il file \path{json/settings/Settings.json} deve esistere, essere leggibile e contenere campi JSON proprietari di UniBodget (\texttt{baseCurrency}, \texttt{theme}), eliminando alla radice il rischio di falsi positivi su cartelle omonime di terze parti.
     \end{itemize}
     \item \textbf{Passo 3 (Parametro esplicito opzionale):} Se la ricerca euristica non rileva cartelle preesistenti, il resolver verifica la presenza della proprietà JVM di sistema \texttt{unibodget.data.dir} o della variabile d'ambiente \texttt{UNIBODGET\_DATA\_DIR}.
     \item \textbf{Passo 4 (Clean fallback con self-healing):} Come garanzia conclusiva di funzionamento, il resolver ricade sul percorso standard \texttt{Path.of("data")}. Qualora i file non esistano, \texttt{ModelFileManager} interviene in modalità di \emph{self-healing}, estraendo automaticamente i template JSON predefiniti inclusi nel classpath applicativo (\texttt{resources/json/}).
@@ -669,15 +687,19 @@ Nel design originario, ciascuna finestra di dialogo e ciascun widget del modulo 
 \subsubsection*{3. Schema UML e Interazioni}
 L'architettura del parser monetario centralizzato e i componenti di vista che ne fanno uso sono riassunti nel diagramma delle classi seguente:
 
+\begingroup
+\setlength{\intextsep}{3pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{0pt}
 \begin{figure}[H]
   \centering
-  \includegraphics[
-  width=0.88\textwidth,
-  keepaspectratio
-  ]{img/uml-monetary-input-parser.pdf}
+  \makebox[\linewidth][c]{%
+    \includegraphics[width=1.24\linewidth,keepaspectratio]{img/uml-monetary-input-parser.pdf}%
+  }
   \caption{Diagramma delle classi: architettura di validazione e parsing dell'input monetario e relative interazioni con le viste.}
   \label{fig:monetary-parser-diagram}
 \end{figure}
+\endgroup
 
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}
@@ -843,7 +865,7 @@ La tabella dei movimenti finanziari della Dashboard offre all'utente una barra d
 \subsubsection*{4. Pattern utilizzati e reificazione}
 \begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
   \item \textbf{Specification Pattern:} Separa la logica del predicato contabile dall'iterazione sulla collezione; ogni specifica rispetta il principio di singola responsabilità (SRP) ed è collaudabile in completo isolamento.
-  \item \textbf{Factory Method / Combiner:} La classe \texttt{TransactionSpecifications} centralizza l'istanziazione e la composizione logica (\texttt{spec.and(...)}) a partire dal record \texttt{TransactionFilterCriteria}.
+  \item \textbf{Factory Method / Combiner:} La classe \texttt{TransactionSpecifications} centralizza l'istanziazione e la composizione logica (\texttt{spec.and(...)}) a partire dal record \texttt{TransactionFilter\allowbreak Criteria}.
   \item \textbf{Functional Pipeline e Defensive Copying:} Il filtraggio sfrutta \texttt{Stream.filter} con il predicato \texttt{isSatisfiedBy} e restituisce collezioni immutabili (\texttt{List.copyOf}), proteggendo l'integrità contabile da manipolazioni esterne.
 \end{itemize}
 
@@ -881,12 +903,19 @@ Un ordine sul modulo investimenti coinvolge quasi sempre più di un conto, e il 
 \subsubsection*{3. Schema UML e Interazioni}
 La view chiama l'interfaccia \texttt{InvestmentController}, passando la sorgente scelta dall'utente come istanza di \texttt{PaymentSource}. L'implementazione \texttt{DefaultInvestmentController} esamina la sorgente con uno \texttt{switch} esaustivo e restituisce sempre un \texttt{OrderResult}, mai un'eccezione per gli errori previsti. Il dialog dell'ordine pubblica l'esito sul canale di eventi (\texttt{OrderResultEvent}): la finestra principale lo riceve e, con uno \texttt{switch} con pattern matching, mostra un messaggio specifico (ad esempio importo richiesto e disponibile in caso di fondi insufficienti), mentre la pagina del portafoglio chiude il dialog se l'ordine è riuscito. La Figura~\ref{fig:dan-ordini} mostra le due gerarchie sigillate, con una selezione dei record di \texttt{OrderResult}.
 
+\begingroup
+\setlength{\intextsep}{3pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{0pt}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{img/uml-dan-ordini.pdf}
+\makebox[\linewidth][c]{%
+  \includegraphics[width=1.24\linewidth,keepaspectratio]{img/uml-dan-ordini.pdf}%
+}
 \caption{Ordini: sorgente di pagamento ed esito modellati come tipi sigillati.}
 \label{fig:dan-ordini}
 \end{figure}
+\endgroup
 
 \subsubsection*{4. Pattern utilizzati e modellazione}
 \begin{itemize}
@@ -1063,8 +1092,8 @@ Per la parte sviluppata da \textbf{Favour Osaretin Emuwahen}, il collaudo automa
 \begin{itemize}
   \item \textbf{Dashboard, Facciata e Snapshot Contabile:}
   \begin{itemize}
-    \item \texttt{DefaultDashboardFacadeTest}, \texttt{DefaultDashboardSnapshotTest}, \texttt{DefaultDashboardControllerTest}: validazione dell'aggregazione atomica dei dati informativi e coordinamento della vista passiva.
-    \item \texttt{DefaultWalletServiceTest}, \texttt{DefaultCategoryServiceTest}, \texttt{DefaultFriendLoanSummaryServiceTest}: verifica dell'elaborazione analitica dei movimenti e del debito/credito residuo verso amici.
+    \item \texttt{DefaultDashboardFacadeTest}, \texttt{DefaultDashboardSnapshotTest}, \\ \texttt{DefaultDashboardControllerTest}: validazione dell'aggregazione atomica dei dati informativi e coordinamento della vista passiva.
+    \item \texttt{DefaultWalletServiceTest}, \texttt{DefaultCategoryServiceTest}, \\ \texttt{DefaultFriendLoanSummaryServiceTest}: verifica dell'elaborazione analitica dei movimenti e del debito/credito residuo verso amici.
   \end{itemize}
   \item \textbf{Strategie di Budget, Trend Mensili e Specifiche di Filtro:}
   \begin{itemize}
@@ -1097,7 +1126,7 @@ Per la parte sviluppata da \textbf{Daniele Zappalà}, i test riguardano il modul
     \end{itemize}
 \end{itemize}
 
-Tutti i test vengono eseguiti automaticamente dal task \texttt{./gradlew check}. Il codice rispetta rigorosamente i controlli statici di Checkstyle, PMD e SpotBugs con zero violazioni.
+Tutti i test vengono eseguiti automaticamente dal task \texttt{./gradlew build check}. Il codice rispetta rigorosamente i controlli statici di Checkstyle, PMD e SpotBugs con zero violazioni.
 
 \section{Note di Sviluppo}
 
@@ -1108,8 +1137,9 @@ In questa sezione vengono documentate le caratteristiche avanzate del linguaggio
 Nello sviluppo del sottosistema Dashboard e Contabilità sono state valorizzate le potenzialità introdotte dalle recenti versioni di Java, coniugando paradigmi orientati agli oggetti e funzionali:
 
 \begin{itemize}[itemsep=5pt,topsep=3pt]
-  \item \textbf{Gestione Idiomatica di \texttt{Optional<T>} e Validazione delle Invarianti di Dominio:} Eliminazione dei valori nulli dall'API pubblica mediante l'impiego pervasivo di \texttt{Optional<T>} per la modellazione dei dati accessori di prestito fiduciario (\texttt{friendLoanId}, \texttt{friendName}) in \texttt{CashTransaction} e dei filtri di ricerca in \texttt{TransactionFilterCriteria}. La consistenza dello stato contabile viene garantita da rigidi controlli di validazione nel costruttore (\emph{fail-fast}), che rifiutano combinazioni spurie di parametri (es. identificativo di prestito valorizzato senza il relativo nominativo).
-  \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/transactions/base/CashTransaction.java#L80-L98}
+  \item \textbf{Gestione Idiomatica di \texttt{Optional<T>} e Validazione delle Invarianti di Dominio:} Eliminazione dei valori nulli dall'API pubblica mediante l'impiego pervasivo di \texttt{Optional<T>} per la modellazione dei dati accessori di prestito fiduciario (\texttt{friendLoanId}, \texttt{friendName}) in \texttt{CashTransaction} e dei filtri di ricerca in \\ \texttt{TransactionFilterCriteria}. La consistenza dello stato contabile viene garantita da rigidi controlli di validazione nel costruttore (\emph{fail-fast}), che rifiutano combinazioni spurie di parametri (es. identificativo di prestito valorizzato senza il relativo nominativo).
+  \par\emph{Riferimento:}
+    \href{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/transactions/base/CashTransaction.java\#L80-L98}{CashTransaction.java, righe 80--98}
 
   \item \textbf{Fluent Builder con Supporto Prototype Copying (\emph{Copy-on-Write}):} Implementazione del Builder pattern per \texttt{CashTransaction} equipaggiato sia con metodi di assemblaggio fluente a tipizzazione stretta, sia con un costruttore di copia specializzato (\texttt{builder(CashTransaction prototype)}). Tale accorgimento abilita la derivazione non distruttiva di nuove transazioni rettificate a partire da entità preesistenti, preservando al contempo la rigorosa immutabilità dei movimenti registrati nel portafoglio.
   \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/transactions/base/CashTransaction.java#L208-L258}
@@ -1150,6 +1180,9 @@ Nello sviluppo del modulo di gestione delle valute, quotazioni, persistenza JSON
   \item \textbf{Callback Funzionali Reattive e Strutture Dati Immutabili:} Impiego dell'interfaccia funzionale \texttt{Consumer<Theme>} in \texttt{ThemeManager} per registrare callback invocate alla commutazione del tema visivo a caldo, e incapsulamento rigoroso dei risultati di conversione tramite la classe immutabile \texttt{CurrencyConversionResult} (affiancata nel modulo dai record \texttt{Asset} per gli importi), garantendo assenza di side-effect.
   \par\emph{Riferimento:} \url{https://github.com/leoI0II/OOP25-UniBodget/blob/1f46f6c0064714ab0f900d9928433eef1f5d965a/app/src/main/java/it/unibo/unibodget/model/currency/CurrencyConversionResult.java#L10-L37}
 \end{itemize}
+
+\noindent
+Nella mia parte non è stato utilizzato codice proveniente da fonti esterne. Per la gestione della serializzazione dei file JSON e per l'integrazione con le API di rete ho consultato la documentazione ufficiale indicata in bibliografia, in particolare \cite{Jackson} e \cite{OracleHttpClient}.
 
 \clearpage
 \subsection{Daniele Zappalà}
@@ -1226,24 +1259,28 @@ Lavorare in team è stata un'esperienza costruttiva: con Arianna e Daniele abbia
   \item \textbf{Elaborazione asincrona dei dati della Dashboard:} Spostamento dell'orchestrazione sincrona svolta da \texttt{DefaultDashboardFacade} su worker thread in background tramite le API di concorrenza di JavaFX (\texttt{javafx.concurrent.Task}), garantendo una reattività ottimale anche a fronte di cronologie con decine di migliaia di transazioni.
 \end{enumerate}
 
+\clearpage
 \subsection{Arianna Palmucci}
-All'interno del progetto mi sono occupata del modulo Valute e Mercato: il motore di conversione monetaria, l'integrazione del client di rete per i tassi remoti con caching e fallback locale, il sistema di notifiche e watchlist, la persistenza su file JSON delle preferenze utente, l'infrastruttura di tematizzazione dinamica a runtime e la normalizzazione centralizzata dell'input numerico.
+All'interno del progetto mi sono occupata del modulo Valute e Mercato: il motore di conversione monetaria, l'integrazione del client di rete per i tassi remoti con caching e fallback locale, il sistema di notifiche e watchlist. Era anche mio compito gestire la persistenza su file JSON, comprese le preferenze utente, l'infrastruttura di tematizzazione dinamica a runtime e la normalizzazione centralizzata dell'input numerico.
 
 \subsubsection*{Punti di forza del contributo:}
 \begin{itemize}
   \item \textbf{Resilienza alle anomalie di rete e continuità d'uso:} Uno degli aspetti su cui ho lavorato con maggiore cura è stato garantire che l'applicazione non andasse mai in blocco in assenza di connessione. Con il meccanismo di cache controllata da TTL e il fallback automatico su mock deterministico o sugli ultimi dati validi memorizzati, il convertitore continua a rispondere puntualmente anche a fronte di disconnessioni o rate-limit dei server esterni.
   \item \textbf{Normalizzazione centralizzata dell'input:} La classe \texttt{MonetaryInputParser} ha risolto alla radice le eterogeneità di digitazione dell'utente, accettando indifferentemente virgola e punto decimale ed eliminando spazi e apici. L'uso di \texttt{Optional<BigDecimal>} restituisce un feedback chiaro ed elegante ai form, evitando che eccezioni non gestite compromettano l'esperienza grafica.
-  \item \textbf{Modularità della vista e tematizzazione a caldo:} La schermata del convertitore è strutturata in widget autonomi facilmente riposizionabili. Le impostazioni dell'utente persistono in formato JSON con storico reversibile (ispirato al pattern Memento), e la commutazione tra tema chiaro e scuro avviene istantaneamente a runtime senza dover riavviare l'applicazione.
+  \item \textbf{Modularità della vista e tematizzazione a caldo:} La schermata del convertitore è strutturata in widget autonomi facilmente riposizionabili. Le impostazioni dell'utente persistono in formato JSON e la commutazione tra tema chiaro e scuro avviene istantaneamente a runtime senza dover riavviare l'applicazione.
+  \item \textbf{Persistenza robusta su file JSON e risoluzione dei percorsi:} Mi sono occupata dell'architettura di persistenza dell'applicazione basata su file JSON (gestione delle impostazioni utente, watchlist, banche censite e preferenze di tema). Tramite la configurazione avanzata di Jackson e l'integrazione di \texttt{AppDataPathResolver}, ho assicurato la totale auto-consistenza e robustezza dei salvataggi su disco, garantendo la compatibilità multipiattaforma e proteggendo i dati da corruzioni accidentali.
+  \item \textbf{Testing unitario incrementale e copertura capillare dei DTO:} Ho gestito con cura e sistematicità la progettazione delle classi di test con JUnit 5: per ciascun DTO (record immutabili e modelli di dominio) e per ogni classe dotata di funzionalità ho sviluppato parallelamente una suite di test dedicata, collaudando il codice passo dopo passo in modo incrementale.
 \end{itemize}
 
 \subsubsection*{Punti di debolezza ed elementi migliorabili:}
 \begin{itemize}
-  \item \textbf{Singolo provider di rete primario:} Il client per le valute fiat si appoggia principalmente a un unico servizio remoto; una catena di provider multipli con fallback automatico a cascata avrebbe offerto una ridondanza ancora superiore.
+  \item \textbf{Gestione articolata di cache e strategie di fallback:} Orchestrare i diversi livelli di cache temporizzata (TTL) e le relative strategie di fallback, sia per i tassi di cambio remoti soggetti a rate-limit sia per la persistenza su file JSON in caso di percorsi mancanti o dati non validi, ha costituito uno degli aspetti più complessi da coordinare per garantire che l'applicazione rimanesse sempre reattiva e priva di blocchi.
+  \item \textbf{Gestione di Git e GitHub in comune:} La sincronizzazione dei branch e la risoluzione dei merge hanno richiesto un costante coordinamento con il team.
   \item \textbf{Caricamento on-demand dei grafici storici:} Il recupero dei dati storici su archi temporali estesi avviene all'apertura del dialogo; anticipare il pre-caricamento in background ridurrebbe ulteriormente la latenza percepita dall'utente.
 \end{itemize}
 
 \subsubsection*{Ruolo all'interno del gruppo:}
-Nel lavoro di squadra mi sono concentrata sulla definizione delle basi multivaluta comuni (\texttt{CurrencyUnit}) e sulla coerenza visiva dell'intera suite attraverso l'architettura dei temi CSS. Ho inoltre collaborato alla definizione del \texttt{MessageBus} e alla corretta gestione delle finestre popup e modali sopraelevate (\texttt{SettingsPopupFX} e grafici di andamento), assicurandomi che ogni dialogo secondario si aprisse come una vera finestra contestuale senza invadere lo schermo intero.
+Il mio lavoro ha fornito le fondamenta per la definizione dei DTO condivisi e per l'intera persistenza su file, l'ambito più critico e rischioso del progetto: partendo dalle proposte del team, ho concretizzato il salvataggio e recupero dei dati reali su disco. La gestione centralizzata delle valute e dei relativi cambi ha costituito la base comune per trattare il denaro in tutta l'applicazione. Sul fronte grafico, coordinare i temi è stata una sfida complessa: ciascuno aveva realizzato la propria vista, quindi ho armonizzato lo stile preservando la struttura iniziale decisa insieme. Ho infine curato l'esperienza utente gestendo il cambio tema a runtime, i settings della valuta, il passaggio fluido tra le tre schermate principali, il pulsante di chiusura, la barra di scorrimento laterale e la memorizzazione automatica delle dimensioni della finestra.
 
 \subsubsection*{Sviluppi futuri specifici del modulo:}
 \begin{enumerate}
@@ -1319,15 +1356,21 @@ Per compilare ed eseguire l'applicazione desktop, è sufficiente posizionarsi ne
 \begin{lstlisting}[language=bash]
 ./gradlew run
 \end{lstlisting}
-In alternativa è possibile creare il pacchetto eseguibile autocontenuto con \texttt{./gradlew jar} e avviarlo con \texttt{java -jar UniBodget.jar}. Il runtime JavaFX provvederà a caricare le preferenze utente persistite, ripristinare i conti, le transazioni e le impostazioni, e visualizzare la finestra principale dell'applicazione, suddivisa tra la barra laterale di navigazione (\emph{Sidebar}) e l'area centrale, impostata di default sulla Dashboard.
+In alternativa è possibile creare il pacchetto eseguibile autocontenuto con \texttt{./gradlew jar} e avviarlo con \texttt{java -jar UniBodget.jar}. All'avvio, l'applicazione carica le preferenze utente persistite, ripristina i conti, le transazioni e le impostazioni, quindi visualizza la finestra principale, suddivisa tra la barra laterale di navigazione (Sidebar) e l'area centrale, impostata di default sulla Dashboard. Di default l'applicazione si avvia con un ambiente pulito pronto per essere configurato; se si desidera invece iniziare a esplorare il software partendo da dati dimostrativi già compilati, è possibile fare riferimento alla cartella \texttt{demo-data/} inclusa nel progetto, contenente il dataset di prova \texttt{data-1}. È sufficiente estrarre o spostare la cartella \texttt{data-1} all'esterno (accanto alla cartella \texttt{demo-data/}) e rinominarla in \texttt{data/} prima dell'avvio per caricare all'istante uno scenario completo di conti, transazioni, investimenti e grafici storici.
 
-Per il recupero delle quotazioni di mercato è richiesta una connessione a Internet; per l'accesso ai titoli azionari tramite provider esterno è supportata una chiave API personale configurabile tramite la variabile d'ambiente \texttt{ALPHA\_VANTAGE\_API\_KEY}. Le istantanee del profitto/perdita dei conti di investimento, usate per il grafico dell'andamento, vengono salvate in file CSV nella cartella \texttt{data/csv/snapshots}, insieme agli altri dati dell'applicazione, un file per ogni conto.
+Per il recupero delle quotazioni di mercato è richiesta una connessione a Internet. Per accedere alle quotazioni dei titoli azionari tramite il provider esterno Alpha Vantage è possibile utilizzare una chiave API personale, impostandola tramite la variabile d'ambiente \texttt{ALPHA\_VANTAGE\_API\_KEY} direttamente dal terminale prima dell'avvio dell'applicazione. Da terminale è possibile avviare l'applicazione con il comando:
+\begin{lstlisting}[language=bash]
+ALPHA_VANTAGE_API_KEY=INSERIRE_LA_PROPRIA_CHIAVE ./gradlew run
+\end{lstlisting}
+L'utilizzo della chiave è facoltativo e riguarda esclusivamente il recupero delle quotazioni azionarie. Per rimuovere la configurazione della chiave personalizzata basterà eseguire \texttt{unset ALPHA\_VANTAGE\_API\_KEY}.
+
+Le istantanee del profitto/perdita dei conti di investimento, usate per il grafico dell'andamento, vengono salvate in file CSV nella cartella \texttt{data/csv/snapshots/}, insieme agli altri dati dell'applicazione, un file per ogni conto.
 
 \section*{Panoramica della Dashboard}
 La schermata principale della Dashboard è organizzata in aree logiche ad alta densità informativa:
 \begin{enumerate}
   \item \textbf{Barra superiore di intestazione:} Mostra il titolo della schermata, il selettore del portafoglio attivo (\emph{Cash Account}) tramite menu a tendina e il pulsante \texttt{"New Wallet"} per la creazione di un nuovo portafoglio.
-  \item \textbf{Scheda Patrimonio e Saldo:} Espone a caratteri cubitali il saldo contabile totale del conto attivo, formattato nella divisa di riferimento (es. EUR, USD).
+  \item \textbf{Scheda Patrimonio e Saldo:} Espone il saldo contabile totale del conto attivo, formattato nella divisa di riferimento (es. EUR, USD).
   \item \textbf{Riepilogo Trend Mensili (Monthly Insights):} Tre schede comparative che espongono in tempo reale il confronto rispetto al mese precedente per:
   \begin{itemize}
     \item \emph{Risparmi netti:} Differenza tra entrate e uscite con indicazione del delta percentuale.
@@ -1355,7 +1398,7 @@ La schermata principale della Dashboard è organizzata in aree logiche ad alta d
   \item Selezionare la categoria semantica associata e specificare la data tramite il calendario integrato.
   \item Inserire una causale descrittiva e note facoltative.
   \item Se si registra un prestito informale (\emph{Friend Loan}), specificare obbligatoriamente il nominativo dell'amico oppure selezionare un prestito pregresso per registrarne la restituzione.
-  \item Premere \texttt{"Save Transaction"}. Il saldo, i grafici e il budget si aggiorneranno istantaneamente in modo atomico.
+  \item Premendo \texttt{"Save Transaction"} il saldo, i grafici e il budget vengono aggiornati immediatamente. L'operazione viene gestita in modo atomico, così da garantire la coerenza dei dati coinvolti.
 \end{enumerate}
 
 \subsection*{Filtraggio Avanzato della Cronologia}
@@ -1390,7 +1433,7 @@ La sezione \textbf{Currency Converter} mette a disposizione una suite completa d
   \item \textbf{Inserimento dell'Importo e Normalizzazione:} Nel campo \texttt{"Amount"} l'utente può inserire la cifra da convertire. Il parser accetta indifferentemente sia la virgola sia il punto come separatore decimale, normalizzando automaticamente il valore inserito senza generare errori di formattazione.
   \item \textbf{Selezione delle Divise (From e To):} Tramite due appositi menu a tendina è possibile selezionare la valuta di origine e quella di destinazione, attingendo dall'intero paniere supportato (valute tradizionali come EUR, USD, GBP, JPY, criptovalute come BTC, ETH e titoli azionari come AAPL, MSFT, GOOGL).
   \item \textbf{Inversione Istantanea delle Valute (Pulsante Swap $\updownarrow$):} Posizionato tra i due selettori valutari, il pulsante \texttt{"Swap"} inverte con un solo clic la valuta sorgente e la valuta target, permettendo di consultare il tasso inverso senza dover reimpostare manualmente i campi.
-  \item \textbf{Calcolo della Conversione Reale (\texttt{"Convert"}):} Cliccando su \texttt{"Convert"}, il sistema interroga il motore di calcolo basato su tassi di mercato aggiornati (con caching resiliente e fallback in memoria) e mostra il risultato netto calcolato (\texttt{"Net Balance Result"}) con arrotondamento bancario conforme agli standard finanziari.
+  \item \textbf{Calcolo della Conversione Reale (\texttt{"Convert"}):} Cliccando su \texttt{"Convert"}, il sistema recupera i tassi di cambio disponibili attraverso i provider di mercato, utilizzando i dati presenti nella cache quando ancora validi e ricorrendo ai meccanismi di fallback in caso di indisponibilità dei servizi esterni. Il risultato della conversione (``Net Balance Result'') viene quindi visualizzato con l'arrotondamento previsto per la valuta di destinazione.
   \item \textbf{Monitoraggio Soglie e Allerte di Mercato (\texttt{"Threshold"}):} È possibile specificare una soglia numerica nel campo \texttt{"Threshold"} e impostare la direzione desiderata (\emph{Above} se si attende un rialzo sopra la soglia, oppure \emph{Below} se si monitora un ribasso). L'applicazione controllerà il tasso corrente e notificherà tempestivamente l'utente all'attivazione della condizione.
   \item \textbf{Simulatore delle Spese Bancarie (\texttt{"Bank Fees"}):} Nel riquadro dedicato, l'utente può selezionare un istituto bancario convenzionato e premere \texttt{"Calculate Bank Fees"}. Il simulatore visualizza lo spread commerciale percentuale applicato dalla banca e le commissioni fisse di transazione, evidenziando la differenza netta tra il cambio puro di mercato e la somma effettivamente ricevuta.
   \item \textbf{Gestione della Watchlist Personale (\texttt{"My Watchlist"}):} Premendo il pulsante \texttt{"Save couple in watchlist"}, la coppia valutaria attualmente impostata viene salvata nella lista dei preferiti a lato dello schermo. Le coppie monitorate rimangono memorizzate tra un avvio e l'altro, e possono essere consultate o eliminate in qualsiasi momento con un semplice clic.
@@ -1412,13 +1455,31 @@ Cliccando sul pulsante \texttt{"Settings"} posizionato nella barra laterale o ne
 \end{enumerate}
 
 \subsection*{Gestione e Portabilità dei Dati: la Cartella \texttt{data/}}
-Tutte le informazioni create e modificate dall'utente durante l'utilizzo di UniBodget --- inclusi i portafogli attivi, i movimenti contabili inseriti, i limiti di budget mensili, le categorie di spesa, le coppie valutarie della watchlist e le preferenze grafiche personalizzate --- vengono salvate in file JSON posizionati all'interno della cartella \texttt{data/} (o \texttt{./data}).
+Durante l'utilizzo di UniBodget, tutte le informazioni create o modificate dall'utente vengono salvate all'interno della cartella \texttt{data/}. 
+Questa comprende i dati relativi ai portafogli, ai movimenti contabili, ai budget, alle categorie, alla watchlist e alle preferenze dell'applicazione, memorizzati in appositi file JSON. 
+La stessa struttura contiene anche le istantanee utilizzate per mantenere lo storico del grafico Portfolio, conservate nella sottocartella \texttt{data/csv/snapshots/}.
 
-Per un corretto utilizzo quotidiano, l'utente deve tenere a mente le seguenti semplici indicazioni operative:
+L'utente non deve intervenire direttamente sui singoli file: il salvataggio e il caricamento delle informazioni vengono gestiti dall'applicazione in modo del tutto trasparente. Per un corretto utilizzo quotidiano e per la gestione della persistenza, è utile tenere a mente le seguenti indicazioni operative:
+
 \begin{itemize}
-    \item \textbf{Portabilità e copie di sicurezza (Backup):} Se si desidera fare una copia di riserva dei propri dati finanziari, trasferire il programma su una chiavetta USB o eseguirlo su un computer diverso continuando da dove si era rimasti, \textbf{è fondamentale portarsi sempre dietro l'intera cartella \texttt{data/}} assieme all'applicazione. La cartella contiene anche le istantanee usate per il grafico del Portfolio (\texttt{data/csv/snapshots}), quindi copiandola si conserva anche lo storico del grafico.
-    \item \textbf{Ricerca automatica della cartella:} All'avvio, l'applicazione cerca autonomamente la cartella \texttt{data/} nella posizione in cui si trova il programma. Se l'utente dovesse avviare l'eseguibile da un percorso leggermente diverso o spostare i file in una sottocartella, il software è abbastanza intelligente da scansionare in autonomia le cartelle vicine e superiori per rintracciare i propri file di configurazione senza richiedere interventi manuali.
-    \item \textbf{Cosa succede se la cartella manca (Ripartenza da zero):} Qualora la cartella \texttt{data/} non dovesse essere trovata in nessun percorso adiacente (ad esempio perché è stata rimossa, non è stata copiata assieme al software o il programma è stato avviato in una cartella completamente vuota), UniBodget non andrà in crash: provvederà invece a \textbf{creare automaticamente una nuova cartella \texttt{data/} vergine}, inizializzandola con i dati di esempio e le impostazioni predefinite di fabbrica. In questa situazione, l'utente si ritroverà l'applicazione pulita e \textbf{si ripartirà da zero}, senza vedere lo storico precedentemente memorizzato. Se ciò dovesse accadere accidentalmente, sarà sufficiente richiudere l'applicazione, ripristinare la cartella \texttt{data/} originale accanto al programma e riavviarlo per ritrovare immediatamente tutti i propri movimenti intatti.
+    \item \textbf{Avvio con dati dimostrativi (\texttt{data-1} in \texttt{demo-data/}):}
+    Al primo avvio UniBodget si presenta con un ambiente vuoto e pronto per l'inserimento delle proprie informazioni personali. Qualora si desideri invece esplorare subito l'applicazione con uno scenario d'uso già completo e popolato (conti cassa, transazioni con relative categorie semantiche, portafogli di investimenti azionari e crypto, watchlist e grafici storici di andamento), nel progetto è fornita la cartella \texttt{demo-data/}, contenente al suo interno il dataset preconfigurato \texttt{data-1}.
+    Per utilizzarlo è sufficiente:
+    \begin{enumerate}
+      \item Aprire la cartella \texttt{demo-data/} e localizzare la sottocartella \texttt{data-1};
+      \item Spostare o copiare \texttt{data-1} al di fuori di \texttt{demo-data/}, posizionandola nella cartella principale del progetto (allo stesso livello di \texttt{demo-data/});
+      \item Rinominare la cartella appena estratta da \texttt{data-1} a \texttt{data/} (oppure sostituire l'eventuale cartella \texttt{data/} già presente se l'applicazione era già stata avviata in precedenza).
+    \end{enumerate}
+    Al successivo avvio del software, il componente \texttt{AppDataPathResolver} rileverà automaticamente la cartella \texttt{data/} e caricherà tutti i dati dimostrativi senza richiedere alcuna configurazione manuale.
+
+    \item \textbf{Backup e copie di sicurezza (Portabilità):}
+    Per conservare una copia di riserva dei propri dati finanziari o trasferire il programma su un altro computer (o su una chiavetta USB) continuando da dove si era rimasti, \textbf{è fondamentale portare sempre con sé l'intera cartella \texttt{data/}} assieme all'applicazione, preservandone la struttura comprensiva della sottocartella \texttt{data/csv/snapshots/}. Per evitare inconsistenze, è preferibile chiudere l'applicazione prima di copiare la cartella.
+
+    \item \textbf{Ricerca automatica della cartella (\texttt{AppDataPathResolver}):}
+    All'avvio, l'applicazione cerca autonomamente la cartella \texttt{data/} nella posizione in cui si trova il programma. Se l'utente avvia l'eseguibile da un percorso leggermente diverso o sposta i file in una sottocartella, il software scansiona in autonomia le cartelle vicine e superiori per rintracciare i propri file di configurazione senza richiedere interventi manuali.
+
+    \item \textbf{Comportamento in assenza della cartella (Ripartenza da zero):}
+    Qualora la cartella \texttt{data/} non dovesse essere individuata in nessun percorso adiacente (ad esempio perché rimossa o non copiata assieme al programma), UniBodget non va in blocco: provvede invece a \textbf{creare automaticamente una nuova cartella \texttt{data/} vergine}, inizializzandola con le categorie e le impostazioni predefinite. In questa situazione l'utente si ritroverà l'applicazione pulita; se ciò fosse avvenuto accidentalmente, basterà richiudere il programma, riposizionare la cartella \texttt{data/} originale accanto all'applicazione e riavviarla per ritrovare intatti tutti i propri dati.
 \end{itemize}
 
 \chapter{Esercitazioni di Laboratorio}

@@ -1,0 +1,44 @@
+{
+  "cashAccounts" : [ {
+    "id" : "146594c6-7c0c-4d12-bf19-20d41511af40",
+    "name" : "prova",
+    "baseCurrency" : "EUR",
+    "history" : {
+      "transactions" : [ {
+        "transactionType" : "cash",
+        "asset" : {
+          "currency" : "EUR",
+          "amount" : -1,
+          "negative" : true,
+          "positive" : false,
+          "zero" : false
+        },
+        "category" : {
+          "name" : "Food",
+          "colorHex" : {
+            "alpha" : 255,
+            "red" : 255,
+            "green" : 152,
+            "blue" : 0
+          },
+          "type" : "EXPENSE",
+          "origin" : "DEFAULT",
+          "active" : true,
+          "custom" : false,
+          "default" : true
+        },
+        "date" : "2026-11-04",
+        "description" : "prova",
+        "notes" : null,
+        "friendLoanId" : null,
+        "friendName" : null,
+        "id" : "f2558880-2055-4491-aac6-9da1d986abcd",
+        "friendLoanTransaction" : false
+      } ]
+    },
+    "budgetSettings" : {
+      "limitValue" : 0,
+      "warningThreshold" : 0.8
+    }
+  } ]
+}

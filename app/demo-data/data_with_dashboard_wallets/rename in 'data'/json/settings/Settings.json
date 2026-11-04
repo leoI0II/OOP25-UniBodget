@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Dark",
+    "primaryColor": { "alpha": 255, "red": 14, "green": 16, "blue": 27 },
+    "buttonColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
+    "textColor": { "alpha": 255, "red": 255, "green": 255, "blue": 255 },
+    "fontFamily": "Arial",
+    "fontSize": 14,
+    "boldText": false
+  },
+  "baseCurrency": "EUR",
+  "preferenceHistory": [],
+  "windowPrefs": { "width": 1280.0, "height": 720.0, "maximized": false }
+}
