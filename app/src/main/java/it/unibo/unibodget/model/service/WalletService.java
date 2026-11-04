@@ -1,0 +1,120 @@
+package it.unibo.unibodget.model.service;
+
+import it.unibo.unibodget.model.dashboard.support.WalletObserver;
+import it.unibo.unibodget.model.transactions.base.AbstractTransaction;
+import it.unibo.unibodget.model.wallet.AbstractWallet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Service responsible for managing a collection of wallets and the transaction history of the
+ * currently selected wallet.
+ *
+ * <p>The service exposes the available wallets, the currently selected wallet, and the operations
+ * used to inspect and update the history of that wallet. Registered {@link WalletObserver}
+ * instances are notified whenever the wallet state changes.
+ *
+ * @param <T> the type of transaction managed by the wallets
+ * @param <W> the concrete wallet type, must extend {@link AbstractWallet}
+ */
+public interface WalletService<T extends AbstractTransaction, W extends AbstractWallet<T>> {
+
+    /**
+     * Returns the wallets available to the user.
+     *
+     * @return the available wallets
+     */
+    List<W> getWallets();
+
+    /**
+     * Returns the currently selected wallet.
+     *
+     * @return the current wallet, if present
+     */
+    Optional<W> getCurrentWallet();
+
+    /**
+     * Adds a wallet to the collection.
+     *
+     * @param wallet the wallet to add
+     */
+    void addWallet(W wallet);
+
+    /**
+     * Removes a wallet by identifier.
+     *
+     * @param walletId the identifier of the wallet to remove
+     * @return {@code true} if the wallet was removed, {@code false} otherwise
+     */
+    boolean removeWallet(UUID walletId);
+
+    /**
+     * Renames the wallet with the given identifier.
+     *
+     * @param walletId the identifier of the wallet to rename
+     * @param newName the new display name; must not be blank
+     * @return {@code true} if the wallet was found and renamed, {@code false} if no such wallet
+     *     exists
+     * @throws IllegalArgumentException if {@code newName} is blank
+     */
+    boolean renameWallet(UUID walletId, String newName);
+
+    /**
+     * Selects the wallet to be used as current dashboard context.
+     *
+     * @param walletId the identifier of the wallet to select
+     * @return {@code true} if the wallet was selected, {@code false} otherwise
+     */
+    boolean selectWallet(UUID walletId);
+
+    /**
+     * Returns the transactions associated with the current wallet.
+     *
+     * @return the current wallet transactions
+     */
+    List<T> getCurrentTransactions();
+
+    /**
+     * Adds a transaction to the current wallet history.
+     *
+     * @param transaction the transaction to add
+     */
+    void addTransaction(T transaction);
+
+    /**
+     * Removes a transaction from the current wallet history.
+     *
+     * @param transaction the transaction to remove
+     * @return {@code true} if the transaction was removed, {@code false} otherwise
+     */
+    boolean removeTransaction(T transaction);
+
+    /**
+     * Replaces a transaction in the current wallet history.
+     *
+     * @param oldTransaction the transaction to replace
+     * @param newTransaction the replacement transaction
+     */
+    void replaceTransaction(T oldTransaction, T newTransaction);
+
+    /** Removes all transactions from the current wallet history. */
+    void clearCurrentWalletHistory();
+
+    /**
+     * Registers an observer interested in wallet changes.
+     *
+     * @param observer the observer to register
+     */
+    void addObserver(WalletObserver observer);
+
+    /**
+     * Removes a previously registered observer.
+     *
+     * @param observer the observer to remove
+     */
+    void removeObserver(WalletObserver observer);
+
+    /** Notifies all registered observers that the wallet state has changed. */
+    void notifyObservers();
+}

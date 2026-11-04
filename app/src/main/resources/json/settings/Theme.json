@@ -1,0 +1,52 @@
+{
+  "themes": [
+    {
+      "name": "Dark",
+      "primaryColor": {
+        "alpha": 255,
+        "red": 14,
+        "green": 16,
+        "blue": 27
+      },
+      "buttonColor": {
+        "alpha": 255,
+        "red": 255,
+        "green": 255,
+        "blue": 255
+      },
+      "textColor": {
+        "alpha": 255,
+        "red": 255,
+        "green": 255,
+        "blue": 255
+      },
+      "fontFamily": "Arial",
+      "fontSize": 14,
+      "boldText": false
+    },
+    {
+      "name": "Light",
+      "primaryColor": {
+        "alpha": 255,
+        "red": 245,
+        "green": 247,
+        "blue": 251
+      },
+      "buttonColor": {
+        "alpha": 255,
+        "red": 24,
+        "green": 27,
+        "blue": 36
+      },
+      "textColor": {
+        "alpha": 255,
+        "red": 24,
+        "green": 27,
+        "blue": 36
+      },
+      "fontFamily": "Arial",
+      "fontSize": 14,
+      "boldText": false
+    }
+  ]
+}

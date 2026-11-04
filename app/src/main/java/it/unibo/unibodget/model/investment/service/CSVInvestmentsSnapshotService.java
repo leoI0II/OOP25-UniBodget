@@ -1,0 +1,166 @@
+package it.unibo.unibodget.model.investment.service;
+
+import it.unibo.unibodget.model.investment.BalanceSnapshot;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
+import it.unibo.unibodget.model.utils.event.TransactionAddedEvent;
+import it.unibo.unibodget.model.utils.event.WalletDeletedEvent;
+import it.unibo.unibodget.model.wallet.InvestmentAccount;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.UUID;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * CSV-backed implementation of {@link InvestmentsSnapshotService}.
+ *
+ * <p>Each {@link InvestmentAccount} gets its own CSV file named {@code <accountId>_snapshots.csv}
+ * stored under the configured data directory. The service subscribes to {@link
+ * TransactionAddedEvent} via the {@link MessageBus} and automatically persists a new balance
+ * snapshot whenever a transaction is added to an {@link InvestmentAccount}.
+ *
+ * <p>The directory is chosen by the caller: the application uses {@code data/csv/snapshots}, next
+ * to the JSON files, so the whole {@code data/} folder can be copied with the chart history too.
+ */
+public class CSVInvestmentsSnapshotService implements InvestmentsSnapshotService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSVInvestmentsSnapshotService.class);
+
+    private final Path dataDir;
+
+    /**
+     * Creates the service using the specified directory for CSV storage. The directory is created
+     * if it does not already exist.
+     *
+     * @param dataDir the directory in which snapshot CSV files are stored
+     * @throws IllegalStateException if the directory does not exist and cannot be created
+     */
+    public CSVInvestmentsSnapshotService(final Path dataDir) {
+        this.dataDir = dataDir;
+        final var dir = dataDir.toFile();
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IllegalStateException(
+                    "Unable to create data directory: " + dir.getAbsolutePath());
+        }
+
+        MessageBus.subscribe(TransactionAddedEvent.class, this::onTransactionAddedEvent);
+        MessageBus.subscribe(WalletDeletedEvent.class, this::onWalletDeletedEvent);
+    }
+
+    /**
+     * Handles a {@link TransactionAddedEvent} by saving a new balance snapshot if the wallet
+     * involved is an {@link InvestmentAccount}.
+     *
+     * @param event the event carrying the wallet and transaction that were just added
+     */
+    private void onTransactionAddedEvent(final TransactionAddedEvent event) {
+        if (event.wallet() instanceof InvestmentAccount account) {
+            save(account.getId(), BalanceSnapshot.buildInvestmentSnapshot(account));
+        }
+    }
+
+    /**
+     * Handles a {@link WalletDeletedEvent} by removing the snapshot CSV of the deleted {@link
+     * InvestmentAccount}, so that no orphan files are left on disk.
+     *
+     * <p>Failures are reported to the user as a notification instead of being thrown, since the
+     * {@link MessageBus} would only log them.
+     *
+     * @param event the event carrying the wallet that was just removed
+     */
+    private void onWalletDeletedEvent(final WalletDeletedEvent event) {
+        if (event.wallet() instanceof InvestmentAccount account) {
+            try {
+                Files.deleteIfExists(fileFor(account.getId()));
+            } catch (final IOException e) {
+                MessageBus.send(
+                        new MainErrorNotificationEvent(
+                                "Unable to delete the snapshots of "
+                                        + account.getName()
+                                        + ": "
+                                        + e.getMessage()));
+            }
+        }
+    }
+
+    /**
+     * Returns the path of the CSV file associated with the given account.
+     *
+     * @param accountId the unique identifier of the investment account
+     * @return the path to the account's snapshot CSV file
+     */
+    private Path fileFor(final UUID accountId) {
+        return dataDir.resolve(accountId + "_snapshots.csv");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void save(final UUID accountId, final BalanceSnapshot snapshot) {
+        final var filePath = fileFor(accountId);
+        final CSVFormat format = CSVFormat.DEFAULT.builder().build();
+        try (BufferedWriter writer =
+                        Files.newBufferedWriter(
+                                filePath,
+                                StandardCharsets.UTF_8,
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND);
+                CSVPrinter pr = new CSVPrinter(writer, format)) {
+            pr.printRecord(snapshot.timestamp(), snapshot.totalPL(), snapshot.costBasis());
+        } catch (final IOException e) {
+            LOGGER.error("Error writing CSV file: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Parses a timestamp string into a {@link LocalDateTime}, with fallback support for older CSV
+     * files that stored only a {@link java.time.LocalDate}.
+     *
+     * @param s the timestamp string to parse
+     * @return the parsed {@link LocalDateTime}
+     */
+    private LocalDateTime parseTimestamp(final String s) {
+        try {
+            return LocalDateTime.parse(s);
+        } catch (final DateTimeParseException e) {
+            // fallback per file vecchi con LocalDate
+            return LocalDate.parse(s).atStartOfDay();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<BalanceSnapshot> getSnapshots(final UUID accountId) {
+        final var filePath = fileFor(accountId);
+        if (!filePath.toFile().exists()) {
+            return List.of(); // no snapshot yet
+        }
+
+        try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
+                var parser = CSVFormat.DEFAULT.parse(reader)) {
+            return parser.getRecords().stream()
+                    .map(
+                            record ->
+                                    new BalanceSnapshot(
+                                            parseTimestamp(record.get(0)),
+                                            new BigDecimal(record.get(1)),
+                                            new BigDecimal(record.get(2))))
+                    .toList();
+        } catch (final IOException e) {
+            LOGGER.error("Error reading snapshots: {}", e.getMessage());
+            return List.of();
+        }
+    }
+}

@@ -1,0 +1,277 @@
+package it.unibo.unibodget.model.currency.api;
+
+import it.unibo.unibodget.model.currency.CurrencyUnit;
+import it.unibo.unibodget.model.currency.FiatCurrency;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Default implementation of {@link ExchangeRateAPI} that retrieves currency exchange rates from the
+ * public <a href="https://open.er-api.com/">open.er-api.com</a> service.
+ *
+ * <p>This implementation performs live HTTP requests using Java's {@link HttpClient}, applies a
+ * simple in-memory caching strategy, and parses the JSON response using lightweight string
+ * operations (no external JSON libraries).
+ */
+public class ExchangeRateAPIImpl implements ExchangeRateAPI {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateAPIImpl.class);
+    private static final int HTTP_OK = 200;
+    private static final int SECONDS_5 = 5;
+
+    /** Duration for which fetched exchange rates remain valid in cache. */
+    private static final Duration CACHE_DURATION = Duration.ofHours(1);
+
+    /** HTTP client used for performing API requests. */
+    private final HttpClient client = HttpClient.newHttpClient();
+
+    /** Timestamp of the last successful API update. */
+    private Instant lastUpdate = Instant.MIN;
+
+    /** Cached exchange rates keyed by {@link CurrencyUnit}. */
+    private Map<CurrencyUnit, Double> cachedRates = new HashMap<>();
+
+    /** Base currency associated with the cached rates. */
+    private String cachedBaseCode;
+
+    /** Flag to prevent flooding UI notifications when running in offline fallback mode. */
+    private boolean offlineNotified;
+
+    /**
+     * Returns the latest exchange rates relative to the given base currency.
+     *
+     * <p>If cached data is still valid, it is returned immediately. Otherwise, a new request is
+     * sent to the external API. Preserves previous rates for the same base if the request fails.
+     *
+     * @param base the base currency for which rates should be retrieved
+     * @return a map of currency units to their exchange rate relative to {@code base}
+     */
+    @Override
+    public synchronized Map<CurrencyUnit, Double> getLatestRates(final CurrencyUnit base) {
+        final boolean sameBase = base.getCode().equalsIgnoreCase(cachedBaseCode);
+        // Reuse valid rates only when the base currency matches
+        if (sameBase
+                && !cachedRates.isEmpty()
+                && Instant.now().isBefore(lastUpdate.plus(CACHE_DURATION))) {
+            return Map.copyOf(cachedRates);
+        }
+        // Fetch new rates and update the cache only if response with multiple currencies
+        final Map<CurrencyUnit, Double> fetchedRates = fetchRatesFromAPI(base);
+        if (fetchedRates.size() > 1) {
+            cachedRates = new HashMap<>(fetchedRates);
+            cachedBaseCode = base.getCode();
+            lastUpdate = Instant.now();
+            offlineNotified = false;
+            return Map.copyOf(cachedRates);
+        }
+        // Keep previous rates if the refresh fails
+        if (sameBase && !cachedRates.isEmpty()) {
+            LOGGER.warn("[FIAT CACHE] Request failed: using previous rates.");
+            return Map.copyOf(cachedRates);
+        }
+        LOGGER.warn("[FIAT CACHE] No network connection and empty cache: using fallback mock rates for {}",
+                base.getCode());
+        if (!offlineNotified) {
+            MessageBus.send(new MainInfoNotificationEvent(
+                    "Offline mode: simulated exchange rates applied (no connection)."));
+            offlineNotified = true;
+        }
+        return getMockFallbackRates(base);
+    }
+
+    /**
+     * Generates deterministic mock exchange rates relative to the requested base currency
+     * when network access is unavailable and no previous cache exists.
+     *
+     * @param base the requested base currency
+     * @return a map of mock exchange rates
+     */
+    private Map<CurrencyUnit, Double> getMockFallbackRates(final CurrencyUnit base) {
+        final Map<CurrencyUnit, Double> usdRates = new HashMap<>(Map.ofEntries(
+                Map.entry(FiatCurrency.USD, 1.0),
+                Map.entry(FiatCurrency.EUR, 0.92),
+                Map.entry(FiatCurrency.GBP, 0.79),
+                Map.entry(FiatCurrency.CHF, 0.89),
+                Map.entry(FiatCurrency.JPY, 155.0),
+                Map.entry(FiatCurrency.CAD, 1.38),
+                Map.entry(FiatCurrency.AUD, 1.52),
+                Map.entry(FiatCurrency.CNY, 7.24),
+                Map.entry(FiatCurrency.HKD, 7.80),
+                Map.entry(FiatCurrency.INR, 84.0),
+                Map.entry(FiatCurrency.RUB, 95.0)
+        ));
+
+        if ("USD".equalsIgnoreCase(base.getCode())) {
+            return usdRates;
+        }
+
+        final double baseRate = usdRates.getOrDefault(base, 1.0);
+        final Map<CurrencyUnit, Double> result = new HashMap<>();
+        usdRates.forEach((unit, rate) -> result.put(unit, rate / baseRate));
+        return result;
+    }
+
+    /**
+     * Returns historical exchange rates for the given currency pair.
+     *
+     * <p>Since the external API does not support historical data, this method generates mock values
+     * for each date in the requested range.
+     *
+     * @param base the base currency
+     * @param target the target currency
+     * @param from start date (inclusive)
+     * @param to end date (inclusive)
+     * @return a map of dates to mock exchange rate values
+     */
+    @Override
+    public Map<LocalDate, Double> getHistoricalRates(
+            final CurrencyUnit base,
+            final CurrencyUnit target,
+            final LocalDate from,
+            final LocalDate to) {
+        return generateMockHistory(from, to);
+    }
+
+    /**
+     * Performs an HTTP request to fetch the latest exchange rates from the API.
+     *
+     * @param base the base currency
+     * @return a map of parsed exchange rates
+     */
+    private Map<CurrencyUnit, Double> fetchRatesFromAPI(final CurrencyUnit base) {
+        final String url = "https://open.er-api.com/v6/latest/" + base.getCode();
+
+        try {
+            final HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .timeout(Duration.ofSeconds(SECONDS_5))
+                            .GET()
+                            .build();
+
+            final HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != HTTP_OK) {
+                // return an empty map
+                return Map.of();
+            }
+            return parseRates(response.body(), base);
+
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // return an empty map
+            return Map.of();
+
+        } catch (final IOException e) {
+            LOGGER.error("Failed to fetch rates from API", e);
+            return Map.of();
+        }
+    }
+
+    /**
+     * Extracts the {@code "rates"} object from the API JSON response using simple string
+     * operations.
+     *
+     * @param json the raw JSON response
+     * @param base the base currency (added manually with value {@code 1.0})
+     * @return a map of currency units to exchange rates
+     */
+    private Map<CurrencyUnit, Double> parseRates(final String json, final CurrencyUnit base) {
+        final Map<CurrencyUnit, Double> result = new HashMap<>();
+
+        final int ratesStart = json.indexOf("\"rates\":");
+        if (ratesStart == -1) {
+            return result;
+        }
+
+        final int braceOpen = json.indexOf('{', ratesStart);
+        if (braceOpen == -1) {
+            return result;
+        }
+
+        // Find matching closing brace for the "rates" object
+        int depth = 0;
+        int braceClose = -1;
+
+        for (int i = braceOpen; i < json.length(); i++) {
+            final char c = json.charAt(i);
+            if (c == '{') {
+                depth++;
+            }
+            if (c == '}') {
+                depth--;
+            }
+            if (depth == 0) {
+                braceClose = i;
+                break;
+            }
+        }
+
+        if (braceClose == -1) {
+            return result;
+        }
+
+        final String ratesBlock = json.substring(braceOpen + 1, braceClose);
+        final String[] entries = ratesBlock.split(",");
+
+        for (final String entry : entries) {
+            final String[] parts = entry.split(":");
+            if (parts.length != 2) {
+                continue;
+            }
+
+            final String code = parts[0].replace("\"", "").trim();
+            final String valueStr = parts[1].trim();
+
+            final CurrencyUnit unit = CurrencyUnit.getByCode(code);
+            if (unit != null) {
+                try {
+                    final double value = Double.parseDouble(valueStr);
+                    result.put(unit, value);
+                } catch (final NumberFormatException ignored) {
+                    LOGGER.debug(
+                            "Parse error in ExchangeRateAPIImpl: {}", ignored.getMessage());
+                }
+            }
+        }
+
+        // Base currency always has rate 1.0
+        result.put(base, 1.0);
+        return result;
+    }
+
+    /**
+     * Generates mock historical exchange rate data for the given date range.
+     *
+     * <p>Each date is assigned a pseudo-random value between 0.5 and 1.5. This method is used only
+     * because the external API does not provide historical data.
+     *
+     * @param from start date (inclusive)
+     * @param to end date (inclusive)
+     * @return a map of dates to generated mock values
+     */
+    private Map<LocalDate, Double> generateMockHistory(final LocalDate from, final LocalDate to) {
+        final Map<LocalDate, Double> map = new HashMap<>();
+        LocalDate date = from;
+
+        while (!date.isAfter(to)) {
+            map.put(date, 0.5 + Math.random());
+            date = date.plusDays(1);
+        }
+
+        return map;
+    }
+}

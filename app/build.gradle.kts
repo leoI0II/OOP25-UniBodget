@@ -6,12 +6,14 @@
  */
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
+    java
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
+    id("org.danilopianini.gradle-java-qa") version "1.155.0"
+    id("com.diffplug.spotless") version "8.10.4"
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
@@ -25,7 +27,6 @@ dependencies {
     implementation(libs.guava)
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -34,10 +35,104 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass.set("it.unibo.unibodget.App")
 }
 
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
+javafx {
+    version = "21.0.2"
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
+}
+
+dependencies {
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.8")
+
+    implementation("org.apache.commons:commons-csv:1.10.0")
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.jooq:jool:0.9.15")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
+
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
+
+    testImplementation(libs.junit.jupiter)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation(libs.guava)
+}
+
+application {
+    // FXML shell is the official entry point; UnibodgetApp remains only a standalone dashboard harness.
+    mainClass.set("it.unibo.unibodget.App")
+}
+
+tasks.named<JavaExec>("run") {
+    workingDir = rootProject.projectDir
+}
+
+tasks.test {
     useJUnitPlatform()
+    exclude("**/* *")
+    exclude("**/* 2*")
+}
+
+tasks.withType<Javadoc>().configureEach {
+    isFailOnError = false
+}
+
+tasks.withType<Pmd>().configureEach {
+    ignoreFailures = true
+}
+
+tasks.matching { it.name.startsWith("spotbugs") }.configureEach {
+    if (this is VerificationTask) {
+        ignoreFailures = true
+    }
+}
+
+tasks.jar {
+    archiveFileName.set("UniBodget.jar")
+
+    manifest {
+        attributes["Main-Class"] = "it.unibo.unibodget.Launcher"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Include runtime dependencies, including JavaFX and Jackson.
+    from({
+        configurations.runtimeClasspath.get().map { dependency ->
+            if (dependency.isDirectory) {
+                dependency
+            } else {
+                zipTree(dependency)
+            }
+        }
+    })
+
+    // Remove dependency signatures and module descriptors.
+    exclude(
+        "META-INF/*.SF",
+        "META-INF/*.RSA",
+        "META-INF/*.DSA",
+        "META-INF/INDEX.LIST",
+        "module-info.class",
+        "META-INF/versions/**/module-info.class"
+    )
+}
+
+spotless {
+    java {
+        target("src/**/*.java")
+
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
