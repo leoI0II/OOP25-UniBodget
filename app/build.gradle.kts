@@ -38,9 +38,26 @@ application {
     mainClass.set("it.unibo.unibodget.App")
 }
 
+val javafxVersion = "21.0.2"
+
 javafx {
-    version = "21.0.2"
+    version = javafxVersion
     modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
+}
+
+// the javafx plugin downloads the native libraries only for the os of the build, so the jar
+// started only there. here the javafx jars of the other systems are added too, and the jar task
+// puts all of them inside UniBodget.jar: at start javafx loads the right ones.
+// mac intel ("mac") and linux arm are left out: their files have the same names of
+// "mac-aarch64" and "linux", and only one of them can be in the jar
+val javafxPlatforms = listOf("win", "mac-aarch64", "linux")
+
+dependencies {
+    for (module in listOf("base", "graphics", "controls", "fxml")) {
+        for (platform in javafxPlatforms) {
+            runtimeOnly("org.openjfx:javafx-$module:$javafxVersion:$platform")
+        }
+    }
 }
 
 dependencies {
