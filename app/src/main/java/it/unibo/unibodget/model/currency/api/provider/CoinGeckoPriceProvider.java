@@ -121,7 +121,8 @@ public class CoinGeckoPriceProvider implements PriceProvider {
             notifyOffline();
             return getMockFallbackPrices(cryptos);
         } catch (final IOException e) {
-            LOGGER.warn("[COINGECKO] Network error: using fallback mock prices (no connection).", e);
+            LOGGER.warn("[COINGECKO] Network error ({}): using fallback mock prices (no connection).",
+                    e.getMessage());
             notifyOffline();
             return getMockFallbackPrices(cryptos);
         } catch (final InterruptedException e) {

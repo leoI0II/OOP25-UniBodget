@@ -137,7 +137,8 @@ public class AlphaPriceProvider implements PriceProvider {
             LOGGER.warn("[ALPHA] Richiesta interrotta.");
             return BigDecimal.ZERO;
         } catch (final IOException e) {
-            LOGGER.warn("[ALPHA] Errore di connessione: using fallback mock stock price (no connection).", e);
+            LOGGER.warn("[ALPHA] Errore di connessione ({}): using fallback mock stock price (no connection).",
+                    e.getMessage());
             notifyOffline();
             return getMockFallbackPrice(unit);
         }

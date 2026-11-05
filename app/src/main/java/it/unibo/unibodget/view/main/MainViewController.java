@@ -367,28 +367,33 @@ public final class MainViewController extends BaseViewController {
      * @param event the order-result event received from the message bus
      */
     private void onOrderResultEvent(final OrderResultEvent event) {
-        final var window = contentArea.getScene().getWindow();
-        switch (event.result()) {
-            case OrderResult.InsufficientFunds f ->
-                    ToastNotification.showError(
-                            window,
-                            "Insufficient funds. Required: "
-                                    + AssetFormatter.ofAsset(f.required())
-                                    + ", available: "
-                                    + AssetFormatter.ofAsset(f.available()));
-            case OrderResult.InsufficientAssets a ->
-                    ToastNotification.showError(
-                            window,
-                            "Insufficient assets. Required: "
-                                    + a.requested()
-                                    + ", available: "
-                                    + a.available());
-            default -> {
-                if (event.result().isSuccess()) {
-                    ToastNotification.showSuccess(window, "Transaction executed successfully!");
+        Platform.runLater(() -> {
+            if (contentArea == null || contentArea.getScene() == null || contentArea.getScene().getWindow() == null) {
+                return;
+            }
+            final var window = contentArea.getScene().getWindow();
+            switch (event.result()) {
+                case OrderResult.InsufficientFunds f ->
+                        ToastNotification.showError(
+                                window,
+                                "Insufficient funds. Required: "
+                                        + AssetFormatter.ofAsset(f.required())
+                                        + ", available: "
+                                        + AssetFormatter.ofAsset(f.available()));
+                case OrderResult.InsufficientAssets a ->
+                        ToastNotification.showError(
+                                window,
+                                "Insufficient assets. Required: "
+                                        + a.requested()
+                                        + ", available: "
+                                        + a.available());
+                default -> {
+                    if (event.result().isSuccess()) {
+                        ToastNotification.showSuccess(window, "Transaction executed successfully!");
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
@@ -397,8 +402,12 @@ public final class MainViewController extends BaseViewController {
      * @param event the error notification event
      */
     private void onMainErrorNotificationEvent(final MainErrorNotificationEvent event) {
-        final var window = contentArea.getScene().getWindow();
-        ToastNotification.showError(window, event.msg());
+        Platform.runLater(() -> {
+            if (contentArea != null && contentArea.getScene() != null && contentArea.getScene().getWindow() != null) {
+                final var window = contentArea.getScene().getWindow();
+                ToastNotification.showError(window, event.msg());
+            }
+        });
     }
 
     /**
@@ -407,7 +416,11 @@ public final class MainViewController extends BaseViewController {
      * @param event the info notification event
      */
     private void onMainInfoNotificationEvent(final MainInfoNotificationEvent event) {
-        final var window = contentArea.getScene().getWindow();
-        ToastNotification.showInfo(window, event.msg());
+        Platform.runLater(() -> {
+            if (contentArea != null && contentArea.getScene() != null && contentArea.getScene().getWindow() != null) {
+                final var window = contentArea.getScene().getWindow();
+                ToastNotification.showInfo(window, event.msg());
+            }
+        });
     }
 }

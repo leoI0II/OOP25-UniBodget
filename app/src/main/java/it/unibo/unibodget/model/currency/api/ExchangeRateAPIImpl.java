@@ -176,7 +176,7 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
             return Map.of();
 
         } catch (final IOException e) {
-            LOGGER.error("Failed to fetch rates from API", e);
+            LOGGER.warn("Failed to fetch rates from API: {}", e.getMessage());
             return Map.of();
         }
     }
