@@ -15,7 +15,11 @@ Progetto per il corso di Programmazione a Oggetti (OOP) — Università di Bolog
 - **Impostazioni (Settings):** personalizzazione a caldo del tema visivo (Dark/Light), valuta base globale e storico configurazioni (Memento).
 
 ### 🚀 Avvio dell'Applicazione
-Per eseguire il software da riga di comando:
+È possibile eseguire l'applicazione direttamente tramite il Fat JAR eseguibile:
+```bash
+java -jar UniBodget.jar
+```
+oppure compilando da sorgente con Gradle:
 ```bash
 ./gradlew run
 ```
