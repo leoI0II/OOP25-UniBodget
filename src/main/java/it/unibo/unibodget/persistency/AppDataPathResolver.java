@@ -192,7 +192,6 @@ public final class AppDataPathResolver {
         final List<Path> adjacentCandidates = List.of(
                 Path.of("..", DATA_DIR_NAME),
                 Path.of("..", "..", DATA_DIR_NAME),
-                Path.of("app", DATA_DIR_NAME),
                 Path.of(System.getProperty("user.home", "."), ".unibodget", DATA_DIR_NAME)
         );
 
