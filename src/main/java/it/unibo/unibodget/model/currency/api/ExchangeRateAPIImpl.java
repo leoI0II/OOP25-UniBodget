@@ -49,6 +49,11 @@ public class ExchangeRateAPIImpl implements ExchangeRateAPI {
     /** Flag to prevent flooding UI notifications when running in offline fallback mode. */
     private boolean offlineNotified;
 
+    /** Creates an exchange-rate client backed by open.er-api.com. */
+    public ExchangeRateAPIImpl() {
+        // default constructor
+    }
+
     /**
      * Returns the latest exchange rates relative to the given base currency.
      *

@@ -13,6 +13,11 @@ public final class CurrencyUnitDeserializer extends JsonDeserializer<CurrencyUni
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyUnitDeserializer.class);
 
+    /** Creates a deserializer for {@link CurrencyUnit} values. */
+    public CurrencyUnitDeserializer() {
+        // default constructor
+    }
+
     /**
      * Deserializes a currency code or JSON object into a registered currency.
      *

@@ -38,6 +38,11 @@ public class ExchangeRateAPIClient implements ExchangeRateAPI {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateAPIClient.class);
     private static final int OK_CODE = 200;
 
+    /** Creates an HTTP client for fetching historical exchange rates. */
+    public ExchangeRateAPIClient() {
+        // default constructor
+    }
+
     /**
      * Fetches historical exchange rates for a given currency pair within the specified date range.
      *

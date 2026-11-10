@@ -32,6 +32,11 @@ public final class CashAccountManager {
     private final ModelFileManager<CashAccount> manager =
             new ModelFileManager<>(PATH, RESOURCE, CashAccount.class, null, KEY);
 
+    /** Creates a persistence manager for cash accounts. */
+    public CashAccountManager() {
+        // default constructor
+    }
+
     /**
      * Loads all {@link CashAccount} entries from the JSON file. Configures Jackson with a custom
      * {@link CurrencyUnitDeserializer} to correctly restore currency fields. Returns an empty list

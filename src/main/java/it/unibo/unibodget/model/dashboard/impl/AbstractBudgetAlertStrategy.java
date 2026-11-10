@@ -15,6 +15,11 @@ public abstract class AbstractBudgetAlertStrategy implements BudgetAlertStrategy
 
     private static final int SCALE = 8;
 
+    /** Creates a budget alert strategy base instance. */
+    protected AbstractBudgetAlertStrategy() {
+        // default constructor
+    }
+
     /**
      * Computes the ratio between the current value and the limit value, if positive.
      *

@@ -21,6 +21,8 @@ public final class CurrencyConverterModule {
     private Parent view;
 
     /**
+     * Creates the currency converter module.
+     *
      * @param api the exchange-rate provider used for the latest rate table
      * @param converter the shared conversion engine (must be a {@link BasicCurrencyConverter}, as
      *     required by the bank widget)
@@ -33,6 +35,8 @@ public final class CurrencyConverterModule {
     }
 
     /**
+     * Returns the converter dashboard root node.
+     *
      * @return the converter dashboard node, built on first access and cached afterwards
      */
     @SuppressFBWarnings(

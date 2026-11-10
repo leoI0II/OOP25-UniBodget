@@ -12,8 +12,8 @@ import java.util.UUID;
  * Bridge that lets the shared sidebar drive the dashboard context.
  *
  * <p>It is a plain {@link SideBarDelegate} (not an FXML controller): the dashboard center is
- * rendered by {@link DefaultDashboardView} inside the content area, while this delegate feeds the
- * <em>shared</em> {@link SideBarViewController}.
+ * rendered by {@link it.unibo.unibodget.view.dashboard.impl.DefaultDashboardView} inside the
+ * content area, while this delegate feeds the <em>shared</em> {@link SideBarViewController}.
  *
  * <ul>
  *   <li>Reads (wallet list, aggregated total) go through the {@link DashboardFacade}.
@@ -28,6 +28,8 @@ public final class DashboardViewController extends BaseViewController implements
     private final SideBarViewController sideBar;
 
     /**
+     * Creates a sidebar delegate for the dashboard.
+     *
      * @param dashboardFacade facade used to read sidebar data
      * @param dashboardController presenter used to handle sidebar actions
      * @param sideBar the shared sidebar to refresh after an action

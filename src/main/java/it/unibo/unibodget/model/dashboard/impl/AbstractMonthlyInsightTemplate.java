@@ -20,6 +20,11 @@ public abstract class AbstractMonthlyInsightTemplate {
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final int PERCENT_SCALE = 2;
 
+    /** Creates a monthly insight template instance. */
+    protected AbstractMonthlyInsightTemplate() {
+        // default constructor
+    }
+
     /**
      * Template method that produces a {@link WalletInsight} comparing current and previous values.
      *

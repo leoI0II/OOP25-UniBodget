@@ -19,6 +19,11 @@ import java.util.UUID;
  */
 public final class OptionalUUIDSerializer extends JsonSerializer<Optional<UUID>> {
 
+    /** Creates a Jackson serializer for optional {@link UUID} values. */
+    public OptionalUUIDSerializer() {
+        // default constructor
+    }
+
     /**
      * Serializes an {@link Optional Optional&lt;UUID&gt;} into a JSON string or null.
      *

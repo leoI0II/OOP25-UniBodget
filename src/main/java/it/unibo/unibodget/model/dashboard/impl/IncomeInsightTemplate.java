@@ -10,6 +10,11 @@ public final class IncomeInsightTemplate extends AbstractMonthlyInsightTemplate 
 
     private static final String INCOME = "Income";
 
+    /** Creates an income insight template. */
+    public IncomeInsightTemplate() {
+        // default constructor
+    }
+
     /**
      * {@inheritDoc}
      */

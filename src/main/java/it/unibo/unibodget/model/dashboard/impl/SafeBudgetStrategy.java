@@ -11,6 +11,11 @@ import it.unibo.unibodget.model.dashboard.api.BudgetStatus;
  */
 public final class SafeBudgetStrategy extends AbstractBudgetAlertStrategy {
 
+    /** Creates a safe-budget evaluation strategy. */
+    public SafeBudgetStrategy() {
+        // default constructor
+    }
+
     @Override
     public boolean applies(final BigDecimal currentValue, final BudgetSettings settings) {
         return true;

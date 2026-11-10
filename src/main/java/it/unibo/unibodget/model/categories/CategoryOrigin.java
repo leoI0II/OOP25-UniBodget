@@ -7,6 +7,8 @@ package it.unibo.unibodget.model.categories;
  * are created by the user and can be archived/reactivated.
  */
 public enum CategoryOrigin {
+    /** Built-in category provided by the application. */
     DEFAULT,
+    /** User-defined custom category. */
     CUSTOM
 }

@@ -21,6 +21,11 @@ public final class CurrencyAlertService {
 
     private final List<CurrencyAlert> activeAlerts = new ArrayList<>();
 
+    /** Creates an alert service with an empty alert registry. */
+    public CurrencyAlertService() {
+        // default constructor
+    }
+
     /**
      * Registers a new alert to be monitored.
      *

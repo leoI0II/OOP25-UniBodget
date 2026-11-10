@@ -22,6 +22,11 @@ public class BankService {
 
     private final BankList bankList = new BankList();
 
+    /** Creates a bank service backed by the bundled bank list. */
+    public BankService() {
+        // default constructor
+    }
+
     /**
      * Adds a bank to the in‑memory list without affecting the JSON source.
      *

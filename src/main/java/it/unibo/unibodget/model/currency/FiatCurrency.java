@@ -7,16 +7,27 @@ package it.unibo.unibodget.model.currency;
  * currencies use 2 decimal places for display.
  */
 public enum FiatCurrency implements CurrencyUnit {
+    /** Euro. */
     EUR("€", "EUR", "Euro", "EUR"),
+    /** United States Dollar. */
     USD(CurrencySymbols.DOLLAR, "USD", "United States Dollar", "USD"),
+    /** Pound Sterling. */
     GBP("£", "GBP", "Pound Sterling", "GBP"),
+    /** Russian Ruble. */
     RUB("₽", "RUB", "Russian Ruble", "RUB"),
+    /** Japanese Yen. */
     JPY("¥", "JPY", "Japanese Yen", "JPY"),
+    /** Australian Dollar. */
     AUD(CurrencySymbols.DOLLAR, "AUD", "Australian Dollar", "AUD"),
+    /** Canadian Dollar. */
     CAD(CurrencySymbols.DOLLAR, "CAD", "Canadian Dollar", "CAD"),
+    /** Swiss Franc. */
     CHF("₣", "CHF", "Swiss Franc", "CHF"),
+    /** Chinese Yuan. */
     CNY("¥", "CNY", "Chinese Yuan", "CNY"),
+    /** Hong Kong Dollar. */
     HKD(CurrencySymbols.DOLLAR, "HKD", "Hong Kong Dollar", "HKD"),
+    /** Indian Rupee. */
     INR("₹", "INR", "Indian Rupee", "INR");
 
     private static final CurrencyType TYPE = CurrencyType.FIAT;

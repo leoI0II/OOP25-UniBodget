@@ -18,6 +18,11 @@ public class BankConversionController {
 
     private final BankService bankService = new BankService();
 
+    /** Creates a bank conversion controller. */
+    public BankConversionController() {
+        // default constructor
+    }
+
     /**
      * Retrieves the list of all banks currently available in the system.
      *

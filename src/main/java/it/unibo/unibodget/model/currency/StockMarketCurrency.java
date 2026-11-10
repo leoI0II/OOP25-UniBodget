@@ -8,12 +8,19 @@ package it.unibo.unibodget.model.currency;
  */
 @SuppressWarnings("checkstyle:MultipleStringLiterals")
 public enum StockMarketCurrency implements CurrencyUnit {
+    /** Apple Inc. */
     AAPL(CurrencySymbols.DOLLAR, "AAPL", "Apple Inc.", "AAPL"),
+    /** Microsoft Corp. */
     MSFT(CurrencySymbols.DOLLAR, "MSFT", "Microsoft Corp.", "MSFT"),
+    /** NVIDIA Corp. */
     NVDA(CurrencySymbols.DOLLAR, "NVDA", "NVIDIA Corp.", "NVDA"),
+    /** Amazon.com Inc. */
     AMZN(CurrencySymbols.DOLLAR, "AMZN", "Amazon.com Inc.", "AMZN"),
+    /** Alphabet Inc. */
     GOOGL(CurrencySymbols.DOLLAR, "GOOGL", "Alphabet Inc.", "GOOGL"),
+    /** Meta Platforms Inc. */
     META(CurrencySymbols.DOLLAR, "META", "Meta Platforms Inc.", "META"),
+    /** Tesla Inc. */
     TSLA(CurrencySymbols.DOLLAR, "TSLA", "Tesla Inc.", "TSLA");
 
     private static final CurrencyType TYPE = CurrencyType.STOCK;

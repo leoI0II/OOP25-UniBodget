@@ -17,6 +17,11 @@ public class BaseViewController implements Disposable {
 
     private final List<Consumer<?>> subscribers = new ArrayList<>();
 
+    /** Creates a base view controller. */
+    public BaseViewController() {
+        // default constructor
+    }
+
     /**
      * Just a mediator between the user and the MessageBus pattern class. Made for commodity, so the
      * user could not think about the message bus and save the tokens/consumer refs.

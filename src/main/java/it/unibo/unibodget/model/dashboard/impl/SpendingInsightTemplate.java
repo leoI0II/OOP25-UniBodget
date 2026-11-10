@@ -11,6 +11,11 @@ public final class SpendingInsightTemplate extends AbstractMonthlyInsightTemplat
     private static final String SPENDING = "Spending";
     private static final String SPENT_PREFIX = "You spent ";
 
+    /** Creates a spending insight template. */
+    public SpendingInsightTemplate() {
+        // default constructor
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -20,6 +20,11 @@ import java.util.stream.Collectors;
  */
 public final class DefaultFriendLoanSummaryService implements FriendLoanSummaryService {
 
+    /** Creates a friend-loan summary service. */
+    public DefaultFriendLoanSummaryService() {
+        // default constructor
+    }
+
     @Override
     public List<FriendLoanSummary> summarize(final List<CashTransaction> transactions) {
         Objects.requireNonNull(transactions);

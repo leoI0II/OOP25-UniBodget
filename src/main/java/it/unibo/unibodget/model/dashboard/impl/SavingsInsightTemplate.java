@@ -9,6 +9,11 @@ public final class SavingsInsightTemplate extends AbstractMonthlyInsightTemplate
 
     private static final String SAVINGS = "Savings";
 
+    /** Creates a savings insight template. */
+    public SavingsInsightTemplate() {
+        // default constructor
+    }
+
     /**
      * {@inheritDoc}
      */

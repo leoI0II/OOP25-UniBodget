@@ -48,6 +48,11 @@ public final class WalletAutoSaver {
     private final List<Runnable> saveTasks = new ArrayList<>();
     private final List<Consumer<?>> subscriptions = new ArrayList<>();
 
+    /** Creates an empty wallet auto-saver. */
+    public WalletAutoSaver() {
+        // default constructor
+    }
+
     /**
      * Registers a kind of wallet to be saved.
      *

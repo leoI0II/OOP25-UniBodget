@@ -9,8 +9,8 @@ import java.util.Objects;
  * <p>Defines the minimal shared structure for representing a transaction category, consisting of: -
  * a readable name - a color expressed as a HEX string - a high-level type (income, expense, loan)
  *
- * <p>Concrete implementations may represent: - user‑defined categories loaded from JSON (see {@link
- * Category}) - predefined categories exposed through an enum (see {@link CategoryPreset})
+ * <p>Concrete implementations may represent: - user-defined or predefined categories loaded from
+ * JSON or constants (see {@link Category} and {@link CategoryOrigin})
  *
  * <p>This class behaves as a value object: equality is based on both name and color.
  */

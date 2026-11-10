@@ -56,6 +56,11 @@ public final class App extends Application {
     private final SettingsController settingsController = new SettingsController();
     private Stage primaryStage;
 
+    /** Creates the JavaFX application instance. */
+    public App() {
+        // default constructor required by JavaFX
+    }
+
     /** {@inheritDoc} */
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",

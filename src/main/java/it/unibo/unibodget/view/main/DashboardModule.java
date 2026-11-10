@@ -91,6 +91,8 @@ public final class DashboardModule {
     }
 
     /**
+     * Returns the dashboard root view node.
+     *
      * @return the dashboard view node to place into the shell content area
      */
     public Region getView() {
@@ -98,6 +100,8 @@ public final class DashboardModule {
     }
 
     /**
+     * Returns the dashboard facade.
+     *
      * @return the dashboard read/command facade (use for reading sidebar data)
      */
     public DashboardFacade getFacade() {
@@ -105,6 +109,8 @@ public final class DashboardModule {
     }
 
     /**
+     * Returns the dashboard presenter controller.
+     *
      * @return the dashboard presenter (use for user actions; it re-renders the center)
      */
     public DefaultDashboardController getController() {

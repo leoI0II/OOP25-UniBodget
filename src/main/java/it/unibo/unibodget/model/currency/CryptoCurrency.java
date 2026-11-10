@@ -7,22 +7,39 @@ package it.unibo.unibodget.model.currency;
  * ISO code - API identifier for price fetching
  */
 public enum CryptoCurrency implements CurrencyUnit {
+    /** Bitcoin. */
     BTC("₿", "BTC", "Bitcoin", "BTC", "bitcoin", false),
+    /** Ethereum. */
     ETH("Ξ", "ETH", "Ethereum", "ETH", "ethereum", false),
+    /** Solana. */
     SOL("◎", "SOL", "Solana", "SOL", "solana", false),
+    /** Tether stablecoin. */
     USDT("₮", "USDT", "Tether", "USDT", "tether", true),
+    /** USD Coin stablecoin. */
     USDC("₩", "USDC", "USD Coin", "USDC", "usd-coin", true),
+    /** Euro Coin stablecoin. */
     EURC("€", "EURC", "Euro Coin", "EURC", "euro-coin", true),
+    /** Monero. */
     XMR("ɱ", "XMR", "Monero", "XMR", "monero", false),
+    /** Cardano. */
     ADA("₳", "ADA", "Cardano", "ADA", "cardano", false),
+    /** Ripple. */
     XRP("✕", "XRP", "Ripple", "XRP", "ripple", false),
+    /** Polkadot. */
     DOT("●", "DOT", "Polkadot", "DOT", "polkadot", false),
+    /** Dogecoin. */
     DOGE("Ð", "DOGE", "Dogecoin", "DOGE", "dogecoin", false),
+    /** Avalanche. */
     AVAX("A", "AVAX", "Avalanche", "AVAX", "avalanche-2", false),
+    /** Polygon. */
     MATIC("M", "MATIC", "Polygon", "MATIC", "matic-network", false),
+    /** Litecoin. */
     LTC("Ł", "LTC", "Litecoin", "LTC", "litecoin", false),
+    /** Stellar. */
     XLM("Ł", "XLM", "Stellar", "XLM", "stellar", false),
+    /** Chainlink. */
     LINK("⛓", "LINK", "Chainlink", "LINK", "chainlink", false),
+    /** Uniswap. */
     UNI("U", "UNI", "Uniswap", "UNI", "uniswap", false);
 
     private static final int BTC_DECIMALS = 8;

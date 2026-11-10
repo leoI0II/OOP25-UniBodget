@@ -16,6 +16,11 @@ import java.io.IOException;
  */
 public class CurrencyUnitSerializer extends JsonSerializer<CurrencyUnit> {
 
+    /** Creates a serializer for {@link CurrencyUnit} values. */
+    public CurrencyUnitSerializer() {
+        // default constructor
+    }
+
     /**
      * Serializes a {@link CurrencyUnit} into its currency code.
      *

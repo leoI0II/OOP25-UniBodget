@@ -5,8 +5,12 @@ package it.unibo.unibodget.model.currency;
  * from JSON
  */
 public enum CurrencyType {
+    /** Government-issued fiat currency. */
     FIAT,
+    /** Cryptocurrency or digital token. */
     CRYPTO,
+    /** Equity or stock ticker. */
     STOCK,
+    /** Custom or JSON-defined currency. */
     CUSTOM
 }

@@ -30,6 +30,11 @@ public final class CashTransactionFactory {
     private static final String MSG_DATE_NOT_NULL = "date must not be null";
     private static final String MSG_FRIEND_NAME_NOT_NULL = "friendName must not be null";
 
+    /** Creates a cash transaction factory. */
+    public CashTransactionFactory() {
+        // default constructor
+    }
+
     /**
      * Creates a standard cash transaction.
      *

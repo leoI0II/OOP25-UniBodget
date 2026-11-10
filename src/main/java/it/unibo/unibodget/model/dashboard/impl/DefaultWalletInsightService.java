@@ -19,18 +19,23 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
  *
  * <p>
  * The current implementation produces three insights:
+ * </p>
  * <ul>
  *   <li>spending change,</li>
  *   <li>savings change,</li>
  *   <li>income change.</li>
  * </ul>
- * </p>
  */
 public final class DefaultWalletInsightService implements WalletInsightService {
 
     private final AbstractMonthlyInsightTemplate spendingTemplate = new SpendingInsightTemplate();
     private final AbstractMonthlyInsightTemplate savingsTemplate = new SavingsInsightTemplate();
     private final AbstractMonthlyInsightTemplate incomeTemplate = new IncomeInsightTemplate();
+
+    /** Creates a wallet insight service using the default monthly templates. */
+    public DefaultWalletInsightService() {
+        // default constructor
+    }
 
     /**
      * {@inheritDoc}

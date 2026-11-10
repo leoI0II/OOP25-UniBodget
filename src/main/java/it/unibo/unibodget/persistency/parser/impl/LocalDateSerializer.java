@@ -19,6 +19,11 @@ import java.time.LocalDate;
  */
 public final class LocalDateSerializer extends JsonSerializer<LocalDate> {
 
+    /** Creates a Jackson serializer for {@link LocalDate}. */
+    public LocalDateSerializer() {
+        // default constructor
+    }
+
     /**
      * Serializes a {@link LocalDate} into an ISO-8601 string.
      *

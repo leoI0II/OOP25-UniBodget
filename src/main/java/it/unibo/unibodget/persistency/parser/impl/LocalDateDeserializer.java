@@ -19,6 +19,11 @@ import java.time.LocalDate;
  */
 public final class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
 
+    /** Creates a Jackson deserializer for {@link LocalDate}. */
+    public LocalDateDeserializer() {
+        // default constructor
+    }
+
     /**
      * Deserializes a JSON string into a {@link LocalDate}.
      *
