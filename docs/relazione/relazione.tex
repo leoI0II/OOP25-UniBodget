@@ -59,11 +59,11 @@ La presente relazione documenta l'analisi, la progettazione architetturale, lo s
 
 Il documento è redatto in rigorosa aderenza alla struttura prescritta dalla \emph{Meta-relazione per Programmazione ad Oggetti} (Prof. Danilo Pianini). In particolare, vengono analizzati e dettagliati i seguenti sottosistemi architetturali:
 \begin{enumerate}
-  \item Il sottosistema del dominio valute (\emph{fiat}, \emph{crypto}, \emph{stock}, \emph{custom}) e il relativo motore polimorfico di conversione;
-  \item L'infrastruttura di integrazione con API di mercato esterne, supportata da una cache trasparente resiliente e meccanismi di fallback;
-  \item Il monitoraggio continuo dei tassi, con watchlist interattiva e sistema reattivo di allerte visive su soglie critiche;
-  \item Il modulo grafico dedicato al convertitore di valute (\texttt{CurrencyConverterModule}), comprendente il simulatore di cambio bancario con spread e commissioni fisse;
-  \item La gestione trasversale delle preferenze dell'utente (\texttt{SettingsController}), dei temi dinamici con iniezione CSS in tempo reale (\texttt{ThemeManager}) e della persistenza affidabile dello stato applicativo su file JSON strutturati.
+  \item Il sottosistema \textbf{Dashboard e Contabilità di Cassa}, basato su Facade e Passive View (\texttt{DashboardFacade}, \texttt{DefaultDashboardView}), costruzione e validazione delle transazioni (\texttt{CashTransactionFactory}), strategie di controllo del budget, trend mensili tramite Template Method, riepilogo dei prestiti tra amici e filtraggio componibile con Specification;
+  \item Il sottosistema \textbf{Portfolio Investimenti e Infrastruttura Comune}, con gestione atomica degli ordini di compravendita e trasferimento tramite tipi sigillati (\texttt{PaymentSource}, \texttt{OrderResult}), calcolo di costo medio ponderato e profitti realizzati/non realizzati, istantanee storiche su CSV e coordinamento della finestra principale con barra laterale condivisa e canale eventi \texttt{MessageBus};
+  \item Il sottosistema del \textbf{Dominio Valute} (\emph{fiat}, \emph{crypto}, \emph{stock}, \emph{custom}), il relativo motore polimorfico di conversione e l'infrastruttura di integrazione con API di mercato esterne dotata di cache e fallback offline;
+  \item Il modulo del \textbf{Convertitore di Valute} (\texttt{CurrencyConverterModule}), comprendente il simulatore di cambio bancario con spread e commissioni fisse, la watchlist interattiva e il monitoraggio con allerte su soglie critiche;
+  \item La gestione trasversale delle \textbf{Impostazioni} (\texttt{SettingsController}), dei temi dinamici con iniezione CSS (\texttt{ThemeManager}), dello storico configurazioni (Memento) e della \textbf{persistenza} su file JSON e CSV (\texttt{AppDataPathResolver}, \texttt{ModelFileManager}, \texttt{WalletAutoSaver}).
 \end{enumerate}
 
 \tableofcontents
@@ -1590,6 +1590,36 @@ OpenJFX Documentation.
   Frankfurter API.
   \newblock \emph{Open-source Currency Exchange Rates API}.
   \newblock \url{https://api.frankfurter.app/}
+
+  \bibitem{Guava}
+  Google LLC.
+  \newblock \emph{Guava: Google Core Libraries for Java}.
+  \newblock \url{https://github.com/google/guava}
+
+  \bibitem{CommonsCSV}
+  Apache Software Foundation.
+  \newblock \emph{Apache Commons CSV}.
+  \newblock \url{https://commons.apache.org/proper/commons-csv/}
+
+  \bibitem{SLF4J}
+  QOS.ch.
+  \newblock \emph{SLF4J (Simple Logging Facade for Java) \& Logback}.
+  \newblock \url{https://www.slf4j.org/} , \url{https://logback.qos.ch/}
+
+  \bibitem{JOOL}
+  Data Geekery GmbH.
+  \newblock \emph{jOO\ensuremath{\lambda} (jOOL) -- Java 8 Lambda Extension}.
+  \newblock \url{https://github.com/jOOQ/jOOL}
+
+  \bibitem{JUnit5}
+  The JUnit Team.
+  \newblock \emph{JUnit 5 User Guide}.
+  \newblock \url{https://junit.org/junit5/docs/current/user-guide/}
+
+  \bibitem{SpotBugs}
+  SpotBugs Community.
+  \newblock \emph{SpotBugs Annotations Documentation}.
+  \newblock \url{https://spotbugs.github.io/}
 
 \end{thebibliography}
 
