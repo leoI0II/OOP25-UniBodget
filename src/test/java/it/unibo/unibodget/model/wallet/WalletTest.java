@@ -5,17 +5,40 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import it.unibo.unibodget.model.categories.Category;
 import it.unibo.unibodget.model.currency.Asset;
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.transactions.base.CashTransaction;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
 
 class WalletTest {
+
+    private static final Path DATA_FILE = AppDataPathResolver.resolveJson("wallet/CashAccounts.json");
+    private byte[] backup;
+
+    @BeforeEach
+    void backupDataFile() throws IOException {
+        backup = Files.exists(DATA_FILE) ? Files.readAllBytes(DATA_FILE) : null;
+    }
+
+    @AfterEach
+    void restoreDataFile() throws IOException {
+        if (backup == null) {
+            Files.deleteIfExists(DATA_FILE);
+        } else {
+            Files.write(DATA_FILE, backup);
+        }
+    }
 
     @Test
     void shouldAddTransaction() {

@@ -6,6 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unibo.unibodget.model.currency.FiatCurrency;
 import it.unibo.unibodget.model.utils.ARGBColor;
+import it.unibo.unibodget.persistency.AppDataPathResolver;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SettingsTest {
@@ -16,6 +22,28 @@ class SettingsTest {
     private static final String TEST = "Test";
     private static final int EXP_1080 = 1080;
     private static final int EXP_1920 = 1920;
+    private static final Path DATA_FILE = AppDataPathResolver.resolveJson("settings/Settings.json");
+
+    private byte[] backup;
+    private Settings previousSettings;
+
+    @BeforeEach
+    void backupSettingsFile() throws IOException {
+        backup = Files.exists(DATA_FILE) ? Files.readAllBytes(DATA_FILE) : null;
+        previousSettings = new SettingsManager().getCurrent().copy();
+    }
+
+    @AfterEach
+    void restoreSettingsFile() throws IOException {
+        if (previousSettings != null) {
+            new SettingsManager().saveCurrent(previousSettings);
+        }
+        if (backup == null) {
+            Files.deleteIfExists(DATA_FILE);
+        } else {
+            Files.write(DATA_FILE, backup);
+        }
+    }
 
     @Test
     void shouldSaveAndReloadSettings() {
