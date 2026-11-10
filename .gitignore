@@ -39,7 +39,6 @@ deleteme/
 
 # runtime data saved by the app (wallets, settings, ...)
 /data/
-/app/data/
 
 # --- LaTeX build artifacts & review ---
 .texbuild/

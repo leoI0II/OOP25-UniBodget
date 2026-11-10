@@ -17,33 +17,7 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation(libs.junit.jupiter)
-
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // This dependency is used by the application.
-    implementation(libs.guava)
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-application {
-    // Define the main class for the application.
-    mainClass.set("it.unibo.unibodget.App")
-}
-
 val javafxVersion = "21.0.2"
-
-javafx {
-    version = javafxVersion
-    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
-}
 
 // the javafx plugin downloads the native libraries only for the os of the build, so the jar
 // started only there. here the javafx jars of the other systems are added too, and the jar task
@@ -53,16 +27,9 @@ javafx {
 val javafxPlatforms = listOf("win", "mac-aarch64", "linux")
 
 dependencies {
-    for (module in listOf("base", "graphics", "controls", "fxml")) {
-        for (platform in javafxPlatforms) {
-            runtimeOnly("org.openjfx:javafx-$module:$javafxVersion:$platform")
-        }
-    }
-}
-
-dependencies {
     compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.8")
 
+    implementation(libs.guava)
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.jooq:jool:0.9.15")
@@ -70,18 +37,30 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
 
     runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
 
-    testImplementation(libs.junit.jupiter)
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    for (module in listOf("base", "graphics", "controls", "fxml")) {
+        for (platform in javafxPlatforms) {
+            runtimeOnly("org.openjfx:javafx-$module:$javafxVersion:$platform")
+        }
+    }
 
-    implementation(libs.guava)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+javafx {
+    version = javafxVersion
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
 }
 
 application {
@@ -90,27 +69,11 @@ application {
 }
 
 tasks.named<JavaExec>("run") {
-    workingDir = rootProject.projectDir
+    workingDir = projectDir
 }
 
 tasks.test {
     useJUnitPlatform()
-    exclude("**/* *")
-    exclude("**/* 2*")
-}
-
-tasks.withType<Javadoc>().configureEach {
-    isFailOnError = false
-}
-
-tasks.withType<Pmd>().configureEach {
-    ignoreFailures = true
-}
-
-tasks.matching { it.name.startsWith("spotbugs") }.configureEach {
-    if (this is VerificationTask) {
-        ignoreFailures = true
-    }
 }
 
 tasks.jar {
