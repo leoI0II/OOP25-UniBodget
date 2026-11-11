@@ -19,6 +19,7 @@ import it.unibo.unibodget.model.utils.AppTicker;
 import it.unibo.unibodget.model.wallet.CashAccountManager;
 import it.unibo.unibodget.model.wallet.InvestmentAccountManager;
 import it.unibo.unibodget.persistency.AppDataPathResolver;
+import it.unibo.unibodget.persistency.DemoDataLoader;
 import it.unibo.unibodget.persistency.WalletAutoSaver;
 import it.unibo.unibodget.view.main.CurrencyConverterModule;
 import it.unibo.unibodget.view.main.DashboardModule;
@@ -51,6 +52,7 @@ public final class App extends Application {
     private static final Duration SNAPSHOT_INTERVAL = Duration.ofMinutes(10);
     private WalletAutoSaver walletSaver;
     private PeriodicSnapshotSaver snapshotSaver;
+    private DemoDataLoader demoDataLoader;
     private AppTicker ticker;
     private boolean persistenceReady;
     private final SettingsController settingsController = new SettingsController();
@@ -92,12 +94,17 @@ public final class App extends Application {
         final Settings settings = settingsController.getSettings();
         // the snapshot files are named with the account ids saved in the json files,
         // so they stay together inside data/ (data/csv/snapshots)
-        final var snapshotService =
-                new CSVInvestmentsSnapshotService(AppDataPathResolver.resolveCsv("snapshots"));
+        final var snapshotsDir = AppDataPathResolver.resolveCsv("snapshots");
+        final var snapshotService = new CSVInvestmentsSnapshotService(snapshotsDir);
         snapshotSaver = new PeriodicSnapshotSaver(
                         investmentsService::getWallets, snapshotService, SNAPSHOT_INTERVAL
         );
         snapshotSaver.start();
+
+        // "Load demo data" / "Clear all data" from the settings: the demo is inside the jar
+        demoDataLoader = new DemoDataLoader(
+                cashAccountsService, investmentsService, cashAccountManager, investmentAccountManager, snapshotsDir);
+        demoDataLoader.start();
 
         final var investmentsController =
                 new DefaultInvestmentController(
@@ -221,6 +228,7 @@ public final class App extends Application {
                 : List.<Runnable>of(
                         ticker::stop,
                         snapshotSaver::stop,
+                        demoDataLoader::stop,
                         walletSaver::stop,
                         walletSaver::saveAll,
                         () -> {

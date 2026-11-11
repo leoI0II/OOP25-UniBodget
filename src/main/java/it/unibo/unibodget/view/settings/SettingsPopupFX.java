@@ -20,6 +20,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -47,6 +48,8 @@ public final class SettingsPopupFX {
     private static final int ROW_2 = 2;
     private static final int ROW_3 = 3;
     private static final int ROW_4 = 4;
+    private static final int ROW_5 = 5;
+    private static final int DEMO_BUTTONS_SPACING = 8;
 
     private final SettingsController controller;
 
@@ -139,6 +142,7 @@ public final class SettingsPopupFX {
         grid.addRow(ROW_2, new Label("Font Family:"), fontBox);
         grid.addRow(ROW_3, new Label("Style:"), boldCheck);
         grid.addRow(ROW_4, new Label("Base Currency:"), currencyBox);
+        grid.addRow(ROW_5, new Label("Demo data:"), createDataButtons(dialog));
 
         final ButtonType applyButton = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(applyButton, ButtonType.CANCEL);
@@ -198,6 +202,41 @@ public final class SettingsPopupFX {
 
         dialog.setOnShown(e -> ThemeManager.applyThemeToScene(dialog.getDialogPane().getScene()));
         dialog.showAndWait();
+    }
+
+    /**
+     * Creates the buttons to load the demo data and to clear all the data. Both ask a confirmation,
+     * because they replace all the wallets, then close the settings so the new data is shown.
+     *
+     * @param dialog the settings dialog
+     * @return the box with the two buttons
+     */
+    private HBox createDataButtons(final Dialog<Void> dialog) {
+        final Button demoButton = new Button("Load demo data");
+        demoButton.setOnAction(event -> {
+            if (DialogHelper.showConfirmation(
+                    demoButton,
+                    "Demo data",
+                    "Load the demo data?",
+                    "All your wallets will be replaced by the demo wallets (cash and investment accounts).")) {
+                controller.requestDemoData();
+                dialog.close();
+            }
+        });
+
+        final Button clearButton = new Button("Clear all data");
+        clearButton.setOnAction(event -> {
+            if (DialogHelper.showConfirmation(
+                    clearButton,
+                    "Clear all data",
+                    "Delete all the wallets?",
+                    "All cash and investment accounts and their history will be deleted. "
+                    + "The settings are kept.")) {
+                controller.requestClearAllData();
+                dialog.close();
+            }
+        });
+        return new HBox(DEMO_BUTTONS_SPACING, demoButton, clearButton);
     }
 
     /**

@@ -9,6 +9,7 @@ import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.utils.event.MainErrorNotificationEvent;
 import it.unibo.unibodget.model.utils.event.MainInfoNotificationEvent;
 import it.unibo.unibodget.model.utils.event.OrderResultEvent;
+import it.unibo.unibodget.model.utils.event.WalletsReplacedEvent;
 import it.unibo.unibodget.view.investments.InvestmentsViewController;
 import it.unibo.unibodget.view.settings.SettingsPopupFX;
 import it.unibo.unibodget.view.utils.AssetFormatter;
@@ -89,6 +90,8 @@ public final class MainViewController extends BaseViewController {
         subscribe(OrderResultEvent.class, this::onOrderResultEvent);
         subscribe(MainErrorNotificationEvent.class, this::onMainErrorNotificationEvent);
         subscribe(MainInfoNotificationEvent.class, this::onMainInfoNotificationEvent);
+        // demo loaded or all data cleared: the last wallet page is built again with the new wallets
+        subscribe(WalletsReplacedEvent.class, ignored -> restoreWalletContext(lastWalletContext));
     }
 
     /**

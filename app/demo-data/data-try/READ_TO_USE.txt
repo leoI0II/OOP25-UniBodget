@@ -1,5 +1,0 @@
-HOW TO: use demo data in this app
-
-To use this set, move outside the folder demo-data.
-Use only for test.
-Rename folder in 'data'.

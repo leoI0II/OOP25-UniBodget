@@ -53,28 +53,36 @@ public final class InvestmentAccountManager {
      */
     public List<InvestmentAccount> loadAll() {
         try {
-            final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
-
-            final SimpleModule module = new SimpleModule();
-            module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
-            mapper.registerModule(module);
-
             manager.open();
-            final JsonNode root = manager.loadJson();
-            final JsonNode arr = root.get(KEY);
-
-            final List<InvestmentAccount> loaded =
-                    mapper.convertValue(
-                            arr,
-                            mapper.getTypeFactory()
-                                    .constructCollectionType(List.class, InvestmentAccount.class));
-
-            return loaded.stream().map(a -> a.withProvider(provider)).toList();
-
+            return fromJson(manager.loadJson());
         } catch (final IOException e) {
             LOGGER.error("Failed to load investment accounts", e);
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Reads the investment accounts from a JSON tree with the same format of the saved file
+     * ({@code {"investmentAccounts": [...]}}), for example the demo data inside the jar. Each account
+     * gets the price provider of this manager.
+     *
+     * @param root the JSON tree
+     * @return the deserialized {@link InvestmentAccount} objects, ready to compute their prices
+     */
+    public List<InvestmentAccount> fromJson(final JsonNode root) {
+        final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
+
+        final SimpleModule module = new SimpleModule();
+        module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
+        mapper.registerModule(module);
+
+        final List<InvestmentAccount> loaded =
+                mapper.convertValue(
+                        root.get(KEY),
+                        mapper.getTypeFactory()
+                                .constructCollectionType(List.class, InvestmentAccount.class));
+
+        return loaded.stream().map(a -> a.withProvider(provider)).toList();
     }
 
     /**

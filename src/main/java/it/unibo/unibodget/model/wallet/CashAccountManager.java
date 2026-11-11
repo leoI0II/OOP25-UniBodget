@@ -41,24 +41,31 @@ public final class CashAccountManager {
      */
     public List<CashAccount> loadAll() {
         try {
-            final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
-
-            final SimpleModule module = new SimpleModule();
-            module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
-            mapper.registerModule(module);
-
             manager.open();
-            final JsonNode root = manager.loadJson();
-            final JsonNode arr = root.get(KEY);
-
-            return mapper.convertValue(
-                    arr,
-                    mapper.getTypeFactory().constructCollectionType(List.class, CashAccount.class));
-
+            return fromJson(manager.loadJson());
         } catch (final IOException e) {
             LOGGER.log(Level.WARNING, "Unable to load cash accounts: {0}", e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Reads the cash accounts from a JSON tree with the same format of the saved file
+     * ({@code {"cashAccounts": [...]}}), for example the demo data inside the jar.
+     *
+     * @param root the JSON tree
+     * @return the deserialized {@link CashAccount} objects
+     */
+    public List<CashAccount> fromJson(final JsonNode root) {
+        final ObjectMapper mapper = PersistenceJacksonConfig.mapper().copy();
+
+        final SimpleModule module = new SimpleModule();
+        module.addDeserializer(CurrencyUnit.class, new CurrencyUnitDeserializer());
+        mapper.registerModule(module);
+
+        return mapper.convertValue(
+                root.get(KEY),
+                mapper.getTypeFactory().constructCollectionType(List.class, CashAccount.class));
     }
 
     /**

@@ -8,6 +8,9 @@ import it.unibo.unibodget.model.settings.SettingsSnapshot;
 import it.unibo.unibodget.model.settings.Theme;
 import it.unibo.unibodget.view.settings.ThemeManager;
 import it.unibo.unibodget.model.settings.WindowPreferences;
+import it.unibo.unibodget.model.utils.MessageBus;
+import it.unibo.unibodget.model.utils.event.ClearAllDataRequestedEvent;
+import it.unibo.unibodget.model.utils.event.LoadDemoDataRequestedEvent;
 import java.util.List;
 
 /**
@@ -143,5 +146,21 @@ public final class SettingsController {
         CurrencyContext.setBase(settings.getBaseCurrency());
         // Persist restored configuration
         manager.saveCurrent(settings);
+    }
+
+    /**
+     * Asks to replace all the wallets with the demo data inside the jar. The request is handled by
+     * the demo loader created in the composition root.
+     */
+    public void requestDemoData() {
+        MessageBus.send(new LoadDemoDataRequestedEvent());
+    }
+
+    /**
+     * Asks to delete all the wallets (cash and investment) and their P/L snapshots, to start again
+     * with an empty application. The settings are kept.
+     */
+    public void requestClearAllData() {
+        MessageBus.send(new ClearAllDataRequestedEvent());
     }
 }
