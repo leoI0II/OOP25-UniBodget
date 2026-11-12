@@ -13,7 +13,7 @@ import it.unibo.unibodget.model.currency.Asset;
  * Represents a specialized financial transaction related to an investment.
  *
  * <p>
- * An {@code InvestmentTransaction} extends the basic {@link Transaction} model
+ * An {@code InvestmentTransaction} extends the basic {@link AbstractTransaction} model
  * by including additional information specific to investment operations, such
  * as:
  * <ul>

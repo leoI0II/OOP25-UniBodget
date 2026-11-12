@@ -19,14 +19,14 @@ import java.util.List;
  *
  * <p>Typical usage:
  *
- * <pre>
+ * <pre>{@code
  * try (ModelFileManager<Settings> mgr =
  *         new ModelFileManager<>(path, resource, Settings.class)) {
  *     mgr.open();
  *     Settings s = mgr.loadObject();
  *     mgr.saveObject(s);
  * }
- * </pre>
+ * }</pre>
  *
  * @param <T> the model type to persist
  */

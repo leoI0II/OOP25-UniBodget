@@ -98,7 +98,7 @@ public final class CurrencyConverterViewFX {
     /**
      * Builds the currency converter dashboard content as a reusable JavaFX node.
      *
-     * <p>Used both by the standalone {@link #start(Stage)} application and by the
+     * <p>Used both by the standalone {@link #launchWith(CurrencyConverterController)} application and by the
      * main shell to embed the converter inside the content area.</p>
      *
      * @param controller the shared currency converter controller

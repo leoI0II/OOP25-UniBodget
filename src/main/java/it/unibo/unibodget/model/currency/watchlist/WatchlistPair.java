@@ -14,12 +14,15 @@ import java.util.Objects;
  *
  * @param from the base currency of the conversion (left side of the pair)
  * @param to the target currency of the conversion (right side of the pair)
- * @throws IllegalArgumentException if {@code from} and {@code to} are the same currency
- * @throws NullPointerException if either parameter is null
  */
 public record WatchlistPair(String from, String to) {
 
-    /** Constructor used to validate the pair. */
+    /**
+     * Constructor used to validate the pair.
+     *
+     * @throws IllegalArgumentException if {@code from} and {@code to} are the same currency
+     * @throws NullPointerException if either parameter is null
+     */
     public WatchlistPair {
         Objects.requireNonNull(from, "Base currency cannot be null");
         Objects.requireNonNull(to, "Target currency cannot be null");

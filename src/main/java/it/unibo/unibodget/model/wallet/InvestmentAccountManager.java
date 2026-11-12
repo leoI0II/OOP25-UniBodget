@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Persistence manager for {@link InvestmentAccount} objects. Handles JSON loading/saving using
  * {@link ModelFileManager} and Jackson. Restores accounts from disk and reattaches the required
- * {@link PriceProvider}. Acts as the persistence gateway for all investment wallets.
+ * {@link CurrencyConverter}. Acts as the persistence gateway for all investment wallets.
  */
 public final class InvestmentAccountManager {
 
@@ -33,7 +33,7 @@ public final class InvestmentAccountManager {
     private final ModelFileManager<InvestmentAccount> manager;
 
     /**
-     * Creates a new manager for investment accounts. The provided {@link PriceProvider} will be
+     * Creates a new manager for investment accounts. The provided {@link CurrencyConverter} will be
      * attached to all loaded accounts.
      *
      * @param provider the price provider used for market value computations
@@ -46,7 +46,7 @@ public final class InvestmentAccountManager {
     /**
      * Loads all {@link InvestmentAccount} entries from the JSON file. Configures Jackson with a
      * custom {@link CurrencyUnitDeserializer} to correctly restore currency fields. After
-     * deserialization, each account is rehydrated with the configured {@link PriceProvider}.
+     * deserialization, each account is rehydrated with the configured {@link CurrencyConverter}.
      * Returns an empty list on failure.
      *
      * @return a list of fully reconstructed {@link InvestmentAccount} objects

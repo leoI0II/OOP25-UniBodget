@@ -24,7 +24,6 @@ import it.unibo.unibodget.model.transactions.base.CashTransaction;
  *   <li>savings change,</li>
  *   <li>income change.</li>
  * </ul>
- * </p>
  */
 public final class DefaultWalletInsightService implements WalletInsightService {
 

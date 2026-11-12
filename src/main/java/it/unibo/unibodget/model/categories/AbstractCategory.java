@@ -10,7 +10,7 @@ import java.util.Objects;
  * a readable name - a color expressed as a HEX string - a high-level type (income, expense, loan)
  *
  * <p>Concrete implementations may represent: - user‑defined categories loaded from JSON (see {@link
- * Category}) - predefined categories exposed through an enum (see {@link CategoryPreset})
+ * Category}) - the default categories of the app (see {@link CategoryOrigin#DEFAULT})
  *
  * <p>This class behaves as a value object: equality is based on both name and color.
  */
