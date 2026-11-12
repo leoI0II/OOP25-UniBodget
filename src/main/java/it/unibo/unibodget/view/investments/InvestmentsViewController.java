@@ -481,6 +481,10 @@ public final class InvestmentsViewController extends BaseViewController implemen
         // the format must be ready before the new points, the axis draws the labels after them
         chartDateFormat = chartDateFormat(snapshots.getFirst().timestamp(), snapshots.getLast().timestamp());
         updateYAxis(snapshots, account.getBaseCurrency().getDisplayDecimals());
+        if (performanceChart.getData().isEmpty()) {
+            // taken out by clearMainPanel when the last account was deleted
+            performanceChart.getData().add(plSeries);
+        }
         // same series, only new points, so the colors stay the same
         plSeries.getData().setAll(plPoints);
     }
@@ -881,7 +885,12 @@ public final class InvestmentsViewController extends BaseViewController implemen
         clearPerformer(worstPerformerPositionName, worstPerformerPositionValue, worstPerformerPositionPercentage);
         allocationPieChart.getData().clear();
         quantityPieChart.getData().clear();
+        // a LineChart keeps drawing the old line when its series has no more points (javafx bug), so
+        // the series is taken out of the chart, and put back by the next refresh
+        performanceChart.setAnimated(false);
         plSeries.getData().clear();
+        performanceChart.getData().clear();
+        performanceChart.setAnimated(true);
         if (addTransactionButton != null) {
             addTransactionButton.setDisable(true);
         }
