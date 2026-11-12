@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
  *     <li><b>Step 3 (Explicit runtime parameter):</b> Checks the optional JVM system property
  *         {@code unibodget.data.dir} or the environment variable {@code UNIBODGET_DATA_DIR}.</li>
  *     <li><b>Step 4 (Clean fallback):</b> Falls back to {@code Path.of("data")}, enabling
- *         {@link ModelFileManager} to initialize clean storage from bundled templates.</li>
+ *         {@link ModelFileManager} to initialize clean storage from bundled templates. If the
+ *         working directory cannot be written (e.g. {@code /} when the jar is opened with a double
+ *         click on macOS), {@code ~/.unibodget/data} is used instead, which step 2 finds again at
+ *         the next start.</li>
  * </ol>
  */
 public final class AppDataPathResolver {
@@ -177,9 +180,25 @@ public final class AppDataPathResolver {
             return configured;
         }
 
-        // Step 4: Clean fallback to default data directory, restored from bundled templates
-        LOGGER.info("Step 4: Fallback to standard data directory {}", DEFAULT_DATA_DIR);
-        return DEFAULT_DATA_DIR;
+        // Step 4: Clean fallback to default data directory, restored from bundled templates.
+        // the working directory is used only if it can be written: with a double click (e.g. on
+        // macOS) it can be "/", which is read-only, so the data go in the user home
+        if (Files.isWritable(Path.of("").toAbsolutePath())) {
+            LOGGER.info("Step 4: Fallback to standard data directory {}", DEFAULT_DATA_DIR);
+            return DEFAULT_DATA_DIR;
+        }
+        final Path homeDataDir = homeDataDir();
+        LOGGER.info("Step 4: Working directory is read-only, using {}", homeDataDir);
+        return homeDataDir;
+    }
+
+    /**
+     * Returns the data directory inside the user home, used when the working directory is read-only.
+     *
+     * @return {@code ~/.unibodget/data}
+     */
+    private static Path homeDataDir() {
+        return Path.of(System.getProperty("user.home", "."), ".unibodget", DATA_DIR_NAME);
     }
 
     /**
@@ -192,7 +211,7 @@ public final class AppDataPathResolver {
         final List<Path> adjacentCandidates = List.of(
                 Path.of("..", DATA_DIR_NAME),
                 Path.of("..", "..", DATA_DIR_NAME),
-                Path.of(System.getProperty("user.home", "."), ".unibodget", DATA_DIR_NAME)
+                homeDataDir()
         );
 
         for (final Path candidate : adjacentCandidates) {
