@@ -630,7 +630,7 @@ Nelle prime versioni dell'applicazione, ciascuna classe responsabile della persi
       \item Sottopone ciascun candidato a \textbf{validazione semantica}: il file \path{json/settings/Settings.json} deve esistere, essere leggibile e contenere campi JSON proprietari di UniBodget (\texttt{baseCurrency}, \texttt{theme}), eliminando alla radice il rischio di falsi positivi su cartelle omonime di terze parti.
     \end{itemize}
     \item \textbf{Passo 3 (Parametro esplicito opzionale):} Se la ricerca euristica non rileva cartelle preesistenti, il resolver verifica la presenza della proprietà JVM di sistema \texttt{unibodget.data.dir} o della variabile d'ambiente \texttt{UNIBODGET\_DATA\_DIR}.
-    \item \textbf{Passo 4 (Clean fallback con self-healing):} Come garanzia conclusiva di funzionamento, il resolver ricade sul percorso standard \texttt{Path.of("data")}. Qualora i file non esistano, \texttt{ModelFileManager} interviene in modalità di \emph{self-healing}, estraendo automaticamente i template JSON predefiniti inclusi nel classpath applicativo (\texttt{resources/json/}).
+    \item \textbf{Passo 4 (Clean fallback con self-healing):} Come garanzia conclusiva di funzionamento, il resolver ricade sul percorso standard \texttt{Path.of("data")}. Se la cartella di lavoro non è scrivibile (ad esempio \texttt{/} quando il jar viene aperto con un doppio click su macOS), viene usata invece \texttt{\textasciitilde/.unibodget/data}, che il Passo 2 ritrova automaticamente agli avvii successivi. Qualora i file non esistano, \texttt{ModelFileManager} interviene in modalità di \emph{self-healing}, estraendo automaticamente i template JSON predefiniti inclusi nel classpath applicativo (\texttt{resources/json/}).
   \end{enumerate}
 \end{itemize}
 
@@ -640,7 +640,7 @@ Il ruolo centrale di \texttt{AppDataPathResolver} come punto di disaccoppiamento
 \begin{figure}[H]
   \centering
   \includegraphics[
-  width=0.88\textwidth,
+  width=0.80\textwidth,
   keepaspectratio
   ]{img/uml-app-data-path-resolver.pdf}
   \caption{Diagramma delle classi: architettura del percorso dati centralizzato e relazioni con i manager di persistenza.}
