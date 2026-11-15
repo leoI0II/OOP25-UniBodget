@@ -23,6 +23,7 @@ oppure compilando da sorgente con Gradle:
 ```bash
 ./gradlew run
 ```
+`./gradlew build` esegue i test e crea lo stesso fat-jar in `build/libs/UniBodget.jar` (eseguibile su Windows, Linux e macOS Apple Silicon).
 Opzionalmente è possibile specificare una chiave Alpha Vantage per le quotazioni azionarie con:
 ```bash
 ALPHA_VANTAGE_API_KEY=CHIAVE_PERSONALE ./gradlew run
@@ -38,7 +39,7 @@ Tutte le informazioni dell'utente vengono gestite e salvate automaticamente su d
 - **Salvataggio automatico:** ogni modifica a portafogli, transazioni, budget, preferenze e watchlist persiste all'istante su file.
 - **Portabilità e Backup:** per conservare i dati o spostarli su un altro computer è sufficiente copiare l'intera cartella `data/`.
 - **Risoluzione percorsi (`AppDataPathResolver`):** l'applicazione individua autonomamente la cartella `data/` anche avviata da directory diverse.
-- **Dati dimostrativi (`data-1` in `demo-data/`):** per esplorare l'app con dati già popolati, estrarre la cartella `data-1` da `demo-data/` e rinominarla in `data/` prima dell'avvio.
+- **Dati dimostrativi (dentro il jar):** da *Settings → Demo data*, il pulsante **Load demo data** sostituisce i conti con quelli della demo (conti di liquidità con alcuni mesi di movimenti e un conto di investimento con lo storico del grafico, da settembre a novembre 2026); **Clear all data** elimina tutti i conti per ripartire da zero. Le preferenze restano invariate.
 - **Ripristino automatico:** se la cartella `data/` è assente, UniBodget genera una nuova struttura vergine con impostazioni predefinite senza blocchi.
 
 ---

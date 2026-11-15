@@ -1,0 +1,836 @@
+{
+  "cashAccounts": [
+    {
+      "id": "b14484af-f88e-41d3-8def-91701f075e12",
+      "name": "Main account",
+      "baseCurrency": "EUR",
+      "history": {
+        "transactions": [
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": 1850.0,
+              "negative": false,
+              "positive": true,
+              "zero": false
+            },
+            "category": {
+              "name": "Savings",
+              "colorHex": {
+                "alpha": 255,
+                "red": 76,
+                "green": 175,
+                "blue": 80
+              },
+              "type": "INCOME",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-01",
+            "description": "Salary",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "7bcf1894-e758-4644-ad12-72bb42d0d016",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -650.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Rent",
+              "colorHex": {
+                "alpha": 255,
+                "red": 156,
+                "green": 39,
+                "blue": 176
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-02",
+            "description": "Monthly rent",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "37f717f4-3e94-4a35-a6c4-ca510249f0df",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -35.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-03",
+            "description": "Monthly bus pass",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "64717ba3-4e7f-430b-84d9-69abbe7b8b4e",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -52.3,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-05",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "2c74343c-914a-4338-95c3-a5d5c63415e6",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -68.9,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-12",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "02b43ca4-7513-4af2-9232-84ebacbda664",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -14.5,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-16",
+            "description": "Train ticket",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "96d23f4f-2be2-4c3d-ad8a-41ccce9e3302",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -45.1,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-19",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "e0ca5c79-f854-4128-b146-0376db63801e",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -80.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Friend Loan",
+              "colorHex": {
+                "alpha": 255,
+                "red": 121,
+                "green": 85,
+                "blue": 72
+              },
+              "type": "FRIEND_LOAN",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-20",
+            "description": "Concert tickets",
+            "notes": "he pays me back in two parts",
+            "friendLoanId": "99cf2ba5-c6f4-4be8-bb0c-bc1d4da9b3f3",
+            "friendName": "Marco",
+            "id": "91b5cc30-2974-400d-9475-77929c2f4c28",
+            "friendLoanTransaction": true
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -73.4,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-09-26",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "9640bdf8-aa19-4848-b041-98165c7f0819",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": 1850.0,
+              "negative": false,
+              "positive": true,
+              "zero": false
+            },
+            "category": {
+              "name": "Savings",
+              "colorHex": {
+                "alpha": 255,
+                "red": 76,
+                "green": 175,
+                "blue": 80
+              },
+              "type": "INCOME",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-01",
+            "description": "Salary",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "7f65dcdb-cd3d-4e64-a206-7d2e86d3dd27",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -650.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Rent",
+              "colorHex": {
+                "alpha": 255,
+                "red": 156,
+                "green": 39,
+                "blue": 176
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-02",
+            "description": "Monthly rent",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "25952ac8-9adf-4787-aa5f-15ed1404c7f7",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -35.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-03",
+            "description": "Monthly bus pass",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "1eb5f6c9-583b-42e7-a277-94a14c8ab0ba",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -61.75,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-05",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "8f461ca6-69aa-4652-afa9-7625827b310b",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": 50.0,
+              "negative": false,
+              "positive": true,
+              "zero": false
+            },
+            "category": {
+              "name": "Friend Loan",
+              "colorHex": {
+                "alpha": 255,
+                "red": 121,
+                "green": 85,
+                "blue": 72
+              },
+              "type": "FRIEND_LOAN",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-10",
+            "description": "First part back",
+            "notes": "",
+            "friendLoanId": "99cf2ba5-c6f4-4be8-bb0c-bc1d4da9b3f3",
+            "friendName": "Marco",
+            "id": "c4485b23-0889-4e3f-a90c-d3d2bb7f3fc8",
+            "friendLoanTransaction": true
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -49.2,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-12",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "adf2cc71-b668-4229-9ead-1b0ed3d841f4",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -14.5,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-16",
+            "description": "Train ticket",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "46477ff9-aff7-4cd1-9b49-758c74e027af",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -82.35,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-19",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "9eb73eed-ada8-4647-9e82-29daecfa9d46",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -200.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transfer",
+              "colorHex": {
+                "alpha": 255,
+                "red": 33,
+                "green": 150,
+                "blue": 243
+              },
+              "type": "TRANSFER",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-22",
+            "description": "To the holidays account",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "3baf4b48-0365-43e0-881e-d4b6df10e8a4",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -57.6,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-26",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "ce246f2b-e1d2-418c-a23c-2c532ce20b1d",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": 1850.0,
+              "negative": false,
+              "positive": true,
+              "zero": false
+            },
+            "category": {
+              "name": "Savings",
+              "colorHex": {
+                "alpha": 255,
+                "red": 76,
+                "green": 175,
+                "blue": 80
+              },
+              "type": "INCOME",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-11-01",
+            "description": "Salary",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "3c272833-2e1f-464f-97fb-905d27151a12",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -650.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Rent",
+              "colorHex": {
+                "alpha": 255,
+                "red": 156,
+                "green": 39,
+                "blue": 176
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-11-02",
+            "description": "Monthly rent",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "44abcda0-369d-4574-907d-c03512dfe554",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -35.0,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-11-03",
+            "description": "Monthly bus pass",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "65b46567-a11d-40b6-a5f4-a801cb67cf60",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -61.2,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-11-04",
+            "description": "Groceries",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "806100d5-2e9d-4143-ac33-771ee5ee62c1",
+            "friendLoanTransaction": false
+          }
+        ]
+      },
+      "budgetSettings": {
+        "limitValue": 1200.0,
+        "warningThreshold": 0.8
+      }
+    },
+    {
+      "id": "de1ff2f7-892d-4401-ac8a-c133b7cfa24b",
+      "name": "Holidays",
+      "baseCurrency": "EUR",
+      "history": {
+        "transactions": [
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": 200.0,
+              "negative": false,
+              "positive": true,
+              "zero": false
+            },
+            "category": {
+              "name": "Transfer",
+              "colorHex": {
+                "alpha": 255,
+                "red": 33,
+                "green": 150,
+                "blue": 243
+              },
+              "type": "TRANSFER",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-22",
+            "description": "From the main account",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "a75839b1-5783-4b65-a3f9-8a0a453e196c",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -89.99,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Transport",
+              "colorHex": {
+                "alpha": 255,
+                "red": 0,
+                "green": 150,
+                "blue": 136
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-10-28",
+            "description": "Flight to Lisbon",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "241667ca-7d6d-4c57-819b-ef6149df7347",
+            "friendLoanTransaction": false
+          },
+          {
+            "transactionType": "cash",
+            "asset": {
+              "currency": "EUR",
+              "amount": -42.5,
+              "negative": true,
+              "positive": false,
+              "zero": false
+            },
+            "category": {
+              "name": "Food",
+              "colorHex": {
+                "alpha": 255,
+                "red": 255,
+                "green": 152,
+                "blue": 0
+              },
+              "type": "EXPENSE",
+              "origin": "DEFAULT",
+              "active": true,
+              "default": true,
+              "custom": false
+            },
+            "date": "2026-11-02",
+            "description": "Dinner in Lisbon",
+            "notes": "",
+            "friendLoanId": null,
+            "friendName": null,
+            "id": "428b2350-25c6-4187-b3c5-35d22e04ac64",
+            "friendLoanTransaction": false
+          }
+        ]
+      },
+      "budgetSettings": {
+        "limitValue": 300.0,
+        "warningThreshold": 0.8
+      }
+    }
+  ]
+}

@@ -39,9 +39,10 @@ deleteme/
 
 # runtime data saved by the app (wallets, settings, ...)
 /data/
-/app/data/
 
 # --- LaTeX build artifacts & review ---
+# the report to deliver is report.pdf in the root, this one is only the latexmk output
+docs/relazione/relazione.pdf
 .texbuild/
 .texreview/
 *.aux
